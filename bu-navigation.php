@@ -178,7 +178,7 @@ function bu_navigation_list_pages($args = '')
 	
 	error_log('exit bu_navigation_construct_tree');
 	
-	return $output;
+	return $html;
 }
 
 function bu_navigation_widgets_init() 

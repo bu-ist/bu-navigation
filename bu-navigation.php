@@ -105,8 +105,10 @@ function bu_navigation_list_pages($args = '')
 
 	$output = '';
 
+	error_log('enter walk_page_tree');
 	$output .= walk_page_tree($pages, $r['depth'], $current_page, $r);
-
+	error_log('exit walk_page_tree');
+	
 	return $output;
 }
 

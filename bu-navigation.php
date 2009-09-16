@@ -96,7 +96,8 @@ function bu_navigation_list_pages($args = '')
 		'title_li' => __('Pages'), 
 		'echo' => 1,
 		'authors' => '', 
-		'sort_column' => 'menu_order, post_title'
+		'sort_column' => 'menu_order, post_title',
+		'max_depth' => 1
 		);
 
 	$r = wp_parse_args($args, $defaults);

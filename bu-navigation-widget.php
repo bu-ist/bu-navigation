@@ -1,7 +1,7 @@
 <?php
 class BU_Widget_Pages extends WP_Widget 
 {
-	function WP_Widget_Pages() 
+	function BU_Widget_Pages() 
 	{
 		$widget_ops = array('classname' => 'widget_bu_pages', 'description' => __( "Navigation list of your site's pages" ) );
 		$this->WP_Widget('bu_pages', __('BU Pages'), $widget_ops);

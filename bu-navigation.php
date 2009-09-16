@@ -84,28 +84,37 @@ function bu_navigation_get_pages($args = '')
 	return $pages;
 }
 
-function bu_navigation_pages_by_parent($pages, $parent_id)
+function bu_navigation_pages_by_parent($pages)
 {
-	$children = array();
+	$pages_by_parent = array();
 	
 	if ((is_array($pages)) && (count($pages) > 0))
 	{
 		foreach ($pages as $page)
 		{
-			if ($page->post_parent == $parent_id) array_push($children, $page);
+			if (!array_key_exists($page->post_parent, $pages_by_parent)) $pages_by_parent[$page->post_parent] = array();
+			array_push($pages_by_parent[$page->post_parent], $page);
 		}
 	}
 	
-	return $children;
+	return $pages_by_parent = array();
 }
 
-function bu_navigation_construct_tree($pages, $parent_id = 0)
+function bu_navigation_list_section($parent_id, $pages_by_parent)
 {
-	$page_tree = array();
+	$output = '';
 	
-	$root = bu_navigation_pages_by_parent($pages, $parent_id);
+	if (array_key_exists($parent_id, $pages_by_parent))
+	{
+		$children = $pages_by_parent[$parent_id];
+		
+		foreach ($children as $page)
+		{
+			$output .= bu_navigation_list_section($page->ID, $pages_by_parent);
+		}
+	}
 	
-	return $page_tree;
+	return $output;
 }
 
 function bu_navigation_list_pages($args = '')
@@ -134,7 +143,19 @@ function bu_navigation_list_pages($args = '')
 	error_log('exit walk_page_tree');
 	
 	error_log('enter bu_navigation_construct_tree');
-	$page_tree = bu_navigation_construct_tree($pages, $r['child_of']);
+
+	$pages_by_parent = bu_navigation_pages_by_parent($pages);
+	
+	if (array_key_exists($r['child_of'], $pages_by_parent))
+	{
+		$root_pages = $pages_by_parent[$r['child_of']];
+		
+		foreach ($root_pages as $page)
+		{
+			bu_navigation_list_section($page->ID, $pages_by_parent);
+		}
+	}
+	
 	error_log('exit bu_navigation_construct_tree');
 	
 	return $output;

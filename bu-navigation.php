@@ -84,6 +84,32 @@ function bu_navigation_get_pages($args = '')
 	return $pages;
 }
 
+function bu_navigation_get_children($pages, $parent_id)
+{
+	$children = array();
+	
+	if ((is_array($pages)) && (count($pages) > 0))
+	{
+		foreach ($pages as $page)
+		{
+			if ($page->post_parent == $parent_id) 
+			{
+				$page->children = array();
+				array_push($children, $page);
+			}
+		}
+	}
+	
+	return $children;
+}
+
+function bu_navigation_construct_tree($pages, $parent_id = 0)
+{
+	$page_tree = bu_navigation_get_children($pages, $parent_id);
+	
+	return $page_tree;
+}
+
 function bu_navigation_list_pages($args = '')
 {
 	$defaults = array(
@@ -96,8 +122,7 @@ function bu_navigation_list_pages($args = '')
 		'title_li' => __('Pages'), 
 		'echo' => 1,
 		'authors' => '', 
-		'sort_column' => 'menu_order, post_title',
-		'max_depth' => 1
+		'sort_column' => 'menu_order, post_title'
 		);
 
 	$r = wp_parse_args($args, $defaults);
@@ -109,6 +134,10 @@ function bu_navigation_list_pages($args = '')
 	error_log('enter walk_page_tree');
 	$output .= walk_page_tree($pages, $r['depth'], $current_page, $r);
 	error_log('exit walk_page_tree');
+	
+	error_log('enter bu_navigation_construct_tree');
+	$page_tree = bu_navigation_construct_tree($pages, $r['child_of']);
+	error_log('exit bu_navigation_construct_tree');
 	
 	return $output;
 }

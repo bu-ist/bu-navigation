@@ -96,6 +96,10 @@ function bu_navigation_pages_by_parent($pages)
 			array_push($pages_by_parent[$page->post_parent], $page);
 		}
 	}
+	else
+	{
+		error_log('bu_navigation_pages_by_parent pages is not an array or is empty');
+	}
 	
 	return $pages_by_parent = array();
 }

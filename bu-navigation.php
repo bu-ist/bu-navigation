@@ -94,7 +94,7 @@ function bu_navigation_get_children($pages, $parent_id)
 		{
 			if ($page->post_parent == $parent_id) 
 			{
-				$page->children = array();
+				$page->children = bu_navigation_get_children($pages, $page->ID);
 				array_push($children, $page);
 			}
 		}

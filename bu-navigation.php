@@ -110,6 +110,8 @@ function bu_navigation_list_section($parent_id, $pages_by_parent)
 		
 		if ((is_array($children)) && (count($children) > 0))
 		{
+			error_log(sprintf('Section %d has %d children', $parent_id, count($children)));
+			
 			$html .= "<ul>\n";
 			
 			foreach ($children as $page)
@@ -154,9 +156,9 @@ function bu_navigation_list_pages($args = '')
 
 	$output = '';
 
-	error_log('enter walk_page_tree');
-	$output .= walk_page_tree($pages, $r['depth'], $current_page, $r);
-	error_log('exit walk_page_tree');
+	// error_log('enter walk_page_tree');
+	// 	$output .= walk_page_tree($pages, $r['depth'], $current_page, $r);
+	// 	error_log('exit walk_page_tree');
 	
 	error_log('enter bu_navigation_construct_tree');
 

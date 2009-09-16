@@ -164,6 +164,7 @@ function bu_navigation_list_pages($args = '')
 
 	$html = "<ul>\n";
 	$pages_by_parent = bu_navigation_pages_by_parent($pages);
+	error_log(sprintf('pages_by_parent contains %d pages', count($pages_by_parent)));
 	
 	if (array_key_exists($r['child_of'], $pages_by_parent))
 	{
@@ -174,6 +175,10 @@ function bu_navigation_list_pages($args = '')
 			$html .= bu_navigation_format_page($page);
 			$html .= bu_navigation_list_section($page->ID, $pages_by_parent);
 		}
+	}
+	else
+	{
+		error_log(sprintf('pages_by_parent does not contain desired section %d', $r['child_of']));
 	}
 	
 	$html .= "</ul>\n";

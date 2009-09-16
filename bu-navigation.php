@@ -75,6 +75,8 @@ function bu_navigation_get_pages($args = '')
 
 	$sql = $wpdb->prepare($query, $params);
 
+	error_log($sql);
+	
 	$pages = $wpdb->get_results($sql, OBJECT_K); // get results as objects in an array keyed on posts.ID 
 
 	if ((!is_array($pages)) || (count($pages) == 0)) return FALSE;

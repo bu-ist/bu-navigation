@@ -84,7 +84,7 @@ function bu_navigation_get_pages($args = '')
 	return $pages;
 }
 
-function bu_navigation_get_children($pages, $parent_id)
+function bu_navigation_pages_by_parent($pages, $parent_id)
 {
 	$children = array();
 	
@@ -92,11 +92,7 @@ function bu_navigation_get_children($pages, $parent_id)
 	{
 		foreach ($pages as $page)
 		{
-			if ($page->post_parent == $parent_id) 
-			{
-				$page->children = bu_navigation_get_children($pages, $page->ID);
-				array_push($children, $page);
-			}
+			if ($page->post_parent == $parent_id) array_push($children, $page);
 		}
 	}
 	
@@ -105,7 +101,9 @@ function bu_navigation_get_children($pages, $parent_id)
 
 function bu_navigation_construct_tree($pages, $parent_id = 0)
 {
-	$page_tree = bu_navigation_get_children($pages, $parent_id);
+	$page_tree = array();
+	
+	$root = bu_navigation_pages_by_parent($pages, $parent_id);
 	
 	return $page_tree;
 }

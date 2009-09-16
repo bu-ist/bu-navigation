@@ -120,8 +120,8 @@ function bu_navigation_list_section($parent_id, $pages_by_parent)
 			
 			foreach ($children as $page)
 			{
-				$html .= bu_navigation_format_page($page);
-				$html .= bu_navigation_list_section($page->ID, $pages_by_parent);
+				$child_html .= bu_navigation_list_section($page->ID, $pages_by_parent);
+				$html .= bu_navigation_format_page($page, $child_html);
 			}
 			
 			$html .= "</ul>\n";
@@ -131,9 +131,9 @@ function bu_navigation_list_section($parent_id, $pages_by_parent)
 	return $html;
 }
 
-function bu_navigation_format_page($page)
+function bu_navigation_format_page($page, $html = '')
 {
-	$html = sprintf('<li><a href="">%s</a></li>', $page->post_title);
+	$html = sprintf('<li><a href="">%s</a> %s</li>', $page->post_title, $html);
 	$html .= "\n";
 	
 	return $html;
@@ -176,8 +176,8 @@ function bu_navigation_list_pages($args = '')
 		
 		foreach ($root_pages as $page)
 		{
+			$child_html .= bu_navigation_list_section($page->ID, $pages_by_parent);
 			$html .= bu_navigation_format_page($page);
-			$html .= bu_navigation_list_section($page->ID, $pages_by_parent);
 		}
 	}
 	else

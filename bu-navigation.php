@@ -101,7 +101,7 @@ function bu_navigation_pages_by_parent($pages)
 		error_log('bu_navigation_pages_by_parent pages is not an array or is empty');
 	}
 	
-	return $pages_by_parent = array();
+	return $pages_by_parent;
 }
 
 function bu_navigation_list_section($parent_id, $pages_by_parent)

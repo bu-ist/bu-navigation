@@ -1,4 +1,12 @@
 <?php
+/*
+ * Alternative content (side) navigation widget
+ * Niall Kavanagh
+ * ntk@bu.edu
+ */
+
+if (!defined('BU_NAVIGATION_LIB_LOADED') require_once('lib/bu-navigation/bu-navigation.php');
+
 class BU_Widget_Pages extends WP_Widget 
 {
 	function BU_Widget_Pages() 

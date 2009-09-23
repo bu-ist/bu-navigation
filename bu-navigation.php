@@ -11,7 +11,7 @@ Author: Networked Information Services
 define('BU_NAV_META_PAGE_LABEL', '_bu_cms_navigation_page_label'); // name of meta_key used to hold navigation labels
 define('BU_NAV_META_PAGE_EXCLUDE', '_bu_cms_navigation_exclude'); // name of meta_key used to exclude pages from navigation
 
-if (!defined('BU_NAVIGATION_LIB_LOADED') require_once('lib/bu-navigation/bu-navigation.php');
+if (!defined('BU_NAVIGATION_LIB_LOADED')) require_once('lib/bu-navigation/bu-navigation.php');
 
 /* Widgets */
 require_once('bu-navigation-widget.php');

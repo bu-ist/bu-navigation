@@ -5,6 +5,9 @@
  * ntk@bu.edu
  */
 
+define('BU_WIDGET_PAGES_LIST_CLASS', 'smartnav'); // default class for list 
+define('BU_WIDGET_PAGES_LIST_ID', 'contentnavlist'); // default element id for list 
+
 class BU_Widget_Pages extends WP_Widget 
 {
 	function BU_Widget_Pages() 
@@ -24,7 +27,16 @@ class BU_Widget_Pages extends WP_Widget
 		if ( $sortby == 'menu_order' )
 			$sortby = 'menu_order, post_title';
 
-		$out = bu_navigation_list_pages( apply_filters('widget_bu_pages_args', array('title_li' => '', 'echo' => 0, 'sort_column' => $sortby, 'exclude' => $exclude) ) );
+		$list_args = array(
+			'title_li' => '', 
+			'echo' => 0, 
+			'sort_column' => $sortby, 
+			'exclude' => $exclude,
+			'element_id' => BU_WIDGET_PAGES_LIST_ID,
+			'element_class' => BU_WIDGET_PAGES_LIST_CLASS
+			);
+		
+		$out = bu_navigation_list_pages( apply_filters('widget_bu_pages_args', $list_args ) );
 
 		if ( !empty( $out ) ) 
 		{

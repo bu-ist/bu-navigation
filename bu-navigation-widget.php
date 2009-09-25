@@ -18,7 +18,7 @@ class BU_Widget_Pages extends WP_Widget
 	function BU_Widget_Pages() 
 	{
 		$widget_ops = array('classname' => 'widget_bu_pages', 'description' => __( "Navigation list of your site's pages" ) );
-		$this->WP_Widget('bu_pages', __('Navigation'), $widget_ops);
+		$this->WP_Widget('bu_pages', __('Content Navigation'), $widget_ops);
 	}
 
 	/**

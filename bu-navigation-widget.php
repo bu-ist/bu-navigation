@@ -21,22 +21,74 @@ class BU_Widget_Pages extends WP_Widget
 		$this->WP_Widget('bu_pages', __('Navigation'), $widget_ops);
 	}
 
+	/**
+	 *
+	 */
+	function section_title($args, $instance)
+	{
+		global $post;
+
+		$html = '';
+		$title = '';
+		$href = '';
+		
+		$section_id = 0;
+
+		if ($instance['navigate_in_section'])
+		{
+			/* displaying family */			
+			$sections = bu_navigation_gather_sections($post->ID);
+			
+			$section_id = $sections[1];
+		}
+		else
+		{
+			/* displaying entire site tree */
+			$section_id = get_option('page_on_front');
+		}
+		
+		if ($section_id)
+		{
+			$section = get_page($section_id);	
+
+			$sections = apply_filters('bu_navigation_filter_page_labels', array($section->ID => $section));
+			$section = array_shift($sections);
+
+			if (!isset($section->navigation_label)) $section->navigation_label = apply_filters('the_title', $section->post_title);
+
+			$title = attribute_escape($section->navigation_label);
+			$href = get_page_link($section->ID);
+
+			$html = sprintf('<a href="%s">%s</a>', $href, $title);
+			$html .= "\n";
+		}
+		return $html;
+	}
+	
 	function widget( $args, $instance ) 
 	{
 		global $post;
 
 		extract( $args );
 		
-		$title = apply_filters('widget_title', empty( $instance['title'] ) ? '' : $instance['title']);
-		$sortby = empty( $instance['sortby'] ) ? 'menu_order' : $instance['sortby'];
+		$title = '';
+		
+		if (($instance['navigation_title'] == 'static') && (!empty($instance['navigation_title_text'])) && (!empty($instance['navigation_title_url'])))
+		{
+			$title = sprintf('<a href="%s">%s</a>', $instance['navigation_title_url'], apply_filters('widget_title', empty( $instance['navigation_title_text'] ) ? '' : $instance['navigation_title_text']));
+		}
+		else if ($instance['navigation_title'] == 'section')
+		{
+			$title = $this->section_title($args, $instance);
+		}
+		
 		$exclude = empty( $instance['exclude'] ) ? '' : $instance['exclude'];
 		
-		$before_widget = ((array_key_exists('contentnav', $instance)) && ($instance['contentnav'] == '1')) ? BU_WIDGET_CONTENTNAV_BEFORE : '';
-		$after_widget = ((array_key_exists('contentnav', $instance)) && ($instance['contentnav'] == '1')) ? BU_WIDGET_CONTENTNAV_AFTER : '';
+		//$before_widget_attrs = ($instance['contentnav'] == 1) ? ' id="contentnav" ' : '';
+		$before_widget_attrs = ' id="contentnav" ';
 		
-
-		if ( $sortby == 'menu_order' )
-			$sortby = 'menu_order, post_title';
+		$before_widget = sprintf('<div %s class="widget">', $before_widget_attrs);
+		$after_widget = '</div>';
 
 		$list_args = array(
 			'page_id' => $post->ID,
@@ -51,7 +103,6 @@ class BU_Widget_Pages extends WP_Widget
 		if ((array_key_exists('navigate_in_section', $instance)) && ($instance['navigate_in_section'] == '1')) 
 			$list_args['navigate_in_section'] = 1;
 		
-		error_log(print_r($instance, TRUE));
 		$out = bu_navigation_list_pages( apply_filters('widget_bu_pages_args', $list_args ) );
 
 		if ( !empty( $out ) ) 
@@ -96,44 +147,8 @@ class BU_Widget_Pages extends WP_Widget
 		
 		$contentnav = $instance['contentnav'];
 		$navigate_in_section = $instance['navigate_in_section'];
-	?>
-		<p>
-			<input type="radio" name="<?php echo $this->get_field_name('navigation_title'); ?>" id="<?php echo $this->get_field_id('navigation_title_none'); ?>" value="none" <?php if ($navigation_title == 'none') echo 'checked="checked"'; ?>
-			<label for="<?php echo $this->get_field_id('navigation_title_none'); ?>">Do not display a title</label>
-		</p>
-		<p>
-			<input type="radio" name="<?php echo $this->get_field_name('navigation_title'); ?>" id="<?php echo $this->get_field_id('navigation_title_section'); ?>" value="section" <?php if ($navigation_title == 'section') echo 'checked="checked"'; ?>
-			<label for="<?php echo $this->get_field_id('navigation_title_section'); ?>">Use the section's name for title</label>
-		</p>
-		<p>
-			<input type="radio" name="<?php echo $this->get_field_name('navigation_title'); ?>" id="<?php echo $this->get_field_id('navigation_title_static'); ?>" value="static" <?php if ($navigation_title == 'static') echo 'checked="checked"'; ?>
-			<label for="<?php echo $this->get_field_id('navigation_title_static'); ?>">Use this text for title:</label>
-			<input class="widefat" id="<?php echo $this->get_field_id('navigation_title_text'); ?>" name="<?php echo $this->get_field_name('navigation_title_text'); ?>" type="text" value="<?php echo $navigation_title_text; ?>" />				
-			<label for="<?php echo $this->get_field_id('navigation_title_url'); ?>">URL:</label>
-			<input class="widefat" id="<?php echo $this->get_field_id('navigation_title_url'); ?>" name="<?php echo $this->get_field_name('navigation_title_url'); ?>" type="text" value="<?php echo $navigation_title_url; ?>" />
-		</p>
-
-		<p>
-			<label for="<?php echo $this->get_field_id('contentnav'); ?>"><?php _e( 'Content Navigation:' ); ?></label> 
-			<input type="checkbox" value="1" name="<?php echo $this->get_field_name('contentnav'); ?>" id="<?php echo $this->get_field_id('contentnav'); ?>" <?php if ($contentnav == 1) echo 'checked="checked"'; ?> />
-			<br />
-			<small><?php _e( 'Only one navigation widget may act as content navigation.' ); ?></small>
-		</p>
-		<p>
-			<label for="<?php echo $this->get_field_id('navigate_in_section'); ?>"><?php _e( 'Section Navigation:' ); ?></label> 
-			<input type="checkbox" value="1" name="<?php echo $this->get_field_name('navigate_in_section'); ?>" id="<?php echo $this->get_field_id('navigate_in_section'); ?>" <?php if ($navigate_in_section == 1) echo 'checked="checked"'; ?> />
-			<br />
-			<small><?php _e( 'Only display links for the main family of pages being browsed.' ); ?></small>
-		</p>
-		<script type="text/javascript">
-		//<![CDATA[
-		jQuery(document).ready( function($) 
-		{
-			console.log('ready for <?php echo $this->get_field_id('navigation_title_static'); ?>');
-		});
-		//]]>
-		</script>
-	<?php
+		
+		require(BU_NAV_PLUGIN_DIR . '/interface/navigation-widget-form.php');
 	}
 }
 ?>

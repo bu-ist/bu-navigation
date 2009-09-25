@@ -8,8 +8,7 @@ Author: Networked Information Services
 */
 
 /* BU Navigation constants */
-define('BU_NAV_META_PAGE_LABEL', '_bu_cms_navigation_page_label'); // name of meta_key used to hold navigation labels
-define('BU_NAV_META_PAGE_EXCLUDE', '_bu_cms_navigation_exclude'); // name of meta_key used to exclude pages from navigation
+define('BU_NAV_PLUGIN_DIR', dirname(__FILE__));
 
 if (!defined('BU_NAVIGATION_LIB_LOADED')) require_once('lib/bu-navigation/bu-navigation.php');
 
@@ -23,7 +22,24 @@ function bu_navigation_widgets_init()
 
 	register_widget('BU_Widget_Pages');
 
+	bu_navigation_load_plugins();
+	
 	do_action('widgets_init');
+}
+
+function bu_navigation_load_plugins()
+{
+	$pattern = sprintf('%s/plugins/*.php', BU_NAV_PLUGIN_DIR);
+	
+	$files = glob($pattern);
+	
+	if ((is_array($files)) && (count($files) > 0))
+	{
+		foreach ($files as $filename)
+		{
+			@include_once($filename);
+		}
+	}
 }
 
 add_action('init', 'bu_navigation_widgets_init', 1);

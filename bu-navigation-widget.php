@@ -5,7 +5,7 @@
  * ntk@bu.edu
  */
 
-define('BU_WIDGET_PAGES_LIST_CLASS', 'smartnav'); 				// default class for list 
+define('BU_WIDGET_PAGES_LIST_CLASS', 'smartnav level1'); 				// default class for list 
 define('BU_WIDGET_PAGES_LIST_ID', 'contentnavlist'); 			// default element id for list 
 
 define('BU_WIDGET_CONTENTNAV_BEFORE', '<div id="contentnav">'); 	// default HTML fragment open
@@ -22,7 +22,8 @@ class BU_Widget_Pages extends WP_Widget
 	}
 
 	/**
-	 *
+	 * Returns HTML fragment containing a section title
+         * @return string HTML fragment with title
 	 */
 	function section_title($args, $instance)
 	{
@@ -87,7 +88,7 @@ class BU_Widget_Pages extends WP_Widget
 		//$before_widget_attrs = ($instance['contentnav'] == 1) ? ' id="contentnav" ' : '';
 		$before_widget_attrs = ' id="contentnav" ';
 		
-		$before_widget = sprintf('<div %s class="widget">', $before_widget_attrs);
+		$before_widget = sprintf('<div %s class="">', $before_widget_attrs);
 		$after_widget = '</div>';
 
 		$list_args = array(

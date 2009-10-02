@@ -34,7 +34,7 @@
 		<p style="margin-left: 2em;">
 			<strong><label for="bu_navigation_primarynav_depth">Display</label></strong>
 			<input type="textbox" id="bu_navigation_primarynav_depth" name="bu_navigation_primarynav_depth" value="<?php echo $bu_navigation_primarynav_depth; ?>" size="2" maxlength="2" />
-			<strong><label for="bu_navigation_primarynav_depth">levels of children</label></strong>
+			<strong><label for="bu_navigation_primarynav_depth">level(s) of children</label></strong>
 			<br />
 			Note that not all themes are able to display more than one level of children.
 		</p>

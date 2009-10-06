@@ -45,7 +45,6 @@ function bu_navigation_widget_<?php echo $this->number; ?>_title_label()
 
 function bu_navigation_widget_<?php echo $this->number; ?>_validate(e)
 {
-	console.log('validating');
 	var re = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
 
 	var url = jQuery("#<?php echo $this->get_field_id('navigation_title_url'); ?>").attr("value");

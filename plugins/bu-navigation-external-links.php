@@ -51,11 +51,9 @@ add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_external_li
  * Filter HTML attributes set on a navigation item anchor element to add window target where applicable
  * @return array Filtered anchor attributes
  */
-function bu_navigation_filter_anchor_attrs_external_links($attrs)
-{	
-	$page = $attrs['page'];
-	
-	if ((isset($page->target)) && ($page->target == 'new')) $attrs['target'] = '_blank';
+function bu_navigation_filter_anchor_attrs_external_links($attrs, $page = NULL)
+{		
+	if ((!is_null($page)) && (isset($page->target)) && ($page->target == 'new')) $attrs['target'] = '_blank';
 	
 	return $attrs;
 }

@@ -1,6 +1,4 @@
 <?php
-define('BU_NAV_META_PAGE_EXCLUDE', '_bu_cms_navigation_exclude'); // name of meta_key used to exclude pages from navigation
-
 /**
  *
  * @param $pages array Associative array of pages keyed on page ID

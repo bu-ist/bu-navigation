@@ -37,6 +37,10 @@
 			<strong><label for="bu_navigation_primarynav_depth">level(s) of children</label></strong>
 			<br />
 			Note that not all themes are able to display more than one level of children.
+			<?php if (defined('BU_NAVIGATION_SUPPORTED_DEPTH')) { ?>
+				<br />
+				The theme your site is currently using supports displaying <strong><?php echo BU_NAVIGATION_SUPPORTED_DEPTH; ?></strong> level(s) of children in the primary navigation bar.
+			<?php } ?>
 		</p>
 
 		<p class="submit">

@@ -130,6 +130,7 @@ class BU_Widget_Pages extends WP_Widget
 		$instance['contentnav'] = ($new_instance['contentnav'] == 1) ? 1 : 0;
 		$instance['navigate_in_section'] = ($new_instance['navigate_in_section'] == 1) ? 1 : 0;
 		
+		if (function_exists('invalidate_blog_cache')) invalidate_blog_cache();
 
 		return $instance;
 	}

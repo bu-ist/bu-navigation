@@ -77,6 +77,8 @@ function bu_navigation_admin_menu_post()
 		update_option(BU_NAV_OPTION_MAX, $primarynav_max);
 		update_option(BU_NAV_OPTION_DIVE, $primarynav_dive);
 		update_option(BU_NAV_OPTION_DEPTH, $primarynav_depth);
+		
+		if (function_exists('invalidate_blog_cache')) invalidate_blog_cache();
 	}
 }
 

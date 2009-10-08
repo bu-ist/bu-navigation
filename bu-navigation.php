@@ -22,6 +22,8 @@ function bu_navigation_init()
 {
 	bu_navigation_load_plugins();
 	bu_navigation_widgets_init();
+	
+	do_action('bu_navigation_init');
 }
 add_action('init', 'bu_navigation_init', 1);
 

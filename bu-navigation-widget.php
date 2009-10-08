@@ -103,6 +103,8 @@ class BU_Widget_Pages extends WP_Widget
 			
 		if ((array_key_exists('navigate_in_section', $instance)) && ($instance['navigate_in_section'] == '1')) 
 			$list_args['navigate_in_section'] = 1;
+			
+		do_action('bu_navigation_widget_before_list');
 		
 		$out = bu_navigation_list_pages( apply_filters('widget_bu_pages_args', $list_args ) );
 

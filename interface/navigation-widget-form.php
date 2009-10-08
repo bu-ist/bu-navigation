@@ -14,22 +14,49 @@
 	<br />
 	<span id="<?php echo $this->get_field_id('navigation_url_error'); ?>" style="color: #cc0000; font-weight: bold;"></span>
 </p>
-<!--
+
 <p>
-	<label for="<?php echo $this->get_field_id('contentnav'); ?>"><?php _e( 'Content Navigation:' ); ?></label> 
-	<input type="checkbox" value="1" name="<?php echo $this->get_field_name('contentnav'); ?>" id="<?php echo $this->get_field_id('contentnav'); ?>" <?php if ($contentnav == 1) echo 'checked="checked"'; ?> />
+	List style:
 	<br />
-	<small><?php _e( 'Only one navigation widget may act as content navigation.' ); ?></small>
-</p>
--->
-<p>
-	<label for="<?php echo $this->get_field_id('navigate_in_section'); ?>"><?php _e( 'Section Navigation:' ); ?></label> 
-	<input type="checkbox" value="1" name="<?php echo $this->get_field_name('navigate_in_section'); ?>" id="<?php echo $this->get_field_id('navigate_in_section'); ?>" <?php if ($navigate_in_section == 1) echo 'checked="checked"'; ?> />
+	<input type="radio" name="<?php echo $this->get_field_name('navigation_style'); ?>" id="<?php echo $this->get_field_id('navigation_style_site'); ?>" value="site" <?php if ($navigation_style == 'site') echo 'checked="checked"'; ?> />
+	<label for="<?php echo $this->get_field_id('navigation_style_site'); ?>">Site</label>
 	<br />
-	<small><?php _e( 'Only display links for the main family of pages being browsed.' ); ?></small>
+	<input type="radio" name="<?php echo $this->get_field_name('navigation_style'); ?>" id="<?php echo $this->get_field_id('navigation_style_section'); ?>" value="section" <?php if ($navigation_style == 'section') echo 'checked="checked"'; ?> />
+	<label for="<?php echo $this->get_field_id('navigation_style_section'); ?>">Section</label>
+	<br />
+	<input type="radio" name="<?php echo $this->get_field_name('navigation_style'); ?>" id="<?php echo $this->get_field_id('navigation_style_adaptive'); ?>" value="adaptive" <?php if ($navigation_style == 'adaptive') echo 'checked="checked"'; ?> />
+	<label for="<?php echo $this->get_field_id('navigation_style_adaptive'); ?>">Adaptive</label>
+	<br />
+	<small id="<?php echo $this->get_field_id('bu_navigation_style_description'); ?>"></small>
 </p>
 <script type="text/javascript">
 //<![CDATA[
+
+function bu_navigation_widget_<?php echo $this->number; ?>_style_description()
+{
+	var description = "";
+	
+	var style = jQuery("input[name='<?php echo $this->get_field_name('navigation_style'); ?>']:checked").val();
+	
+	switch (style)
+	{
+		case 'site':
+		description = "The entire site's structure will be used for content navigation. ";
+		break;
+		
+		case 'section':
+		description = "Only the active section's structure will be used for content navigation. ";
+		break;
+		
+		case 'adaptive':
+		description = "The content navigation widget will adapt to your site's content. This option is recommended for larger sites. ";
+		break;
+	}
+	
+	description += "<br />The current page will always be displayed in the content navigation. ";
+		
+	jQuery("#<?php echo $this->get_field_id('bu_navigation_style_description'); ?>").html(description);
+}
 
 function bu_navigation_widget_<?php echo $this->number; ?>_title_label()
 {
@@ -91,6 +118,11 @@ jQuery(document).ready( function($)
 			jQuery("#<?php echo $this->get_field_id('navigation_title_static'); ?>").attr("checked", "checked");
 		}
 	});
+	
+	jQuery("input[name='<?php echo $this->get_field_name('navigation_style'); ?>']").change(function () {
+		bu_navigation_widget_<?php echo $this->number; ?>_style_description();
+	});
+	bu_navigation_widget_<?php echo $this->number; ?>_style_description();
 
 	var form = jQuery("#<?php echo $this->get_field_id('navigation_title_url'); ?>").parents("form:first")[0];
 

@@ -1,19 +1,18 @@
 <?php
 
-function bu_navigation_widget_before_list_tech()
+function bu_navigation_widget_adaptive_before_list()
 {
-	add_filter('bu_navigation_filter_pages_by_parent', 'bu_navigation_filter_pages_tech');
-	add_filter('widget_bu_pages_args', 'widget_bu_pages_args_tech');
+	add_filter('bu_navigation_filter_pages_by_parent', 'bu_navigation_filter_pages_adaptive');
+	add_filter('widget_bu_pages_args', 'widget_bu_pages_args_adaptive');
 }
-add_action('bu_navigation_widget_before_list', 'bu_navigation_widget_before_list_tech');
 
-function widget_bu_pages_args_tech($args)
+function widget_bu_pages_args_adaptive($args)
 {
 	$args['page_id'] = NULL;
 	return $args;
 }
 
-function bu_navigation_filter_pages_tech($pages_by_parent)
+function bu_navigation_filter_pages_adaptive($pages_by_parent)
 {
 	global $post;
 	
@@ -52,7 +51,7 @@ function bu_navigation_filter_pages_tech($pages_by_parent)
 		}
 	}
 	
-	remove_filter('bu_navigation_filter_pages_by_parent', 'bu_navigation_filter_pages_tech');
+	remove_filter('bu_navigation_filter_pages_by_parent', 'bu_navigation_filter_pages_adaptive');
 			
 	return $filtered;
 }

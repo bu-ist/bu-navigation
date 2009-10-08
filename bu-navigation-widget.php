@@ -14,6 +14,7 @@ define('BU_WIDGET_CONTENTNAV_AFTER', '</div>'); 					// default HTML fragment cl
 class BU_Widget_Pages extends WP_Widget 
 {
 	var $title_options = array('none', 'section', 'static');
+	var $styles = array('site', 'section', 'adaptive');
 	
 	function BU_Widget_Pages() 
 	{
@@ -101,8 +102,17 @@ class BU_Widget_Pages extends WP_Widget
 			'element_class' => BU_WIDGET_PAGES_LIST_CLASS
 			);
 			
-		if ((array_key_exists('navigate_in_section', $instance)) && ($instance['navigate_in_section'] == '1')) 
-			$list_args['navigate_in_section'] = 1;
+		if (array_key_exists('navigation_style', $instance))
+		{
+			if ($instance['navigation_style'] == 'section')
+			{
+				$list_args['navigate_in_section'] = 1;
+			} 
+			else if ($instance['navigation_style'] == 'adaptive')
+			{
+				add_action('bu_navigation_widget_before_list', 'bu_navigation_widget_adaptive_before_list');
+			}
+		}
 			
 		do_action('bu_navigation_widget_before_list');
 		
@@ -129,8 +139,7 @@ class BU_Widget_Pages extends WP_Widget
 		$instance['navigation_title_text'] = ($instance['navigation_title'] == 'static') ? strip_tags($new_instance['navigation_title_text']) : '';
 		$instance['navigation_title_url'] = ($instance['navigation_title'] == 'static') ? strip_tags($new_instance['navigation_title_url']) : '';
 		
-		$instance['contentnav'] = ($new_instance['contentnav'] == 1) ? 1 : 0;
-		$instance['navigate_in_section'] = ($new_instance['navigate_in_section'] == 1) ? 1 : 0;
+		$instance['navigation_style'] = (in_array($new_instance['navigation_style'], $this->styles)) ? $new_instance['navigation_style'] : 'site';
 		
 		if (function_exists('invalidate_blog_cache')) invalidate_blog_cache();
 
@@ -149,8 +158,7 @@ class BU_Widget_Pages extends WP_Widget
 	
 		$exclude = esc_attr( $instance['exclude'] );
 		
-		$contentnav = $instance['contentnav'];
-		$navigate_in_section = $instance['navigate_in_section'];
+		$navigation_style = (in_array($instance['navigation_style'], $this->styles)) ? $instance['navigation_style'] : 'site';
 		
 		require(BU_NAV_PLUGIN_DIR . '/interface/navigation-widget-form.php');
 	}

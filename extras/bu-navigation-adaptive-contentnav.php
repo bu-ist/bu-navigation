@@ -22,12 +22,8 @@ function bu_navigation_filter_pages_tech($pages_by_parent)
 	$hasChildren = FALSE;
 	if ((array_key_exists($post->ID, $pages_by_parent)) && (count($pages_by_parent[$post->ID]) > 0)) $hasChildren = TRUE;
 
-	error_log(sprintf('bu_navigation_filter_pages_tech: %d hasChildren = %d', $post->ID, $hasChildren));
-
 	foreach ($pages_by_parent as $parent_id => $posts)
-	{
-		error_log(sprintf('%d has %d children', $parent_id, count($posts)));
-		
+	{		
 		if ((is_array($posts)) && (count($posts) > 0))
 		{
 			$potentials = array();
@@ -57,9 +53,7 @@ function bu_navigation_filter_pages_tech($pages_by_parent)
 	}
 	
 	remove_filter('bu_navigation_filter_pages_by_parent', 'bu_navigation_filter_pages_tech');
-	
-	error_log(sprintf('sections: %s', implode(', ', array_keys($filtered))));
-		
+			
 	return $filtered;
 }
 ?>

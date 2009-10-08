@@ -20,7 +20,7 @@ require_once('bu-navigation-widget.php'); // Content navigation widget
  */
 function bu_navigation_init()
 {
-	bu_navigation_load_plugins();
+	bu_navigation_load_extras();
 	bu_navigation_widgets_init();
 	
 	do_action('bu_navigation_init');
@@ -41,12 +41,12 @@ function bu_navigation_widgets_init()
 
 /**
  * Loads plugins for this... plugin
- * Any .php file placed in the plugins directory will be automatically loaded.
+ * Any .php file placed in the extras directory will be automatically loaded.
  * @return void
  */
-function bu_navigation_load_plugins()
+function bu_navigation_load_extras()
 {
-	$pattern = sprintf('%s/plugins/*.php', BU_NAV_PLUGIN_DIR);
+	$pattern = sprintf('%s/extras/*.php', BU_NAV_PLUGIN_DIR);
 	
 	$files = glob($pattern);
 	

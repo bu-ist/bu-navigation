@@ -4,42 +4,26 @@ define('BU_NAV_OPTION_MAX', 'bu_navigation_primarynav_max');
 define('BU_NAV_OPTION_DIVE', 'bu_navigation_primarynav_dive');
 define('BU_NAV_OPTION_DEPTH', 'bu_navigation_primarynav_depth');
 
-function bu_navigation_admin_menu_init()
+function bu_navigation_admin_menu_display_init()
 {
 	global $menu;
 	
 	$perm = is_site_admin() ? 0 : 'edit_pages';
 	
-	$parent = 'Site Options';
+	$parents = array('Navigation', 'Site Options');
 	
-	$map = array();
+	//$page = add_submenu_page($filename, __('Primary Navigation'), __('Primary Navigation'), $perm, __FILE__, 'bu_navigation_admin_menu_display');
 	
-	if ((is_array($menu)) && (count($menu) > 0))
-	{
-		foreach ($menu as $menu_item)
-		{
-			if ($menu_item[0])
-			{
-				$map[$menu_item[0]] = $menu_item[2];
-			}	
-		}
-	}
+	$page = bu_add_submenu_page($parents, __('Primary Navigation'), __('Primary Navigation'), $perm, __FILE__, 'bu_navigation_admin_menu_display');
 	
-	$filename = 'tools.php';
-	
-	if (array_key_exists($parent, $map))
-	{
-		$filename = $map[$parent];
-	}
-	
-	$page = add_submenu_page($filename, __('Primary Navigation'), __('Primary Navigation'), $perm, __FILE__, 'bu_navigation_admin_menu_display');
+	//$page = add_submenu_page(__FILE__, __('Navigation Manager'), 'Edit Order', $perm, __FILE__, 'bu_navman_admin_menu_display');
 	
 	if ($page)
 	{
 		add_action('load-' . $page, 'bu_navigation_admin_menu_post');	
 	}
 }
-add_action('admin_menu', 'bu_navigation_admin_menu_init');
+add_action('admin_menu', 'bu_navigation_admin_menu_display_init');
 
 function bu_navigation_admin_menu_display()
 {

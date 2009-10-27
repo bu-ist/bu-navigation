@@ -42,7 +42,11 @@
 				The theme your site is currently using supports displaying <strong><?php echo BU_NAVIGATION_SUPPORTED_DEPTH; ?></strong> level(s) of children in the primary navigation bar.
 			<?php } ?>
 		</p>
-
+		<p>
+			<input type="checkbox" name="bu_allow_top_level_page" id="bu_allow_top_level_page" value="1" <?php echo $bu_allow_top_level_page ? 'checked="checked"' : '';?> />
+			<strong><label for="bu_allow_top_level_page">Allow Top-Level Pages</label></strong><br/>
+			If checked, users will be allowed to create new pages at the top level of the site hierarchy.
+		</p>
 		<p class="submit">
 			<input type="submit" name="Submit" value="Save Changes" />
 		</p>

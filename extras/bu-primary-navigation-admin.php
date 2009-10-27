@@ -80,7 +80,7 @@ function bu_navigation_filter_primarynav_defaults($defaults)
 		$bu_navigation_primarynav_dive = get_option(BU_NAV_OPTION_DIVE);
 		$bu_navigation_primarynav_depth = get_option(BU_NAV_OPTION_DEPTH);
 		if (!$bu_navigation_primarynav_depth) $bu_navigation_primarynav_depth = BU_NAVIGATION_PRIMARY_DEPTH;
-		$bu_allow_top_level_page = getoption(BU_NAV_OPTION_ALLOW_top);
+		$bu_allow_top_level_page = get_option(BU_NAV_OPTION_ALLOW_TOP);
 
 		$defaults['max_items'] = $bu_navigation_primarynav_max;
 		$defaults['dive'] = $bu_navigation_primarynav_dive;

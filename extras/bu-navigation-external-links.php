@@ -29,6 +29,7 @@ function bu_navigation_filter_pages_external_links($pages)
 		$query = sprintf("SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s)", $wpdb->postmeta, BU_NAV_META_TARGET, implode(',', $ids));
 		
 		$targets = $wpdb->get_results($query, OBJECT_K); // get results as objects in an array keyed on post_id
+		error_log(print_r($targets, TRUE));
 		
 		foreach ($pages as $page)
 		{

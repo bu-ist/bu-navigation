@@ -51,11 +51,6 @@ class BU_Widget_Pages extends WP_Widget
 				$section_id = $sections[1];
 			}
 		}
-		else
-		{
-			/* displaying entire site tree */
-			$section_id = get_option('page_on_front');
-		}
 		
 		if ($section_id)
 		{
@@ -72,6 +67,20 @@ class BU_Widget_Pages extends WP_Widget
 			$html = sprintf('<a href="%s">%s</a>', $href, $title);
 			$html .= "\n";
 		}
+		else
+		{
+			/* Use site name as title */
+			/* Note: I consider this a bug; we should use the navigation label of the homepage */
+			/* Note 2: It's kind of pompous and/or passive-agressive to note my objections to this */
+			/* here as nobody will ever read it. */
+			
+			$title = get_bloginfo('name');
+			$href = get_bloginfo('url') . '/';
+
+			$html = sprintf('<a href="%s">%s</a>', $href, $title);
+			$html .= "\n";
+		}
+		
 		return $html;
 	}
 	

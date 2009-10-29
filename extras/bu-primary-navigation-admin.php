@@ -12,13 +12,9 @@ function bu_navigation_admin_menu_display_init()
 	$perm = is_site_admin() ? 0 : 'edit_pages';
 	
 	$parents = array('Navigation', 'Site Options');
-	
-	//$page = add_submenu_page($filename, __('Primary Navigation'), __('Primary Navigation'), $perm, __FILE__, 'bu_navigation_admin_menu_display');
-	
+		
 	$page = bu_add_submenu_page($parents, __('Primary Navigation'), __('Primary Navigation'), $perm, __FILE__, 'bu_navigation_admin_menu_display');
-	
-	//$page = add_submenu_page(__FILE__, __('Navigation Manager'), 'Edit Order', $perm, __FILE__, 'bu_navman_admin_menu_display');
-	
+		
 	if ($page)
 	{
 		add_action('load-' . $page, 'bu_navigation_admin_menu_post');	

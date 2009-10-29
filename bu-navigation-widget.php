@@ -98,8 +98,7 @@ class BU_Widget_Pages extends WP_Widget
 			'echo' => 0, 
 			'sort_column' => $sortby, 
 			'exclude' => $exclude,
-			'element_id' => BU_WIDGET_PAGES_LIST_ID,
-			'element_class' => BU_WIDGET_PAGES_LIST_CLASS
+			'container_id' => BU_WIDGET_PAGES_LIST_ID
 			);
 			
 		if (array_key_exists('navigation_style', $instance))

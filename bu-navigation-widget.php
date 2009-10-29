@@ -36,12 +36,20 @@ class BU_Widget_Pages extends WP_Widget
 		
 		$section_id = 0;
 
-		if ($instance['navigate_in_section'])
+		if ($instance['navigation_style'] != 'site')
 		{
 			/* displaying family */			
 			$sections = bu_navigation_gather_sections($post->ID);
 			
-			$section_id = $sections[1];
+			if ($instance['navigation_style'] == 'adaptive')
+			{
+				$section_id = $sections[count($sections) - 2];
+			}
+			else
+			{
+				/* default to current top-level section */
+				$section_id = $sections[1];
+			}
 		}
 		else
 		{

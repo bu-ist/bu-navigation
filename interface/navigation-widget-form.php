@@ -62,7 +62,7 @@ function bu_navigation_widget_<?php echo $this->number; ?>_title_label()
 {
 	var title = "<?php _e('Use the site name as the title'); ?>";
 
-	if (jQuery("#<?php echo $this->get_field_id('navigate_in_section'); ?>:checked").val())
+	if (jQuery("input[name='<?php echo $this->get_field_name('navigation_style'); ?>']:checked").val() != 'site')
 	{
 		title = "<?php _e('Use the section name as the title'); ?>";
 	}
@@ -93,7 +93,7 @@ jQuery(document).ready( function($)
 		jQuery("#<?php echo $this->get_field_id('navigation_title_text'); ?>").focus();
 	});
 
-	jQuery("#<?php echo $this->get_field_id('navigate_in_section'); ?>").change(function (e) {
+	jQuery("input[name='<?php echo $this->get_field_name('navigation_style'); ?>']").change(function (e) {
 		bu_navigation_widget_<?php echo $this->number; ?>_title_label();
 	});
 	bu_navigation_widget_<?php echo $this->number; ?>_title_label();

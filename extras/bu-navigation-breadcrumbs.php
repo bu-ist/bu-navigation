@@ -27,15 +27,19 @@ function bu_navigation_breadcrumbs($args = '')
 	/* grab ancestors */
 	$ancestors = bu_navigation_gather_sections($post->ID);
 	array_push($ancestors, $post->ID);
-	
+		
 	$pages = bu_navigation_get_pages(array('pages' => $ancestors));
 	
 	$crumbs = array(); // array of HTML fragments for each crumb
 	
 	if ((is_array($pages)) && (count($pages) > 0))
 	{
-		foreach ($pages as $p)
+		foreach ($ancestors as $page_id)
 		{
+			if (!array_key_exists($page_id, $pages)) continue;
+			
+			$p = $pages[$page_id];
+			
 			if (!isset($p->navigation_label)) $p->navigation_label = apply_filters('the_title', $p->post_title);
 
 			$title = attribute_escape($p->navigation_label);

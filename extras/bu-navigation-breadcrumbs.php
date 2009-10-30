@@ -26,12 +26,12 @@ function bu_navigation_breadcrumbs($args = '')
 	
 	/* grab ancestors */
 	$ancestors = bu_navigation_gather_sections($post->ID);
-	array_push($ancestors, $post->ID);
+	if (!in_array($post->ID, $ancestors)) array_push($ancestors, $post->ID);
 		
 	$pages = bu_navigation_get_pages(array('pages' => $ancestors));
 	
 	$crumbs = array(); // array of HTML fragments for each crumb
-	
+
 	if ((is_array($pages)) && (count($pages) > 0))
 	{
 		foreach ($ancestors as $page_id)

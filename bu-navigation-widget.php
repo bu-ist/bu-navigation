@@ -120,6 +120,8 @@ class BU_Widget_Pages extends WP_Widget
 			
 		if (array_key_exists('navigation_style', $instance))
 		{
+		  $list_args['style'] = $instance['navigation_style'];
+
 			if ($instance['navigation_style'] == 'section')
 			{
 				$list_args['navigate_in_section'] = 1;

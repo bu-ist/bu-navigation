@@ -21,6 +21,11 @@ function bu_navigation_filter_pages_adaptive($pages_by_parent)
 	$hasChildren = FALSE;
 	if ((array_key_exists($post->ID, $pages_by_parent)) && (count($pages_by_parent[$post->ID]) > 0)) $hasChildren = TRUE;
 
+	if ($hasChildren)
+	  {
+	    //error_log(sprintf("ID: %d, children: %s", $post->ID, print_r($pages_by_parent[$post->ID], TRUE)));
+	  }
+
 	foreach ($pages_by_parent as $parent_id => $posts)
 	{		
 		if ((is_array($posts)) && (count($posts) > 0))

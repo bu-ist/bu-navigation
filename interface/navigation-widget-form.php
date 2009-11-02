@@ -93,7 +93,7 @@ jQuery(document).ready( function($)
 		jQuery("#<?php echo $this->get_field_id('navigation_title_text'); ?>").focus();
 	});
 
-	jQuery("input[name='<?php echo $this->get_field_name('navigation_style'); ?>']").change(function (e) {
+	jQuery("input[name='<?php echo $this->get_field_name('navigation_style'); ?>']").click(function (e) {
 		bu_navigation_widget_<?php echo $this->number; ?>_title_label();
 	});
 	bu_navigation_widget_<?php echo $this->number; ?>_title_label();
@@ -119,7 +119,7 @@ jQuery(document).ready( function($)
 		}
 	});
 	
-	jQuery("input[name='<?php echo $this->get_field_name('navigation_style'); ?>']").change(function () {
+	jQuery("input[name='<?php echo $this->get_field_name('navigation_style'); ?>']").click(function () {
 		bu_navigation_widget_<?php echo $this->number; ?>_style_description();
 	});
 	bu_navigation_widget_<?php echo $this->number; ?>_style_description();

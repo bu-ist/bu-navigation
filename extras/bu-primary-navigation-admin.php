@@ -1,3 +1,4 @@
+
 <?php
 define('BU_NAV_OPTION_DISPLAY', 'bu_navigation_primarynav');
 define('BU_NAV_OPTION_MAX', 'bu_navigation_primarynav_max');
@@ -14,17 +15,12 @@ function bu_navigation_admin_menu_display_init()
 	$parents = array('Navigation', 'Site Options');
 		
 	$page = bu_add_submenu_page($parents, __('Primary Navigation'), __('Primary Navigation'), $perm, __FILE__, 'bu_navigation_admin_menu_display');
-		
-	if ($page)
-	{
-		add_action('load-' . $page, 'bu_navigation_admin_menu_post');	
-	}
 }
 add_action('admin_menu', 'bu_navigation_admin_menu_display_init');
 
 function bu_navigation_admin_menu_display()
 {
-	global $bu_navigation_changes_saved;
+	$saved = bu_navigation_admin_menu_post();
 	
 	/* default options */
 	$bu_navigation_primarynav = TRUE;
@@ -43,15 +39,18 @@ function bu_navigation_admin_menu_display()
 		$bu_navigation_primarynav_depth = get_option(BU_NAV_OPTION_DEPTH);
 		$bu_allow_top_level_page = get_option(BU_NAV_OPTION_ALLOW_TOP);
 	}
+	
 	require_once(BU_NAV_PLUGIN_DIR . '/interface/primary-navigation-admin.php');
 }
 
 function bu_navigation_admin_menu_post()
 {
-	global $bu_navigation_changes_saved;
-	
+	$saved = NULL;
+
 	if ((array_key_exists('bu_navigation_primary_save', $_POST)) && ($_POST['bu_navigation_primary_save'] == 'save'))
 	{
+		$saved = TRUE; /* no useful return from update_option */
+		
 		$primarynav = intval($_POST['bu_navigation_primarynav']);
 		$primarynav_max = intval($_POST['bu_navigation_primarynav_max']);
 		if (!$primarynav_max) $primarynav_max = BU_NAVIGATION_PRIMARY_MAX;
@@ -60,7 +59,7 @@ function bu_navigation_admin_menu_post()
 		if (!$primarynav_depth) $primarynav_depth = BU_NAVIGATION_PRIMARY_DEPTH;
 		$bu_allow_top_level_page = intval($_POST['bu_allow_top_level_page']);
 
-		update_option(BU_NAV_OPTION_DISPLAY, $primarynav);
+		update_option(BU_NAV_OPTION_DISPLAY, $primarynav);\
 		update_option(BU_NAV_OPTION_MAX, $primarynav_max);
 		update_option(BU_NAV_OPTION_DIVE, $primarynav_dive);
 		update_option(BU_NAV_OPTION_DEPTH, $primarynav_depth);
@@ -70,6 +69,8 @@ function bu_navigation_admin_menu_post()
 		
 		if (function_exists('invalidate_blog_cache')) invalidate_blog_cache();
 	}
+	
+	return $saved;
 }
 
 function bu_navigation_filter_primarynav_defaults($defaults)

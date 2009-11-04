@@ -1,8 +1,15 @@
 <div class="wrap">
 	<h2><?php _e('Primary Navigation'); ?></h2>
 	
-	<?php if ($bu_navigation_changes_saved) {?><div id="message" class="updated fade"><p>Site options updated.</p></div><?php }?>
-	
+	<?php if ($saved === TRUE) { ?>
+		<div id="message" class="updated fade">
+			<p>Primary navigation settings saved.</p>
+		</div>
+	<?php } else if ($saved === FALSE) { ?>
+		<div class="error">
+			<p><strong>Error:</strong> Error(s) occurred while saving your primary navigation settings.</p>
+		</div>
+	<? } ?>
 	<p>
 		Your primary navigation bar is the horizontal bar at the top of every 
 		page which shows users your top-level navigation no matter where they

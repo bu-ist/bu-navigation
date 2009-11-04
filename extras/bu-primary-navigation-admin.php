@@ -24,6 +24,8 @@ add_action('admin_menu', 'bu_navigation_admin_menu_display_init');
 
 function bu_navigation_admin_menu_display()
 {
+	global $bu_navigation_changes_saved;
+	
 	/* default options */
 	$bu_navigation_primarynav = TRUE;
 	$bu_navigation_primarynav_max = BU_NAVIGATION_PRIMARY_MAX;
@@ -46,6 +48,8 @@ function bu_navigation_admin_menu_display()
 
 function bu_navigation_admin_menu_post()
 {
+	global $bu_navigation_changes_saved;
+	
 	if ((array_key_exists('bu_navigation_primary_save', $_POST)) && ($_POST['bu_navigation_primary_save'] == 'save'))
 	{
 		$primarynav = intval($_POST['bu_navigation_primarynav']);
@@ -61,6 +65,8 @@ function bu_navigation_admin_menu_post()
 		update_option(BU_NAV_OPTION_DIVE, $primarynav_dive);
 		update_option(BU_NAV_OPTION_DEPTH, $primarynav_depth);
 		update_option(BU_NAV_OPTION_ALLOW_TOP, $bu_allow_top_level_page);
+		
+		$bu_navigation_changes_saved = true;
 		
 		if (function_exists('invalidate_blog_cache')) invalidate_blog_cache();
 	}

@@ -140,7 +140,7 @@ class BU_Widget_Pages extends WP_Widget
 		{
 			echo $before_widget;
 			if ( $title)
-				echo $before_title . $title . $after_title;
+				echo '<h2>' . $title . '</h2>';
 			
 			echo $out; // the list
 			

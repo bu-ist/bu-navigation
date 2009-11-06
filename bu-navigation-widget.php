@@ -106,7 +106,7 @@ class BU_Widget_Pages extends WP_Widget
 		//$before_widget_attrs = ($instance['contentnav'] == 1) ? ' id="contentnav" ' : '';
 		$before_widget_attrs = ' id="contentnav" ';
 		
-		$before_widget = sprintf('<div %s class="">', $before_widget_attrs);
+		$before_widget = sprintf('<div %s class="widget">', $before_widget_attrs);
 		$after_widget = '</div>';
 
 		$list_args = array(

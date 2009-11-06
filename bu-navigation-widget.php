@@ -64,7 +64,7 @@ class BU_Widget_Pages extends WP_Widget
 			$title = attribute_escape($section->navigation_label);
 			$href = get_page_link($section->ID);
 
-			$html = sprintf('<a href="%s">%s</a>', $href, $title);
+			$html = sprintf('<a class="content_nav_header" href="%s">%s</a>', $href, $title);
 			$html .= "\n";
 		}
 		else
@@ -77,7 +77,7 @@ class BU_Widget_Pages extends WP_Widget
 			$title = get_bloginfo('name');
 			$href = get_bloginfo('url') . '/';
 
-			$html = sprintf('<a href="%s">%s</a>', $href, $title);
+			$html = sprintf('<a class="content_nav_header" href="%s">%s</a>', $href, $title);
 			$html .= "\n";
 		}
 		
@@ -94,7 +94,7 @@ class BU_Widget_Pages extends WP_Widget
 		
 		if (($instance['navigation_title'] == 'static') && (!empty($instance['navigation_title_text'])) && (!empty($instance['navigation_title_url'])))
 		{
-			$title = sprintf('<a href="%s">%s</a>', $instance['navigation_title_url'], apply_filters('widget_title', empty( $instance['navigation_title_text'] ) ? '' : $instance['navigation_title_text']));
+			$title = sprintf('<a class="content_nav_header" href="%s">%s</a>', $instance['navigation_title_url'], apply_filters('widget_title', empty( $instance['navigation_title_text'] ) ? '' : $instance['navigation_title_text']));
 		}
 		else if ($instance['navigation_title'] == 'section')
 		{

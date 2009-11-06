@@ -1,4 +1,3 @@
-
 <?php
 define('BU_NAV_OPTION_DISPLAY', 'bu_navigation_primarynav');
 define('BU_NAV_OPTION_MAX', 'bu_navigation_primarynav_max');

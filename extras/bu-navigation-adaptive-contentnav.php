@@ -8,22 +8,24 @@ function bu_navigation_widget_adaptive_before_list()
 
 function widget_bu_pages_args_adaptive($args)
 {	
+	remove_filter('widget_bu_pages_args', 'widget_bu_pages_args_adaptive');
+	
 	if ($args['page_id'])
 	{
 		$sections = bu_navigation_gather_sections($args['page_id']);
-				
-		if (count($sections) > 2) $sections = array_slice($sections, -2, 2);
 
 		$args['sections'] = $sections;
 		
 		$args['page_id'] = NULL;
 	}
-		
+				
 	return $args;
 }
 
 function bu_navigation_filter_pages_adaptive($pages_by_parent)
 {
+	remove_filter('bu_navigation_filter_pages_by_parent', 'bu_navigation_filter_pages_adaptive');
+	
 	global $post;
 	
 	$filtered = array();
@@ -72,9 +74,7 @@ function bu_navigation_filter_pages_adaptive($pages_by_parent)
 			if (count($potentials) > 0) $filtered[$parent_id] = $potentials;
 		}
 	}
-	
-	remove_filter('bu_navigation_filter_pages_by_parent', 'bu_navigation_filter_pages_adaptive');
-	
+		
 	return $filtered;
 }
 ?>

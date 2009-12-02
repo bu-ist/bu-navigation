@@ -13,7 +13,7 @@ function widget_bu_pages_args_adaptive($args)
 	if ($args['page_id'])
 	{
 		$sections = bu_navigation_gather_sections($args['page_id']);
-
+		
 		$args['sections'] = $sections;
 		
 		$args['page_id'] = NULL;

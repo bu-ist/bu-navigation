@@ -12,9 +12,12 @@ function bu_navigation_breadcrumbs($args = '')
 		'anchor_class' => 'crumb',
 		'crumb_current' => 1,
 		'anchor_current' => 0,
-		'echo' => 0
+		'echo' => 0,
+		'home' => false,
+		'home_label' => 'Home',
+		'prefix' => '',
+		'suffix' => ''
 		);
-	
 	$r = wp_parse_args($args, $defaults);
 	
 	$attrs = '';
@@ -22,27 +25,39 @@ function bu_navigation_breadcrumbs($args = '')
 	if ($r['container_id']) $attrs .= sprintf(' id="%s"', $r['container_id']);
 	if ($r['container_class']) $attrs .= sprintf(' class="%s"', $r['container_class']);
 	
-	$html = sprintf('<%s%s>', $r['container_tag'], $attrs);
+	$html = sprintf('<%s%s>%s', $r['container_tag'], $attrs, $r['prefix']);
 	
 	/* grab ancestors */
 	$ancestors = bu_navigation_gather_sections($post->ID);
 	if (!in_array($post->ID, $ancestors)) array_push($ancestors, $post->ID);
-		
-	$pages = bu_navigation_get_pages(array('pages' => $ancestors));
 	
+//	$front_page = get_option('page_on_front');
+//	if ($r['home'] && (!$ancestors[0])) {
+//		$ancestors[0] = $front_page;
+//	}
+	$pages = bu_navigation_get_pages(array('pages' => $ancestors, 'supress_filter_pages' => true));
+
 	$crumbs = array(); // array of HTML fragments for each crumb
 
 	if ((is_array($pages)) && (count($pages) > 0))
 	{
 		foreach ($ancestors as $page_id)
 		{
-			if (!array_key_exists($page_id, $pages)) continue;
+			if (!$page_id && $r['home']) {
+				$crumb = sprintf('<a href="%s" class="%s">%s</a>', get_bloginfo('url'), $r['anchor_class'], $r['home_label']);
+				array_push($crumbs, $crumb);
+				continue;
+			} else if (!array_key_exists($page_id, $pages)) continue;
 			
 			$p = $pages[$page_id];
 			
 			if (!isset($p->navigation_label)) $p->navigation_label = apply_filters('the_title', $p->post_title);
 
 			$title = attribute_escape($p->navigation_label);
+			if ($page_id == $front_page) {
+				$title = str_replace('[label]', $title, $r['home_label']);
+			}
+			
 			$href = $p->url;
 			$classname = $r['anchor_class'];
 			
@@ -69,7 +84,7 @@ function bu_navigation_breadcrumbs($args = '')
 		$html .= implode($r['glue'], $crumbs);
 	}
 	
-	$html .= sprintf('</%s>', $r['container_tag']);
+	$html .= sprintf('%s</%s>', $r['suffix'], $r['container_tag']);
 	
 	if ($r['echo']) echo $html;
 	

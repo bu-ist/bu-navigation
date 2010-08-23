@@ -24,7 +24,7 @@ class BU_Widget_Pages extends WP_Widget
 
 	/**
 	 * Returns HTML fragment containing a section title
-         * @return string HTML fragment with title
+	 * @return string HTML fragment with title
 	 */
 	function section_title($args, $instance)
 	{
@@ -92,9 +92,16 @@ class BU_Widget_Pages extends WP_Widget
 		
 		$title = '';
 		
-		if (($instance['navigation_title'] == 'static') && (!empty($instance['navigation_title_text'])) && (!empty($instance['navigation_title_url'])))
+		if (($instance['navigation_title'] == 'static') && (!empty($instance['navigation_title_text'])))
 		{
-			$title = sprintf('<a class="content_nav_header" href="%s">%s</a>', $instance['navigation_title_url'], apply_filters('widget_title', empty( $instance['navigation_title_text'] ) ? '' : $instance['navigation_title_text']));
+			if (!empty($instance['navigation_title_url']))
+			{
+				$title = sprintf('<a class="content_nav_header" href="%s">%s</a>', $instance['navigation_title_url'], apply_filters('widget_title', empty( $instance['navigation_title_text'] ) ? '' : $instance['navigation_title_text']));
+			}
+			else
+			{
+				$title = apply_filters('widget_title', $instance['navigation_title_text']);
+			}
 		}
 		else if ($instance['navigation_title'] == 'section')
 		{
@@ -103,12 +110,6 @@ class BU_Widget_Pages extends WP_Widget
 		
 		$exclude = empty( $instance['exclude'] ) ? '' : $instance['exclude'];
 		
-		//$before_widget_attrs = ($instance['contentnav'] == 1) ? ' id="contentnav" ' : '';
-		$before_widget_attrs = ' id="contentnav" ';
-		
-		$before_widget = sprintf('<div %s class="widget">', $before_widget_attrs);
-		$after_widget = '</div>';
-
 		$list_args = array(
 			'page_id' => $post->ID,
 			'title_li' => '', 
@@ -138,11 +139,12 @@ class BU_Widget_Pages extends WP_Widget
 
 		if ( !empty( $out ) ) 
 		{
-			echo $before_widget;
-			if ( $title)
-				echo '<h2>' . $title . '</h2>';
+			printf('%s<div id="contentnav">', $before_widget);
 			
-			echo $out; // the list
+			if ( $title)
+				echo $before_title . $title . $after_title;
+			
+			printf('%s</div>', $out);
 			
 			echo $after_widget;
 		}

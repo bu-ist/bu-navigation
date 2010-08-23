@@ -1,18 +1,18 @@
-<p>
+<p class="content-navigation-widget-form">
 	<input type="radio" name="<?php echo $this->get_field_name('navigation_title'); ?>" id="<?php echo $this->get_field_id('navigation_title_none'); ?>" value="none" <?php if ($navigation_title == 'none') echo 'checked="checked"'; ?> />
 	<label for="<?php echo $this->get_field_id('navigation_title_none'); ?>">Do not display a title</label>
 	<br />
 	<input type="radio" name="<?php echo $this->get_field_name('navigation_title'); ?>" id="<?php echo $this->get_field_id('navigation_title_section'); ?>" value="section" <?php if ($navigation_title == 'section') echo 'checked="checked"'; ?> />
 	<label for="<?php echo $this->get_field_id('navigation_title_section'); ?>"><?php _e('Use the site name as the title'); ?></label>
 	<br />
-	<input type="radio" name="<?php echo $this->get_field_name('navigation_title'); ?>" id="<?php echo $this->get_field_id('navigation_title_static'); ?>" value="static" <?php if ($navigation_title == 'static') echo 'checked="checked"'; ?> />
+	<input class="nav-title-static" type="radio" name="<?php echo $this->get_field_name('navigation_title'); ?>" id="<?php echo $this->get_field_id('navigation_title_static'); ?>" value="static" <?php if ($navigation_title == 'static') echo 'checked="checked"'; ?> />
 	<label for="<?php echo $this->get_field_id('navigation_title_static'); ?>">Use this text for title:</label>
-	<input class="widefat" id="<?php echo $this->get_field_id('navigation_title_text'); ?>" name="<?php echo $this->get_field_name('navigation_title_text'); ?>" type="text" value="<?php echo $navigation_title_text; ?>" />				
+	<input class="widefat only-if-static" id="<?php echo $this->get_field_id('navigation_title_text'); ?>" name="<?php echo $this->get_field_name('navigation_title_text'); ?>" type="text" value="<?php echo $navigation_title_text; ?>" />				
 	<br />
 	<label for="<?php echo $this->get_field_id('navigation_title_url'); ?>">URL:</label>
-	<input class="widefat" id="<?php echo $this->get_field_id('navigation_title_url'); ?>" name="<?php echo $this->get_field_name('navigation_title_url'); ?>" type="text" value="<?php echo $navigation_title_url; ?>" />
+	<input class="widefat only-if-static" id="<?php echo $this->get_field_id('navigation_title_url'); ?>" name="<?php echo $this->get_field_name('navigation_title_url'); ?>" type="text" value="<?php echo $navigation_title_url; ?>" />
 	<br />
-	<span id="<?php echo $this->get_field_id('navigation_url_error'); ?>" style="color: #cc0000; font-weight: bold;"></span>
+	<span class="navigation-url-error" id="<?php echo $this->get_field_id('navigation_url_error'); ?>" style="color: #cc0000; font-weight: bold;"></span>
 </p>
 
 <p>
@@ -86,12 +86,32 @@ function bu_navigation_widget_<?php echo $this->number; ?>_validate(e)
 	}
 }
 
+function bu_navigation_widget_<?php echo $this->number; ?>_title_changed()
+{
+	var is_static = jQuery('#<?php echo $this->get_field_id('navigation_title_static');?>').attr('checked');
+
+	if (is_static) {
+		jQuery(this).siblings('input.only-if-static').attr('disabled', false);
+	} else {
+		jQuery(this).siblings('input.only-if-static').attr('disabled', true);
+		jQuery(this).siblings('span.navigation-url-error').text('');
+	}
+}
+
 jQuery(document).ready( function($) 
 {
+	jQuery('#<?php echo $this->get_field_id('navigation_title_none');?>')
+		.add('#<?php echo $this->get_field_id('navigation_title_section');?>')
+		.add('#<?php echo $this->get_field_id('navigation_title_static');?>')
+		.change(bu_navigation_widget_<?php echo $this->number; ?>_title_changed);
+	
+	jQuery('#<?php echo $this->get_field_id('navigation_title_static');?>').change();
+	
 	jQuery("#<?php echo $this->get_field_id('navigation_title_static'); ?>").change(function () {
 		if (jQuery("#<?php echo $this->get_field_id('navigation_title_static'); ?>:checked").val())
 		jQuery("#<?php echo $this->get_field_id('navigation_title_text'); ?>").focus();
 	});
+
 
 	jQuery("input[name='<?php echo $this->get_field_name('navigation_style'); ?>']").click(function (e) {
 		bu_navigation_widget_<?php echo $this->number; ?>_title_label();

@@ -126,6 +126,7 @@ class BU_Widget_Pages extends WP_Widget
 			if ($instance['navigation_style'] == 'section')
 			{
 				$list_args['navigate_in_section'] = 1;
+				if(is_404()) return '';
 			} 
 			else if ($instance['navigation_style'] == 'adaptive')
 			{
@@ -134,7 +135,7 @@ class BU_Widget_Pages extends WP_Widget
 		}
 			
 		do_action('bu_navigation_widget_before_list');
-		
+
 		$out = bu_navigation_list_pages( apply_filters('widget_bu_pages_args', $list_args ) );
 
 		if ( !empty( $out ) ) 

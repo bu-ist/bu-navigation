@@ -1,0 +1,203 @@
+<?php
+
+
+if (defined('BU_PLUGIN_PAGE_PARENT')) {
+	return;
+}
+
+// This plugin is loaded (use this for graceful degradation).
+define('BU_PLUGIN_PAGE_PARENT', true);
+
+class BuPageParent
+{
+	public static function init()
+	{
+		add_action('do_meta_boxes', array(__CLASS__, 'do_meta_boxes'));
+		add_action('admin_enqueue_scripts', array(__CLASS__, 'admin_page_scripts'));
+		add_action('admin_enqueue_scripts', array(__CLASS__, 'admin_page_styles'));
+		
+		add_action('save_post', array(__CLASS__, 'save_nav_meta_data'));
+	}
+	
+	
+	public static function admin_page_scripts($hook_suffix)
+	{
+        global $current_screen;
+
+		$possible_hook_suffix = array ( 'post.php', 'post-new.php' );
+        if( $current_screen->post_type != 'page' || !in_array($hook_suffix, $possible_hook_suffix) ) return;
+		
+        $suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : ''; 
+		wp_enqueue_script('bu-jquery-scrolling-tree', plugins_url('js/jquery.scrolling-tree' . $suffix . '.js', __FILE__), array('jquery'), '0.2', true);
+		wp_enqueue_script('jquery-qtip', plugins_url('js/jquery.qtip-1.0.0-rc3' . $suffix . '.js', __FILE__), array('jquery'), '1.0.0-rc3', true);
+		wp_enqueue_script('bu-page-parent-browser', plugins_url('js/browser' . $suffix . '.js', __FILE__), array('jquery'));
+		wp_enqueue_script('bu-page-parent-position-menu', 
+				  plugins_url('js/position-menu' . $suffix . '.js', __FILE__), 
+				  array('jquery'));
+	}
+	
+	public static function admin_page_styles($hook_suffix)
+	{
+        global $current_screen;
+
+		$possible_hook_suffix = array ( 'post.php', 'post-new.php' );
+        if( $current_screen->post_type != 'page' || !in_array($hook_suffix, $possible_hook_suffix) ) return;
+		
+		wp_enqueue_style('bu-page-parent-browser', plugins_url('interface/style.css', __FILE__));
+	}
+	
+	
+	public static function jsonTree()
+	{
+		check_ajax_referer();
+		
+		echo json_encode(self::getTree());
+		
+		die;
+	}
+	
+	public static function filterPostFields($fields)
+	{
+		$fields = array('ID', 'post_title', 'post_parent', 'post_type', 'menu_order', 'post_name', 'post_status');
+		return $fields;
+	}
+	
+	public static function allowTopLevelPage()
+	{
+		if (defined('BU_NAV_OPTION_ALLOW_TOP')) {
+			return (bool)get_option(BU_NAV_OPTION_ALLOW_TOP);
+		} else {
+			return true;
+		}
+	}
+
+	public static function filterValidParents($pages)
+	{
+
+		foreach ($pages as $index => $page) {
+
+			if (!$page->post_name) {
+
+				unset($pages[$index]);
+
+			}
+
+			if ($page->post_status === 'trash') {
+
+				unset($pages[$index]);
+
+			}
+
+		}
+
+		return $pages;
+	}
+	
+	
+	public static function getTree()
+	{		
+		/* add filter to only grab fields we need */
+		add_filter('bu_navigation_filter_fields', array(__CLASS__, 'filterPostFields'));
+
+		/* filter out pages we don't want */
+ 		add_filter('bu_navigation_filter_pages', array(__CLASS__, 'filterValidParents'));
+
+		/* we do want pages excluded from nav */
+		remove_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
+
+		/* arguments for bu_navigation_get_pages */
+		$pargs = array(
+			'post_status' => NULL, // don't restrict post_status
+			'supress_filter_pages' => FALSE,
+			'suppress_urls' => TRUE, // don't add urls
+			);
+
+		$pages = array_values(bu_navigation_get_pages($pargs)); // we don't want an indexed array
+
+		remove_filter('bu_navigation_filter_fields', array(__CLASS__, 'filterPostFields'));
+		remove_filter('bu_navigation_filter_pages', array(__CLASS__, 'filterValidParents'));
+		add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
+		
+		return $pages;
+	}
+
+	public static function do_meta_boxes()
+	{
+		remove_meta_box('pageparentdiv', 'page', 'side');
+
+		if (is_array($tpls = get_page_templates()) && (count($tpls) > 0)) {
+			add_meta_box('bupagetemplatediv', __('Page Template'), array(__CLASS__, 'page_template_meta_box'), 'page', 'side', 'core');
+		}
+
+		add_meta_box('bupageparentdiv', __('Page Attributes'), array(__CLASS__, 'metaBox'), 'page', 'side', 'core');
+	}
+	
+	
+	public static function metaBox($post)
+	{
+		include('interface/page-attributes.php');
+	}
+	
+	
+	public static function page_template_meta_box($post)
+	{
+		include('interface/page-template.php');
+	}
+
+
+	/* retrieve and save navigation-related post meta data */
+
+	public static function get_nav_meta_data($post) {
+	  $nav_label = get_post_meta($post->ID, '_bu_cms_navigation_page_label', true);
+	  $exclude = get_post_meta($post->ID, '_bu_cms_navigation_exclude', true);
+	  
+	  return array('label' => (trim($nav_label) ? $nav_label : $post->post_title),
+		       'exclude' => (int) $exclude);
+	}
+
+	public static function save_nav_meta_data($post_id) {
+	  global $wpdb;
+
+	  $post = get_post($post_id);
+	  if ($post->post_type != 'page') return;
+
+	  if (array_key_exists('nav_label', $_POST)) {
+	    
+	    // update the navigation meta data
+	    
+	    $nav_label = $_POST['nav_label'];
+	    $exclude = (array_key_exists('nav_display', $_POST) ? 0 : 1);
+	    
+	    update_post_meta($post_id, '_bu_cms_navigation_page_label', $nav_label);
+	    update_post_meta($post_id, '_bu_cms_navigation_exclude', $exclude);
+
+	    
+	    // renumber the sibling pages
+	    // ----
+	    // 1. get the siblings of the current post, in menu_order
+	    // 2. update their menu_order fields, starting at 0, skipping the menu_order of the current post
+
+	    $siblings = bu_navigation_get_pages(array('sections' => array($post->post_parent),
+	    					      'post_status' => false,
+						      'supress_filter_pages' => true));
+	    
+	    $i = 1;
+	    if ($siblings) {
+		  foreach ($siblings as $sib) {
+	        if ($sib->ID == $post_id) continue;
+
+	        if ($i == $post->menu_order) $i++;
+
+	        $stmt = $wpdb->prepare("UPDATE $wpdb->posts SET menu_order = %d WHERE ID = %d", $i, $sib->ID);
+	        $wpdb->query($stmt);
+	      
+	        $i++;
+	      }
+		}
+	  }
+	}
+}
+add_action('admin_init', array('BuPageParent', 'init'));
+
+
+?>

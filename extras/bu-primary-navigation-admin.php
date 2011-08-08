@@ -7,15 +7,37 @@ define('BU_NAV_OPTION_ALLOW_TOP', 'bu_allow_top_level_page');
 
 function bu_navigation_admin_menu_display_init()
 {
-	global $menu;
 	
-	$perm = is_site_admin() ? 0 : 'edit_pages';
+	$perm = 'edit_pages';
 	
-	$parents = array('Navigation', 'Site Options');
-		
-	$page = bu_add_submenu_page($parents, __('Primary Navigation'), __('Primary Navigation'), $perm, __FILE__, 'bu_navigation_admin_menu_display');
+	$page = add_submenu_page('bu-navigation/bu-navman.php', __('Primary Navigation'), __('Primary Navigation'), $perm, __FILE__, 'bu_navigation_admin_menu_display');
 }
 add_action('admin_menu', 'bu_navigation_admin_menu_display_init');
+
+function bu_primary_navigation_admin_page_styles($hook_suffix) {
+	if ($hook_suffix == 'navigation_page_bu-navigation/extras/bu-primary-navigation-admin') {
+		wp_enqueue_style('primary-navigation-admin', plugins_url( 'interface/primary-navigation-admin.css', dirname(__FILE__) ));
+	}
+}
+add_action('admin_enqueue_scripts', 'bu_primary_navigation_admin_page_styles');
+
+/* fixes:
+ * - depth too high
+ * switching from a high depth theme to a low depth theme can cause the options to be wrong
+ * so we will fix to the the theme-supported depth (if needed)
+ * - depth not set
+ * sets to the default
+ */
+function bu_navigation_depth_fix( $curr_depth ) {
+	
+	if ( defined('BU_NAVIGATION_SUPPORTED_DEPTH') && $curr_depth > BU_NAVIGATION_SUPPORTED_DEPTH ) {
+		return BU_NAVIGATION_SUPPORTED_DEPTH;
+	}
+	
+	if ( !$curr_depth ) $curr_depth = BU_NAVIGATION_PRIMARY_DEPTH;
+	
+	return $curr_depth;
+}
 
 function bu_navigation_admin_menu_display()
 {
@@ -36,6 +58,7 @@ function bu_navigation_admin_menu_display()
 		if (!$bu_navigation_primarynav_max) $bu_navigation_primarynav = BU_NAVIGATION_PRIMARY_MAX;
 		$bu_navigation_primarynav_dive = get_option(BU_NAV_OPTION_DIVE);
 		$bu_navigation_primarynav_depth = get_option(BU_NAV_OPTION_DEPTH);
+		$bu_navigation_primarynav_depth = bu_navigation_depth_fix( $bu_navigation_primarynav_depth );
 		$bu_allow_top_level_page = get_option(BU_NAV_OPTION_ALLOW_TOP);
 	}
 	
@@ -55,10 +78,10 @@ function bu_navigation_admin_menu_post()
 		if (!$primarynav_max) $primarynav_max = BU_NAVIGATION_PRIMARY_MAX;
 		$primarynav_dive = intval($_POST['bu_navigation_primarynav_dive']);
 		$primarynav_depth = intval($_POST['bu_navigation_primarynav_depth']);
-		if (!$primarynav_depth) $primarynav_depth = BU_NAVIGATION_PRIMARY_DEPTH;
+		$primarynav_depth = bu_navigation_depth_fix( $primarynav_depth );
 		$bu_allow_top_level_page = intval($_POST['bu_allow_top_level_page']);
 
-		update_option(BU_NAV_OPTION_DISPLAY, $primarynav);\
+		update_option(BU_NAV_OPTION_DISPLAY, $primarynav);
 		update_option(BU_NAV_OPTION_MAX, $primarynav_max);
 		update_option(BU_NAV_OPTION_DIVE, $primarynav_dive);
 		update_option(BU_NAV_OPTION_DEPTH, $primarynav_depth);
@@ -81,7 +104,7 @@ function bu_navigation_filter_primarynav_defaults($defaults)
 		if (!$bu_navigation_primarynav_max) $bu_navigation_primarynav = BU_NAVIGATION_PRIMARY_MAX;
 		$bu_navigation_primarynav_dive = get_option(BU_NAV_OPTION_DIVE);
 		$bu_navigation_primarynav_depth = get_option(BU_NAV_OPTION_DEPTH);
-		if (!$bu_navigation_primarynav_depth) $bu_navigation_primarynav_depth = BU_NAVIGATION_PRIMARY_DEPTH;
+		$bu_navigation_primarynav_depth = bu_navigation_depth_fix($bu_navigation_primarynav_depth);
 		$bu_allow_top_level_page = get_option(BU_NAV_OPTION_ALLOW_TOP);
 
 		$defaults['max_items'] = $bu_navigation_primarynav_max;

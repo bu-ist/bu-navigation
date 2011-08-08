@@ -58,4 +58,21 @@ function bu_navigation_filter_anchor_attrs_external_links($attrs, $page = NULL)
 	return $attrs;
 }
 add_filter('bu_navigation_filter_anchor_attrs', 'bu_navigation_filter_anchor_attrs_external_links');
+
+/**
+ * Filter the page_link to support the custom post_type 'link'
+ * @param string $link URI
+ * @param int $id Post ID
+ * @see get_page_link()
+ */
+function bu_navigation_page_link_filter($link, $id)
+{
+	if (($page = get_post($id, OBJECT, 'raw', FALSE)) && ($page->post_type === 'link')) {
+		$link = $page->post_content;
+	}
+	return $link;
+}
+
+add_filter('page_link', 'bu_navigation_page_link_filter', 10, 2);
+
 ?>

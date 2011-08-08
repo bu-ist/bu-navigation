@@ -1,0 +1,139 @@
+/*
+st-selected -- highlight selected LIs
+st-back-to-top -- back to top span
+st-back-one -- duh
+st-the-list -- the list itself
+st-disabled -- disabled link
+st-list-container -- div, contains the list
+st-drill -- class given to drill span
+*/
+
+#bu-page-parent {
+	font-size: 1.1em;
+	border: solid 1px #CCCCCC;
+	padding: 5px;
+	height: 190px;
+	overflow: auto;
+}
+
+#bu-page-parent-current {
+	padding: 3px;
+	background-color: #DFDFDF;
+}
+
+#bu-page-parent-help, #bu-page-position-help, #bu-navigation-help {
+	background: url('tips.png') no-repeat center right;
+	padding-left: 20px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+.st-breadcrumbs {
+	margin-top: 5px;
+	font-weight: bold;
+}
+
+.st-breadcrumb-link {
+	text-decoration: underline;
+	cursor: pointer;
+	color: #21759B;
+}
+
+.st-breadcrumb-link:hover {
+	color: #D54E21;
+}
+
+.st-selected {
+	background-color: #EEEEEE;
+}
+
+.st-the-list li {
+	margin-bottom: 2px;
+}
+
+.st-back-to-top, .st-back-one {
+	text-transform: uppercase;
+	font-weight: bold;
+}
+
+.st-back-to-top:hover, .st-back-one:hover {
+	color: #0575A2;
+}
+
+.st-back-to-top, .st-back-one, .st-list-container {
+	margin-bottom: 5px;
+}
+
+.st-back-to-top {
+	background: url('double-arrow-left.png') no-repeat center left;
+	padding-left: 12px;
+}
+
+.st-back-one {
+	background: url('arrow-left.png')  no-repeat center left;
+	padding-left: 12px;
+}
+
+.st-back-to-top, .st-back-one, .st-drill {
+	cursor: pointer;
+}
+
+.st-the-list {
+	font-size: 1em;
+}
+
+.st-the-list span, .st-the-list label {
+	margin-left: 7px;
+}
+
+.st-disabled-node {
+	color: #CCCCCC;
+}
+
+.st-disabled:hover {
+	color: #CCCCCC;
+}
+
+.st-drill {
+	padding-right: 13px;
+	background: url('arrow-right.png') no-repeat center right;
+}
+
+.st-drill:hover {
+	color: #0575A2;
+}
+
+.st-disabled {
+	color: #CCCCCC;
+}
+
+#tooltip {
+	position: absolute;
+	z-index: 3000;
+	border: 1px solid #111;
+	background-color: #eee;
+	padding: 5px;
+	opacity: 0.95;
+}
+#tooltip h3, #tooltip div { margin: 0; }
+
+
+div.page-attributes-section select { 
+  width: 260px;
+}
+
+div.page-attributes-section label { 
+  display: block;
+  padding-bottom: 5px;
+}
+
+div.page-attributes-section label.inline { 
+  display: inline;
+}
+
+hr.divider { 
+  border: 0;
+  color: #cccccc;
+  background-color: #cccccc;
+  height: 1px;
+}

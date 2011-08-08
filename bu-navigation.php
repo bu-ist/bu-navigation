@@ -1,19 +1,41 @@
 <?php
 /*
 Plugin Name: Page Navigation 
-Version: 0.1
+Version: 0.2
 Author URI: http://www.bu.edu/tech/help/
 Description: Provides alternative navigation elements designed for blogs with large page counts
-Author: Niall Kavanagh (ntk@bu.edu)
+Author: Boston University (IS&T)
 */
+
+/**
+ * Components:
+ * 
+ * BU Page Parent Meta Box
+ * Navigation Management Screens
+ * Content navigation widget
+ * Filter for drilling into a particular section when view the edit pages screen
+ * 
+ * @todo Include javascript and enqueue only if needed. 
+ */
 
 /* BU Navigation constants */
 define('BU_NAV_PLUGIN_DIR', dirname(__FILE__));
 
-if (!defined('BU_NAVIGATION_LIB_LOADED')) require_once('lib/bu-navigation/bu-navigation.php');
+if (!defined('BU_INCLUDES_PATH')) {
+    if(!defined('BU_NAVIGATION_LIB_LOADED')) {
+        require_once('lib/bu-navigation/bu-navigation.php');
+        define('BU_NAVIGATION_LIB_LOADED', true);
+    }
+} else {
+    require_once(BU_INCLUDES_PATH . '/bu-navigation/bu-navigation.php');
+}
 
-require_once('bu-navigation-widget.php'); // Content navigation widget
-
+include(dirname(__FILE__) . '/bu-navigation-widget.php'); // Content navigation widget
+if(is_admin()) {
+    include(dirname(__FILE__) . '/bu-filter-pages.php'); // Filter pages
+    include(dirname(__FILE__) . '/bu-navman.php'); // Navigation manager
+    include(dirname(__FILE__) . '/bu-page-parent.php'); // Page parent selector
+}
 /**
  * Initialization function for navigation plugin
  * @return void 

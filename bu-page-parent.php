@@ -17,17 +17,29 @@ class BuPageParent
 		add_action('admin_enqueue_scripts', array(__CLASS__, 'admin_page_styles'));
 		
 		add_action('save_post', array(__CLASS__, 'save_nav_meta_data'));
+		// for WP 3.2: change delete_post to before_delete_post (because at that point, the children posts haven't moved up)
+		add_action('delete_post', array(__CLASS__, 'handle_hidden_page_deletion'));
+		add_action('wp_ajax_check_hidden_page', array(__CLASS__, 'ajax_check_hidden_page'));
+		
 	}
 	
 	
 	public static function admin_page_scripts($hook_suffix)
 	{
         global $current_screen;
-
-		$possible_hook_suffix = array ( 'post.php', 'post-new.php' );
-        if( $current_screen->post_type != 'page' || !in_array($hook_suffix, $possible_hook_suffix) ) return;
 		
-        $suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : ''; 
+        $suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
+        $editpage_suffixes = array ( 'post.php', 'post-new.php' );				// post.php and post-new.php are the edit/add new pages
+		$listpage_suffixes = array ( 'post.php', 'post-new.php', 'edit.php' );	// edit.php is the listing page
+		
+		if( $current_screen->post_type != 'page' ) return;
+		
+		if ( in_array($hook_suffix, $listpage_suffixes) ) {
+			wp_enqueue_script('bu-page-parent-deletion', plugins_url('js/deletion' . $suffix . '.js', __FILE__), array('jquery'));
+		}
+
+        if( !in_array($hook_suffix, $editpage_suffixes) ) return;
+		
 		wp_enqueue_script('bu-jquery-scrolling-tree', plugins_url('js/jquery.scrolling-tree' . $suffix . '.js', __FILE__), array('jquery'), '0.2', true);
 		wp_enqueue_script('jquery-qtip', plugins_url('js/jquery.qtip-1.0.0-rc3' . $suffix . '.js', __FILE__), array('jquery'), '1.0.0-rc3', true);
 		wp_enqueue_script('bu-page-parent-browser', plugins_url('js/browser' . $suffix . '.js', __FILE__), array('jquery'));
@@ -196,8 +208,105 @@ class BuPageParent
 		}
 	  }
 	}
+
+	/**
+	 * when deleting posts that are hidden, the children will get moved up one level (to take place of the current post),
+	 * but if they were hidden (as a result of the current post being hidden), they will become unhidden.
+	 * So we must go through all the children and mark them hidden.
+	 */
+	public static function handle_hidden_page_deletion($post_id) {
+		global $wpdb;
+		
+		$post = get_post($post_id);
+		if ($post->post_type != 'page') return;
+			
+		$exclude = get_post_meta($post_id, '_bu_cms_navigation_exclude', true);
+		
+		if ($exclude) {	// post was hidden
+			error_log("$post_id is now exclude: $exclude");
+			// get children
+			$children_query = $wpdb->prepare("SELECT * FROM $wpdb->posts WHERE post_parent = %d AND post_type='page'", $post_id);
+			$children = $wpdb->get_results($children_query);
+			
+			// mark each hidden
+			foreach ( (array) $children as $child ) {
+				error_log("setting the child $post_id to exclude: $exclude");
+				update_post_meta($child->ID, '_bu_cms_navigation_exclude', $exclude);
+			}
+		}
+	}
+	
+	/*
+	 * - prints json formatted data that tells the browser to either show a warning or not
+	 * - dies.
+	 */
+	public static function ajax_check_hidden_page() {
+		global $wpdb;
+		
+		$response = array();
+		$post_id = (int) $_POST['post_id'];
+		$post = get_post($post_id);
+		
+		// case: not a page
+		if ($post->post_type != 'page') {
+			echo json_encode( array( 'ignore' => true ) );
+			die;
+		}
+		
+		// get children pages/links
+		$page_children_query = $wpdb->prepare("SELECT * FROM $wpdb->posts WHERE post_parent = %d AND post_type='page'", $post_id);
+		$page_children = $wpdb->get_results($page_children_query);
+		$link_children_query = $wpdb->prepare("SELECT * FROM $wpdb->posts WHERE post_parent = %d AND post_type='link'", $post_id);
+		$link_children = $wpdb->get_results($link_children_query);
+	
+		// case no children, output the "ignore" flag
+		if ( count($page_children) == 0 and count($link_children) == 0 ) {
+			echo json_encode( array( 'ignore' => true, 'children' => 0 ) );
+			die;
+		}
+		
+		$hidden = get_post_meta($post_id, '_bu_cms_navigation_exclude', true);
+		// case: wasn't hidden, output the "ignore" flag
+		if ( !$hidden ) {
+			echo json_encode( array( 'ignore' => true, 'children' => 0 ) );
+			die;
+		}
+		
+		// case: child pages and/or links exist
+		// construct output msg based on how many child pages/links exist
+		$msg = sprintf('"%s" is a hidden page with ', $post->post_title);
+		$children_msgs = array();
+		
+		if (count($page_children) > 1) {
+			$children_msgs['page'] = count($page_children) . " child pages";
+		} else if ( count($page_children) == 1 ) {
+			$children_msgs['page'] = "a child page";
+		}
+		
+		if (count($link_children) > 1) {
+			$children_msgs['link'] = count($link_children) . " child links";
+		} else if ( count($link_children) == 1 ) {
+			$children_msgs['link'] = "a child link";
+		}
+		
+		$children_msgs_vals = array_values($children_msgs);
+		$children_msg = count($children_msgs) > 1 ? implode(' and ', $children_msgs_vals) : current($children_msgs);
+		$msg .= $children_msg . ".";
+		
+		if ( $children_msgs['page'] )
+			$msg .= " If you delete this page, " . $children_msgs['page'] . " will move up one node in the page hierarchy, and will autmatically be marked as hidden.";
+			
+		if ( $children_msgs['link'] )
+			$msg .= " If you delete this page, " . $children_msgs['link'] . " will move up one node in the page hierarchy, and will be displayed in navigation menus.";
+		
+		$response = array (
+			'ignore' => false,
+			'msg' => $msg,
+		);
+		
+		echo json_encode( $response );
+		die;
+	}
 }
 add_action('admin_init', array('BuPageParent', 'init'));
 
-
-?>

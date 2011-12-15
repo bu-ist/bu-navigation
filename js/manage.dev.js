@@ -23,8 +23,7 @@ function editNode(n)
 {
 
     var $node = jQuery(n);
-
-	if ($node.attr("rel") === "link")
+	if ($node.attr("rel") === "link" || $node.attr("rel") === "link_restricted")
 	{
 		if ($node.is('[class*="newlink_"]'))
 		{

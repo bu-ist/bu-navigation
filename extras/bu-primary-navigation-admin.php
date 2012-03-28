@@ -10,12 +10,12 @@ function bu_navigation_admin_menu_display_init()
 	
 	$perm = 'edit_pages';
 	
-	$page = add_submenu_page('bu-navigation/bu-navman.php', __('Primary Navigation'), __('Primary Navigation'), $perm, __FILE__, 'bu_navigation_admin_menu_display');
+	$page = add_submenu_page('themes.php', __('Primary Navigation'), __('Primary Navigation'), $perm, __FILE__, 'bu_navigation_admin_menu_display');
 }
-add_action('admin_menu', 'bu_navigation_admin_menu_display_init');
+add_action('admin_menu', 'bu_navigation_admin_menu_display_init', 20);
 
 function bu_primary_navigation_admin_page_styles($hook_suffix) {
-	if ($hook_suffix == 'navigation_page_bu-navigation/extras/bu-primary-navigation-admin') {
+	if ($hook_suffix == 'appearance_page_bu-navigation/extras/bu-primary-navigation-admin') {
 		wp_enqueue_style('primary-navigation-admin', plugins_url( 'interface/primary-navigation-admin.css', dirname(__FILE__) ));
 	}
 }

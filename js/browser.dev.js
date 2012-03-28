@@ -60,7 +60,7 @@ jQuery(function($) {
 		startNode: current_parent,
 		drillMarkup: '&nbsp;',
 		filterNode: function() {
-			return (this.post_type == 'page') && (this.ID != post_id) && (this.ID != page_on_front);
+			return (this.post_type !=  'link') && (this.ID != post_id) && (this.ID != page_on_front);
 		}
 	});
 	

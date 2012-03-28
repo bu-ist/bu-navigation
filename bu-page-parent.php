@@ -12,7 +12,7 @@ class BuPageParent
 {
 	public static function init()
 	{
-		add_action('do_meta_boxes', array(__CLASS__, 'do_meta_boxes'));
+		add_action('add_meta_boxes', array(__CLASS__, 'do_meta_boxes'));
 		add_action('admin_enqueue_scripts', array(__CLASS__, 'admin_page_scripts'));
 		add_action('admin_enqueue_scripts', array(__CLASS__, 'admin_page_styles'));
 		
@@ -32,7 +32,7 @@ class BuPageParent
         $editpage_suffixes = array ( 'post.php', 'post-new.php' );				// post.php and post-new.php are the edit/add new pages
 		$listpage_suffixes = array ( 'post.php', 'post-new.php', 'edit.php' );	// edit.php is the listing page
 		
-		if( $current_screen->post_type != 'page' ) return;
+		if( !in_array($current_screen->post_type, bu_navigation_supported_post_types()) ) return;
 		
 		if ( in_array($hook_suffix, $listpage_suffixes) ) {
 			wp_enqueue_script('bu-page-parent-deletion', plugins_url('js/deletion' . $suffix . '.js', __FILE__), array('jquery'));
@@ -53,7 +53,7 @@ class BuPageParent
         global $current_screen;
 
 		$possible_hook_suffix = array ( 'post.php', 'post-new.php' );
-        if( $current_screen->post_type != 'page' || !in_array($hook_suffix, $possible_hook_suffix) ) return;
+        if( !in_array($current_screen->post_type, bu_navigation_supported_post_types()) || !in_array($hook_suffix, $possible_hook_suffix) ) return;
 		
 		wp_enqueue_style('bu-page-parent-browser', plugins_url('interface/style.css', __FILE__));
 	}
@@ -106,7 +106,7 @@ class BuPageParent
 	}
 	
 	
-	public static function getTree()
+	public static function getTree($post_types = array())
 	{		
 		/* add filter to only grab fields we need */
 		add_filter('bu_navigation_filter_fields', array(__CLASS__, 'filterPostFields'));
@@ -122,6 +122,7 @@ class BuPageParent
 			'post_status' => NULL, // don't restrict post_status
 			'supress_filter_pages' => FALSE,
 			'suppress_urls' => TRUE, // don't add urls
+			'post_types' => $post_types,
 			);
 
 		$pages = array_values(bu_navigation_get_pages($pargs)); // we don't want an indexed array
@@ -141,7 +142,9 @@ class BuPageParent
 			add_meta_box('bupagetemplatediv', __('Page Template'), array(__CLASS__, 'page_template_meta_box'), 'page', 'side', 'core');
 		}
 
-		add_meta_box('bupageparentdiv', __('Page Attributes'), array(__CLASS__, 'metaBox'), 'page', 'side', 'core');
+		$post_types = bu_navigation_supported_post_types();
+		foreach($post_types as $pt)
+			add_meta_box('bupageparentdiv', __('Page Attributes'), array(__CLASS__, 'metaBox'), $pt, 'side', 'core');
 	}
 	
 	
@@ -171,7 +174,7 @@ class BuPageParent
 	  global $wpdb;
 
 	  $post = get_post($post_id);
-	  if ($post->post_type != 'page') return;
+	  if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) return;
 
 	  if (array_key_exists('nav_label', $_POST)) {
 	    
@@ -188,10 +191,13 @@ class BuPageParent
 	    // ----
 	    // 1. get the siblings of the current post, in menu_order
 	    // 2. update their menu_order fields, starting at 0, skipping the menu_order of the current post
-
-	    $siblings = bu_navigation_get_pages(array('sections' => array($post->post_parent),
-	    					      'post_status' => false,
-						      'supress_filter_pages' => true));
+		$post_types = ( $post->post_type == 'page' ? array('page', 'link') : array($post->post_type) );
+	    $siblings = bu_navigation_get_pages(array(
+			'sections' => array($post->post_parent),
+	    	'post_status' => false,
+			'supress_filter_pages' => true,
+			'post_type' => $post_types,	// handle custom post types support
+		));
 	    
 	    $i = 1;
 	    if ($siblings) {
@@ -218,14 +224,14 @@ class BuPageParent
 		global $wpdb;
 		
 		$post = get_post($post_id);
-		if ($post->post_type != 'page') return;
+	  if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) return;
 			
 		$exclude = get_post_meta($post_id, '_bu_cms_navigation_exclude', true);
 		
 		if ($exclude) {	// post was hidden
 			error_log("$post_id is now exclude: $exclude");
 			// get children
-			$children_query = $wpdb->prepare("SELECT * FROM $wpdb->posts WHERE post_parent = %d AND post_type='page'", $post_id);
+			$children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d", $post_id);
 			$children = $wpdb->get_results($children_query);
 			
 			// mark each hidden
@@ -247,16 +253,16 @@ class BuPageParent
 		$post_id = (int) $_POST['post_id'];
 		$post = get_post($post_id);
 		
-		// case: not a page
-		if ($post->post_type != 'page') {
+		// case: not a supported post_type
+		if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) {
 			echo json_encode( array( 'ignore' => true ) );
 			die;
 		}
 		
 		// get children pages/links
-		$page_children_query = $wpdb->prepare("SELECT * FROM $wpdb->posts WHERE post_parent = %d AND post_type='page'", $post_id);
+		$page_children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='$post->post_type'", $post_id);
 		$page_children = $wpdb->get_results($page_children_query);
-		$link_children_query = $wpdb->prepare("SELECT * FROM $wpdb->posts WHERE post_parent = %d AND post_type='link'", $post_id);
+		$link_children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='link'", $post_id);
 		$link_children = $wpdb->get_results($link_children_query);
 	
 		// case no children, output the "ignore" flag

@@ -9,26 +9,20 @@ define('BU_NAVMAN_LOCK_USER', '_bu_navman_lock_user');
 
 
 /**
- * Initialization function for navigation manager admin page
+ * Add "Edit Order" submenu pages to allow editing the navigation of the supported post types
  * @return void
  */
 function bu_navman_admin_menu_init()
 {
-	global $menu, $current_site;
-
 	$perm = 'edit_pages';
-
-	$interface_path = plugins_url('interface', __FILE__);
-	$icon = sprintf('%s/icons/nav-icon-gray.png', $interface_path);
-
-	$page = add_menu_page(__('Navigation Manager'), __('Navigation'), $perm, __FILE__, 'bu_navman_admin_menu_display', $icon);
-
-	if ($page)
-	{
-		add_submenu_page(__FILE__, __('Navigation Manager'), 'Edit Order', $perm, __FILE__, 'bu_navman_admin_menu_display');
-
+	
+	// Add "Edit Order" links to the submenu of each supported post type
+	$post_types = bu_navigation_supported_post_types();
+	foreach( $post_types as $pt ) {
+		$parent_slug = 'edit.php?post_type=' . $pt;
+		add_submenu_page($parent_slug, null, 'Edit Order', $perm, __FILE__  , 'bu_navman_admin_menu_display');
 	}
-
+		
 	bu_navman_clear_lock();
 }
 add_action('admin_menu', 'bu_navman_admin_menu_init');
@@ -39,8 +33,8 @@ add_action('admin_menu', 'bu_navman_admin_menu_init');
  */
 function bu_navman_enqueue_media($hook)
 {
-	if ($hook == 'toplevel_page_bu-navigation/bu-navman')
-	{
+	// all hierarchical post_types have '_page___FILE__' at the end of the hook
+	if (stripos($hook, '_page_bu-navigation/bu-navman') !== false) {
         $suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
 
         //switched from jquery-json to json2 @see http://ejohn.org/blog/ecmascript-5-strict-mode-json-and-more/
@@ -71,6 +65,9 @@ add_action('admin_enqueue_scripts', 'bu_navman_enqueue_media');
  */
 function bu_navman_admin_menu_display()
 {
+	$post_type = isset($_GET['post_type']) ? $_GET['post_type'] : 'page';
+	$post_types = ( $post_type == 'page' ? array('page', 'link') : array($post_type) );
+	
 	/* process any post */
 	$saved = bu_navman_admin_menu_post();
 
@@ -85,16 +82,16 @@ function bu_navman_admin_menu_display()
 	$interface_path = plugins_url('interface', __FILE__);//str_replace(site_url(), '', plugins_url('interface', __FILE__));
 
     /* RPC urls */
-
-	$rpc_url = 'admin-ajax.php?action=bu_getpages';
-	$rpc_page_url = 'admin-ajax.php?action=bu_getpage';
+	$post_types_param = ($post_types ? '&post_type='.implode(',',$post_types) : '');
+	$rpc_url = 'admin-ajax.php?action=bu_getpages' . $post_types_param;	// used to get all the posts for the tree
+	$rpc_page_url = 'admin-ajax.php?action=bu_getpage';	// used with links, so it doesn't need post_type
 
 	$pages = array();
 
-	$section_args = array('direction' => 'down', 'depth' => 1, 'sections' => array(0));
+	$section_args = array('direction' => 'down', 'depth' => 1, 'sections' => array(0), 'post_types' => $post_types);
 	$sections = bu_navigation_gather_sections(0, $section_args);
-
-	$root_pages = bu_navigation_get_pages(array('sections' => $sections));
+	
+	$root_pages = bu_navigation_get_pages(array('sections' => $sections, 'post_types' => $post_types));
 
 	$pages_by_parent = bu_navigation_pages_by_parent($root_pages);
 

@@ -17,10 +17,11 @@ $bu_post_id = $new_page ? 'null' : $post->ID;
 // new pages are not in the nav already, so we need to fix this
 $already_in_nav = $new_page ? false : (bool) !$nav_exclude;
 
+$post_types = ( $post->post_type == 'page' ? array('page', 'link') : array($post->post_type) );
 ?>
 
 <script type="text/javascript">
-	var page_summary = <?php echo json_encode(BuPageParent::getTree());?>,
+	var page_summary = <?php echo json_encode(BuPageParent::getTree( $post_types ));?>,
 		current_parent = <?php echo $post->post_parent;?>,
 		post_id = <?php echo $bu_post_id;?>,
 		allow_top = <?php echo json_encode($allow_top);?>,

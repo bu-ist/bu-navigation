@@ -35,11 +35,12 @@ class BU_Widget_Pages extends WP_Widget
 		$href = '';
 		
 		$section_id = 0;
+		$post_types = ($post->post_type == 'page' ? array('page', 'link') : array($post->post_type));
 
 		if ($instance['navigation_style'] != 'site')
 		{
 			/* displaying family */			
-			$sections = bu_navigation_gather_sections($post->ID);
+			$sections = bu_navigation_gather_sections($post->ID, array('post_types' => $post_types));
 			
 			if ($instance['navigation_style'] == 'adaptive')
 			{
@@ -62,7 +63,7 @@ class BU_Widget_Pages extends WP_Widget
 			if (!isset($section->navigation_label)) $section->navigation_label = apply_filters('the_title', $section->post_title);
 
 			$title = attribute_escape($section->navigation_label);
-			$href = get_page_link($section->ID);
+			$href = get_permalink($section->ID);
 
 			$html = sprintf('<a class="content_nav_header" href="%s">%s</a>', $href, $title);
 			$html .= "\n";
@@ -87,6 +88,7 @@ class BU_Widget_Pages extends WP_Widget
 	function widget( $args, $instance ) 
 	{
 		global $post;
+		$post_types = ($post->post_type == 'page' ? array('page', 'link') : array($post->post_type));
 
 		extract( $args );
 		
@@ -116,7 +118,8 @@ class BU_Widget_Pages extends WP_Widget
 			'echo' => 0, 
 			'sort_column' => $sortby, 
 			'exclude' => $exclude,
-			'container_id' => BU_WIDGET_PAGES_LIST_ID
+			'container_id' => BU_WIDGET_PAGES_LIST_ID,
+			'post_types' => $post_types,
 			);
 			
 		if (array_key_exists('navigation_style', $instance))

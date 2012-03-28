@@ -21,6 +21,7 @@
 		</div>
 	<? } ?>
 	<div class="metabox-holder has-right-sidebar">
+		<?php if ($post_type == 'page') { ?>
 		<div class="inner-sidebar">
 			<div id="navman_addlink" class="postbox">
 				<div class="handlediv" title="Click to toggle"><br /></div>
@@ -52,6 +53,7 @@
 				</div>
 			</div>			
 		</div>
+		<? } ?>
 
 		<div id="navman_main">
 			<form method="post" id="navman_form" action="">
@@ -89,6 +91,7 @@
 			</form>
 		</div>
 		
+		<?php if ($post_type == 'page') { ?>
 		<div id="navman_editlink" title="Edit a Link">
 			<div class="submitbox navform navformwide">
 				<form id="navman_editlink_form">
@@ -112,6 +115,7 @@
 				</form>
 			</div>
 		</div>
+		<? } ?>
 	</div>
 </div>
 <script type="text/javascript">

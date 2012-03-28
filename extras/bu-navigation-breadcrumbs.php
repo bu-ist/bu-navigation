@@ -28,14 +28,15 @@ function bu_navigation_breadcrumbs($args = '')
 	$html = sprintf('<%s%s>%s', $r['container_tag'], $attrs, $r['prefix']);
 	
 	/* grab ancestors */
-	$ancestors = bu_navigation_gather_sections($post->ID);
+	$post_types = ( $post->post_type == 'page' ? array('page', 'link') : array($post->post_type) );
+	$ancestors = bu_navigation_gather_sections($post->ID, array( 'post_types' => $post_types ));
 	if (!in_array($post->ID, $ancestors)) array_push($ancestors, $post->ID);
 	
 //	$front_page = get_option('page_on_front');
 //	if ($r['home'] && (!$ancestors[0])) {
 //		$ancestors[0] = $front_page;
 //	}
-	$pages = bu_navigation_get_pages(array('pages' => $ancestors, 'supress_filter_pages' => true));
+	$pages = bu_navigation_get_pages(array('pages' => $ancestors, 'supress_filter_pages' => true, 'post_types' => $post_types));
 
 	$crumbs = array(); // array of HTML fragments for each crumb
 

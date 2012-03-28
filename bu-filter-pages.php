@@ -7,20 +7,24 @@ define('BU_FILTER_PAGES_ID', 'bu_filter_pages');
 
 /**
  * Action for bu_after_post_stati, a custom action that is called after the list of filter options is displayed.
- * Adds a select box allowing users to filter the list of pages by page parent
+ * Adds a select box allowing users to filter the list of $_GET['post_type'] posts by page parent
  * @return void
  */
 function bu_filter_pages_after_post_stati()
 {
-
-	if($_GET['post_type'] !== 'page') return;
+	// only show the sections for the current post_type
+	$post_type = isset($_GET['post_type']) ? $_GET['post_type'] : 'page';
 	
-	$section_args = array('direction' => 'down', 'depth' => 1);
+	$post_types = bu_navigation_supported_post_types();
+	if( !in_array($post_type, $post_types) )  return;
+	
+	$section_args = array('direction' => 'down', 'depth' => 1, 'post_types' => array($post_type));
 	$args = array(
 		'suppress_filter_pages' => TRUE,
-		'sections' => bu_navigation_gather_sections(0, $section_args)
+		'sections' => bu_navigation_gather_sections(0, $section_args),
+		'post_types' => array($post_type),
 		);
-
+	
 	/* grab all pages  we need for pnav */
 	
 	$pages = bu_navigation_get_pages($args);
@@ -39,10 +43,12 @@ function bu_filter_the_posts($posts)
 {
 	if(!is_admin()) return $posts;
 	$post_parent = array_key_exists('post_parent', $_GET) ? intval($_GET['post_parent']) : NULL;
+	// only show the sections for the current post_type
+	$post_type = isset($_GET['post_type']) ? $_GET['post_type'] : '';
 	
 	if ($post_parent)
 	{
-		$section_args = array('direction' => 'down', 'depth' => 0);
+		$section_args = array('direction' => 'down', 'depth' => 0, 'post_types' => array($post_type));
 		$sections = bu_navigation_gather_sections($post_parent, $section_args);
 		
 		if ((is_array($sections)) && (count($sections) > 0))
@@ -78,11 +84,14 @@ add_action('bu_edit_pages_pre_footer', 'bu_filter_pages_edit_pages_pre_footer');
  */
 function bu_filter_pages_parent_dropdown($pages_by_parent, $default = 0, $parent = 0, $level = 0)
 {
+	$post_types = bu_navigation_supported_post_types();
+	
 	if ((is_array($pages_by_parent)) && (array_key_exists($parent, $pages_by_parent)) && (count($pages_by_parent) > 0))
 	{
 		foreach ($pages_by_parent[$parent] as $p)
 		{
-			if ($p->post_type != 'page') continue; // only show pages
+			
+			if (!in_array($p->post_type, $post_types)) continue; // only show valid post types
 			if (!array_key_exists($p->ID, $pages_by_parent)) continue; // don't show pages with no children
 			
 			$padding = str_repeat('&nbsp;', $level * 3);

@@ -1,7 +1,7 @@
 (function($) {
 	$(function() {
 		
-		// ajax request to get info on the page (but only if it is relevant), otherwise we get ignore: true in response
+		// ajax request to get info on the post (but only if it is relevant), otherwise we get ignore: true in response
 		function ajaxCheck(id) {
 			
 			var resp = { ignore: true };	// default to ignore
@@ -33,7 +33,7 @@
 				
 				// show warning
 				var warning = resp.msg;
-				warning += "\n\nAre you sure you want to delete " + (multiple_warnings ? "these pages" : "this page") + "?";
+				warning += "\n\nAre you sure you want to delete " + (multiple_warnings ? "these " + bu_navigation_pt_labels.plural.toLowerCase() : "this " + bu_navigation_pt_labels.singular.toLowerCase()) + "?";
 				
 				if ( window.confirm(warning) ) {
 					return true;

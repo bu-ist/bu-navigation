@@ -8,6 +8,8 @@ function bu_navigation_filter_pages_ancestors($pages)
 {
 	global $wpdb, $post;
 	
+	if (!$post) return $pages;
+	
 	$post_types = ( $post->post_type == 'page' ? array('page', 'link') : array($post->post_type) );
 	$ancestors = bu_navigation_gather_sections($post->ID, array( 'post_types' => $post_types ));
 	

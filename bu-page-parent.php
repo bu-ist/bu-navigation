@@ -32,7 +32,10 @@ class BuPageParent
         $editpage_suffixes = array ( 'post.php', 'post-new.php' );				// post.php and post-new.php are the edit/add new pages
 		$listpage_suffixes = array ( 'post.php', 'post-new.php', 'edit.php' );	// edit.php is the listing page
 		
-		if( !in_array($current_screen->post_type, bu_navigation_supported_post_types()) ) return;
+		if( !isset($current_screen->post_type) || !in_array($current_screen->post_type, bu_navigation_supported_post_types()) ) return;
+		
+		// post type labels (singular, plural)
+		wp_localize_script('jquery', 'bu_navigation_pt_labels', self::getPostTypeLabels());
 		
 		if ( in_array($hook_suffix, $listpage_suffixes) ) {
 			wp_enqueue_script('bu-page-parent-deletion', plugins_url('js/deletion' . $suffix . '.js', __FILE__), array('jquery'));
@@ -51,9 +54,9 @@ class BuPageParent
 	public static function admin_page_styles($hook_suffix)
 	{
         global $current_screen;
-
+		
 		$possible_hook_suffix = array ( 'post.php', 'post-new.php' );
-        if( !in_array($current_screen->post_type, bu_navigation_supported_post_types()) || !in_array($hook_suffix, $possible_hook_suffix) ) return;
+        if( !isset($current_screen->post_type) || !in_array($current_screen->post_type, bu_navigation_supported_post_types()) || !in_array($hook_suffix, $possible_hook_suffix) ) return;
 		
 		wp_enqueue_style('bu-page-parent-browser', plugins_url('interface/style.css', __FILE__));
 	}
@@ -76,11 +79,26 @@ class BuPageParent
 	
 	public static function allowTopLevelPage()
 	{
-		if (defined('BU_NAV_OPTION_ALLOW_TOP')) {
+		global $post;
+		// the 'allow top level page' option (in Site Design -> Primary Navigation screen) only applies to pages
+		if ($post->post_type == 'page' && defined('BU_NAV_OPTION_ALLOW_TOP')) {
 			return (bool)get_option(BU_NAV_OPTION_ALLOW_TOP);
 		} else {
 			return true;
 		}
+	}
+	
+	public static function getPostTypeLabels($post_type = '') {
+		global $current_screen;
+		
+		if (!$post_type) $post_type = $current_screen->post_type;
+		
+		$pt_obj = get_post_type_object($post_type);
+		return array(
+			'post_type' => $post_type,
+			'singular' => $pt_obj->labels->singular_name,
+			'plural' => $pt_obj->labels->name,
+		);
 	}
 
 	public static function filterValidParents($pages)
@@ -143,8 +161,10 @@ class BuPageParent
 		}
 
 		$post_types = bu_navigation_supported_post_types();
-		foreach($post_types as $pt)
-			add_meta_box('bupageparentdiv', __('Page Attributes'), array(__CLASS__, 'metaBox'), $pt, 'side', 'core');
+		foreach($post_types as $pt) {
+			$pt_labels = self::getPostTypeLabels($pt);
+			add_meta_box('bupageparentdiv', __($pt_labels['singular'] . ' Attributes'), array(__CLASS__, 'metaBox'), $pt, 'side', 'core');
+		}
 	}
 	
 	
@@ -259,6 +279,9 @@ class BuPageParent
 			die;
 		}
 		
+		// get post type labels
+		$pt_labels = self::getPostTypeLabels($post->post_type);
+		
 		// get children pages/links
 		$page_children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='$post->post_type'", $post_id);
 		$page_children = $wpdb->get_results($page_children_query);
@@ -280,13 +303,13 @@ class BuPageParent
 		
 		// case: child pages and/or links exist
 		// construct output msg based on how many child pages/links exist
-		$msg = sprintf('"%s" is a hidden page with ', $post->post_title);
+		$msg = sprintf('"%s" is a hidden ' . strtolower($pt_labels['singular']) . ' with ', $post->post_title);
 		$children_msgs = array();
 		
 		if (count($page_children) > 1) {
-			$children_msgs['page'] = count($page_children) . " child pages";
+			$children_msgs['page'] = count($page_children) . " child " . strtolower($pt_labels['plural']);
 		} else if ( count($page_children) == 1 ) {
-			$children_msgs['page'] = "a child page";
+			$children_msgs['page'] = "a child " . strtolower($pt_labels['singular']);
 		}
 		
 		if (count($link_children) > 1) {
@@ -300,10 +323,10 @@ class BuPageParent
 		$msg .= $children_msg . ".";
 		
 		if ( $children_msgs['page'] )
-			$msg .= " If you delete this page, " . $children_msgs['page'] . " will move up one node in the page hierarchy, and will autmatically be marked as hidden.";
+			$msg .= sprintf(' If you delete this %1$s, %2$s will move up one node in the %1$s hierarchy, and will autmatically be marked as hidden.', strtolower($pt_labels['singular']), $children_msgs['page']);
 			
 		if ( $children_msgs['link'] )
-			$msg .= " If you delete this page, " . $children_msgs['link'] . " will move up one node in the page hierarchy, and will be displayed in navigation menus.";
+			$msg .= sprintf(' If you delete this %1$s, %2$s will move up one node in the %1$s hierarchy, and will be displayed in navigation menus.', strtolower($pt_labels['singular']), $children_msgs['link']);
 		
 		$response = array (
 			'ignore' => false,

@@ -18,6 +18,9 @@ $bu_post_id = $new_page ? 'null' : $post->ID;
 $already_in_nav = $new_page ? false : (bool) !$nav_exclude;
 
 $post_types = ( $post->post_type == 'page' ? array('page', 'link') : array($post->post_type) );
+
+// for display purposes
+$pt_labels = BuPageParent::getPostTypeLabels($post->post_type);
 ?>
 
 <script type="text/javascript">
@@ -30,34 +33,34 @@ $post_types = ( $post->post_type == 'page' ? array('page', 'link') : array($post
 </script>
 
 <div style="display:none;" id="bu-page-parent-help-content">
-	<h3>Page Parent</h3>
-	<p>Page Parent specifies where this page is located in the site tree (hierarchy) and in navigation menus. To set the page parent, use the hierarchy browser to locate a parent, and click the radio button next to the page title.</p>
+	<h3><?php echo $pt_labels['singular']; ?> Parent</h3>
+	<p><?php echo $pt_labels['singular']; ?> Parent specifies where this <?php echo strtolower($pt_labels['singular']); ?> is located in the site tree (hierarchy) and in navigation menus. To set the <?php echo strtolower($pt_labels['singular']); ?> parent, use the hierarchy browser to locate a parent, and click the radio button next to the <?php echo strtolower($pt_labels['singular']); ?> title.</p>
 	
-	<p>Pages with a right-pointing arrow have children. Click the page title or the arrow to drill down into a section. Use the "Back to Top" or "Back One Level" links to move up in the hierarchy. The links under the menu show the path to your current selection as clickable breadcrumbs.</p>
+	<p><?php echo $pt_labels['plural']; ?> with a right-pointing arrow have children. Click the <?php echo strtolower($pt_labels['singular']); ?> title or the arrow to drill down into a section. Use the "Back to Top" or "Back One Level" links to move up in the hierarchy. The links under the menu show the path to your current selection as clickable breadcrumbs.</p>
 	
-	<p>Once you have chosen a page parent, your selection is displayed in the shaded box above the hierarchy menu. You can continue to browse the hierarchy without losing your selection. The page parent selection is remembered for a short period, making it easier for you to specify the same page parent when creating several pages in a section.</p>
+	<p>Once you have chosen a <?php echo strtolower($pt_labels['singular']); ?> parent, your selection is displayed in the shaded box above the hierarchy menu. You can continue to browse the hierarchy without losing your selection. The <?php echo strtolower($pt_labels['singular']); ?> parent selection is remembered for a short period, making it easier for you to specify the same <?php echo strtolower($pt_labels['singular']); ?> parent when creating several <?php echo strtolower($pt_labels['plural']); ?> in a section.</p>
 	
-	<p>Top-level pages do not have a page parent. The option to create a new one may be enabled or disabled on individual sites. If you need to create a top-level page and this option is not available in your hierarchy menu, ask your site administrator.</p>
+	<p>Top-level <?php echo strtolower($pt_labels['plural']); ?> do not have a <?php echo strtolower($pt_labels['singular']); ?> parent. The option to create a new one may be enabled or disabled on individual sites. If you need to create a top-level <?php echo strtolower($pt_labels['singular']); ?> and this option is not available in your hierarchy menu, ask your site administrator.</p>
 </div>
 
 <div style="display: none;" id="bu-page-position-help-content">
-	<h3>Page Position</h3>
-	<p>Page Position specifies the order of this page in relation to its sibling pages (ie, other pages that share the same page parent).  You must specify a page parent before setting the page position.</p>
+	<h3><?php echo $pt_labels['singular']; ?> Position</h3>
+	<p><?php echo $pt_labels['singular']; ?> Position specifies the order of this <?php echo strtolower($pt_labels['singular']); ?> in relation to its sibling <?php echo strtolower($pt_labels['plural']); ?> (ie, other <?php echo strtolower($pt_labels['plural']); ?> that share the same <?php echo strtolower($pt_labels['singular']); ?> parent).  You must specify a <?php echo strtolower($pt_labels['singular']); ?> parent before setting the <?php echo strtolower($pt_labels['singular']); ?> position.</p>
 	
 	<p>If you change the parent, you should also specify a new position.</p>
 	
-	<p>If a page position is not selected, the page will be placed last on the list (in relation to its sibling pages).</p>
+	<p>If a <?php echo strtolower($pt_labels['singular']); ?> position is not selected, the <?php echo strtolower($pt_labels['singular']); ?> will be placed last on the list (in relation to its sibling <?php echo strtolower($pt_labels['plural']); ?>).</p>
 </div>
 
 <div style="display: none;" id="bu-navigation-help-content">
 	<h3>Navigation</h3>
-	<p>Label: Use this to specify an alternate title for this page. This title will be shown in all navigation menus.</p> 
+	<p>Label: Use this to specify an alternate title for this <?php echo strtolower($pt_labels['singular']); ?>. This title will be shown in all navigation menus.</p> 
 	
-	<p>Display This Page: Click the checkbox next to "Display this page in navigation lists" to expose the link to this page in all navigation menus. You must select a page parent in order to display the link in navigation lists.</p>
+	<p>Display This <?php echo $pt_labels['singular']; ?>: Click the checkbox next to "Display this <?php echo strtolower($pt_labels['singular']); ?> in navigation lists" to expose the link to this <?php echo strtolower($pt_labels['singular']); ?> in all navigation menus. You must select a <?php echo strtolower($pt_labels['singular']); ?> parent in order to display the link in navigation lists.</p>
 </div>
 
-<h4><?php _e('Page Parent');?><span id="bu-page-parent-help">&nbsp;</span></h4>
-<p>Navigate the site tree below, locate the page parent, click the radio button to set parent.</p>
+<h4><?php _e($pt_labels['singular'] . ' Parent');?><span id="bu-page-parent-help">&nbsp;</span></h4>
+<p>Navigate the site tree below, locate the <?php echo strtolower($pt_labels['singular']); ?> parent, click the radio button to set parent.</p>
 
 <div id="bu-page-parent-current">
 	<strong>Selection: </strong><span>none</span>
@@ -67,14 +70,14 @@ $post_types = ( $post->post_type == 'page' ? array('page', 'link') : array($post
 <hr class="divider"/>
 
 <div style="display: none;" id="bu-page-position-help-content">
-  <h3>Positioning Your Page</h3>
+  <h3>Positioning Your <?php echo $pt_labels['singular']; ?></h3>
   <p>blah, blah, blah...</p>
 </div>
 
-<h4><?php _e('Page Position'); ?><span id="bu-page-position-help">&nbsp;</span></h4>
+<h4><?php _e($pt_labels['singular'] . ' Position'); ?><span id="bu-page-position-help">&nbsp;</span></h4>
 
 <div id="bu-page-position" class="page-attributes-section">
-  <label for="bu-page-position-menu-order">After setting the page parent (above), use this menu to specify the position of this page within the list of sibling pages.</label>
+  <label for="bu-page-position-menu-order">After setting the <?php echo strtolower($pt_labels['singular']); ?> parent (above), use this menu to specify the position of this <?php echo strtolower($pt_labels['singular']); ?> within the list of sibling <?php echo strtolower($pt_labels['plural']); ?>.</label>
 
   <select id="bu-page-position-menu-order" name="menu_order" disabled="disabled">
     <option value="1">Make FIRST item</option>
@@ -87,12 +90,12 @@ $post_types = ( $post->post_type == 'page' ? array('page', 'link') : array($post
 
 <div id="bu-page-navigation" class="page-attributes-section">
   <p>
-    <label for="bu-page-navigation-label"><strong>Label:</strong> This label will be used instead of the page title in all navigation lists.</label>
+    <label for="bu-page-navigation-label"><strong>Label:</strong> This label will be used instead of the <?php echo strtolower($pt_labels['singular']); ?> title in all navigation lists.</label>
     <input id="bu-page-navigation-label" name="nav_label" type="text" size="30" value="<?php echo $nav_label; ?>"/>
   </p>
 
   <p>
     <input id="bu-page-navigation-display" name="nav_display" type="checkbox" value="yes" <?php if ( $already_in_nav ) { ?>checked="checked"<?php }?>/>
-    <label class="inline" for="bu-page-navigation-display"><strong>Display this page in navigation lists.</strong></label>
+    <label class="inline" for="bu-page-navigation-display"><strong>Display this <?php echo strtolower($pt_labels['singular']); ?> in navigation lists.</strong></label>
   </p>
 </div>

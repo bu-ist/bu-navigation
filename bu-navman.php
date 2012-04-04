@@ -104,14 +104,13 @@ function bu_navman_admin_menu_display()
 			$title = $page->navigation_label;
 
 			$classes = array(); // css classes
-
+			
 			$p = array(
 				'attr' => array('id' => sprintf('p%d', $page->ID), 'class' => ''),
 				'data' => $title,
-				'author' => $page->author
 				);
 
-			if ((is_array($pages_by_parent[$page->ID])) && (count($pages_by_parent[$page->ID]) > 0))
+			if (isset($pages_by_parent[$page->ID]) && (is_array($pages_by_parent[$page->ID])) && (count($pages_by_parent[$page->ID]) > 0))
 			{
 				$p['state'] = 'closed';
 				$p['attr']['rel'] = 'folder';
@@ -119,10 +118,10 @@ function bu_navman_admin_menu_display()
 
 			if (!array_key_exists('state', $p))
 			{
-				$p['attr']['rel'] = $page->post_type;
+				$p['attr']['rel'] = 'page';
 			}
 
-			if ($page->excluded)
+			if (isset($page->excluded) && $page->excluded)
 			{
 				$p['attr']['rel'] .= '_excluded';
 				array_push($classes, 'excluded');
@@ -451,7 +450,7 @@ function bu_navman_get_children($parent_id, $pages_by_parent)
 
 				$classes = array(); // CSS classes
 
-				if ((is_array($pages_by_parent[$page->ID])) && (count($pages_by_parent[$page->ID]) > 0))
+				if (isset($pages_by_parent[$page->ID]) && (is_array($pages_by_parent[$page->ID])) && (count($pages_by_parent[$page->ID]) > 0))
 				{
 					$p['state'] = 'closed';
 					$p['attr']['rel'] = 'folder';
@@ -463,10 +462,10 @@ function bu_navman_get_children($parent_id, $pages_by_parent)
 
 				if (!array_key_exists('state', $p))
 				{
-					$p['attr']['rel'] = $page->post_type;
+					$p['attr']['rel'] = 'page';
 				}
 
-				if ($page->excluded)
+				if (isset($page->excluded) && $page->excluded)
 				{
 					$p['attr']['rel'] .= '_excluded';
 					array_push($classes, 'excluded');

@@ -9,7 +9,7 @@ jQuery(function($) {
 		var id = $(e.target).data('scrollingTree').getSelection(),
 			d;
 		$('[name="parent_id"]').val(id);
-		$('#bu-page-parent-current span').html((id == 0) ? 'Top level page' : $(e.target).data('scrollingTree').getSelectionName());
+		$('#bu-page-parent-current span').html((id == 0) ? 'Top level ' + bu_navigation_pt_labels.singular.toLowerCase() : $(e.target).data('scrollingTree').getSelectionName());
 		
 		d = new Date();
 		d.setTime(d.getTime() + (28800000)); // 8 hours
@@ -19,7 +19,7 @@ jQuery(function($) {
 	container.bind('beforeDraw', function(e) {
 		var st = $(e.target).data('scrollingTree'),
 			sel = st.getSelection(),
-			name = ((sel === 0) ? 'Top level page' : st.getSelectionName()) || 'none';
+			name = ((sel === 0) ? 'Top level ' + bu_navigation_pt_labels.singular.toLowerCase() : st.getSelectionName()) || 'none';
 		
 		$('#bu-page-parent-current span').html(name);
 	});
@@ -30,7 +30,7 @@ jQuery(function($) {
 		if (!st.current_view) {
 			st.the_list.prepend($('<li>')
 				.append($('<input type="radio" value="0" id="top_level_page" name="st-input" />').bind('change', {'st': st}, st.itemSelected))
-				.append($('<label for="top_level_page">MAKE TOP LEVEL PAGE</label>'))
+				.append($('<label for="top_level_page">MAKE TOP LEVEL ' + bu_navigation_pt_labels.singular.toUpperCase() +  '</label>'))
 				.data('st-value', 0)
 			);
 			

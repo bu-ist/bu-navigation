@@ -62,7 +62,7 @@ class BU_Widget_Pages extends WP_Widget
 
 			if (!isset($section->navigation_label)) $section->navigation_label = apply_filters('the_title', $section->post_title);
 
-			$title = attribute_escape($section->navigation_label);
+			$title = esc_attr($section->navigation_label);
 			$href = get_permalink($section->ID);
 
 			$html = sprintf('<a class="content_nav_header" href="%s">%s</a>', $href, $title);
@@ -88,8 +88,11 @@ class BU_Widget_Pages extends WP_Widget
 	function widget( $args, $instance ) 
 	{
 		global $post;
+		
+		// only works for supported post_types
+		if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) return;
 		$post_types = ($post->post_type == 'page' ? array('page', 'link') : array($post->post_type));
-
+		
 		extract( $args );
 		
 		$title = '';

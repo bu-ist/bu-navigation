@@ -5,11 +5,14 @@
 		<div id="message" class="updated fade">
 			<p>Primary navigation settings saved.</p>
 		</div>
-	<?php } else if ($saved === FALSE) { ?>
+	<?php } else if ($saved === FALSE || (is_array($saved) && $saved['success'] == false)) { ?>
 		<div class="error">
 			<p><strong>Error:</strong> Error(s) occurred while saving your primary navigation settings.</p>
+			<?php if (is_array($saved) && $saved['success'] == false) { ?>
+				<p><?php echo $saved['msg']; ?></p>
+			<?php } ?>
 		</div>
-	<? } ?>
+	<?php } ?>
 	<p>
 		Your primary navigation bar is the horizontal bar at the top of every 
 		page which shows users your top-level navigation no matter where they
@@ -30,7 +33,7 @@
 			<strong><label for="bu_navigation_primarynav_max">Maximum items</label></strong>
 			<br />
 			Maximum number of top-level items to display in the primary 
-			navigation bar.
+			navigation bar. (Must be a positive number)
 		</p>
 		<?php if ( (defined('BU_NAVIGATION_SUPPORTED_DEPTH') && BU_NAVIGATION_SUPPORTED_DEPTH != 0) || !defined('BU_NAVIGATION_SUPPORTED_DEPTH') ) { ?>
 			<?php $bu_pn_depth_limit = ( defined('BU_NAVIGATION_SUPPORTED_DEPTH') ) ? BU_NAVIGATION_SUPPORTED_DEPTH : BU_NAVIGATION_PRIMARY_DEPTH; ?>

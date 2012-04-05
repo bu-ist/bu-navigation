@@ -74,8 +74,20 @@ function bu_navigation_admin_menu_post()
 		$saved = TRUE; /* no useful return from update_option */
 		
 		$primarynav = intval($_POST['bu_navigation_primarynav']);
-		$primarynav_max = intval($_POST['bu_navigation_primarynav_max']);
+		
+		// primarynav maximum items
+		$primarynav_max = absint($_POST['bu_navigation_primarynav_max']);
 		if (!$primarynav_max) $primarynav_max = BU_NAVIGATION_PRIMARY_MAX;
+		
+		// primarynav maximum items: error handling
+		if ($primarynav_max != $_POST['bu_navigation_primarynav_max']) {
+			$saved = array(
+				'success' => false,
+				'msg' => sprintf('The value "%s" entered for "Maximum items" is not correct.', esc_html($_POST['bu_navigation_primarynav_max']), $primarynav_max)
+			);
+			return $saved;
+		}
+		
 		$primarynav_dive = intval($_POST['bu_navigation_primarynav_dive']);
 		$primarynav_depth = intval($_POST['bu_navigation_primarynav_depth']);
 		$primarynav_depth = bu_navigation_depth_fix( $primarynav_depth );

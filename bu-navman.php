@@ -118,7 +118,7 @@ function bu_navman_admin_menu_display()
 
 			if (!array_key_exists('state', $p))
 			{
-				$p['attr']['rel'] = 'page';
+				$p['attr']['rel'] = ($page->post_type == 'link' ? $page->post_type : 'page');
 			}
 
 			if (isset($page->excluded) && $page->excluded)
@@ -462,7 +462,7 @@ function bu_navman_get_children($parent_id, $pages_by_parent)
 
 				if (!array_key_exists('state', $p))
 				{
-					$p['attr']['rel'] = 'page';
+					$p['attr']['rel'] = ($page->post_type == 'link' ? $page->post_type : 'page');
 				}
 
 				if (isset($page->excluded) && $page->excluded)

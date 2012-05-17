@@ -9,7 +9,7 @@
 	<div id="message" class="updated fade">
 		<p>Warning: <strong><?php echo $user_detail->display_name; ?></strong> is currently editing this site's navigation.</p>
 	</div>
-	<? } ?>
+	<?php } ?>
 
 	<?php if ($saved === TRUE) { ?>
 		<div id="message" class="updated fade">
@@ -19,7 +19,7 @@
 		<div class="error">
 			<p><strong>Error:</strong> Errors occurred while saving your navigation changes.</p>
 		</div>
-	<? } ?>
+	<?php } ?>
 	<div class="metabox-holder has-right-sidebar">
 		<?php if ($post_type == 'page') { ?>
 		<div class="inner-sidebar">
@@ -53,7 +53,7 @@
 				</div>
 			</div>			
 		</div>
-		<? } ?>
+		<?php } ?>
 
 		<div id="navman_main">
 			<form method="post" id="navman_form" action="">
@@ -115,7 +115,7 @@
 				</form>
 			</div>
 		</div>
-		<? } ?>
+		<?php } ?>
 	</div>
 </div>
 <script type="text/javascript">

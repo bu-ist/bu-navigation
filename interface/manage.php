@@ -125,5 +125,7 @@ var pages = [<?php echo $pages_json; ?>];
 var interfacePath = "<?php echo $interface_path; ?>";
 var rpcURL = "<?php echo $rpc_url; ?>";
 var rpcPageURL = "<?php echo $rpc_page_url; ?>";
+var isSectionEditor = <?php echo json_encode( $is_section_editor ); ?>;
+var allowTop = <?php echo json_encode( $allow_top ); ?>;
 //]]>
 </script>

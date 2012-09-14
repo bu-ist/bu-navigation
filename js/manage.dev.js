@@ -235,6 +235,19 @@ jQuery(document).ready( function($)
                         image: interfacePath + "/icons/folder_hidden.png"
                     }
                 },
+                "folder_excluded_denied": {
+                    clickable	: false,
+                    renameable	: false,
+                    deletable	: false,
+                    creatable	: false,
+                    draggable	: false,
+                    max_children	: -1,
+                    max_depth	: -1,
+                    valid_children	: "all",
+                    icon: {
+                        image: interfacePath + "/icons/folder_hidden.png"
+                    }
+                },
                 "folder_restricted": {
                     clickable	: true,
                     renameable	: false,
@@ -248,12 +261,51 @@ jQuery(document).ready( function($)
                         image: interfacePath + "/icons/folder_lock.png"
                     }
                 },
+                "folder_denied": {
+                    clickable	: false,
+                    renameable	: false,
+                    deletable	: false,
+                    creatable	: false,
+                    draggable	: false,
+                    max_children	: -1,
+                    max_depth	: -1,
+                    valid_children	: "all",
+                    icon: {
+                        image: interfacePath + "/icons/folder_regular.png"
+                    }
+                },
+                "folder_restricted_denied": {
+                    clickable	: false,
+                    renameable	: false,
+                    deletable	: false,
+                    creatable	: false,
+                    draggable	: false,
+                    max_children	: -1,
+                    max_depth	: -1,
+                    valid_children	: "all",
+                    icon: {
+                        image: interfacePath + "/icons/folder_lock.png"
+                    }
+                },
                 "folder_excluded_restricted": {
                     clickable	: true,
                     renameable	: false,
                     deletable	: true,
                     creatable	: true,
                     draggable	: true,
+                    max_children	: -1,
+                    max_depth	: -1,
+                    valid_children	: "all",
+                    icon: {
+                        image: interfacePath + "/icons/folder_hidden_restricted.png"
+                    }
+                },
+                "folder_excluded_restricted_denied": {
+                    clickable	: false,
+                    renameable	: false,
+                    deletable	: false,
+                    creatable	: false,
+                    draggable	: false,
                     max_children	: -1,
                     max_depth	: -1,
                     valid_children	: "all",
@@ -300,12 +352,64 @@ jQuery(document).ready( function($)
                         image: interfacePath + "/icons/page_restricted.png"
                     }
                 },
+                "page_denied": {
+                    clickable	: false,
+                    renameable	: false,
+                    deletable	: false,
+                    creatable	: false,
+                    draggable	: false,
+                    max_children	: -1,
+                    max_depth	: -1,
+                    valid_children	: "all",
+                    icon: {
+                        image: interfacePath + "/icons/page_regular.png"
+                    }
+                },
+                "page_excluded_denied": {
+                    clickable	: false,
+                    renameable	: false,
+                    deletable	: false,
+                    creatable	: false,
+                    draggable	: false,
+                    max_children	: -1,
+                    max_depth	: -1,
+                    valid_children	: "all",
+                    icon: {
+                        image: interfacePath + "/icons/page_hidden.png"
+                    }
+                },
+                "page_restricted_denied": {
+                    clickable	: false,
+                    renameable	: false,
+                    deletable	: false,
+                    creatable	: false,
+                    draggable	: false,
+                    max_children	: -1,
+                    max_depth	: -1,
+                    valid_children	: "all",
+                    icon: {
+                        image: interfacePath + "/icons/page_restricted.png"
+                    }
+                },
                 "page_excluded_restricted": {
                     clickable	: true,
                     renameable	: false,
                     deletable	: true,
                     creatable	: true,
                     draggable	: true,
+                    max_children	: -1,
+                    max_depth	: -1,
+                    valid_children	: "all",
+                    icon: {
+                        image: interfacePath + "/icons/page_hidden_restricted.png"
+                    }
+                },
+                "page_excluded_restricted_denied": {
+                    clickable	: false,
+                    renameable	: false,
+                    deletable	: false,
+                    creatable	: false,
+                    draggable	: false,
                     max_children	: -1,
                     max_depth	: -1,
                     valid_children	: "all",
@@ -337,6 +441,37 @@ jQuery(document).ready( function($)
                 }
             },
             "progressive_render" : true
+        },
+        "crrm" : {
+        	   "move" : {
+                "check_move" : function (m) {
+
+                    // Don't allow top level pages for section editors or of global option prohibits it
+                    if( m.cr == -1 && ( isSectionEditor || ! allowTop ) ) {
+                        console.log('Move denied, top level pages cannot be created!');
+                        return false;
+                    }
+
+                    // Section editor specific
+                    if( isSectionEditor ) {
+
+                        // Can't move a denied post
+                        if( m.o.hasClass( 'denied' ) ) {
+                            console.log('Cannot move a denied post!');
+                            return false;
+                        }
+
+                        // Can't move inside denied post
+                        if( m.np.hasClass( 'denied' ) ) {
+                            console.log('Move denied, destination parent invalid');
+                            return false;
+                        }
+
+                    }
+
+                    return true;
+                }
+            }
         },
         contextmenu : {
                 items : function() {

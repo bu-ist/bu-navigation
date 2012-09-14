@@ -71,11 +71,6 @@ function bu_navman_admin_menu_display()
 	/* process any post */
 	$saved = bu_navman_admin_menu_post();
 
-	/* remove default page filter and add our own */
-	remove_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
-	add_filter('bu_navigation_filter_pages', 'bu_navman_filter_pages');
-
-
 	/* set lock */
 	bu_navman_set_lock();
 
@@ -86,7 +81,40 @@ function bu_navman_admin_menu_display()
 	$rpc_url = 'admin-ajax.php?action=bu_getpages' . $post_types_param;	// used to get all the posts for the tree
 	$rpc_page_url = 'admin-ajax.php?action=bu_getpage';	// used with links, so it doesn't need post_type
 
+	// Get pages, formatted for jstree
+	$pages = bu_navman_get_page_tree( $post_types );
+
+	$pages_json = json_encode($pages);
+
+	// section editing
+	$is_section_editor = false;
+
+	if( class_exists( 'BU_Section_Editing_Plugin' ) ) {
+		$is_section_editor = BU_Section_Editing_Plugin::is_allowed_user( get_current_user_id() );
+	}
+
+	// Allowing top level pages
+	// the 'allow top level page' option (in Site Design -> Primary Navigation screen) only applies to pages
+	// @todo refactor in to a function
+	$allow_top = false;
+	if ($post_type == 'page' && defined('BU_NAV_OPTION_ALLOW_TOP')) {
+		$allow_top = (bool) get_option(BU_NAV_OPTION_ALLOW_TOP);
+	} else {
+		$allow_top = true;
+	}
+
+	include(BU_NAV_PLUGIN_DIR . '/interface/manage.php');
+
+}
+
+
+function bu_navman_get_page_tree( $post_types ) {
+
 	$pages = array();
+
+	/* remove default page filter and add our own */
+	remove_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
+	add_filter('bu_navigation_filter_pages', 'bu_navman_filter_pages');
 
 	$section_args = array('direction' => 'down', 'depth' => 1, 'sections' => array(0), 'post_types' => $post_types);
 	$sections = bu_navigation_gather_sections(0, $section_args);
@@ -133,19 +161,27 @@ function bu_navman_admin_menu_display()
 				array_push($classes, 'restricted');
 			}
 
+			if(isset($page->perm))
+			{
+				if( $page->perm == 'denied' )
+					$p['attr']['rel'] .= '_denied';
+				
+				array_push($classes,$page->perm);
+			}
+
 			$p['attr']['class'] = implode(' ', $classes);
 
 			array_push($pages, $p);
 		}
+
+		return $pages;
+
 	}
-
-	$pages_json = json_encode($pages);
-
-	include(BU_NAV_PLUGIN_DIR . '/interface/manage.php');
 
 	/* remove our page filter and add back in the default */
 	remove_filter('bu_navigation_filter_pages', 'bu_navman_filter_pages');
 	add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
+
 }
 
 function bu_navman_page_restricted($page_id, $restricted_pages)
@@ -182,7 +218,9 @@ function bu_navman_filter_pages($pages)
 
 		if (class_exists('BuAccessControlPlugin'))
 		{
-			$query = sprintf("SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value != '0'", $wpdb->postmeta, BuAccessControlList::PAGE_ACL_OPTION, implode(',', $ids));
+			$acl_option = defined( 'BuAccessControlList::PAGE_ACL_OPTION' ) ? BuAccessControlList::PAGE_ACL_OPTION : BU_ACL_PAGE_OPTION;
+
+			$query = sprintf("SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value != '0'", $wpdb->postmeta, $acl_option, implode(',', $ids));
 
 			$restricted = $wpdb->get_results($query, OBJECT_K); // get results as objects in an array keyed on post_id
 			if (!is_array($restricted)) $restricted = array();
@@ -475,6 +513,14 @@ function bu_navman_get_children($parent_id, $pages_by_parent)
 				{
 					$p['attr']['rel'] .= '_restricted';
 					array_push($classes, 'restricted');
+				}
+
+				if(isset($page->perm))
+				{
+					if( $page->perm == 'denied' )
+						$p['attr']['rel'] .= '_denied';
+					
+					array_push($classes,$page->perm);
 				}
 
 				$p['attr']['class'] = implode(' ', $classes);

@@ -1,0 +1,169 @@
+#edit_page_tree {
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	background-color: #F7F7F7;
+	border: 1px solid #E5E5E5;
+	padding: 1.2em;
+}
+
+#bu_page_parent_edit_buttons {
+	margin-top: 3em;
+	margin-bottom: 3em;
+	clear: both;
+}
+
+.jstree-classic a.jstree-loading.jstree-clicked .jstree-icon { background:url("images/throbber-dark.gif") center center no-repeat !important; }
+
+#edit_page_tree .allowed > a {
+	background-color: transparent;
+}
+
+#edit_page_tree .denied > a {
+	background-color: rgba(255, 0, 0, 0.2);
+}
+
+.jstree-classic li > a.jstree-clicked {
+	background-color: #555 !important;
+	border-color: #555 !important;
+}
+
+#edit_page_tree li > a:visited, #edit_page_tree li > a:link {
+	color: black;
+}
+
+#edit_page_tree li.excluded > a.jstree-clicked {
+	color: white !important;
+}
+
+#edit_page_tree li.excluded > a {
+	color: black !important;
+}
+
+.navform div input.error
+{
+	margin: 0;
+	-moz-border-radius-bottomleft: 4px;
+	-moz-border-radius-bottomright: 4px;
+	-moz-border-radius-topleft: 4px;
+	-moz-border-radius-topright: 4px;
+	padding: 3px;
+}
+
+.navform label.error
+{
+	clear: both;
+	width: auto;
+	margin-left: 101px;
+	margin-top: 4px;
+	color: red;
+}
+
+.navformwide label.error
+{
+	margin-left: 138px;
+}
+
+#edit_page_tree li
+{
+	width: auto;
+}
+
+#edit_page_tree ul li > a ins
+{
+	background-image: url(icons/page_regular.png);
+}
+
+#edit_page_tree ul li[rel="folder"] > a ins
+{
+	background-image: url(icons/folder_regular.png);
+}
+
+#edit_page_tree ul li[rel="folder_denied"] > a ins
+{
+	background-image: url(icons/folder_regular.png);
+}
+
+#edit_page_tree ul li[rel="folder_excluded"] > a ins
+{
+	background-image: url(icons/folder_hidden.png);
+}
+
+#edit_page_tree ul li[rel="folder_excluded_denied"] > a ins
+{
+	background-image: url(icons/folder_hidden.png);
+}
+
+#edit_page_tree ul li[rel="folder_restricted"] > a ins
+{
+	background-image: url(icons/folder_lock.png);
+}
+
+#edit_page_tree ul li[rel="folder_restricted_denied"] > a ins
+{
+	background-image: url(icons/folder_lock.png);
+}
+
+#edit_page_tree ul li[rel="folder_excluded_restricted"] > a ins
+{
+	background-image: url(icons/folder_hidden_restricted.png);
+}
+
+#edit_page_tree ul li[rel="folder_excluded_restricted_denied"] > a ins
+{
+	background-image: url(icons/folder_hidden_restricted.png);
+}
+
+#edit_page_tree ul li[rel="page"] > a ins
+{
+	background-image: url(icons/page_regular.png);
+}
+
+#edit_page_tree ul li[rel="page_excluded"] > a ins
+{
+	background-image: url(icons/page_hidden.png);
+}
+
+#edit_page_tree ul li[rel="page_restricted"] > a ins
+{
+	background-image: url(icons/page_restricted.png);
+}
+
+#edit_page_tree ul li[rel="page_denied"] > a ins
+{
+	background-image: url(icons/page_regular.png);
+}
+
+#edit_page_tree ul li[rel="page_excluded_denied"] > a ins
+{
+	background-image: url(icons/page_hidden.png);
+}
+
+#edit_page_tree ul li[rel="page_restricted_denied"] > a ins
+{
+	background-image: url(icons/page_restricted.png);
+}
+
+#edit_page_tree ul li[rel="page_excluded_restricted"] > a ins
+{
+	background-image: url(icons/page_hidden_restricted.png);
+}
+
+#edit_page_tree ul li[rel="page_excluded_restricted_denied"] > a ins
+{
+	background-image: url(icons/page_hidden_restricted.png);
+}
+
+#edit_page_tree ul li[rel="page"] > a ins
+{
+	background-image: url(icons/page_regular.png);
+}
+
+#edit_page_tree ul li[rel="link"] > a ins
+{
+	background-image: url(icons/page_white_link.png);
+}
+
+#edit_page_tree ul li[rel="link_restricted"] > a ins
+{
+	background-image: url(icons/page_white_link.png);
+}

@@ -34,6 +34,8 @@ class BuPageParent
 		
 		if( !isset($current_screen->post_type) || !in_array($current_screen->post_type, bu_navigation_supported_post_types()) ) return;
 		
+		wp_enqueue_style( 'bu-page-parent-browser', plugins_url('interface/page-parent.css', __FILE__) );
+
 		// post type labels (singular, plural)
 		wp_localize_script('jquery', 'bu_navigation_pt_labels', self::getPostTypeLabels());
 		
@@ -43,12 +45,10 @@ class BuPageParent
 
         if( !in_array($hook_suffix, $editpage_suffixes) ) return;
 		
-		wp_enqueue_script('bu-jquery-scrolling-tree', plugins_url('js/jquery.scrolling-tree' . $suffix . '.js', __FILE__), array('jquery'), '0.2', true);
 		wp_enqueue_script('jquery-qtip', plugins_url('js/jquery.qtip-1.0.0-rc3' . $suffix . '.js', __FILE__), array('jquery'), '1.0.0-rc3', true);
-		wp_enqueue_script('bu-page-parent-browser', plugins_url('js/browser' . $suffix . '.js', __FILE__), array('jquery'));
-		wp_enqueue_script('bu-page-parent-position-menu', 
-				  plugins_url('js/position-menu' . $suffix . '.js', __FILE__), 
-				  array('jquery'));
+
+		wp_enqueue_script('bu-page-parent-browser', plugins_url('js/parent-browser' . $suffix . '.js', __FILE__), array('jquery'));
+
 	}
 	
 	public static function admin_page_styles($hook_suffix)
@@ -59,16 +59,6 @@ class BuPageParent
         if( !isset($current_screen->post_type) || !in_array($current_screen->post_type, bu_navigation_supported_post_types()) || !in_array($hook_suffix, $possible_hook_suffix) ) return;
 		
 		wp_enqueue_style('bu-page-parent-browser', plugins_url('interface/style.css', __FILE__));
-	}
-	
-	
-	public static function jsonTree()
-	{
-		check_ajax_referer();
-		
-		echo json_encode(self::getTree());
-		
-		die;
 	}
 	
 	public static function filterPostFields($fields)
@@ -123,35 +113,6 @@ class BuPageParent
 		return $pages;
 	}
 	
-	
-	public static function getTree($post_types = array())
-	{		
-		/* add filter to only grab fields we need */
-		add_filter('bu_navigation_filter_fields', array(__CLASS__, 'filterPostFields'));
-
-		/* filter out pages we don't want */
- 		add_filter('bu_navigation_filter_pages', array(__CLASS__, 'filterValidParents'));
-
-		/* we do want pages excluded from nav */
-		remove_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
-
-		/* arguments for bu_navigation_get_pages */
-		$pargs = array(
-			'post_status' => NULL, // don't restrict post_status
-			'supress_filter_pages' => FALSE,
-			'suppress_urls' => TRUE, // don't add urls
-			'post_types' => $post_types,
-			);
-
-		$pages = array_values(bu_navigation_get_pages($pargs)); // we don't want an indexed array
-
-		remove_filter('bu_navigation_filter_fields', array(__CLASS__, 'filterPostFields'));
-		remove_filter('bu_navigation_filter_pages', array(__CLASS__, 'filterValidParents'));
-		add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
-		
-		return $pages;
-	}
-
 	public static function do_meta_boxes()
 	{
 		remove_meta_box('pageparentdiv', 'page', 'side');
@@ -170,7 +131,7 @@ class BuPageParent
 	
 	public static function metaBox($post)
 	{
-		include('interface/page-attributes.php');
+		include('interface/page-attributes-new.php');
 	}
 	
 	

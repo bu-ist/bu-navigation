@@ -77,7 +77,7 @@ jQuery(function($) {
 		if ( !already_in_nav || current_parent != 0 ) {
 			
 			// if we don't allow top levels, and the user has selected top level, then this is clearly a problem
-			if (!allow_top && current_parent == 0 && check.is(":checked")) {
+			if (!allowTop && current_parent == 0 && check.is(":checked")) {
 				alert("Displaying top-level pages in the navigation is disabled. To change this behavior, go to Site Design > Primary Navigation and enable \"Allow Top-Level Pages.\"");
 				check.removeAttr("checked");
 			}

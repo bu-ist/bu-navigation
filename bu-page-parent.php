@@ -47,7 +47,14 @@ class BuPageParent
 		
 		wp_enqueue_script('jquery-qtip', plugins_url('js/jquery.qtip-1.0.0-rc3' . $suffix . '.js', __FILE__), array('jquery'), '1.0.0-rc3', true);
 
-		wp_enqueue_script('bu-page-parent-browser', plugins_url('js/parent-browser' . $suffix . '.js', __FILE__), array('jquery'));
+        //switched from jquery-json to json2 @see http://ejohn.org/blog/ecmascript-5-strict-mode-json-and-more/
+        wp_enqueue_script('json2');
+        //uses the most-recent github commit as the version identifier
+		wp_enqueue_script('bu-jquery-cookie', plugins_url('js/jquery.cookie' . $suffix . '.js', __FILE__), array('jquery'), '00168770', true);
+		//for now, I am prefixing bu- to the various jquery plugins to avoid conflicts with the bu-js-lib
+        wp_enqueue_script('bu-jquery-tree', plugins_url('js/jstree/jquery.jstree' . $suffix . '.js', __FILE__), array('jquery', 'bu-jquery-cookie'), '1.0-rc3', true);
+
+		wp_enqueue_script('bu-page-parent-browser', plugins_url('js/parent-browser' . $suffix . '.js', __FILE__), array('jquery','bu-jquery-tree'));
 
 	}
 	

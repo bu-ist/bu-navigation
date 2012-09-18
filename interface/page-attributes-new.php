@@ -81,7 +81,7 @@ if( class_exists( 'BU_Section_Editing_Plugin' ) ) {
 
 	<h4><?php _e('Position');?><span id="bu-page-parent-help">&nbsp;</span></h4>
 	<div id="bu_page_parent_current_label"><?php echo $current_parent_txt; ?></div><br>
-	<a id="select-parent" href="#TB_inline?width=640&inlineId=edit_page_parent&width=640&height=982" class="thickbox" ><?php echo $select_parent_txt; ?></a></p>
+	<a id="select-parent" href="#TB_inline?width=640&inlineId=edit_page_parent" class="thickbox button" ><?php echo $select_parent_txt; ?></a></p>
 
 <div id="edit_page_parent" style="display:none;">
 	<input type="hidden" name="tmp_parent_id" value="">

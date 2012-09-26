@@ -185,7 +185,7 @@ class BUN_Navman_Page {
 		// we have added them in to ours
 		$this->webdriver->moveTo( $src );
 		$this->webdriver->buttonDown();
-		$this->webdriver->moveTo( $dest, $x_offset, $y_offset );
+		$this->webdriver->moveTo( $dest, round($x_offset), round($y_offset) );
 		// $this->webdriver->getScreenshotAndSaveToFile( $file_before );
 		$this->webdriver->buttonUp();
 		// $this->webdriver->getScreenshotAndSaveToFile( $file_after );

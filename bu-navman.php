@@ -333,7 +333,7 @@ function bu_navman_process_nodes($parent_id, $nodes, $links)
 
 		array_push($updates[$parent_id], $id);
 
-		if (($node->children) && (is_array($node->children)) && (count($node->children) > 0))
+		if ((isset($node->children)) && (is_array($node->children)) && (count($node->children) > 0))
 		{
 			$child_updates = bu_navman_process_nodes($id, $node->children, $links);
 

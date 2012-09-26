@@ -213,8 +213,6 @@ class BUN_Navman_Page {
 		$button->click();
 		sleep(1);
 
-		$this->webdriver->getScreenshotAndSaveToFile( 'selenium/screenshots/after-save.png' );
-
 	}
 
 	/* Assertions */

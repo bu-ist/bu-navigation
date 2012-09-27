@@ -3,8 +3,15 @@
 require_once 'page-objects/navman.php';
 
 /**
- * @group bu-navigation
  * @group bu
+ * @group bu-navigation
+ * @group bu-navigation-navman
+ * 
+ * @todo
+ * 	- custom post types
+ *  - context menus (depend on right click)
+ * 	- edit link (dependent on right click / context menu)
+ * 	- section editing tests
  */
  class BU_Navigation_Navman_Test extends WP_SeleniumTestCase {
 
@@ -74,6 +81,26 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-types
+	 * 
+	 * Post 3.3, _update_blog_date_on_post_publish in includes/ms-blogs.php throws an error that we need to supress here
+	 * Error occurs because it attempts to grab a post type object for 'link', which is not a registerd post type
+	 * 
+	 * @expectedException PHPUnit_Framework_Error
+	 */ 
+	public function test_link() {
+
+		$id = wp_insert_post(array('post_title' => 'Google', 'post_type' => 'link','post_content' => 'http://www.google.com', 'post_status' => 'publish' ));
+
+		$navman = new BUN_Navman_Page( $this, 'page' );
+		$page = $navman->getPage( $id );
+		
+		$this->assertEquals( $page->getAttribute('rel'), BUN_Navman_Page::TYPES_LINK );
+
+		wp_delete_post( $id, true );
+	}
+
+	/**
+	 * @group bu-navigation-types
 	 */ 
 	public function test_hidden_page() {
 
@@ -112,7 +139,7 @@ require_once 'page-objects/navman.php';
 
 		$this->moveTo( $page );
 
-		$this->assertTrue( false !== strpos( $page->getAttribute('class'), 'jstree-hovered' ) );
+		$this->assertTrue( false !== strpos( $page->getAttribute('class'), BUN_Navman_Page::JSTREE_HOVERED ) );
 
 	}
 
@@ -127,7 +154,7 @@ require_once 'page-objects/navman.php';
 
 		$page->click();
 
-		$this->assertTrue( false !== strpos( $page->getAttribute('class'), 'jstree-clicked' ) );
+		$this->assertTrue( false !== strpos( $page->getAttribute('class'), BUN_Navman_Page::JSTREE_CLICKED ) );
 
 	}
 
@@ -141,11 +168,11 @@ require_once 'page-objects/navman.php';
 		$navman = new BUN_Navman_Page( $this, 'page' );
 		$page = $navman->getPage( $this->pages['parent'] );
 
-		$this->assertTrue( false !== strpos( $page->getAttribute('class'), 'jstree-closed' ) );
+		$this->assertTrue( false !== strpos( $page->getAttribute('class'), BUN_Navman_Page::JSTREE_CLOSED ) );
 
 		$navman->openSection( $this->pages['parent'] );
 
-		$this->assertTrue( false !== strpos( $page->getAttribute('class'), 'jstree-open' ) );
+		$this->assertTrue( false !== strpos( $page->getAttribute('class'), BUN_Navman_Page::JSTREE_OPEN ) );
 
 	}
 
@@ -159,16 +186,17 @@ require_once 'page-objects/navman.php';
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
 
-		$sections = $navman->getSections();
+		// Get all closed sections (will not open/load hidden sections)
+		$sections = $navman->getSections( );
 
 		foreach( $sections as $section ) {
-			$this->assertRegExp( '/jstree-closed/', $section->getAttribute('class') );
+			$this->assertRegExp( '/' . BUN_Navman_Page::JSTREE_CLOSED . '/', $section->getAttribute('class') );
 		}
 
 		$navman->expandAll();
 
 		foreach( $sections as $section ) {
-			$this->assertRegExp( '/jstree-open/', $section->getAttribute('class') );
+			$this->assertRegExp( '/' . BUN_Navman_Page::JSTREE_OPEN . '/', $section->getAttribute('class') );
 		}
 
 	}
@@ -181,18 +209,18 @@ require_once 'page-objects/navman.php';
 	public function test_collapse_all() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
-		$navman->expandAll();
 
-		$sections = $navman->getSections();
+		// Get sections, loading and opening all closed sections first
+		$sections = $navman->getSections( true );
 
 		foreach( $sections as $section ) {
-			$this->assertRegExp( '/jstree-open/', $section->getAttribute('class') );
+			$this->assertRegExp( '/' . BUN_Navman_Page::JSTREE_OPEN . '/', $section->getAttribute('class') );
 		}
 
 		$navman->collapseAll();
 
 		foreach( $sections as $section ) {
-			$this->assertRegExp( '/jstree-closed/', $section->getAttribute('class') );
+			$this->assertRegExp( '/' . BUN_Navman_Page::JSTREE_CLOSED . '/', $section->getAttribute('class') );
 		}
 
 	}
@@ -214,9 +242,7 @@ require_once 'page-objects/navman.php';
 		$navman->movePage( $src_id, $dest_id, 'before' );
 
 		// Verify move
-		$selector = sprintf("#p%s + #p%s", $src_id, $dest_id );
-		$newPage = $this->findElementBy( LocatorStrategy::cssSelector, $selector );
-		$this->assertNotNull( $newPage );
+		$navman->assertMovedBefore( $src_id, $dest_id );
 
 	}
 
@@ -235,9 +261,7 @@ require_once 'page-objects/navman.php';
 		$navman->movePage( $src_id, $dest_id, 'after' );
 
 		// Verify move
-		$selector = sprintf("#p%s + #p%s", $dest_id, $src_id );
-		$newPage = $this->findElementBy( LocatorStrategy::cssSelector, $selector );
-		$this->assertNotNull( $newPage );
+		$navman->assertMovedAfter( $src_id, $dest_id );
 
 	}
 
@@ -256,9 +280,7 @@ require_once 'page-objects/navman.php';
 		$navman->movePage( $src_id, $dest_id, 'inside' );
 
 		// Verify move
-		$selector = sprintf("#p%s > ul > #p%s", $dest_id, $src_id );
-		$newPage = $this->findElementBy( LocatorStrategy::cssSelector, $selector );
-		$this->assertNotNull( $newPage );
+		$navman->assertMovedInside( $src_id, $dest_id );
 
 	}
 
@@ -281,7 +303,7 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-actions 
-	 * @expectedException NoSuchElementException
+	 * @expectedException PHPUnit_Framework_AssertionFailedError
 	 */
 	public function test_delete_page() {
 
@@ -290,10 +312,33 @@ require_once 'page-objects/navman.php';
 		// Select and remove a page
 		$navman->deletePage( $this->pages['edit'] );
 
-		// Will throw an expected NoSuchElementException
-		$page = $navman->getPage( $this->pages['edit'] );
+		// Will throw an expected PHPUnit_Framework_AssertionFailedError
+		$navman->getPage( $this->pages['edit'] );
 
 	}
+
+	/**
+	 * @group bu-navigation-links 
+	 */ 
+	public function test_add_link() {
+
+		$navman = new BUN_Navman_Page( $this, 'page' );
+
+		$id = $navman->addLink( 'Test Link', 'http://www.bu.edu' );
+
+		$navman->assertNewLinkExists( $id );
+
+	}
+
+	// @todo need to figure out how to right click first
+	// public function test_edit_link() {
+
+	// }
+
+	// @todo need to figure out how to right click first
+	// public function test_delete_link() {
+
+	// }
 
 	/**
 	 * @group bu-navigation-actions
@@ -364,6 +409,7 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-save
+	 * @group bu-navigation-moves
 	 */
 	public function test_save_with_moves() {
 
@@ -395,7 +441,24 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-save
-	 * @expectedException NoSuchElementException
+	 * @group bu-navigation-links
+	 */ 
+	public function test_save_with_links() {
+
+		$navman = new BUN_Navman_Page( $this, 'page' );
+
+		$id = $navman->addLink( 'Test Link', 'http://www.bu.edu' );
+
+		$navman->assertNewLinkExists( $id );
+
+		$navman->save();
+
+		$navman->assertLinkExistsWithLabel( 'Test Link' );
+	}
+
+	/**
+	 * @group bu-navigation-save
+	 * @expectedException PHPUnit_Framework_AssertionFailedError
 	 */
 	public function test_save_with_deletions() {
 
@@ -408,28 +471,13 @@ require_once 'page-objects/navman.php';
 		$navman->save();
 		$navman->assertChangesWereSaved();
 
-		// Will throw an expected NoSuchElementException
+		// Will throw an expected PHPUnit_Framework_AssertionFailedError
 		$navman->getPage( $this->pages['parent'] );
 
 	}
 
-	/* @todo Links */
-
-	// public function test_add_link() {
-
-	// }
-
-	// public function test_edit_link() {
-
-	// }
-
-	// public function test_delete_link() {
-
-	// }
-
 	/**
 	 * Contextual menu 
-	 * 
 	 * @todo right clicking is not implemented in webdriver at the moment
 	 */
 

@@ -35,6 +35,7 @@ function bu_navman_enqueue_media($hook)
 {
 	// all hierarchical post_types have '_page___FILE__' at the end of the hook
 	if (stripos($hook, '_page_bu-navigation/bu-navman') !== false) {
+		
         $suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
 
         //switched from jquery-json to json2 @see http://ejohn.org/blog/ecmascript-5-strict-mode-json-and-more/
@@ -52,7 +53,6 @@ function bu_navman_enqueue_media($hook)
 		wp_enqueue_style('bu-jquery-ui-navman', plugins_url('interface/jquery-ui-1.8.13.custom.css', __FILE__), array(), '1.8.13');
 
 		wp_enqueue_style('bu-navman', plugins_url('interface/manage.css', __FILE__), array(), '0.3');
-
 
         wp_enqueue_style('bu-jquery-tree-classic', plugins_url('js/jstree/themes/classic/style.css', __FILE__), array(), '1.8.1');
 	}
@@ -464,75 +464,6 @@ function bu_navman_admin_menu_post()
 
 	return $saved;
 }
-
-function bu_navman_get_children($parent_id, $pages_by_parent)
-{
-	$children = array();
-
-	if (array_key_exists($parent_id, $pages_by_parent))
-	{
-		$pages = $pages_by_parent[$parent_id];
-
-		if ((is_array($pages)) && (count($pages) > 0))
-		{
-			foreach ($pages as $page)
-			{
-				if (!isset($page->navigation_label)) $page->navigation_label = apply_filters('the_title', $page->post_title);
-
-				$title = $page->navigation_label;
-
-				$p = array(
-					'attr' => array('id' => sprintf('p%d', $page->ID)),
-					'data' => $title
-					);
-
-				$classes = array(); // CSS classes
-
-				if (isset($pages_by_parent[$page->ID]) && (is_array($pages_by_parent[$page->ID])) && (count($pages_by_parent[$page->ID]) > 0))
-				{
-					$p['state'] = 'closed';
-					$p['attr']['rel'] = 'folder';
-
-					$descendants = bu_navman_get_children($page->ID, $pages_by_parent);
-
-					if (count($descendants) > 0) $p['children'] = $descendants;
-				}
-
-				if (!array_key_exists('state', $p))
-				{
-					$p['attr']['rel'] = ($page->post_type == 'link' ? $page->post_type : 'page');
-				}
-
-				if (isset($page->excluded) && $page->excluded)
-				{
-					$p['attr']['rel'] .= '_excluded';
-					array_push($classes, 'excluded');
-				}
-
-				if ($page->restricted)
-				{
-					$p['attr']['rel'] .= '_restricted';
-					array_push($classes, 'restricted');
-				}
-
-				if(isset($page->perm))
-				{
-					if( $page->perm == 'denied' )
-						$p['attr']['rel'] .= '_denied';
-					
-					array_push($classes,$page->perm);
-				}
-
-				$p['attr']['class'] = implode(' ', $classes);
-
-				array_push($children, $p);
-			}
-		}
-	}
-
-	return $children;
-}
-
 
 function bu_navman_page_fields($fields)
 {

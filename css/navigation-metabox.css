@@ -1,0 +1,12 @@
+#edit_page_tree {
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	background-color: #F7F7F7;
+	border: 1px solid #E5E5E5;
+	padding: 1.2em;
+}
+
+.page_position_edit_buttons {
+	margin-top: 3em;
+	margin-bottom: 3em;
+}

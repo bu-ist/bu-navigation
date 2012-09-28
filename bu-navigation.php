@@ -21,6 +21,7 @@ Author: Boston University (IS&T)
 /* BU Navigation constants */
 define('BU_NAV_PLUGIN_DIR', dirname(__FILE__));
 
+/* Load navigation library */
 if (!defined('BU_INCLUDES_PATH')) {
     if(!defined('BU_NAVIGATION_LIB_LOADED')) {
         require_once('lib/bu-navigation/bu-navigation.php');
@@ -30,54 +31,77 @@ if (!defined('BU_INCLUDES_PATH')) {
     require_once(BU_INCLUDES_PATH . '/bu-navigation/bu-navigation.php');
 }
 
-include(dirname(__FILE__) . '/bu-navigation-widget.php'); // Content navigation widget
-if(is_admin()) {
-    include(dirname(__FILE__) . '/bu-filter-pages.php'); // Filter pages
-    include(dirname(__FILE__) . '/bu-navman.php'); // Navigation manager
-    include(dirname(__FILE__) . '/bu-page-parent.php'); // Page parent selector
-}
-/**
- * Initialization function for navigation plugin
- * @return void 
- */
-function bu_navigation_init()
-{
-	bu_navigation_load_extras();
-	bu_navigation_widgets_init();
-	
-	do_action('bu_navigation_init');
-}
-add_action('init', 'bu_navigation_init', 1);
+class BU_Navigation_Plugin {
 
-/**
- * Initializes navigation widgets
- * @return void
- */
-function bu_navigation_widgets_init() 
-{
-	if ( !is_blog_installed() )
-		return;
+	static $admin;
 
-	register_widget('BU_Widget_Pages');
-}
+	public function __construct() {
 
-/**
- * Loads plugins for this... plugin
- * Any .php file placed in the extras directory will be automatically loaded.
- * @return void
- */
-function bu_navigation_load_extras()
-{
-	$pattern = sprintf('%s/extras/*.php', BU_NAV_PLUGIN_DIR);
-	
-	$files = glob($pattern);
-	
-	if ((is_array($files)) && (count($files) > 0))
-	{
-		foreach ($files as $filename)
-		{
-			@include_once($filename);
-		}
+		add_action( 'init', array( $this, 'init' ), 1 );
+
 	}
+
+	/**
+	 * Initialization function for navigation plugin
+	 * 
+	 * @hook init
+	 * @return void 
+	 */
+	public function init() {
+
+		if( is_admin() ) {
+
+			include(dirname(__FILE__) . '/bu-navigation-admin.php');
+			self::$admin = new BU_Navigation_Admin();
+
+		}
+
+		$this->load_extras();
+
+		$this->load_widget();
+		
+		do_action('bu_navigation_init');
+
+	}
+
+	/**
+	 * Initializes navigation widgets
+	 * @return void
+	 */
+	public function load_widget() {
+
+		if ( !is_blog_installed() )
+			return;
+
+		include(dirname(__FILE__) . '/bu-navigation-widget.php'); // Content navigation widget
+		register_widget('BU_Widget_Pages');
+
+	}
+
+	/**
+	 * Loads plugins for this... plugin
+	 * Any .php file placed in the extras directory will be automatically loaded.
+	 * @return void
+	 */
+	public function load_extras() {
+
+		$pattern = sprintf('%s/extras/*.php', BU_NAV_PLUGIN_DIR);
+		
+		$files = glob($pattern);
+		
+		if ((is_array($files)) && (count($files) > 0)) {
+			foreach ($files as $filename) {
+				@include_once($filename);
+			}
+		}
+
+	}
+
 }
+
+// Instantiate plugin (only once)
+if( ! isset( $bu_navigation_plugin ) ) {
+	$bu_navigation_plugin = new BU_Navigation_Plugin();
+}
+
 ?>

@@ -1,4 +1,11 @@
 <?php
+/*
+ @todo
+ 	- refactor this into a class
+ 	- only load on manage posts screen
+ 	- rename file to something more consistent -- bu-navigation-admin-manage-posts.php
+ */
+ 
 
 /** @todo fix pagination? */
 
@@ -97,7 +104,7 @@ function bu_filter_pages_parent_dropdown($pages_by_parent, $default = 0, $parent
 			$padding = str_repeat('&nbsp;', $level * 3);
 			$selected = ($p->ID == $default) ? 'selected="selected"' : '';
 
-			printf("\n\t<option value=\"%d\" %s>%s%s</option>", $p->ID, $selected, $padding, wp_specialchars($p->post_title));
+			printf("\n\t<option value=\"%d\" %s>%s%s</option>", $p->ID, $selected, $padding, esc_html($p->post_title));
 			bu_filter_pages_parent_dropdown($pages_by_parent, $default, $p->ID, $level + 1);
 		}
 

@@ -1,0 +1,115 @@
+.bu_nav_tree a.jstree-loading.jstree-clicked .jstree-icon { 
+	background:url("../images/throbber-dark.gif") center center no-repeat !important;
+}
+
+.bu_nav_tree li > a.jstree-clicked {
+	background-color: #555;
+	border-color: #555;
+}
+
+.bu_nav_tree li {
+	width: auto;
+}
+
+.bu_nav_tree li > a:visited,
+.bu_nav_tree li > a:link {
+	color: black;
+}
+
+.bu_nav_tree .excluded > a {
+	color: black;
+}
+
+.bu_nav_tree .excluded > a.jstree-clicked {
+	color: white;
+}
+
+.bu_nav_tree .allowed > a {
+	background-color: transparent;
+}
+
+.bu_nav_tree .denied > a {
+	background-color: red;
+	background-color: rgba(255, 0, 0, 0.2);
+}
+
+/* Thickbox overrides */
+#TB_window .bu_nav_tree a {
+ color: black;   
+}
+
+#TB_window .bu_nav_tree .jstree-clicked {
+ color: white;
+}
+
+/*.bu_nav_tree ul li > a ins,
+.bu_nav_tree ul li[rel="page"] > a ins,
+.bu_nav_tree ul li[rel="page_denied"] > a ins {
+	background-image: url(icons/page_regular.png);
+}
+
+.bu_nav_tree ul li[rel="folder"] > a ins,
+.bu_nav_tree ul li[rel="folder_denied"] > a ins {
+	background-image: url(icons/folder_regular.png);
+}
+
+.bu_nav_tree ul li[rel="folder_excluded"] > a ins,
+.bu_nav_tree ul li[rel="folder_excluded_denied"] > a ins {
+	background-image: url(icons/folder_hidden.png);
+}
+
+.bu_nav_tree ul li[rel="folder_restricted"] > a ins,
+.bu_nav_tree ul li[rel="folder_restricted_denied"] > a ins
+{
+	background-image: url(icons/folder_lock.png);
+}
+
+.bu_nav_tree ul li[rel="folder_excluded_restricted"] > a ins,
+.bu_nav_tree ul li[rel="folder_excluded_restricted_denied"] > a ins {
+	background-image: url(icons/folder_hidden_restricted.png);
+}
+
+.bu_nav_tree ul li[rel="page_excluded"] > a ins,
+.bu_nav_tree ul li[rel="page_excluded_denied"] > a ins {
+	background-image: url(icons/page_hidden.png);
+}
+
+.bu_nav_tree ul li[rel="page_restricted"] > a ins,
+.bu_nav_tree ul li[rel="page_restricted_denied"] > a ins {
+	background-image: url(icons/page_restricted.png);
+}
+
+.bu_nav_tree ul li[rel="page_excluded_restricted"] > a ins,
+.bu_nav_tree ul li[rel="page_excluded_restricted_denied"] > a ins {
+	background-image: url(icons/page_hidden_restricted.png);
+}
+
+.bu_nav_tree ul li[rel="link"] > a ins,
+.bu_nav_tree ul li[rel="link_restricted"] > a ins {
+	background-image: url(icons/page_white_link.png);
+}*/
+
+.navform div input.error {
+	margin: 0;
+	-moz-border-radius-bottomleft: 4px;
+	-moz-border-radius-bottomright: 4px;
+	-moz-border-radius-topleft: 4px;
+	-moz-border-radius-topright: 4px;
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	padding: 3px;
+}
+
+.navform label.error {
+	clear: both;
+	width: auto;
+	margin-left: 101px;
+	margin-top: 4px;
+	color: red;
+}
+
+.navformwide label.error {
+	margin-left: 138px;
+}

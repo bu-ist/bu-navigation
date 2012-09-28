@@ -4,6 +4,7 @@
 /* BU Navigation Manager constants */
 if (!defined('BU_NAV_PLUGIN_DIR'))
 	define('BU_NAV_PLUGIN_DIR', dirname(__FILE__));
+
 define('BU_NAVMAN_LOCK_TIME', '_bu_navman_lock_time');
 define('BU_NAVMAN_LOCK_USER', '_bu_navman_lock_user');
 
@@ -25,6 +26,7 @@ function bu_navman_admin_menu_init()
 		
 	bu_navman_clear_lock();
 }
+
 add_action('admin_menu', 'bu_navman_admin_menu_init');
 
 /**
@@ -43,18 +45,18 @@ function bu_navman_enqueue_media($hook)
         wp_enqueue_script('jquery-ui-dialog');
 
         //for now, I am prefixing bu- to the various jquery plugins to avoid conflicts with the bu-js-lib
-        wp_enqueue_script('bu-jquery-tree', plugins_url('js/jstree/jquery.jstree' . $suffix . '.js', __FILE__), array('jquery', 'bu-jquery-cookie'), '1.0-rc3', true);
+        wp_enqueue_script('bu-jquery-tree', plugins_url('js/vendor/jstree/jquery.jstree' . $suffix . '.js', __FILE__), array('jquery', 'bu-jquery-cookie'), '1.0-rc3', true);
         //uses the most-recent github commit as the version identifier
-		wp_enqueue_script('bu-jquery-cookie', plugins_url('js/jquery.cookie' . $suffix . '.js', __FILE__), array('jquery'), '00168770', true);
+		wp_enqueue_script('bu-jquery-cookie', plugins_url('js/vendor/jquery.cookie' . $suffix . '.js', __FILE__), array('jquery'), '00168770', true);
 
-        wp_enqueue_script('bu-jquery-validate', plugins_url('js/jquery.validate' . $suffix . '.js', __FILE__), array('jquery'), '1.8.1', true);
+        wp_enqueue_script('bu-jquery-validate', plugins_url('js/vendor/jquery.validate' . $suffix . '.js', __FILE__), array('jquery'), '1.8.1', true);
         wp_enqueue_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-jquery-tree'), '0.3.1', true);
 
-		wp_enqueue_style('bu-jquery-ui-navman', plugins_url('interface/jquery-ui-1.8.13.custom.css', __FILE__), array(), '1.8.13');
+		wp_enqueue_style('bu-jquery-ui-navman', plugins_url('css/vendor/jquery-ui/jquery-ui-1.8.13.custom.css', __FILE__), array(), '1.8.13');
 
-		wp_enqueue_style('bu-navman', plugins_url('interface/manage.css', __FILE__), array(), '0.3');
+		wp_enqueue_style('bu-navman', plugins_url('css/manage.css', __FILE__), array(), '0.3');
 
-        wp_enqueue_style('bu-jquery-tree-classic', plugins_url('js/jstree/themes/classic/style.css', __FILE__), array(), '1.8.1');
+        wp_enqueue_style('bu-jquery-tree-classic', plugins_url('js/vendor/jstree/themes/classic/style.css', __FILE__), array(), '1.8.1');
 	}
 }
 add_action('admin_enqueue_scripts', 'bu_navman_enqueue_media');
@@ -541,4 +543,5 @@ function bu_navman_clear_lock()
 		delete_option(BU_NAVMAN_LOCK_USER);
 	}
 }
+
 ?>

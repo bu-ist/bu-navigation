@@ -37,6 +37,15 @@ class BU_Navigation_Plugin {
 
 	public function __construct() {
 
+		$this->register_hooks();
+
+	}
+
+	/**
+	 * Attach WordPress hook callbacks
+	 */ 
+	public function register_hooks() {
+
 		add_action( 'init', array( $this, 'init' ), 1 );
 
 	}

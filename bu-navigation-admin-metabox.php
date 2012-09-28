@@ -15,29 +15,32 @@ class BU_Navigation_Admin_Metabox {
 
 	static $interface;
 
-	// @todo use these
 	public $post;
 	public $post_type;
 	public $post_type_labels;
 
-	public function __construct( $post ) {
-
-		if( ! $post )
-			return;
+	public function __construct( $post, $post_type ) {
 
 		// Set up properties
 		if( is_numeric( $post ) )
 			$post = get_post( $post );
 
 		$this->post = $post;
-		$this->post_type = $this->get_post_type( $post );
+		$this->post_type = $post_type;
 		$this->post_type_labels = $this->get_post_type_labels( $this->post_type );
 
-		// Register for WP hooks
+		// Instantiate navman tree interface object
+		$tree_post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
+		self::$interface = new BU_Navman_Interface( $tree_post_types );
+
+		// Attach WP actions/filters
 		$this->register_hooks();
 
 	}
 
+	/**
+	 * Attach WP actions and filters utilized by our meta boxes
+	 */ 
 	public function register_hooks() {
 		global $wp_version;
 
@@ -45,8 +48,8 @@ class BU_Navigation_Admin_Metabox {
 		add_action('admin_enqueue_scripts', array($this, 'admin_page_styles'));
 		add_action('add_meta_boxes', array($this, 'register_metaboxes'), 10, 2);
 
-		add_action('save_post', array($this, 'save_nav_meta_data'));
-		
+		add_action('save_post', array($this, 'save_nav_meta_data'), 10, 2);
+
 		// for WP 3.2: change delete_post to before_delete_post (because at that point, the children posts haven't moved up)
 		if( version_compare( $wp_version, '3.2', '<' ) ) {
 			add_action('delete_post', array($this, 'handle_hidden_page_deletion'));
@@ -76,15 +79,13 @@ class BU_Navigation_Admin_Metabox {
 		wp_enqueue_script( 'bu-page-parent-deletion', $scripts_path . '/deletion' . $suffix . '.js', array('jquery'));
 		wp_localize_script( 'bu-page-parent-deletion', 'bu_navigation_pt_labels', $this->post_type_labels );
 
-		wp_enqueue_script('bu-navigation-metabox', $scripts_path . '/navigation-metabox' . $suffix . '.js', array('jquery','bu-jquery-tree'));
-
-		$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
-
-		// jstree
-		self::$interface = new BU_Navman_Interface( $post_types );
+		// jstree scripts
 		self::$interface->enqueue_scripts();
 
+		wp_enqueue_script('bu-navigation-metabox', $scripts_path . '/navigation-metabox' . $suffix . '.js', array('jquery','bu-jquery-tree'));
+
 		// Setup JS context
+		// @todo should not be spitting out large json object (page hierarchy) in document <head>
 		$data = $this->get_script_context();
 		wp_localize_script('bu-navigation-metabox', 'BUPP', $data );
 
@@ -98,6 +99,11 @@ class BU_Navigation_Admin_Metabox {
 
 	}
 	
+	/**
+	 * Register navigation metaboxes for supported post types
+	 * 
+	 * @todo needs selenium tests
+	 */ 
 	public function register_metaboxes( $post_type, $post ) {
 
 		// Remove built in page attributes meta box
@@ -165,13 +171,18 @@ class BU_Navigation_Admin_Metabox {
 	 * Dynamic variables to be passed to the navigation-attributes.js script
 	 */ 
 	public function get_script_context() {
-		global $post;
 
-		$post_id = $post->post_status == 'auto-draft' ? null : $post->ID;
+		$post = $this->post;
+		$post_id = is_object( $post ) ? $post->ID : null;
 
+		// Pass current post ancestors if present to assist in selecting current post
 		$ancestors = null;
-		if( isset( $post->ancestors ) && ! empty( $post->ancestors )) $ancestors = $post->ancestors;
 
+		if( is_object( $post ) && isset( $post->ancestors ) && ! empty( $post->ancestors ))
+			$ancestors = $post->ancestors;
+
+		// Does the current user have any editing restrictions from the section editing plugin?
+		// @todo loosen this coupling somehow
 		$is_section_editor = false;
 
 		if( class_exists( 'BU_Section_Editing_Plugin' ) ) {
@@ -179,7 +190,7 @@ class BU_Navigation_Admin_Metabox {
 		}
 
 		$data = array(
-			'tree' => self::$interface->get_top_level(),
+			'tree' => self::$interface->get_pages( 0, array( 'depth' => 1 ) ),
 			'ancestors' => $ancestors,
 			'currentPage' => $post_id,
 			'allowTop' => $this->allow_top_level_page(),
@@ -190,6 +201,9 @@ class BU_Navigation_Admin_Metabox {
 
 	}
 
+	/**
+	 * @todo move this out of here, in to a global settings class
+	 */ 
 	public function allow_top_level_page() {
 
 		// the 'allow top level page' option (in Site Design -> Primary Navigation screen) only applies to pages
@@ -199,24 +213,9 @@ class BU_Navigation_Admin_Metabox {
 			return true;
 		}
 	}
-	
-	protected function get_post_type( $post ) {
-
-		$post_type = '';
-
-		if( is_object( $post ) )
-			$post_type = $post->post_type;
-		elseif( is_string( $post ) )
-			$post_type = $post;
-
-		// @todo add BU Versions logic here
-		return $post_type;
-
-	}
 
 	protected function get_post_type_labels( $post_type ) {
 				
-		$post_type = $this->get_post_type( $post_type );
 		$pt_obj = get_post_type_object($post_type);
 
 		if( ! is_object( $pt_obj ) )
@@ -245,11 +244,22 @@ class BU_Navigation_Admin_Metabox {
 
 	}
 
-	public function save_nav_meta_data($post_id) {
-		global $wpdb;
+	/**
+	 * Update navigation related meta data on post save
+	 * 
+	 * WordPress will handle updating of post_parent and menu_order prior to this callback
+	 * 
+	 * @todo needs selenium test
+	 * 
+	 * @hook save_post
+	 */ 
+	public function save_nav_meta_data( $post_id, $post ) {
 
-		$post = get_post($post_id);
-		if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) return;
+		if( !in_array($post->post_type, bu_navigation_supported_post_types()) )
+			return;
+
+		if( 'auto-draft' == $post->post_status )
+			return;
 
 		if(array_key_exists('nav_label', $_POST)) {
 		
@@ -260,38 +270,90 @@ class BU_Navigation_Admin_Metabox {
 			update_post_meta($post_id, '_bu_cms_navigation_page_label', $nav_label);
 			update_post_meta($post_id, '_bu_cms_navigation_exclude', $exclude);
 			
-			// renumber the sibling pages
-			// @todo investigate this behavior, wasn't working when attempting to move page to first
-			// ----
-			// 1. get the siblings of the current post, in menu_order
-			// 2. update their menu_order fields, starting at 0, skipping the menu_order of the current post
-			$post_types = ( $post->post_type == 'page' ? array('page', 'link') : array($post->post_type) );
-			$siblings = bu_navigation_get_pages(array(
-				'sections' => array($post->post_parent),
-				'post_status' => false,
-				'supress_filter_pages' => true,
-				'post_type' => $post_types,	// handle custom post types support
-			));
-			
-			$i = 1;
-			if ($siblings) {
-				foreach ($siblings as $sib) {
-					if ($sib->ID == $post_id) continue;
-
-					if ($i == $post->menu_order) $i++;
-
-					$stmt = $wpdb->prepare("UPDATE $wpdb->posts SET menu_order = %d WHERE ID = %d", $i, $sib->ID);
-					$wpdb->query($stmt);
-			
-					$i++;
-				}
-			}
 		}
+
+		/* 
+		Reorder siblings, old and new, if post_parent or menu_order has changed
+		@todo 
+			- review these more carefully
+			- make sure to consider new post menu_order of 0 in reordering top level pages
+		*/
+
+		// Reorder old siblings if my parent has changed
+		if( $this->post->post_parent != $post->post_parent ) {
+			error_log('Post parent has changed!  Reordering old and new siblings...');
+			$this->reorder_siblings( $this->post );	// Reorder old siblings by passing original post object
+			$this->reorder_siblings( $post ); // Reorder current siblings by passing new one
+		}
+
+		// Reorder current siblings if only my menu order has changed
+		else if( $this->post->menu_order != $post->menu_order ) {
+			error_log('Menu order has changed!  Reordering current siblings...');
+			$this->reorder_siblings( $post );
+		}
+
 	}
 
 	/**
+	 * Account for a possible change in menu_order by reordering siblings of the saved post
 	 * 
-	 * @todo relocate
+	 * @todo review logic more closely, especially args to bu_navigation_get_pages
+	 * @todo perhaps move this to a more globally accessible location, could be useful outside of here
+	 * @todo needs unit test
+	 */ 
+	public function reorder_siblings( $post ) {
+		global $wpdb;
+
+		error_log("Reordering siblings for post {$post->post_title}, with parent: {$post->post_parent}");
+
+		$post_types = ( $post->post_type == 'page' ? array('page', 'link') : array($post->post_type) );
+
+		// Fetch siblings, as currently ordered by menu_order
+		$siblings = bu_navigation_get_pages( array(
+			'sections' => array($post->post_parent),
+			'post_status' => false,	// @todo this includes auto-drafts/revisions...
+			'suppress_filter_pages' => true,	// suppress is spelled with two p's...
+			'post_type' => $post_types,	// handle custom post types support
+		));
+		
+		$i = 1;
+
+		if ($siblings) {
+
+			foreach ($siblings as $sib) {
+
+				// Skip post being saved if present in siblings array (it already has menu_order set correctly)
+				if ($sib->ID == $post->ID) {
+					error_log("Skipping myself, I already have the right menu order");
+					continue;
+				}
+
+				// If post being saved is among siblings, increment menu order counter to account for it
+				if ( in_array( $post->ID, array_keys( $siblings ) ) && $i == $post->menu_order) {
+					error_log("Skipping my own menu order...");
+					$i++;
+				}
+
+				// Commit new order for this sibling
+				$update = $wpdb->prepare("UPDATE $wpdb->posts SET menu_order = %d WHERE ID = %d", $i, $sib->ID);
+				$wpdb->query( $update );
+				error_log("Updating menu order for {$sib->post_title} to: $i");
+				$i++;
+
+			}
+
+		} else {
+
+			error_log("No siblings found for post {$post->ID}, done!");
+
+		}
+
+	}
+
+	/**
+	 * @todo
+	 *  - relocate
+	 *  - needs unit tests (selenium)
 	 * 
 	 * when deleting posts that are hidden, the children will get moved up one level (to take place of the current post),
 	 * but if they were hidden (as a result of the current post being hidden), they will become unhidden.
@@ -300,10 +362,8 @@ class BU_Navigation_Admin_Metabox {
 	public function handle_hidden_page_deletion($post_id) {
 		global $wpdb;
 		
-		error_log('Handling hidden page deletion!');
-		
 		$post = get_post($post_id);
-	  if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) return;
+		if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) return;
 			
 		$exclude = get_post_meta($post_id, '_bu_cms_navigation_exclude', true);
 		
@@ -322,7 +382,9 @@ class BU_Navigation_Admin_Metabox {
 	}
 	
 	/**
-	 * @todo relocate
+	 * @todo
+	 *  - relocate
+	 *  - needs unit tests (selenium)
 	 * 
 	 * - prints json formatted data that tells the browser to either show a warning or not
 	 * - dies.

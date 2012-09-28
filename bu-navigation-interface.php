@@ -38,6 +38,8 @@ class BU_Navman_Interface {
 
 	/**
 	 * Enqueue all scripts and styles needed to create the navigation management interface
+	 * 
+	 * Must be called before scripts are printed
 	 */ 
 	public function enqueue_scripts() {
 
@@ -74,11 +76,21 @@ class BU_Navman_Interface {
 	 * Fetches top level pages, formatting for jstree consumption
 	 * 
 	 * @todo
-	 * 	- rename this to "get_pages" and take arguments that will dictate depth loaded
-	 *  - use this method to load subsequent sections from a specific page ID
 	 *  - make this extendable, so that plugins can tie in to the formatting portion to add their own attributes
+	 * 
+	 * @param int $parent_id post ID to start loading pages from
+	 * @param array $args option configuration
+	 * 	- depth = how many levels to traverse of page hierarchy (0 = all)
+	 * @return array $pages an array of pages, formatted for jstree json_data consumption
 	 */ 
-	public function get_top_level() {
+	public function get_pages( $parent_id, $args = array() ) {
+
+		$defaults = array(
+			'depth' => 0
+			);
+
+		$args = wp_parse_args( $args, $defaults );
+		extract( $args );
 
 		$pages = array();
 
@@ -86,150 +98,122 @@ class BU_Navman_Interface {
 		remove_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
 		add_filter('bu_navigation_filter_pages', array( __CLASS__, 'filter_pages' ) );
 
-		$section_args = array('direction' => 'down', 'depth' => 1, 'sections' => array(0), 'post_types' => $this->post_types);
-		$sections = bu_navigation_gather_sections(0, $section_args);
-		
-		$root_pages = bu_navigation_get_pages(array('sections' => $sections, 'post_types' => $this->post_types));
+		// Gather sections and fetch top level pages
+		$section_args = array('direction' => 'down', 'depth' => $depth, 'post_types' => $this->post_types);
+		$sections = bu_navigation_gather_sections( $parent_id, $section_args);
 
+		$root_pages = bu_navigation_get_pages(array('sections' => $sections, 'post_types' => $this->post_types));
 		$pages_by_parent = bu_navigation_pages_by_parent($root_pages);
 
-		if ((is_array($pages_by_parent[0])) && (count($pages_by_parent[0]) > 0))
-		{
-			foreach ($pages_by_parent[0] as $page)
-			{
-				if (!isset($page->navigation_label)) $page->navigation_label = apply_filters('the_title', $page->post_title);
-
-				$title = $page->navigation_label;
-
-				$classes = array(); // css classes
-				
-				$p = array(
-					'attr' => array('id' => sprintf('p%d', $page->ID), 'class' => ''),
-					'data' => $title,
-					);
-
-				if (isset($pages_by_parent[$page->ID]) && (is_array($pages_by_parent[$page->ID])) && (count($pages_by_parent[$page->ID]) > 0))
-				{
-					$p['state'] = 'closed';
-					$p['attr']['rel'] = 'page';
-				}
-
-				if (!array_key_exists('state', $p))
-				{
-					$p['attr']['rel'] = ($page->post_type == 'link' ? $page->post_type : 'page');
-				}
-
-				if (isset($page->excluded) && $page->excluded)
-				{
-					$p['attr']['rel'] .= '_excluded';
-					array_push($classes, 'excluded');
-				}
-
-				if ($page->restricted)
-				{
-					$p['attr']['rel'] .= '_restricted';
-					array_push($classes, 'restricted');
-				}
-
-				if(isset($page->perm))
-				{
-					if( $page->perm == 'denied' )
-						$p['attr']['rel'] .= '_denied';
-					
-					array_push($classes,$page->perm);
-				}
-
-				$p['attr']['class'] = implode(' ', $classes);
-
-				array_push($pages, $p);
-			}
-
-			/* remove our page filter and add back in the default */
-			remove_filter('bu_navigation_filter_pages', array( __CLASS__, 'filter_pages' ) );
-			add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
-
-			return $pages;
-
-		}
+		// Return jstree formatted pages
+		$pages = $this->get_children( $parent_id, $pages_by_parent );
 
 		/* remove our page filter and add back in the default */
 		remove_filter('bu_navigation_filter_pages', array( __CLASS__, 'filter_pages' ) );
 		add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
+
+		return $pages;
 
 	}
 
 	/**
 	 * Handles fetching child pages and formatting for jstree consumption
 	 * 
-	 * @todo
-	 * 	- reduce redundancies between this method and get_top_level
+	 * @param int $parent_id post ID to fetch children of
+	 * @param array $pages_by_parent array of all pages, keyed by post ID and grouped in to sections
+	 * @return array $children children of specified parent, formatted for jstree json_data consumption
 	 */ 
 	public function get_children( $parent_id, $pages_by_parent ) {
 
 		$children = array();
 
-		if (array_key_exists($parent_id, $pages_by_parent))
-		{
+		if( array_key_exists( $parent_id, $pages_by_parent ) ) {
+
 			$pages = $pages_by_parent[$parent_id];
 
-			if ((is_array($pages)) && (count($pages) > 0))
-			{
-				foreach ($pages as $page)
-				{
-					if (!isset($page->navigation_label)) $page->navigation_label = apply_filters('the_title', $page->post_title);
+			if( is_array( $pages ) && ( count( $pages ) > 0 ) ) {
 
-					$title = $page->navigation_label;
+				foreach ($pages as $page) {
 
-					$p = array(
-						'attr' => array('id' => sprintf('p%d', $page->ID)),
-						'data' => $title
-						);
+					$has_children = false;
 
-					$classes = array(); // CSS classes
+					if( isset($pages_by_parent[$page->ID] ) && ( is_array($pages_by_parent[$page->ID]) ) && ( count($pages_by_parent[$page->ID] ) > 0))
+						$has_children = true;
 
-					if (isset($pages_by_parent[$page->ID]) && (is_array($pages_by_parent[$page->ID])) && (count($pages_by_parent[$page->ID]) > 0))
-					{
+					// Format attributes for jstree
+					$p = $this->format_page( $page, $has_children );
+
+					// Fetch children recursively
+					if( $has_children ) {
+
 						$p['state'] = 'closed';
-						$p['attr']['rel'] = 'page';
 
-						$descendants = $this->get_children($page->ID, $pages_by_parent);
+						$descendants = $this->get_children( $page->ID, $pages_by_parent );
 
-						if (count($descendants) > 0) $p['children'] = $descendants;
+						if( count( $descendants ) > 0 )
+							$p['children'] = $descendants;
+
 					}
-
-					if (!array_key_exists('state', $p))
-					{
-						$p['attr']['rel'] = ($page->post_type == 'link' ? $page->post_type : 'page');
-					}
-
-					if (isset($page->excluded) && $page->excluded)
-					{
-						$p['attr']['rel'] .= '_excluded';
-						array_push($classes, 'excluded');
-					}
-
-					if ($page->restricted)
-					{
-						$p['attr']['rel'] .= '_restricted';
-						array_push($classes, 'restricted');
-					}
-
-					if(isset($page->perm))
-					{
-						if( $page->perm == 'denied' )
-							$p['attr']['rel'] .= '_denied';
-						
-						array_push($classes,$page->perm);
-					}
-
-					$p['attr']['class'] = implode(' ', $classes);
 
 					array_push($children, $p);
 				}
+
 			}
+
 		}
 
 		return $children;
+
+	}
+
+	/**
+	 * Given a WP post object, return an array of data formated for consumption by jstree
+	 * 
+	 * @param StdClass $page WP post object
+	 * @return array $p array of data with markup attributes for jstree json_data plugin
+	 */ 
+	public function format_page( $page ) {
+
+		// Label
+		if( !isset( $page->navigation_label ) )
+			$page->navigation_label = apply_filters('the_title', $page->post_title);
+
+		// Default attributes
+		$p = array(
+			'attr' => array(
+				'id' => sprintf('p%d', $page->ID),
+				'rel' => ($page->post_type == 'link' ? $page->post_type : 'page' )
+				),
+			'data' => $page->navigation_label
+			);
+
+		// Build classes based on page properties
+		$classes = array();
+
+		// Excluded from navigation
+		if( isset( $page->excluded ) && $page->excluded ) {
+			$p['attr']['rel'] .= '_excluded';
+			array_push($classes, 'excluded');
+		}
+
+		// ACL restricted (from access-control plugin)
+		if( isset( $page->restricted ) && $page->restricted ) {
+			$p['attr']['rel'] .= '_restricted';
+			array_push( $classes, 'restricted' );
+		}
+
+		// Editing denied for current user (from BU Section Editing plugin)
+		if( isset( $page->perm ) ) {
+
+			if( $page->perm == 'denied' )
+				$p['attr']['rel'] .= '_denied';
+
+			array_push($classes,$page->perm);
+		}
+
+		$p['attr']['class'] = implode(' ', $classes);
+
+		return $p;
 
 	}
 

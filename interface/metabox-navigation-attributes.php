@@ -6,6 +6,7 @@
 <input type="hidden" name="parent_id" value="<?php echo $current_parent; ?>">
 
 <div id="bu_page_parent_current_label">
+	<?php // bu_navigation_breadcrumbs( array( 'echo' => true, 'crumb_current' => false ) ); ?>
 	<?php echo $current_parent_txt; ?>
 </div>
 

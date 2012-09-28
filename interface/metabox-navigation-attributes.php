@@ -5,16 +5,16 @@
 <input type="hidden" name="menu_order" value="<?php echo $current_menu_order; ?>">
 <input type="hidden" name="parent_id" value="<?php echo $current_parent; ?>">
 
-<div id="bu_page_parent_current_label">
+<div id="bu_nav_attributes_location_breadcrumbs">
 	<?php // bu_navigation_breadcrumbs( array( 'echo' => true, 'crumb_current' => false ) ); ?>
-	<?php echo $current_parent_txt; ?>
+	<?php echo $current_parent_label; ?>
 </div>
 
 <p>
-	<a id="select-parent" href="#TB_inline?width=640&inlineId=edit_page_position" class="thickbox button" ><?php echo $select_parent_txt; ?></a>
+	<a id="select-parent" href="#TB_inline?width=640&inlineId=edit_page_location" class="thickbox button" ><?php echo $select_parent_txt; ?></a>
 </p>
 
-<div id="edit_page_position" style="display:none;">
+<div id="edit_page_location" style="display:none;">
 	<input type="hidden" name="tmp_parent_id" value="">
 	<input type="hidden" name="tmp_parent_label" value="">
 	<input type="hidden" name="tmp_menu_order" value="">

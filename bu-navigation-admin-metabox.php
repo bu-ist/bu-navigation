@@ -139,19 +139,21 @@ class BU_Navigation_Admin_Metabox {
 
 		$current_menu_order = $post->menu_order;
 		$current_parent = $post->post_parent ? $post->post_parent : '';
-		$current_parent_txt = $select_parent_txt = '';
+		$current_parent_label = $select_parent_txt = '';
 		$lc_label = strtolower( $pt_labels['singular'] );
 
 		if( empty( $current_parent ) ) {
 			if( $post->post_status == 'publish' ) {
-				$current_parent_txt = 'Current Parent: <span>None (top-level page)</span>';
+				$current_parent_label = '<p>Current Parent: <span>None (top-level page)</span></p>';
 				$select_parent_txt = "Move $lc_label";
 			} else {
-				$current_parent_txt = 'No post parent has been set';
+				$current_parent_label = '<p>No post parent has been set</p>';
 				$select_parent_txt = "Move $lc_label";
 			}
 		} else {
-			$current_parent_txt = 'Current Parent: <span>' . get_post( $post->post_parent )->post_title . '</span>';
+			$parent = get_post( $current_parent );
+			$parent_meta = $this->get_nav_meta_data( $parent );
+			$current_parent_label = '<p>Current Parent: <span>' . $parent_meta['label'] . '</span></p>';
 			$select_parent_txt = "Move $lc_label";
 		}
 
@@ -304,7 +306,7 @@ class BU_Navigation_Admin_Metabox {
 	public function reorder_siblings( $post ) {
 		global $wpdb;
 
-		error_log("Reordering siblings for post {$post->post_title}, with parent: {$post->post_parent}");
+		// error_log("Reordering siblings for post {$post->post_title}, with parent: {$post->post_parent}");
 
 		$post_types = ( $post->post_type == 'page' ? array('page', 'link') : array($post->post_type) );
 
@@ -324,27 +326,27 @@ class BU_Navigation_Admin_Metabox {
 
 				// Skip post being saved if present in siblings array (it already has menu_order set correctly)
 				if ($sib->ID == $post->ID) {
-					error_log("Skipping myself, I already have the right menu order");
+					// error_log("Skipping myself, I already have the right menu order");
 					continue;
 				}
 
 				// If post being saved is among siblings, increment menu order counter to account for it
 				if ( in_array( $post->ID, array_keys( $siblings ) ) && $i == $post->menu_order) {
-					error_log("Skipping my own menu order...");
+					// error_log("Skipping my own menu order...");
 					$i++;
 				}
 
 				// Commit new order for this sibling
 				$update = $wpdb->prepare("UPDATE $wpdb->posts SET menu_order = %d WHERE ID = %d", $i, $sib->ID);
 				$wpdb->query( $update );
-				error_log("Updating menu order for {$sib->post_title} to: $i");
+				// error_log("Updating menu order for {$sib->post_title} to: $i");
 				$i++;
 
 			}
 
 		} else {
 
-			error_log("No siblings found for post {$post->ID}, done!");
+			// error_log("No siblings found for post {$post->ID}, done!");
 
 		}
 

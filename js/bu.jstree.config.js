@@ -29,8 +29,6 @@ if ( typeof bu === 'undefined' )
 
 		var config = {};
 
-		console.log(settings.interfacePath);
-
 		var defaultSettings = {
 			"themes" : {
 				"theme" : "classic"

@@ -1,7 +1,7 @@
 /*
 @todo
 	- look at the new media upload interface (currently in beta) for a better looking modal implementation
-	- redo with Backbone
+	- consider redo with Backbone
 */
 
 /*
@@ -50,29 +50,30 @@ jQuery(document).ready( function($) {
 	tb_position();
 
 	var bu_navtree_rollback = null;
+	var current_node_id, current_node, current_selection, current_section;
 
-	// Current page attributes
-	var current_node_id = 'p' + BUPP.currentPage;
-	var current_node = null;
-	var current_selection = [ '#' + current_node_id ];
-	var current_section = [];
+	// Setup data on current section for jsTree if we are editing an existing post
+	if( BUPP.currentPage ) {
 
-	if( BUPP.ancestors ) {
-		var i = BUPP.ancestors.length - 1;
+		// Use current post ID to pass as initially_selected to ui plugin
+		current_node_id = 'p' + BUPP.currentPage;
+		current_selection = [ '#' + current_node_id ];
 
-		for(; i >= 0; i-- ) {
-			current_section.push( '#p' + BUPP.ancestors[i] );
+		// Build section with current post ancesors to pass as initially_open
+		current_section = [];
+
+		if( BUPP.ancestors ) {
+			var i = BUPP.ancestors.length - 1;
+
+			for(; i >= 0; i-- ) {
+				current_section.push( '#p' + BUPP.ancestors[i] );
+			}
 		}
+
 	}
 
 	// Customizations on top of base BU jstree configuration
 	var extra_conf = {
-		"core" : {
-			"initially_open": current_section
-		},
-		"ui" : {
-			"initially_select": current_selection
-		},
 		"crrm" : {
 			"move" : {
 				"check_move" : function (m) {
@@ -85,9 +86,10 @@ jQuery(document).ready( function($) {
 						return false;
 					}
 
-					// Don't allow top level pages for section editors or of global option prohibits it
+					// Don't allow top level posts for section editors or of global option prohibits it
 					if( m.cr == -1 && ( BUPP.isSectionEditor || ! BUPP.allowTop ) ) {
-						console.log('Move denied, top level pages cannot be created!');
+						console.log('Move denied, top level posts cannot be created!');
+						// @todo pop up a friendlier notice explaining this
 						return false;
 					}
 
@@ -116,11 +118,43 @@ jQuery(document).ready( function($) {
 		}
 	};
 
+	// Tell jsTree to open all ancestors for the current page if we have one
+	if( current_section ) {
+		extra_conf["core"] = { "initially_open": current_section };
+	}
+
+	// Tell jsTree to select the current post on load if we have one
+	if( current_selection ) {
+		extra_conf["ui"] = { "initially_select" : current_selection };
+	}
+
 	// Extend base BU jstree configuration
 	var jstree_settings = bu.navigation.default_tree_config( { 'extra': extra_conf, 'initialTree': BUPP.tree } );
 
 	// Instantiate jstree and attach event handlers
 	$('#edit_page_tree')
+
+		.bind('loaded.jstree', function( event, data ) {
+
+			// Current node will be undefined if we are editing a new post
+			if( typeof current_node_id === "undefined" ) {
+
+				// Fetch autodraft ID and current title now that jstree has loaded
+				current_node_id = $('input[name="post_ID"]').val() || '0';
+				current_node_id = 'p' + current_node_id;
+				var post_title = $('input[name="post_title"]').val() || 'Untitled post';
+				var newPageAttributes = { 'attr': { 'id' : current_node_id }, 'data': post_title };
+
+				// Create a new leaf for this page, placing it at the top
+				var firstPage = data.inst._get_node('ul > li:first');
+				current_node = data.inst.create_node( firstPage, 'before', newPageAttributes );
+
+				// Select
+				data.inst.select_node(current_node);
+				
+			}
+
+		})
 
 		// Construction
 		.jstree( jstree_settings )
@@ -138,7 +172,9 @@ jQuery(document).ready( function($) {
 
 			}
 
-			current_node = $( '#' + current_node_id );
+			// If current node is still undefined, set it now using current_node_id
+			if( typeof current_node === 'undefined' )
+				current_node = $( '#' + current_node_id );
 
 		})
 
@@ -209,11 +245,17 @@ jQuery(document).ready( function($) {
 
 			var $new_parent = data.rslt.np;
 			var menu_order = data.rslt.o.index() + 1;
+			var parent_id;
 
-			var parent_id = $new_parent.attr('id').substr(1);
-			parent_id = ( parent_id > 0 ) ? parent_id : 0;
+			// Set new parent ID
+			if( 'edit_page_tree' == $new_parent.attr('id') ) {
+				parent_id = 0;
+			} else {
+				parent_id = $new_parent.attr('id').substr(1);
+			}
 
-			var parent_label = data.inst.get_text( $new_parent );
+			// If we have a valid parent, fetch label from it's text
+			var parent_label = parent_id > 0 ? data.inst.get_text( $new_parent ) : '';
 
 			// Update placeholder values
 			$('[name="tmp_parent_id"]').val( parent_id );
@@ -222,13 +264,25 @@ jQuery(document).ready( function($) {
 
 		});
 
+	// @todo investigate why post title field is not blurring on tab
+	$('input[name="post_title"]').blur( function(e) {
+
+		// Update current node title
+		// @todo sanitization
+		$.jstree._reference('#edit_page_tree').set_text( current_node, $(this).val() );
+
+	});
+
 	// @todo add a cancel and save button, handle actions accordingly
 	$('#bu_page_parent_save').click( function(e) {
 		e.preventDefault();
 
+		// Commit values for parent ID and menu order to actual inputs
 		$('[name="parent_id"]').val( $('[name="tmp_parent_id"]').val() );
 		$('[name="menu_order"]').val( $('[name="tmp_menu_order"]').val() );
-		$('#bu_page_parent_current_label span').text($('[name="tmp_parent_label"]').val());
+
+		// Update meta box breadcrumb label
+		setCurrentParentLabel( $('[name="tmp_parent_label"]').val() );
 
 		// Update rollback object
 		bu_navtree_rollback = $.jstree._reference('#edit_page_tree').get_rollback();
@@ -240,6 +294,7 @@ jQuery(document).ready( function($) {
 	$('#bu_page_parent_cancel').click( function(e) {
 		e.preventDefault();
 
+		// Clear any unsaved moves
 		$('[name="tmp_parent_id"]').val( '' );
 		$('[name="tmp_menu_order"]').val( '' );
 		$('[name="tmp_parent_label"]').val( '' );
@@ -250,6 +305,31 @@ jQuery(document).ready( function($) {
 		tb_remove();
 
 	});
+
+	/**
+	 * Helper to set navigation attributes location label
+	 */
+	function setCurrentParentLabel( text ) {
+
+		if( text ) {
+			$('#bu_nav_attributes_location_breadcrumbs').html('<p>Current Parent: <span>' + text + '</span></p>' );
+		} else {
+			$('#bu_nav_attributes_location_breadcrumbs').html('<p>Current Parent: <span>None (top-level page)</span></p>');
+		}
+
+	}
+
+	// More thickbox monkey patching
+	var original_tb_remove = window.tb_remove;
+
+	window.tb_remove = function() {
+
+		original_tb_remove();
+		
+		// Rollback
+		$.jstree.rollback(bu_navtree_rollback);
+
+	};
 
 	// @todo Implement this properly
 	// need to prohibit displaying of navigation label for top-level pages

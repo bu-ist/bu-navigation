@@ -10,6 +10,7 @@
  * 
  * @todo
  *  - Move hidden page deletion behavior to higher level admin class
+ *  - Add "Help" for navigation, label, visibilty
  */ 
 class BU_Navigation_Admin_Metabox {
 
@@ -65,7 +66,7 @@ class BU_Navigation_Admin_Metabox {
 	}
 	
 	/**
-	 * Load necessary Javascript
+	 * Load metabox scripts
 	 */ 
 	public function admin_page_scripts($hook_suffix) {
 		
@@ -84,13 +85,11 @@ class BU_Navigation_Admin_Metabox {
 
 		wp_enqueue_script('bu-navigation-metabox', $scripts_path . '/navigation-metabox' . $suffix . '.js', array('jquery','bu-jquery-tree'));
 
-		// Setup JS context
-		// @todo should not be spitting out large json object (page hierarchy) in document <head>
-		$data = $this->get_script_context();
-		wp_localize_script('bu-navigation-metabox', 'BUPP', $data );
-
 	}
 
+	/**
+	 * Load metabox styles
+	 */ 
 	public function admin_page_styles($hook_suffix) {
 
 		$styles_path = plugins_url('css',__FILE__);
@@ -124,6 +123,17 @@ class BU_Navigation_Admin_Metabox {
 
 	}
 	
+	/**
+	 * Render our replacement for the standard Page Attributes metabox
+	 * 
+	 * Replaces the built-in "Parent" dropdown and "Order" text input with
+	 * a modal jstree interface for placing the current post among the
+	 * site hierarchy.
+	 * 
+	 * Also adds a custom navigation label, and the ability to hide
+	 * this page from navigation lists (i.e. content nav widget) with
+	 * a checkbox.
+	 */ 
 	public function navigation_attributes_metabox( $post ) {
 
 		// retrieve previously saved settings for this post (if any)
@@ -157,10 +167,20 @@ class BU_Navigation_Admin_Metabox {
 			$select_parent_txt = "Move $lc_label";
 		}
 
+		// Print dynamic Javascript data
+		$this->print_script_context( 'BUPP' );
+
 		include('interface/metabox-navigation-attributes.php');
 
 	}
 	
+	/**
+	 * Render custom "Page Template" metabox
+	 * 
+	 * Since we replace the standard "Page Attributes" meta box with our own,
+	 * we relocate the "Template" dropdown that usually appears there to its
+	 * own custom meta box
+	 */ 
 	public function custom_template_metabox($post) {
 
 		$current_template = isset( $post->page_template ) ? $post->page_template : 'default';
@@ -170,9 +190,29 @@ class BU_Navigation_Admin_Metabox {
 	}
 
 	/**
+	 * Outputs a block of Javascript that contains a global object used by
+	 * the navigation-attributes.js script
+	 */ 
+	public function print_script_context( $name ) {
+
+		$properties = array();
+
+		$context = $this->get_script_data();
+
+		foreach( $context as $key => $value ) {
+			array_push( $properties, "\"$key\": " . json_encode( $value ) );
+		}
+
+		echo "<script type=\"text/javascript\">//<![CDATA[\r";
+		echo "var $name = {\r" . implode(",\r", $properties ) . "\r};\r";
+		echo "//]]>\r</script>";
+
+	}
+
+	/**
 	 * Dynamic variables to be passed to the navigation-attributes.js script
 	 */ 
-	public function get_script_context() {
+	public function get_script_data() {
 
 		$post = $this->post;
 		$post_id = is_object( $post ) ? $post->ID : null;
@@ -283,14 +323,14 @@ class BU_Navigation_Admin_Metabox {
 
 		// Reorder old siblings if my parent has changed
 		if( $this->post->post_parent != $post->post_parent ) {
-			error_log('Post parent has changed!  Reordering old and new siblings...');
+			// error_log('Post parent has changed!  Reordering old and new siblings...');
 			$this->reorder_siblings( $this->post );	// Reorder old siblings by passing original post object
 			$this->reorder_siblings( $post ); // Reorder current siblings by passing new one
 		}
 
 		// Reorder current siblings if only my menu order has changed
 		else if( $this->post->menu_order != $post->menu_order ) {
-			error_log('Menu order has changed!  Reordering current siblings...');
+			// error_log('Menu order has changed!  Reordering current siblings...');
 			$this->reorder_siblings( $post );
 		}
 

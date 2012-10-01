@@ -86,7 +86,7 @@ class BU_Navman_Interface {
 	public function get_pages( $parent_id, $args = array() ) {
 
 		$defaults = array(
-			'depth' => 0
+			'depth' => 0 // Load all descendents
 			);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -97,18 +97,40 @@ class BU_Navman_Interface {
 		/* remove default page filter and add our own */
 		remove_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
 		add_filter('bu_navigation_filter_pages', array( __CLASS__, 'filter_pages' ) );
+		add_filter('bu_navigation_filter_fields', array( __CLASS__, 'filter_fields' ) );
 
-		// Gather sections and fetch top level pages
+		// Gather sections
 		$section_args = array('direction' => 'down', 'depth' => $depth, 'post_types' => $this->post_types);
+
+		// error_log('Getting pages for parent: ' . $parent_id );
+		// error_log('Section args: ' . print_r( $section_args,true ) );
+
 		$sections = bu_navigation_gather_sections( $parent_id, $section_args);
 
-		$root_pages = bu_navigation_get_pages(array('sections' => $sections, 'post_types' => $this->post_types));
+		// error_log('Sections:' . print_r( $sections,true ) );
+
+		// Load pages in sections
+		$root_pages = bu_navigation_get_pages( array(
+			'sections' => $sections,
+			'post_types' => $this->post_types,
+			'post_status' => array( 'draft', 'pending', 'publish', 'trash' )
+			)
+		);
+
+		// Structure in to parent/child sections keyed by parent ID
 		$pages_by_parent = bu_navigation_pages_by_parent($root_pages);
 
-		// Return jstree formatted pages
-		$pages = $this->get_children( $parent_id, $pages_by_parent );
+		$load_children = false;
+
+		// Get children if the depth argument implies it
+		if( $depth == 0 || $depth > 1 )
+			$load_children = true;
+
+		// Convert to jstree formatted pages
+		$pages = $this->get_formatted_pages( $parent_id, $pages_by_parent, $load_children );
 
 		/* remove our page filter and add back in the default */
+		remove_filter('bu_navigation_filter_fields', array( __CLASS__, 'filter_fields' ) );
 		remove_filter('bu_navigation_filter_pages', array( __CLASS__, 'filter_pages' ) );
 		add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
 
@@ -123,7 +145,7 @@ class BU_Navman_Interface {
 	 * @param array $pages_by_parent array of all pages, keyed by post ID and grouped in to sections
 	 * @return array $children children of specified parent, formatted for jstree json_data consumption
 	 */ 
-	public function get_children( $parent_id, $pages_by_parent ) {
+	public function get_formatted_pages( $parent_id, $pages_by_parent, $load_children = true ) {
 
 		$children = array();
 
@@ -148,10 +170,12 @@ class BU_Navman_Interface {
 
 						$p['state'] = 'closed';
 
-						$descendants = $this->get_children( $page->ID, $pages_by_parent );
+						if( $load_children ) {
+							$descendants = $this->get_formatted_pages( $page->ID, $pages_by_parent );
 
-						if( count( $descendants ) > 0 )
-							$p['children'] = $descendants;
+							if( count( $descendants ) > 0 )
+								$p['children'] = $descendants;
+						}
 
 					}
 
@@ -182,9 +206,12 @@ class BU_Navman_Interface {
 		$p = array(
 			'attr' => array(
 				'id' => sprintf('p%d', $page->ID),
-				'rel' => ($page->post_type == 'link' ? $page->post_type : 'page' )
+				'rel' => ($page->post_type == 'link' ? $page->post_type : 'page' ),
 				),
-			'data' => $page->navigation_label
+			'data' => $page->navigation_label,
+			'metadata' => array(
+				'post_status' => $page->post_status
+				)
 			);
 
 		// Build classes based on page properties
@@ -246,8 +273,8 @@ class BU_Navman_Interface {
 
 			// @todo move this query to the access control plugin
 			// look at bu-section-editing/plugin-support/bu-navigation
-			if (class_exists('BuAccessControlPlugin'))
-			{
+			if (class_exists('BuAccessControlPlugin')) {
+
 				$acl_option = defined( 'BuAccessControlList::PAGE_ACL_OPTION' ) ? BuAccessControlList::PAGE_ACL_OPTION : BU_ACL_PAGE_OPTION;
 
 				$query = sprintf("SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value != '0'", $wpdb->postmeta, $acl_option, implode(',', $ids));
@@ -257,57 +284,72 @@ class BU_Navman_Interface {
 			}
 
 			/* set exclusions and acls */
-			foreach ($pages as $page)
-			{
+			foreach ($pages as $page) {
+
 				/* exclusions */
-				if (array_key_exists($page->ID, $exclusions))
-				{
+				if (array_key_exists($page->ID, $exclusions)) {
+				
 					$page->excluded = TRUE;
-				}
-				else
-				{
+				
+				} else {
+					
 					$parent_id = $page->post_parent;
 
-					while (($parent_id) && (array_key_exists($parent_id, $pages)))
-					{
-						if (array_key_exists($parent_id, $exclusions))
-						{
+					while( ($parent_id) && (array_key_exists($parent_id, $pages)) ) {
+
+						if( array_key_exists($parent_id, $exclusions) ) {
 							$page->excluded = TRUE;
 							break;
 						}
 
 						$parent_id = $pages[$parent_id]->post_parent;
 					}
+
 				}
 
 				/* restrictions */
 				$page->restricted = FALSE;
 
-				if (array_key_exists($page->ID, $restricted))
-				{
+				if( array_key_exists($page->ID, $restricted) ) {
+
 					$page->restricted = TRUE;
-				}
-				else
-				{
+
+				} else {
+					
 					$parent_id = $page->post_parent;
 
-					while (($parent_id) && (array_key_exists($parent_id, $pages)))
-					{
-						if (array_key_exists($parent_id, $restricted))
-						{
+					while( ($parent_id) && (array_key_exists($parent_id, $pages)) ) {
+
+						if( array_key_exists($parent_id, $restricted) ) {
 							$page->restricted = TRUE;
 							break;
 						}
 
 						$parent_id = $pages[$parent_id]->post_parent;
+
 					}
+
 				}
 
 				$filtered[$page->ID] = $page;
 			}
+
 		}
 
 		return $filtered;
+
+	}
+
+	/**
+	 * Filter wp_post columns to fetch from DB
+	 */
+	public static function filter_fields( $fields ) {
+
+		// Adding post status so we can include status indicators in tree view
+		$fields[] = 'post_status';
+
+		return $fields;
+
 	}
 
 }

@@ -6,6 +6,7 @@
 }
 
 .page_position_edit_buttons {
+	float: right;
 	margin-top: 3em;
 	margin-bottom: 3em;
 }

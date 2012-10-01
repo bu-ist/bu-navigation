@@ -33,6 +33,31 @@
 	background-color: rgba(255, 0, 0, 0.2);
 }
 
+.bu_nav_tree .post_status {
+	padding: 1px 3px;
+	border-radius: 3px;
+	margin-left: 5px;
+}
+
+.bu_nav_tree .pending {
+	background-color: yellow;
+}
+
+.bu_nav_tree .draft {
+	color: white;
+	background-color: blue;
+}
+
+.bu_nav_tree .trash {
+	color: white;
+	background-color: orange;
+}
+
+.bu_nav_tree .new {
+	color: white;
+	background-color: green;
+}
+
 /* Thickbox overrides */
 #TB_window .bu_nav_tree a {
  color: black;   

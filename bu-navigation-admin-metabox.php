@@ -168,7 +168,7 @@ class BU_Navigation_Admin_Metabox {
 		}
 
 		// Print dynamic Javascript data
-		$this->print_script_context( 'BUPP' );
+		$this->print_script_context();
 
 		include('interface/metabox-navigation-attributes.php');
 
@@ -193,7 +193,7 @@ class BU_Navigation_Admin_Metabox {
 	 * Outputs a block of Javascript that contains a global object used by
 	 * the navigation-attributes.js script
 	 */ 
-	public function print_script_context( $name ) {
+	public function print_script_context() {
 
 		$properties = array();
 
@@ -204,7 +204,9 @@ class BU_Navigation_Admin_Metabox {
 		}
 
 		echo "<script type=\"text/javascript\">//<![CDATA[\r";
-		echo "var $name = {\r" . implode(",\r", $properties ) . "\r};\r";
+		echo "if( typeof bu === \"undefined\" ) var bu = {};\r";
+		echo "if( typeof bu.navigation === \"undefined\" ) bu.navigation = {};\r";
+		echo "bu.navigation.settings = {\r" . implode(",\r", $properties ) . "\r};\r";
 		echo "//]]>\r</script>";
 
 	}

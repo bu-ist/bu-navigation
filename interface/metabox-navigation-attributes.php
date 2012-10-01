@@ -19,16 +19,15 @@
 	<input type="hidden" name="tmp_parent_label" value="">
 	<input type="hidden" name="tmp_menu_order" value="">
 
+	<div class="page_position_edit_buttons">
+		<a href="#" id="bu_page_parent_cancel" class="button">Cancel</a>
+		<input id="bu_page_parent_save" class="button-primary" type="submit" value="Update Location">
+	</div>
+
 	<h2>Set <?php _e($lc_label); ?> location</h2>
 	<p>Drag the current <?php _e($lc_label); ?> to the desired location.</p>
 
 	<div id="edit_page_tree" class="bu_nav_tree"></div>
-	
-	<div class="page_position_edit_buttons">
-		<input id="bu_page_parent_save" class="button-primary" type="submit" value="Update Location">
-		<a href="#" id="bu_page_parent_cancel" class="button">Cancel</a>
-	</div>
-
 </div>
 
 <h4><?php _e('Label & Visibility'); ?></h4>

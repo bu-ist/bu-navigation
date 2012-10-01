@@ -3,7 +3,7 @@ if ( typeof bu === 'undefined' )
 
 (function($){
 
-	if( typeof bu.navigation == 'undefined' )
+	if( typeof bu.navigation === 'undefined' )
 		bu.navigation = {};
 
 	/**
@@ -13,23 +13,21 @@ if ( typeof bu === 'undefined' )
 	 *		interfacePath = path to type icons
 	 *		rpcUrl = JSON formatted page tree
 	 *		initialTree = JSON object containing initial tree state
-	 *		extra = a jstree configuration object to be merged with default settings
 	 */
-	bu.navigation.default_tree_config = function( settings ) {
+	bu.navigation.get_default_tree_settings = function( config ) {
 
-		if( typeof( settings ) != 'object' )
-			settings = {};
+		if( typeof( config ) != 'object' )
+			config = {};
 
 		// Plugin defaults -- default variables brought to you by wp_localize_script
-		if( typeof( settings.rpcUrl ) == 'undefined' )
-			settings.rpcUrl = buNavTree.rpcUrl;
+		if( typeof( config.rpcUrl ) === 'undefined' )
+			config.rpcUrl = buNavTree.rpcUrl;
 			
-		if( typeof( settings.interfacePath ) == 'undefined' )
-			settings.interfacePath = buNavTree.interfacePath;
+		if( typeof( config.interfacePath ) === 'undefined' )
+			config.interfacePath = buNavTree.interfacePath;
 
-		var config = {};
-
-		var defaultSettings = {
+		// Build default BU jstree settings object
+		var settings = {
 			"themes" : {
 				"theme" : "classic"
 			},
@@ -50,7 +48,7 @@ if ( typeof bu === 'undefined' )
 						"max_depth"			: -1,
 						"valid_children"	: "all",
 						"icon": {
-							"image": settings.interfacePath + "/icons/page_regular.png"
+							"image": config.interfacePath + "/icons/page_regular.png"
 						}
 					},
 					"page": {
@@ -63,7 +61,7 @@ if ( typeof bu === 'undefined' )
 						"max_depth"			: -1,
 						"valid_children"	: "all",
 						"icon": {
-							"image": settings.interfacePath + "/icons/page_regular.png"
+							"image": config.interfacePath + "/icons/page_regular.png"
 						}
 					},
 					"page_excluded": {
@@ -76,7 +74,7 @@ if ( typeof bu === 'undefined' )
 						"max_depth"			: -1,
 						"valid_children"	: "all",
 						"icon": {
-							"image": settings.interfacePath + "/icons/page_hidden.png"
+							"image": config.interfacePath + "/icons/page_hidden.png"
 						}
 					},
 					"page_restricted": {
@@ -89,7 +87,7 @@ if ( typeof bu === 'undefined' )
 						"max_depth"			: -1,
 						"valid_children"	: "all",
 						"icon": {
-							"image": settings.interfacePath + "/icons/page_restricted.png"
+							"image": config.interfacePath + "/icons/page_restricted.png"
 						}
 					},
 					"page_denied": {
@@ -102,7 +100,7 @@ if ( typeof bu === 'undefined' )
 						"max_depth"			: -1,
 						"valid_children"		: "all",
 						"icon": {
-							"image": settings.interfacePath + "/icons/page_regular.png"
+							"image": config.interfacePath + "/icons/page_regular.png"
 						}
 					},
 					"page_excluded_denied": {
@@ -115,7 +113,7 @@ if ( typeof bu === 'undefined' )
 						"max_depth"			: -1,
 						"valid_children"	: "all",
 						"icon": {
-							"image": settings.interfacePath + "/icons/page_hidden.png"
+							"image": config.interfacePath + "/icons/page_hidden.png"
 						}
 					},
 					"page_restricted_denied": {
@@ -128,7 +126,7 @@ if ( typeof bu === 'undefined' )
 						"max_depth"			: -1,
 						"valid_children"	: "all",
 						"icon": {
-							"image": settings.interfacePath + "/icons/page_restricted.png"
+							"image": config.interfacePath + "/icons/page_restricted.png"
 						}
 					},
 					"page_excluded_restricted": {
@@ -141,7 +139,7 @@ if ( typeof bu === 'undefined' )
 						"max_depth"			: -1,
 						"valid_children"	: "all",
 						"icon": {
-							"image": settings.interfacePath + "/icons/page_hidden_restricted.png"
+							"image": config.interfacePath + "/icons/page_hidden_restricted.png"
 						}
 					},
 					"page_excluded_restricted_denied": {
@@ -154,24 +152,24 @@ if ( typeof bu === 'undefined' )
 						"max_depth"			: -1,
 						"valid_children"	: "all",
 						"icon": {
-							"image": settings.interfacePath + "/icons/page_hidden_restricted.png"
+							"image": config.interfacePath + "/icons/page_hidden_restricted.png"
 						}
 					},
 					"link": {
 						"icon": {
-							"image": settings.interfacePath + "/icons/page_white_link.png"
+							"image": config.interfacePath + "/icons/page_white_link.png"
 						},
 						"max_children": 0
 					},
 					"link_restricted": {
 						"icon": {
-							"image": settings.interfacePath + "/icons/page_white_link.png"
+							"image": config.interfacePath + "/icons/page_white_link.png"
 						},
 						"max_children": 0
 					},
 					"link_excluded": {
 						"icon": {
-							"image": settings.interfacePath + "/icons/page_white_link.png"
+							"image": config.interfacePath + "/icons/page_white_link.png"
 						},
 						"max_children": 0
 					}
@@ -179,7 +177,7 @@ if ( typeof bu === 'undefined' )
 			},
 			"json_data": {
 				"ajax" : {
-					"url" : settings.rpcUrl,
+					"url" : config.rpcUrl,
 					"type" : "POST",
 					"data" : function (n) {
 						return { id : n.attr ? n.attr("id") : 0 };
@@ -189,21 +187,10 @@ if ( typeof bu === 'undefined' )
 			}
 		};
 
-		if( settings.initialTree )
-			defaultSettings.json_data.ajax.data = settings.initialTree;
+		if( config.initialTree )
+			settings.json_data.data = config.initialTree;
 
-		// Merge extra config object if passed in
-		if( typeof( settings.extra ) == 'object' ) {
-
-			jQuery.extend( true, config, settings.extra, defaultSettings );
-
-		} else {
-
-			config = defaultSettings;
-			
-		}
-
-		return config;
+		return settings;
 
 	};
 

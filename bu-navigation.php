@@ -141,16 +141,17 @@ class BU_Navigation_Plugin {
 		if( empty( $this->settings ) ) {
 			$settings = array();
 
-			$settings['display'] = get_option( self::OPTION_DISPLAY, true );
-			$settings['max_items'] = get_option( self::OPTION_MAX_ITEMS, BU_NAVIGATION_PRIMARY_MAX );
-			$settings['dive'] = get_option( self::OPTION_DIVE, true );
-			$settings['depth'] = get_option( self::OPTION_DEPTH, BU_NAVIGATION_PRIMARY_DEPTH );
-			$settings['allow_top'] = get_option( self::OPTION_ALLOW_TOP, false );
+			$settings['display'] = (bool) get_option( self::OPTION_DISPLAY, true );
+			$settings['max_items'] = (int) get_option( self::OPTION_MAX_ITEMS, BU_NAVIGATION_PRIMARY_MAX );
+			$settings['dive'] = (bool) get_option( self::OPTION_DIVE, true );
+			$settings['depth'] = (int) get_option( self::OPTION_DEPTH, BU_NAVIGATION_PRIMARY_DEPTH );
+			$settings['allow_top'] = (bool) get_option( self::OPTION_ALLOW_TOP, false );
 
 			$this->settings = $settings;
 		}
 
 		return $this->settings;
+		
 	}
 
 	/**

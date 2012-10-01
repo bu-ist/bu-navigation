@@ -57,7 +57,7 @@ class BU_Navigation_Plugin {
 		add_action( 'init', array( $this, 'init' ), 1 );
 
 		// Filter plugin settings utilized by bu_navigation_display_primary function
-		add_filter('bu_filter_primarynav_defaults', 'filter_primary_nav_defaults' );
+		add_filter('bu_filter_primarynav_defaults', array( $this, 'filter_primary_nav_defaults' ) );
 
 	}
 
@@ -187,22 +187,11 @@ class BU_Navigation_Plugin {
 	 */ 
 	public function filter_primary_nav_defaults( $defaults ) {
 
-		$settings = $this->get_settings();
+		$defaults['echo'] = $this->get_setting('display');
+		$defaults['depth'] = $this->get_setting('depth');
+		$defaults['max_items'] = $this->get_setting('max_items');
+		$defaults['dive'] = $this->get_setting('dive');
 
-		foreach( $settings as $key => $val ) {
-
-			if( array_key_exists( $key, $defaults ) ) {
-
-				$defaults[$key] = $val;
-
-			} else {
-
-				error_log('BU Navigation -- Primary nav defaults -- settings key does not exist: ' . $key );
-
-			}
-
-		}
-		
 		return $defaults;
 
 	}

@@ -90,11 +90,11 @@ class BU_Navigation_Admin_Primary {
 			$bu_allow_top_level_page = isset($_POST['bu_allow_top_level_page']) ? intval($_POST['bu_allow_top_level_page']) : 0;
 
 			$updates = array(
-				'display' => (bool) $primarynav_display,
+				'display' => (int) $primarynav_display,
 				'max_items' => (int) $primarynav_max,
-				'dive' => (bool) $primarynav_dive,
+				'dive' => (int) $primarynav_dive,
 				'depth' => (int) $primarynav_depth,
-				'allow_top' => (bool) $bu_allow_top_level_page
+				'allow_top' => (int) $bu_allow_top_level_page
 				);
 
 			$GLOBALS['bu_navigation_plugin']->update_settings( $updates );

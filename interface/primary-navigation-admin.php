@@ -22,7 +22,7 @@
 	<form id="bu_navigation_primary_navigation" action="" method="post">
 		<input type="hidden" name="bu_navigation_primary_save" value="save" />
 		<p>
-			<input type="checkbox" id="bu_navigation_primarynav" name="bu_navigation_primarynav" value="1" <?php if ($bu_navigation_primarynav) echo 'checked="checked"'; ?> /> 
+			<input type="checkbox" id="bu_navigation_primarynav" name="bu_navigation_primarynav" value="1" <?php checked( $bu_navigation_primarynav ); ?> /> 
 			<strong><label for="bu_navigation_primarynav">Display primary navigation bar</label></strong>
 			<br />
 			Toggles the primary navigation bar on and off.
@@ -38,7 +38,7 @@
 		<?php if ( (defined('BU_NAVIGATION_SUPPORTED_DEPTH') && BU_NAVIGATION_SUPPORTED_DEPTH != 0) || !defined('BU_NAVIGATION_SUPPORTED_DEPTH') ) { ?>
 			<?php $bu_pn_depth_limit = ( defined('BU_NAVIGATION_SUPPORTED_DEPTH') ) ? BU_NAVIGATION_SUPPORTED_DEPTH : BU_NAVIGATION_PRIMARY_DEPTH; ?>
 			<p>
-				<input type="checkbox" id="bu_navigation_primarynav_dive" name="bu_navigation_primarynav_dive" value="1" <?php if ($bu_navigation_primarynav_dive) echo 'checked="checked"'; ?> /> 
+				<input type="checkbox" id="bu_navigation_primarynav_dive" name="bu_navigation_primarynav_dive" value="1" <?php checked($bu_navigation_primarynav_dive); ?> /> 
 				<strong><label for="bu_navigation_primarynav_dive">Use drop-down menus</label></strong>
 				<br />
 				If checked, any top-level pages with children will expand to display 
@@ -76,7 +76,7 @@
 		<?php } ?>
 		
 		<p>
-			<input type="checkbox" name="bu_allow_top_level_page" id="bu_allow_top_level_page" value="1" <?php echo $bu_allow_top_level_page ? 'checked="checked"' : '';?> />
+			<input type="checkbox" name="bu_allow_top_level_page" id="bu_allow_top_level_page" value="1" <?php checked( $bu_allow_top_level_page ); ?> />
 			<strong><label for="bu_allow_top_level_page">Allow Top-Level Pages</label></strong><br/>
 			If checked, users will be allowed to display top level pages to the navigation.
 		</p>

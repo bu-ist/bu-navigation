@@ -63,6 +63,7 @@ class BU_Navigation_Settings_Test extends WP_UnitTestCase {
 			);
 
 		$this->plugin->update_settings( $updates );
+		$this->plugin->clear_settings();
 
 		$this->assertSame( $updates, $this->plugin->get_settings() );
 
@@ -85,9 +86,10 @@ class BU_Navigation_Settings_Test extends WP_UnitTestCase {
 	 public function test_update_with_invalid_depth() {
 
 	 	define( 'BU_NAVIGATION_SUPPORTED_DEPTH', 5 );
-
 	 	$updates = array( 'depth' => 10 );
+
 	 	$this->plugin->update_settings( $updates );
+		$this->plugin->clear_settings();
 
 	 	$this->assertEquals( 5, $this->plugin->get_setting( 'depth' ) );
 

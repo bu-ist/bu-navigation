@@ -15,21 +15,6 @@ require_once 'page-objects/primary-navigation-settings.php';
  */
  class BU_Navigation_Primary_Settings_Test extends WP_SeleniumTestCase {
 
- 	public $default_settings;
-
-	public function setUp() {
-
-		parent::setUp();
-
-		$this->plugin = $GLOBALS['bu_navigation_plugin'];
-
-	}
-
-	public function tearDown() {
-
-		parent::tearDown();
-
-	}
 	/**
 	* Primary navigation settings menu item is present and page loads correctly
 	*/ 
@@ -51,14 +36,12 @@ require_once 'page-objects/primary-navigation-settings.php';
 
 		$page->setOptions( array( 'display' =>  0 ) );
 		$page->save();
-		$page->assertChangesWereSaved();
 
 		$value = $page->getOption('display');
 		$this->assertFalse( $value );
 
 		$page->setOptions( array( 'display' =>  1 ) );
 		$page->save();
-		$page->assertChangesWereSaved();
 
 		$value = $page->getOption('display');
 		$this->assertTrue( $value );
@@ -79,15 +62,13 @@ require_once 'page-objects/primary-navigation-settings.php';
 		// Set to new value
 		$page->setOptions( array( 'max_items' =>  '10' ) );
 		$page->save();
-		$page->assertChangesWereSaved();
 
 		$value = $page->getOption('max_items');
 		$this->assertEquals( 10, $value );
 
 		// Invalid submittion shouldn't go through
 		$page->setOptions( array( 'max_items' =>  '-2' ) );
-		$page->save();
-		$page->assertErrorSavingChanges();
+		$page->save_with_errors();
 
 		$value = $page->getOption('max_items');
 		$this->assertEquals( 10, $value );
@@ -95,7 +76,6 @@ require_once 'page-objects/primary-navigation-settings.php';
 		// Revert back to original value
 		$page->setOptions( array( 'max_items' =>  '6' ) );
 		$page->save();
-		$page->assertChangesWereSaved();
 
 		$value = $page->getOption('max_items');
 		$this->assertEquals( 6, $value );
@@ -114,14 +94,12 @@ require_once 'page-objects/primary-navigation-settings.php';
 
 		$page->setOptions( array( 'dive' =>  0 ) );
 		$page->save();
-		$page->assertChangesWereSaved();
 
 		$value = $page->getOption('dive');
 		$this->assertFalse( $value );
 
 		$page->setOptions( array( 'dive' =>  1 ) );
 		$page->save();
-		$page->assertChangesWereSaved();
 
 		$value = $page->getOption('dive');
 		$this->assertTrue( $value );
@@ -140,14 +118,12 @@ require_once 'page-objects/primary-navigation-settings.php';
 
 		$page->setOptions( array( 'allow_top' =>  1 ) );
 		$page->save();
-		$page->assertChangesWereSaved();
 
 		$value = $page->getOption('allow_top');
 		$this->assertTrue( $value );
 
 		$page->setOptions( array( 'allow_top' =>  0 ) );
 		$page->save();
-		$page->assertChangesWereSaved();
 
 		$value = $page->getOption('allow_top');
 		$this->assertFalse( $value );

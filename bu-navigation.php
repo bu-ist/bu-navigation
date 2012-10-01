@@ -139,6 +139,7 @@ class BU_Navigation_Plugin {
 	public function get_settings() {
 
 		if( empty( $this->settings ) ) {
+
 			$settings = array();
 
 			$settings['display'] = (bool) get_option( self::OPTION_DISPLAY, true );
@@ -148,6 +149,7 @@ class BU_Navigation_Plugin {
 			$settings['allow_top'] = (bool) get_option( self::OPTION_ALLOW_TOP, false );
 
 			$this->settings = $settings;
+			
 		}
 
 		return $this->settings;
@@ -170,14 +172,33 @@ class BU_Navigation_Plugin {
 			if( $key == 'depth' )
 				$val = $this->depth_fix( $val );
 
-			// Update internal settings property
-			$this->settings[$key] = $val;
+			// Cooerce booleans into ints for update_option
+			if( is_bool( $val ) ) $val = intval( $val );
 
 			// Commit to db
 			$option = constant( 'self::OPTION_' . strtoupper( $key ) );
-			update_option( $option, $val );
+			$result = update_option( $option, $val );
+
+			// Update internal settings on successful commit
+			if( $result ) {
+
+				// Update internal settings property
+				$this->settings[$key] = $val;
+
+			}
 
 		}
+
+	}
+
+	/**
+	 * Clear internal settings object
+	 * 
+	 * Useful for unit tests that want to check actual DB values
+	 */ 
+	public function clear_settings() {
+
+		$this->settings = array();
 
 	}
 

@@ -70,6 +70,23 @@ class BUN_Settings_Page {
 	public function save() {
 
 		$this->form->submit();
+		$this->assertChangesWereSaved();
+
+		// Reload settings page to make SURE form data has updated
+		$this->webdriver->open( self::URL );
+		$this->form = new SeleniumFormHelper( $this->webdriver, self::FORM_ID );
+	
+
+	}
+
+	public function save_with_errors() {
+
+		$this->form->submit();
+		$this->assertErrorSavingChanges();
+
+		// Reload settings page to make SURE form data has updated
+		$this->webdriver->open( self::URL );
+		$this->form = new SeleniumFormHelper( $this->webdriver, self::FORM_ID );
 
 	}
 

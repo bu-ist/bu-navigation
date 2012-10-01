@@ -68,4 +68,29 @@ class BU_Navigation_Settings_Test extends WP_UnitTestCase {
 
 	}
 
+	/**
+	 * @group bu-navigation-settings
+	 */
+	 public function test_depth_fix() {
+
+	 	$this->assertEquals( BU_NAVIGATION_PRIMARY_DEPTH, $this->plugin->depth_fix() );
+
+	 	$this->assertEquals( 5, $this->plugin->depth_fix( 5 ) );
+
+	 	define( 'BU_NAVIGATION_SUPPORTED_DEPTH', 2 );
+	 	$this->assertEquals( 2, $this->plugin->depth_fix( 6 ) );
+
+	 }
+
+	 public function test_update_with_invalid_depth() {
+
+	 	define( 'BU_NAVIGATION_SUPPORTED_DEPTH', 5 );
+
+	 	$updates = array( 'depth' => 10 );
+	 	$this->plugin->update_settings( $updates );
+
+	 	$this->assertEquals( 5, $this->plugin->get_setting( 'depth' ) );
+
+	 }
+
 }

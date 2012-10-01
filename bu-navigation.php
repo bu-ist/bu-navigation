@@ -208,10 +208,8 @@ class BU_Navigation_Plugin {
 
 	/**
 	 * Assure that current max depth is below the threshold set by the current themes BU_NAVIGATION_SUPPORTED_DEPTH constant
-	 * 
-	 * @todo unit-test
 	 */ 
-	protected function depth_fix( $curr_depth ) {
+	public function depth_fix( $curr_depth = 0 ) {
 
 		if ( defined('BU_NAVIGATION_SUPPORTED_DEPTH') && $curr_depth > BU_NAVIGATION_SUPPORTED_DEPTH ) {
 			return BU_NAVIGATION_SUPPORTED_DEPTH;

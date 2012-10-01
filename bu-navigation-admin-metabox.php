@@ -222,6 +222,10 @@ class BU_Navigation_Admin_Metabox {
 		// Pass current post ancestors if present to assist in selecting current post
 		$ancestors = null;
 
+		// @todo setup an else clause here that fetches ancestors if they aren't set on the
+		// post object.  Something in our environment seems to be removing them randomly,
+		// and with memcache that can stick around for a while in the cache.
+
 		if( is_object( $post ) && isset( $post->ancestors ) && ! empty( $post->ancestors ))
 			$ancestors = $post->ancestors;
 
@@ -236,9 +240,9 @@ class BU_Navigation_Admin_Metabox {
 		$data = array(
 			'tree' => self::$interface->get_pages( 0, array( 'depth' => 1 ) ),
 			'ancestors' => $ancestors,
-			'currentPage' => $post_id,
-			'allowTop' => $this->allow_top_level_page(),
-			'isSectionEditor' => $is_section_editor,
+			'current_post' => $post_id,
+			'allow_top' => $this->allow_top_level_page(),
+			'is_section_editor' => $is_section_editor,
 			);
 
 		return $data;

@@ -486,11 +486,11 @@ jQuery(document).ready( function($) {
 	// Instantiate navtree object
 	navtree = bu.navigation.views.reposition_post({
 		tree_id: '#edit_page_tree',
-		post_id: bu.navigation.settings.currentPage,
+		initial_data: bu.navigation.settings.tree,
+		post_id: bu.navigation.settings.current_post,
 		ancestors: bu.navigation.settings.ancestors,
-		is_section_editor: bu.navigation.settings.isSectionEditor,
-		allow_top_level: bu.navigation.settings.allowTop,
-		initial_data: bu.navigation.settings.tree
+		is_section_editor: bu.navigation.settings.is_section_editor,
+		allow_top_level: bu.navigation.settings.allow_top
 	});
 
 	/**

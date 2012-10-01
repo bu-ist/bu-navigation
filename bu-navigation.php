@@ -35,6 +35,16 @@ class BU_Navigation_Plugin {
 
 	static $admin;
 
+	// Plugin settings option names
+	const OPTION_DISPLAY = 'bu_navigation_primarynav';
+	const OPTION_MAX = 'bu_navigation_primarynav_max';
+	const OPTION_DIVE = 'bu_navigation_primarynav_dive';
+	const OPTION_DEPTH = 'bu_navigation_primarynav_depth';
+	const OPTION_ALLOW_TOP = 'bu_allow_top_level_page';
+
+	// Plugin settings
+	private $settings = array();
+
 	public function __construct() {
 
 		$this->register_hooks();
@@ -102,6 +112,54 @@ class BU_Navigation_Plugin {
 			foreach ($files as $filename) {
 				@include_once($filename);
 			}
+		}
+
+	}
+
+	public function get_setting( $name ) {
+
+		$settings = $this->get_settings();
+
+		if( array_key_exists( $name, $settings ) )
+			return $settings[$name];
+
+		return false;
+
+	}
+
+	public function get_settings() {
+
+		if( empty( $this->settings ) ) {
+			$settings = array();
+
+			$settings['display'] = get_option( self::OPTION_DISPLAY, true );
+			$settings['max'] = get_option( self::OPTION_MAX, BU_NAVIGATION_PRIMARY_MAX );
+			$settings['dive'] = get_option( self::OPTION_DIVE, true );
+			$settings['depth'] = get_option( self::OPTION_DEPTH, BU_NAVIGATION_PRIMARY_DEPTH );
+			$settings['allow_top'] = get_option( self::OPTION_ALLOW_TOP, false );
+
+			$this->settings = $settings;
+		}
+
+		return $this->settings;
+	}
+
+	public function update_settings( $updates ) {
+
+		$settings = $this->get_settings();
+
+		foreach( $updates as $key => $val ) {
+
+			if( ! array_key_exists( $key, $settings ) )
+				continue;
+
+			// Update internal settings property
+			$this->settings[$key] = $val;
+
+			// Commit to db
+			$option = constant( 'self::OPTION_' . strtoupper( $key ) );
+			update_option( $option, $val );
+
 		}
 
 	}

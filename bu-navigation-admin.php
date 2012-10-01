@@ -4,14 +4,20 @@ require_once(dirname(__FILE__) . '/bu-navigation-interface.php'); // bu jstree c
 
 /**
  * Administrative code loader
+ * 
+ * Navigation admin componenents:
+ * 	- Primary settings page - "Appearance > Primary Navigation" (bu-navigation-admin-primary.php)
+ *  - Navigation Manager - "Edit Order" page (bu-navman.php)
+ *  - Navigation attributes metabox (bu-navigation-admin-metabox.php)
+ *  - Manage posts "Section" dropdown (bu-filter-pages.php)
  */ 
 class BU_Navigation_Admin {
 
-	// Administrative page component classes
-	static $metabox;
+	// Administrative component classes
+	static $settings_page;
 	static $navman;	// @todo implement
+	static $metabox;
 	static $manage_posts; // @todo implement
-	static $primary_nav_settings;	// @todo implement
 
 	public function __construct() {
 
@@ -22,48 +28,61 @@ class BU_Navigation_Admin {
 
 	public function register_hooks() {
 
-		include(dirname(__FILE__) . '/bu-navman.php'); // Navman "Edit Order" interface, custom admin page
+		// Componenents with menu items need to be registered for every admin request
+		$this->load_primary_settings_page();
+		$this->load_navman_page();
+
+		// Other admin components can be loaded more selectively
+		add_action( 'load-edit.php', array( $this, 'load_filter_pages' ) );
+		add_action( 'load-post.php', array( $this, 'load_metaboxes' ) );
+		add_action( 'load-post-new.php', array( $this, 'load_metaboxes' ) );
+
+	}
+
+	/**
+	 * Primary plugin settings page
+	 * 
+	 * Accessed via "Appearance > Primary Navigation" menu item
+	 */ 
+	public function load_primary_settings_page() {
+
+		require_once(dirname(__FILE__) . '/bu-navigation-admin-primary.php');
+		self::$settings_page = new BU_Navigation_Admin_Primary();
+
+	}
+
+	/**
+	 * Site navigation manager interface
+	 * 
+	 * Accessed via the "Edit Order" menu item under support post type menus
+	 */ 
+	public function load_navman_page() {
+
+		require_once(dirname(__FILE__) . '/bu-navman.php'); // Navman "Edit Order" interface, custom admin page
 		// self::$navman = new BU_Navigation_Admin_Navman();
 
-		// Add menu items
-		// @todo self::$navman->register_hooks()
-		// `--> move menu code to navman class
-		add_action('admin_menus', 'setup_menus' );
-
-		// Manage posts section dropdown
-		add_action( 'load-edit.php', array( $this, 'load_manage_posts' ) );
-
-		// Edit post navigation metabox
-		add_action( 'load-post.php', array( $this, 'load_edit_post' ) );
-		add_action( 'load-post-new.php', array( $this, 'load_edit_post' ) );
-
 	}
 
-	public function setup_menus() {
-
-		// Add "Edit Order" links to the submenu of each supported post type
-		$post_types = bu_navigation_supported_post_types();
-
-		foreach( $post_types as $pt ) {
-			$parent_slug = 'edit.php?post_type=' . $pt;
-			// @todo loads for array( self::$navman, 'render' )
-			$hook = add_submenu_page($parent_slug, null, 'Edit Order', 'edit_pages', __FILE__, 'bu_navman_admin_menu_display');
-		}
-			
-		// @todo find a better place for this
-		bu_navman_clear_lock();
-
-	}
-
-	public function load_manage_posts() {
+	/**
+	 * Filter manage post tables by section dropdown
+	 * 
+	 * Found on the manage posts page (edit.php) for supported post types
+	 */ 
+	public function load_filter_pages() {
 
 		// @todo maybe be more selective in WHICH edit.php pages we load section dropdown on
-		include(dirname(__FILE__) . '/bu-filter-pages.php'); // Filter pages, only needed on manage posts
+		require_once(dirname(__FILE__) . '/bu-filter-pages.php'); // Filter pages, only needed on manage posts
 		// self::$manage_posts = new BU_Navigation_Admin_ManagePosts();
 
 	}
 
-	public function load_edit_post() {
+	/**
+	 * Navigation attributes meta box
+	 * 
+	 * Displayed for supported post types.  Allows repositioning of page via modal tree interface, setting of
+	 * navigation label, and toggling of display in nav menus.
+	 */ 
+	public function load_metaboxes() {
 		global $pagenow;
 
 		$post_id = $post_type = null;
@@ -106,7 +125,7 @@ class BU_Navigation_Admin {
 		}
 
 		// Load admin metabox class
-		include(dirname(__FILE__) . '/bu-navigation-admin-metabox.php'); // Position & Visibility
+		require_once(dirname(__FILE__) . '/bu-navigation-admin-metabox.php'); // Position & Visibility
 
 		// Instantiate for current post
 		self::$metabox = new BU_Navigation_Admin_Metabox( $post_id, $post_type );

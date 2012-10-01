@@ -14,8 +14,6 @@ Author: Boston University (IS&T)
  * Navigation Management Screens
  * Content navigation widget
  * Filter for drilling into a particular section when view the edit pages screen
- * 
- * @todo Include javascript and enqueue only if needed. 
  */
 
 /* BU Navigation constants */
@@ -37,7 +35,7 @@ class BU_Navigation_Plugin {
 
 	// Plugin settings option names
 	const OPTION_DISPLAY = 'bu_navigation_primarynav';
-	const OPTION_MAX = 'bu_navigation_primarynav_max';
+	const OPTION_MAX_ITEMS = 'bu_navigation_primarynav_max';
 	const OPTION_DIVE = 'bu_navigation_primarynav_dive';
 	const OPTION_DEPTH = 'bu_navigation_primarynav_depth';
 	const OPTION_ALLOW_TOP = 'bu_allow_top_level_page';
@@ -58,6 +56,9 @@ class BU_Navigation_Plugin {
 
 		add_action( 'init', array( $this, 'init' ), 1 );
 
+		// Filter plugin settings utilized by bu_navigation_display_primary function
+		add_filter('bu_filter_primarynav_defaults', 'filter_primary_nav_defaults' );
+
 	}
 
 	/**
@@ -70,7 +71,7 @@ class BU_Navigation_Plugin {
 
 		if( is_admin() ) {
 
-			include(dirname(__FILE__) . '/bu-navigation-admin.php');
+			require_once(dirname(__FILE__) . '/bu-navigation-admin.php');
 			self::$admin = new BU_Navigation_Admin();
 
 		}
@@ -92,7 +93,7 @@ class BU_Navigation_Plugin {
 		if ( !is_blog_installed() )
 			return;
 
-		include(dirname(__FILE__) . '/bu-navigation-widget.php'); // Content navigation widget
+		require_once(dirname(__FILE__) . '/bu-navigation-widget.php'); // Content navigation widget
 		register_widget('BU_Widget_Pages');
 
 	}
@@ -116,6 +117,11 @@ class BU_Navigation_Plugin {
 
 	}
 
+	// Plugin settings
+
+	/**
+	 * Get a single plugin setting by slug
+	 */ 
 	public function get_setting( $name ) {
 
 		$settings = $this->get_settings();
@@ -127,13 +133,16 @@ class BU_Navigation_Plugin {
 
 	}
 
+	/**
+	 * Get all plugin settings
+	 */ 
 	public function get_settings() {
 
 		if( empty( $this->settings ) ) {
 			$settings = array();
 
 			$settings['display'] = get_option( self::OPTION_DISPLAY, true );
-			$settings['max'] = get_option( self::OPTION_MAX, BU_NAVIGATION_PRIMARY_MAX );
+			$settings['max_items'] = get_option( self::OPTION_MAX_ITEMS, BU_NAVIGATION_PRIMARY_MAX );
 			$settings['dive'] = get_option( self::OPTION_DIVE, true );
 			$settings['depth'] = get_option( self::OPTION_DEPTH, BU_NAVIGATION_PRIMARY_DEPTH );
 			$settings['allow_top'] = get_option( self::OPTION_ALLOW_TOP, false );
@@ -144,6 +153,9 @@ class BU_Navigation_Plugin {
 		return $this->settings;
 	}
 
+	/**
+	 * Update plugin settings
+	 */ 
 	public function update_settings( $updates ) {
 
 		$settings = $this->get_settings();
@@ -153,6 +165,10 @@ class BU_Navigation_Plugin {
 			if( ! array_key_exists( $key, $settings ) )
 				continue;
 
+			// Prevent depth setting from exceeding theme limit (BU_NAVIGATION_SUPPORTED_DEPTH)
+			if( $key == 'depth' )
+				$val = $this->depth_fix( $val );
+
 			// Update internal settings property
 			$this->settings[$key] = $val;
 
@@ -161,6 +177,49 @@ class BU_Navigation_Plugin {
 			update_option( $option, $val );
 
 		}
+
+	}
+
+	/**
+	 * Filter the navigation settings used by bu_navigation_display_primary to
+	 * utilize plugin settings
+	 */ 
+	public function filter_primary_nav_defaults( $defaults ) {
+
+		$settings = $this->get_settings();
+
+		foreach( $settings as $key => $val ) {
+
+			if( array_key_exists( $key, $defaults ) ) {
+
+				$defaults[$key] = $val;
+
+			} else {
+
+				error_log('BU Navigation -- Primary nav defaults -- settings key does not exist: ' . $key );
+
+			}
+
+		}
+		
+		return $defaults;
+
+	}
+
+	/**
+	 * Assure that current max depth is below the threshold set by the current themes BU_NAVIGATION_SUPPORTED_DEPTH constant
+	 * 
+	 * @todo unit-test
+	 */ 
+	protected function depth_fix( $curr_depth ) {
+
+		if ( defined('BU_NAVIGATION_SUPPORTED_DEPTH') && $curr_depth > BU_NAVIGATION_SUPPORTED_DEPTH ) {
+			return BU_NAVIGATION_SUPPORTED_DEPTH;
+		}
+		
+		if ( !$curr_depth ) $curr_depth = BU_NAVIGATION_PRIMARY_DEPTH;
+		
+		return $curr_depth;
 
 	}
 

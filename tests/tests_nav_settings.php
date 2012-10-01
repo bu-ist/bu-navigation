@@ -25,7 +25,7 @@ class BU_Navigation_Settings_Test extends WP_UnitTestCase {
 	public function test_get_setting() {
 		
 		$this->assertTrue( $this->plugin->get_setting( 'display' ) );
-		$this->assertEquals( BU_NAVIGATION_PRIMARY_MAX, $this->plugin->get_setting( 'max' ) );
+		$this->assertEquals( BU_NAVIGATION_PRIMARY_MAX, $this->plugin->get_setting( 'max_items' ) );
 		$this->assertTrue( $this->plugin->get_setting( 'dive' ) );
 		$this->assertEquals( BU_NAVIGATION_PRIMARY_DEPTH, $this->plugin->get_setting( 'depth' ) );
 		$this->assertFalse( $this->plugin->get_setting( 'allow_top' ) );
@@ -39,7 +39,7 @@ class BU_Navigation_Settings_Test extends WP_UnitTestCase {
 
 		$expected_settings = array(
 			'display' => true,
-			'max' => BU_NAVIGATION_PRIMARY_MAX,
+			'max_items' => BU_NAVIGATION_PRIMARY_MAX,
 			'dive' => true,
 			'depth' => BU_NAVIGATION_PRIMARY_DEPTH,
 			'allow_top' => false
@@ -56,7 +56,7 @@ class BU_Navigation_Settings_Test extends WP_UnitTestCase {
 
 		$updates = array(
 			'display' => false,
-			'max' => 3,
+			'max_items' => 3,
 			'dive' => false,
 			'depth' => 2,
 			'allow_top' => true

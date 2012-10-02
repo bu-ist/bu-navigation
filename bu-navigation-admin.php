@@ -9,7 +9,7 @@ require_once(dirname(__FILE__) . '/bu-navigation-interface.php'); // bu jstree c
  * 	- Primary settings page - "Appearance > Primary Navigation" (bu-navigation-admin-primary.php)
  *  - Navigation Manager - "Edit Order" page (bu-navman.php)
  *  - Navigation attributes metabox (bu-navigation-admin-metabox.php)
- *  - Manage posts "Section" dropdown (bu-filter-pages.php)
+ *  - Manage posts "Section" dropdown (bu-navigation-admin-filter-pages.php)
  */ 
 class BU_Navigation_Admin {
 
@@ -17,7 +17,7 @@ class BU_Navigation_Admin {
 	static $settings_page;
 	static $navman;	// @todo implement
 	static $metabox;
-	static $manage_posts; // @todo implement
+	static $filter_pages;
 
 	public function __construct() {
 
@@ -70,9 +70,15 @@ class BU_Navigation_Admin {
 	 */ 
 	public function load_filter_pages() {
 
-		// @todo maybe be more selective in WHICH edit.php pages we load section dropdown on
-		require_once(dirname(__FILE__) . '/bu-filter-pages.php'); // Filter pages, only needed on manage posts
-		// self::$manage_posts = new BU_Navigation_Admin_ManagePosts();
+		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'post';
+		$post_parent = isset( $_GET['post_parent'] ) ? intval($_GET['post_parent']) : 0;
+
+		if( in_array( $post_type, bu_navigation_supported_post_types() ) ) {
+
+			require_once(dirname(__FILE__) . '/bu-navigation-admin-filter-pages.php');
+			self::$filter_pages = new BU_Navigation_Admin_Filter_Pages( $post_type, $post_parent );
+
+		}
 
 	}
 

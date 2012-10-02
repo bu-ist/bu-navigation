@@ -12,6 +12,11 @@ require_once 'page-objects/navman.php';
  *  - context menus (depend on right click)
  * 	- edit link (dependent on right click / context menu)
  * 	- section editing tests
+ *  - fix move before/after
+ * 
+ *  AFTER REFACTORING:
+ *  - post status labels (draft, pending, trash)
+ *  - adjust test_save_with_deletions to pass (deleted post still shows up as it's in the trash)
  */
  class BU_Navigation_Navman_Test extends WP_SeleniumTestCase {
 
@@ -54,18 +59,6 @@ require_once 'page-objects/navman.php';
 	}
 
 	/* Test types */
-
-	/**
-	 * @group bu-navigation-types
-	 */ 
-	public function test_section() {
-
-		$navman = new BUN_Navman_Page( $this, 'page' );
-		$page = $navman->getPage( $this->pages['parent'] );
-
-		$this->assertEquals( $page->getAttribute('rel'), BUN_Navman_Page::TYPES_FOLDER );
-
-	}
 
 	/**
 	 * @group bu-navigation-types

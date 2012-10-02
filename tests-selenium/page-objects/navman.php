@@ -8,7 +8,7 @@ class BUN_Navman_Page {
 	protected $webdriver = null;
 
 	/* URL's */
-	const NAVMAN_BASE_URL = '/wp-admin/edit.php?page=bu-navigation/bu-navman.php';
+	const NAVMAN_BASE_URL = '/wp-admin/edit.php?page=bu-navigation-manager';
 	const NAVMAN_PAGE_HEADER_XPATH = "//h2[contains(text(),'Edit Navigation')]";
 
 	/* Markup constants */
@@ -37,7 +37,6 @@ class BUN_Navman_Page {
 
 	// Tree types (li rel attribute)
 	const TYPES_PAGE = 'page';
-	const TYPES_FOLDER = 'folder';
 	const TYPES_LINK = 'link';
 	const TYPES_EXCLUDED = 'page_excluded';
 
@@ -101,14 +100,14 @@ class BUN_Navman_Page {
 	}
 
 	/**
-	 * @todo option to expand all before running this
+	 * Gets all non-leaf nodes (sections)
 	 */ 
 	public function getSections( $expand_first = false ) {
  		
  		if( $expand_first )
  			$this->expandAll();
 
- 		return $this->webdriver->getElement( LocatorStrategy::cssSelector, '#navman_container li[rel="folder"]');
+ 		return $this->webdriver->getElement( LocatorStrategy::cssSelector, '#navman_container li[class*="jstree-closed"], #navman_container li[class*="jstree-open"]');
 
 	}
 

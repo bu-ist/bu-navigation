@@ -3,10 +3,17 @@
 	background-color: #F7F7F7;
 	border: 1px solid #E5E5E5;
 	padding: 1.2em;
+	margin-top: 90px;
 }
 
-.page_position_edit_buttons {
+.page_location_toolbar {
+	width: inherit;
+	background-color: white;
+	position: fixed;
+}
+
+.page_location_toolbar .edit_buttons {
 	float: right;
-	margin-top: 3em;
-	margin-bottom: 3em;
+	margin-top: 45px;
+	margin-bottom: 1em;
 }

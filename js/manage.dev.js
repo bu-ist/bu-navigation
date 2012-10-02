@@ -1,3 +1,5 @@
+/* @todo refactor to be consistent with navigation attributes metabox, recompress */
+
 var navman = null;
 var navman_dirty = false;
 

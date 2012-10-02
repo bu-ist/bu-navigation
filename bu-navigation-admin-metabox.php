@@ -1,5 +1,7 @@
 <?php
 
+require_once(dirname(__FILE__) . '/bu-navigation-interface.php' );
+
 /**
  * BU Navigation Admin Metabox controller
  * 
@@ -29,10 +31,6 @@ class BU_Navigation_Admin_Metabox {
 		$this->post = $post;
 		$this->post_type = $post_type;
 		$this->post_type_labels = $this->get_post_type_labels( $this->post_type );
-
-		// Instantiate navman tree interface object
-		$tree_post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
-		self::$interface = new BU_Navman_Interface( $tree_post_types );
 
 		// Attach WP actions/filters
 		$this->register_hooks();
@@ -80,7 +78,12 @@ class BU_Navigation_Admin_Metabox {
 		wp_enqueue_script( 'bu-page-parent-deletion', $scripts_path . '/deletion' . $suffix . '.js', array('jquery'));
 		wp_localize_script( 'bu-page-parent-deletion', 'bu_navigation_pt_labels', $this->post_type_labels );
 
-		// jstree scripts
+		// Instantiate navman tree interface object
+		// @todo this logic should be centralized somewhere else
+		$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
+		self::$interface = new BU_Navman_Interface( $post_types );
+
+		// Load default navigation manager scripts & styles
 		self::$interface->enqueue_scripts();
 
 		wp_enqueue_script('bu-navigation-metabox', $scripts_path . '/navigation-metabox' . $suffix . '.js', array('jquery','bu-jquery-tree'));

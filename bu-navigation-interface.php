@@ -33,7 +33,7 @@ class BU_Navman_Interface {
 		$this->config = wp_parse_args( $config, $defaults );
 
 		$this->post_types = explode(',', $post_types );
-		
+
 	}
 
 	/**
@@ -53,6 +53,7 @@ class BU_Navman_Interface {
 		wp_register_script( 'bu-jquery-cookie', $vendor_path . '/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '00168770', true);
 		wp_register_script( 'bu-jquery-tree', $vendor_path . '/jstree/jquery.jstree' . $suffix . '.js', array( 'jquery', 'bu-jquery-cookie' ), '1.0-rc3', true );
 		
+		//switched from jquery-json to json2 @see http://ejohn.org/blog/ecmascript-5-strict-mode-json-and-more/
 		wp_enqueue_script( 'json2' );
 
 		// Main configuration file

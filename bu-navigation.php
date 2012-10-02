@@ -16,6 +16,12 @@ Author: Boston University (IS&T)
  * Filter for drilling into a particular section when view the edit pages screen
  */
 
+/*
+@todo
+	- multiple post types should be allowed to support links -- move array(page,link) code to isolated function
+
+*/ 
+
 /* BU Navigation constants */
 define('BU_NAV_PLUGIN_DIR', dirname(__FILE__));
 

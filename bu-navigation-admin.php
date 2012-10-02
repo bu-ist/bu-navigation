@@ -1,7 +1,5 @@
 <?php
 
-require_once(dirname(__FILE__) . '/bu-navigation-interface.php'); // bu jstree config
-
 /**
  * Administrative code loader
  * 
@@ -15,7 +13,7 @@ class BU_Navigation_Admin {
 
 	// Administrative component classes
 	static $settings_page;
-	static $navman;	// @todo implement
+	static $navman;
 	static $metabox;
 	static $filter_pages;
 
@@ -57,9 +55,11 @@ class BU_Navigation_Admin {
 	 * Accessed via the "Edit Order" menu item under support post type menus
 	 */ 
 	public function load_navman_page() {
+		
+		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'post';
 
-		require_once(dirname(__FILE__) . '/bu-navman.php'); // Navman "Edit Order" interface, custom admin page
-		// self::$navman = new BU_Navigation_Admin_Navman();
+		require_once(dirname(__FILE__) . '/bu-navigation-admin-navman.php');
+		self::$navman = new BU_Navigation_Admin_Navman( $post_type );
 
 	}
 

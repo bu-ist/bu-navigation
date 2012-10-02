@@ -1,27 +1,26 @@
 <div class="wrap">
     <h2>Edit Navigation</h2>
-	<?php 
-	$editing_user = bu_navman_check_lock();
 
-	if ($editing_user) {
-		$user_detail = get_userdata($editing_user);
-	?>
+    <!-- @todo use admin notices for this -->
+	<?php if( $editing_user ): ?>
+	<?php $user_detail = get_userdata($editing_user); ?>
 	<div id="message" class="updated fade">
 		<p>Warning: <strong><?php echo $user_detail->display_name; ?></strong> is currently editing this site's navigation.</p>
 	</div>
-	<?php } ?>
+	<?php endif; ?>
 
-	<?php if ($saved === TRUE) { ?>
+	<?php if( $saved === TRUE ): ?>
 		<div id="message" class="updated fade">
 			<p>Your navigation changes were saved.</p>
 		</div>
-	<?php } else if ($saved === FALSE) { ?>
+	<?php elseif( $saved === FALSE ): ?>
 		<div class="error">
 			<p><strong>Error:</strong> Errors occurred while saving your navigation changes.</p>
 		</div>
-	<?php } ?>
+	<?php endif; ?>
+
 	<div class="metabox-holder has-right-sidebar">
-		<?php if ($post_type == 'page') { ?>
+		<?php if( $post_type == 'page' ): ?>
 		<div class="inner-sidebar">
 			<div id="navman_addlink" class="postbox">
 				<div class="handlediv" title="Click to toggle"><br /></div>
@@ -53,7 +52,7 @@
 				</div>
 			</div>			
 		</div>
-		<?php } ?>
+		<?php endif; ?>
 
 		<div id="navman_main">
 			<form method="post" id="navman_form" action="">
@@ -91,7 +90,7 @@
 			</form>
 		</div>
 		
-		<?php if ($post_type == 'page') { ?>
+		<?php if( $post_type == 'page' ): ?>
 		<div id="navman_editlink" title="Edit a Link">
 			<div class="submitbox navform navformwide">
 				<form id="navman_editlink_form">
@@ -115,9 +114,11 @@
 				</form>
 			</div>
 		</div>
-		<?php } ?>
+		<?php endif; ?>
 	</div>
 </div>
+
+<!-- @todo rethink/refactor and treat consistently with navigation-attributes metabox dynamic script context -->
 <script type="text/javascript">
 //<![CDATA[
 /* top-level pages */

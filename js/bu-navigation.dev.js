@@ -691,26 +691,26 @@ var bu = bu || {};
 						// 3. jQuery object of the selected list item (happens on node closing)
 						if(typeof data.args[0] == 'string') {
 							if('#' + currentNodeId != data.args[0]) {
-								console.log( 'Selection prohibited 1!' );
-								console.log('Current post: #' + currentNodeId );
-								console.log('Args[0]: ' + data.args[0] );
+								// console.log( 'Selection prohibited 1!' );
+								// console.log('Current post: #' + currentNodeId );
+								// console.log('Args[0]: ' + data.args[0] );
 								return false;
 							}
 						}
 
 						if(data.args[0] instanceof HTMLElement) {
-							console.log('Checking before selection:');
-							console.log('Current node ID: ' + currentNodeId );
-							console.log('Parent LI ID: ' + $(data.args[0]).parent('li').attr('id'));
+							// console.log('Checking before selection:');
+							// console.log('Current node ID: ' + currentNodeId );
+							// console.log('Parent LI ID: ' + $(data.args[0]).parent('li').attr('id'));
 							if(currentNodeId != $(data.args[0]).parent('li').attr('id')) {
-								console.log('Selection prohibited 2!');
+								// console.log('Selection prohibited 2!');
 								return false;
 							}
 						}
 
 						if(data.args[0] instanceof jQuery) {
 							if(currentNodeId != data.args[0].attr('id')) {
-								console.log('Selection prohibited 3!');
+								// console.log('Selection prohibited 3!');
 								return false;
 							}
 						}
@@ -719,7 +719,7 @@ var bu = bu || {};
 						// Don't allow de-selection of post being edited
 					case "deselect_node":
 						if( currentNodeId == $(data.args[0]).parent('li').attr('id')) {
-							console.log('Preventing deselection!');
+							// console.log('Preventing deselection!');
 							return false;
 						}
 						break;
@@ -767,13 +767,13 @@ var bu = bu || {};
 
 				// Can ONLY move current post being edited
 				if( s.currentPost != m.o.attr('id')) {
-					console.log('No moving allowed -- illegal selection!');
+					// console.log('No moving allowed -- illegal selection!');
 					return false;
 				}
 
 				// Don't allow top level posts if global option prohibits it
 				if(m.cr === -1 && !Nav.settings.allowTop ) {
-					console.log('Move denied, top level posts cannot be created!');
+					// console.log('Move denied, top level posts cannot be created!');
 					// @todo pop up a friendlier notice explaining this
 					return false;
 				}

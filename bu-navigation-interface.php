@@ -25,7 +25,8 @@ class BU_Navman_Interface {
 			$post_types = implode(',', $post_types );
 
 		$defaults = array(
-			'interface_path' => plugins_url( 'images', __FILE__ ),
+			'interface_path' => plugins_url( 'images', __FILE__ ), 
+			'themes_path' => plugins_url( 'css/vendor/jstree/themes', __FILE__ ), 
 			'rpc_url' => admin_url('admin-ajax.php?action=bu_getpages&post_type=' . $post_types ),
 			'post_types' => $post_types
 			);
@@ -87,6 +88,7 @@ class BU_Navman_Interface {
 
 		$defaults = array(
 			'interfacePath' => $this->config['interface_path'],
+			'themesPath' => $this->config['themes_path'],
 			'rpcUrl' => $this->config['rpc_url'],
 			'allowTop' => $GLOBALS['bu_navigation_plugin']->get_setting('allow_top'),
 			'initialTreeData' => $pages

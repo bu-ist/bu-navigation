@@ -106,7 +106,8 @@ var bu = bu || {};
 			// jsTree Settings object
 			d.treeConfig = {
 				"themes" : {
-					"theme" : "classic"
+					"theme" : "bu", 
+					"url"	: s.themesPath + "/bu-jstree/style.css"
 				},
 				"core" : {
 					"animation" : 0,
@@ -268,9 +269,10 @@ var bu = bu || {};
 			// ======= Public ======= //
 
 			that.initialize = function() {
-				$tree.jstree( d.treeConfig );
+				$tree.jstree( d.treeConfig );				
 				return that;
 			};
+
 
 			that.selectPost = function( post ) {
 				var node = my.getNodeForPost( post );

@@ -42,6 +42,7 @@ class BU_Navman_Interface {
 	 * Must be called before scripts are printed
 	 */ 
 	public function enqueue_scripts() {
+		global $wp_version;
 
 		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
 
@@ -63,19 +64,79 @@ class BU_Navman_Interface {
 		wp_enqueue_style( 'bu-jquery-tree-classic', $vendor_path . '/jstree/themes/classic/style.css', array(), '1.8.1');
 		wp_enqueue_style( 'bu-jquery-tree', $styles_path . '/bu-navigation-tree.css' );
 
-		// Dynamic script context
-		$data = apply_filters( 'bu_navigation_script_settings', array(
-			'interfacePath' => $this->config['interface_path'],
-			'rpcUrl' => $this->config['rpc_url'],
-			'allowTop' => $GLOBALS['bu_navigation_plugin']->get_setting('allow_top'),
-			'initialTreeData' => json_encode( $this->get_pages( 0, array( 'depth' => 1 ) ) )
-			)
-		);
-
-		wp_localize_script( 'bu-navigation', 'buNavSettings', $data );
+		// wp_localize_script( 'bu-navigation', 'buNavSettings', $data );
 
 		do_action( 'bu_navigation_interface_scripts' );
 
+		// Hack due to lack of support for array data to wp_localize_script in WP < 3.3
+		if( version_compare( $wp_version, '3.3', '<' ) ) {
+			add_action( 'admin_print_footer_scripts', array( $this, 'print_footer_scripts' ) );
+		} else {
+			wp_localize_script( 'bu-navigation', 'buNavSettings', $this->get_script_settings() );
+		}
+
+	}
+
+	/**
+	 * Global settings object that our Javascript files depend on
+	 */ 
+	public function get_script_settings() {
+
+		// We handle loading of top level pages (only) on page load
+		$pages = $this->get_pages( 0, array( 'depth' => 1 ) );
+
+		$defaults = array(
+			'interfacePath' => $this->config['interface_path'],
+			'rpcUrl' => $this->config['rpc_url'],
+			'allowTop' => $GLOBALS['bu_navigation_plugin']->get_setting('allow_top'),
+			'initialTreeData' => $pages
+			);
+
+		return apply_filters( 'bu_navigation_script_settings', $defaults );
+
+	}
+
+	/**
+	 * Print dynamic script context with plugin settings for JS
+	 */ 
+	public function print_footer_scripts() {
+		global $wp_scripts;
+
+		// Check if bu-navigation script is queued
+		if( in_array( 'bu-navigation', array_keys( $wp_scripts->registered ) ) ) {
+
+			$data = $this->get_script_settings();
+			$this->localize( 'buNavSettings', $data );
+
+		}
+	}
+
+	/**
+	 * Custom version of WP_Scripts::localize to provide localization for array data
+	 * 
+	 * @see WP_Scripts::localize in WP 3.3 on
+	 */ 
+	public function localize( $object_name, $script_data, $echo = true ) {
+
+		foreach ( (array) $script_data as $key => $value ) {
+			if ( !is_scalar($value) )
+				continue;
+
+			$script_data[$key] = html_entity_decode( (string) $value, ENT_QUOTES, 'UTF-8');
+		}
+
+		$script = "var $object_name = " . json_encode($script_data) . ';';
+
+		if ( $echo ) {
+			echo "<script type='text/javascript'>\n";
+			echo "/* <![CDATA[ */\n";
+			echo $script;
+			echo "/* ]]> */\n";
+			echo "</script>\n";
+			return true;
+		} else {
+			return $data;
+		}
 	}
 
 	/**

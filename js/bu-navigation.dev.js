@@ -17,10 +17,6 @@ var bu = bu || {};
 	// Global plugin settings
 	Nav.settings = buNavSettings || {};
 
-	// Parse initial data string (pages to load) to object for json_data.data (due to WP deficiency)
-	if( Nav.settings.initialTreeData && typeof Nav.settings.initialTreeData === 'string' )
-		Nav.settings.initialTreeData = JSON.parse( Nav.settings.initialTreeData );
-
 })(jQuery);
 
 // ----------------------------
@@ -40,7 +36,6 @@ var bu = bu || {};
 	};
 
 	// ====== BU Navigation Tree Types ====== //
-
 	Nav.trees = {
 
 		// ----------------------------
@@ -69,10 +64,10 @@ var bu = bu || {};
 			var c = that.config;
 			var d = that.data;
 			
+
+			// Simple pub/sub pattern - belongs elsewhere
 			var listeners = {};
 			var events = ['selectPost','movePost'];
-
-			// Simple pub/sub pattern
 
 			that.listenFor = function( event, callback ) {
 
@@ -103,153 +98,72 @@ var bu = bu || {};
 			if( $tree.length === 0 )
 				return false;
 
+			// Need to implement this in a filterable way
+			var checkMove = function(m) {
+				var attempted_parent_id = m.np.attr('id');
+
+				// Don't allow top level posts if global option prohibits it
+				if(m.cr === -1 && ! Nav.settings.allowTop ) {
+					// console.log('Move denied, top level posts cannot be created!');
+					// @todo pop up a friendlier notice explaining this
+					return false;
+				}
+
+				// @todo needs to be extendable
+				// maybe register for the checkMove filter, and if any one of those
+				// returns false then return false
+
+				return true;
+			};
+
 			// jsTree Settings object
 			d.treeConfig = {
-				"themes" : {
-					"theme" : "bu", 
-					"url"	: s.themesPath + "/bu-jstree/style.css"
-				},
+				"plugins" : ["themes", "types", "json_data", "ui", "dnd", "crrm"],
 				"core" : {
 					"animation" : 0,
 					"html_titles": true
 				},
-				"plugins" : ["themes", "json_data", "ui", "types", "dnd", "crrm"],
+				"themes" : {
+					"theme" : "bu",
+					"url"	: s.themePath + "/style.css"
+				},
 				"types" : {
 					"types" : {
 						"default" : {
-							"clickable"			: true,
-							"renameable"		: true,
-							"deletable"			: true,
-							"creatable"			: true,
-							"draggable"			: true,
 							"max_children"		: -1,
 							"max_depth"			: -1,
 							"valid_children"	: "all",
 							"icon": {
-								"image": s.interfacePath + "/icons/page_regular.png"
+								"image": s.themePath + "/icons/page_regular.png"
+								// "position": "0 0"	// page section offset
 							}
 						},
 						"page": {
-							"clickable"			: true,
-							"renameable"		: false,
-							"deletable"			: true,
-							"creatable"			: true,
-							"draggable"			: true,
 							"max_children"		: -1,
 							"max_depth"			: -1,
 							"valid_children"	: "all",
 							"icon": {
-								"image": s.interfacePath + "/icons/page_regular.png"
+								"image": s.themePath + "/icons/page_regular.png"
+								// "position": "0 0"	// page section offset
 							}
 						},
-						"page_excluded": {
-							"clickable"			: true,
-							"renameable"		: false,
-							"deletable"			: true,
-							"creatable"			: true,
-							"draggable"			: true,
+						"section": {
 							"max_children"		: -1,
 							"max_depth"			: -1,
 							"valid_children"	: "all",
 							"icon": {
-								"image": s.interfacePath + "/icons/page_hidden.png"
-							}
-						},
-						"page_restricted": {
-							"clickable"			: true,
-							"renameable"		: false,
-							"deletable"			: true,
-							"creatable"			: true,
-							"draggable"			: true,
-							"max_children"		: -1,
-							"max_depth"			: -1,
-							"valid_children"	: "all",
-							"icon": {
-								"image": s.interfacePath + "/icons/page_restricted.png"
-							}
-						},
-						"page_denied": {
-							"clickable"			: false,
-							"renameable"		: false,
-							"deletable"			: false,
-							"creatable"			: false,
-							"draggable"			: false,
-							"max_children"		: -1,
-							"max_depth"			: -1,
-							"valid_children"		: "all",
-							"icon": {
-								"image": s.interfacePath + "/icons/page_regular.png"
-							}
-						},
-						"page_excluded_denied": {
-							"clickable"			: false,
-							"renameable"		: false,
-							"deletable"			: false,
-							"creatable"			: false,
-							"draggable"			: false,
-							"max_children"		: -1,
-							"max_depth"			: -1,
-							"valid_children"	: "all",
-							"icon": {
-								"image": s.interfacePath + "/icons/page_hidden.png"
-							}
-						},
-						"page_restricted_denied": {
-							"clickable"			: false,
-							"renameable"		: false,
-							"deletable"			: false,
-							"creatable"			: false,
-							"draggable"			: false,
-							"max_children"		: -1,
-							"max_depth"			: -1,
-							"valid_children"	: "all",
-							"icon": {
-								"image": s.interfacePath + "/icons/page_restricted.png"
-							}
-						},
-						"page_excluded_restricted": {
-							"clickable"			: true,
-							"renameable"		: false,
-							"deletable"			: true,
-							"creatable"			: true,
-							"draggable"			: true,
-							"max_children"		: -1,
-							"max_depth"			: -1,
-							"valid_children"	: "all",
-							"icon": {
-								"image": s.interfacePath + "/icons/page_hidden_restricted.png"
-							}
-						},
-						"page_excluded_restricted_denied": {
-							"clickable"			: false,
-							"renameable"		: false,
-							"deletable"			: false,
-							"creatable"			: false,
-							"draggable"			: false,
-							"max_children"		: -1,
-							"max_depth"			: -1,
-							"valid_children"	: "all",
-							"icon": {
-								"image": s.interfacePath + "/icons/page_hidden_restricted.png"
+								"image": s.themePath + "/icons/page_regular.png"
+								// "position": "5px 5px"	// section icon offset
 							}
 						},
 						"link": {
+							"max_children"		: 0,
+							"max_depth"			: 0,
+							"valid_children"	: "none",
 							"icon": {
-								"image": s.interfacePath + "/icons/page_white_link.png"
-							},
-							"max_children": 0
-						},
-						"link_restricted": {
-							"icon": {
-								"image": s.interfacePath + "/icons/page_white_link.png"
-							},
-							"max_children": 0
-						},
-						"link_excluded": {
-							"icon": {
-								"image": s.interfacePath + "/icons/page_white_link.png"
-							},
-							"max_children": 0
+								"image": s.themePath + "/icons/page_link.png"
+								// "position": "5px 5px"	// link icon offset
+							}
 						}
 					}
 				},
@@ -263,16 +177,20 @@ var bu = bu || {};
 						}
 					},
 					"progressive_render" : true
+				},
+				"crrm": {
+					"move": {
+						"check_move": checkMove
+					}
 				}
 			};
 
-			// ======= Public ======= //
+			// ======= Public API ======= //
 
 			that.initialize = function() {
-				$tree.jstree( d.treeConfig );				
+				$tree.jstree( d.treeConfig );
 				return that;
 			};
-
 
 			that.selectPost = function( post ) {
 				var node = my.getNodeForPost( post );
@@ -323,6 +241,7 @@ var bu = bu || {};
 					$tree.jstree('set_text', $node, post.title );
 
 					// Update metadata stored with node
+					// @todo do this dynamically by looping through post props
 					$node.data('post_content', post.content);
 					$node.data('post_title', post.title);
 					$node.data('post_status', post.status);
@@ -336,6 +255,7 @@ var bu = bu || {};
 				that.broadcast('updatePost', [ post ]);
 			};
 
+			// Remove post
 			that.removePost = function( post ) {
 				var node;
 
@@ -353,26 +273,18 @@ var bu = bu || {};
 				that.broadcast('removePost', [post]);
 			};
 
+			// Get post ancestors (by title)
 			that.getAncestors = function( postID ) {
 				var $node = my.getNodeForPost( postID );
-
-				var $ancestors = $node.parentsUntil( $tree, 'li' );
-				var ancestorPosts = [];
-
-				$ancestors.each(function(){
-					ancestorPosts.push(my.nodeToPost($(this)));
-				});
-
-				return ancestorPosts;
+				return $tree.jstree('get_path', $node);
 			};
 
+			// Save tree state
 			that.save = function() {
-
-				// Update rollback object
 				d.rollback = $tree.jstree( 'get_rollback' );
-
 			};
 
+			// Restore tree state
 			that.restore = function() {
 				/*
 				HUGE hack alert...
@@ -479,25 +391,18 @@ var bu = bu || {};
 
 				// @todo clean up type coercion
 				if( post && typeof post === 'object' ) {
-
 					node_id = post.ID;
-
 					if( node_id.indexOf('post-new') === -1 ) {
 						node_id = c.nodePrefix + node_id;
 					}
-
 				} else {
-
 					node_id = post;
-
 					if( node_id.indexOf('post-new') === -1 ) {
 						node_id = c.nodePrefix + node_id;
 					}
-
 				}
 
 				var $node = $.jstree._reference($tree)._get_node( '#' + node_id );
-
 				if( $node.length )
 					return $node;
 
@@ -549,25 +454,44 @@ var bu = bu || {};
 				}
 			});
 
-			$tree.bind( 'create_node.jstree', function( event, data ) {
+			$tree.bind('create_node.jstree', function( event, data ) {
 				var $node = data.rslt.obj;
 				var post = my.nodeToPost( $node );
-
 				that.broadcast( 'postCreated', [ post ] );
 			});
 
-			$tree.bind( "select_node.jstree", function( event, data ) {
+			$tree.bind('select_node.jstree', function( event, data ) {
 				var post = my.nodeToPost(data.rslt.obj);
 				that.broadcast( 'selectPost', [ post ]);
 			});
 
-			$tree.bind( "deselect_node.jstree", function( event, data ) {
+			$tree.bind('deselect_node.jstree', function( event, data ) {
 				var post = my.nodeToPost( data.rslt.obj );
 				that.broadcast( 'deselectPost', [ post ]);
 			});
 
-			return that;
+			$tree.bind('move_node.jstree', function( event, data ) {
+				var $parent = data.rslt.np,
+					menu_order = data.rslt.o.index() + 1,
+					parent_id;
 
+				// Set new parent ID
+				if( $tree.attr('id') == $parent.attr('id')) {
+					parent_id = 0;
+				} else {
+					parent_id = parseInt(my.stripNodePrefix($parent.attr('id') ),10);
+				}
+
+				// Extra post parameters that may be helpful to consumers
+				var post = my.nodeToPost( data.rslt.o );
+				post['parent'] = parent_id;
+				post['menu_order'] = menu_order;
+
+				that.updatePost(post);
+				that.broadcast( 'postMoved', [post, parent_id, menu_order]);
+			});
+
+			return that;
 		},
 
 		// ----------------------------
@@ -614,7 +538,6 @@ var bu = bu || {};
 			};
 
 			return that;
-
 		},
 
 		// ----------------------------
@@ -636,155 +559,54 @@ var bu = bu || {};
 
 			// Extra configuration
 			var extraTreeConfig = {
-				"crrm": {
-					"move": {
-						"check_move": that.checkMove
-					}
+				"types": {
+					"types": {}
 				}
 			};
 
-			// @todo push ui plugin if it isn't already there
-			// extraTreeConfig["plugins"].push("ui");
-
 			// Build initial open and selection arrays from current post / ancestors
-			var toSelect = [], toOpen = [], i;
-
-			if( s.currentPost ) {
-
+			var toSelect = [],
+				toOpen = [],
+				i;
+			if ( s.currentPost ) {
 				toSelect.push( '#' + currentNodeId );
-
-				if( s.ancestors && s.ancestors.length ) {
+				if ( s.ancestors && s.ancestors.length ) {
 					// We want old -> young, which is not how they're passed
 					var ancestors = s.ancestors.reverse();
-					for(i = 0; i < ancestors.length; i++ ) {
+					for (i = 0; i < ancestors.length; i++ ) {
 						toOpen.push( '#' + c.nodePrefix + s.ancestors[i] );
 					}
 				}
-
 			}
-
-			if( toSelect.length ) {
+			if ( toSelect.length ) {
 				extraTreeConfig['ui'] = {
 					"initially_select": toSelect
 				};
 			}
-
-			if( toOpen.length ) {
+			if ( toOpen.length ) {
 				extraTreeConfig['core'] = {
 					"initially_open": toOpen
 				};
 			}
 
+			// Extend config object to restrict selection, hover and dragging to current post
+			var checkCurrentPost = function( node ) {
+				var post = my.nodeToPost(node);
+				return post.ID == s.currentPost;
+			};
+			var typeChecks = {
+				"select_node"		: checkCurrentPost,
+				"hover_node"		: checkCurrentPost,
+				"start_drag"		: checkCurrentPost
+			};
+			$.each( d.treeConfig['types']['types'], function( type, typeConfig ){
+				extraTreeConfig['types']['types'][type] = $.extend(typeConfig,typeChecks);
+			});
+
 			// Merge base tree config with extras
 			$.extend( true, d.treeConfig, extraTreeConfig );
 
-			// jsTree Event Handlers
-
-			// Run before ALL events -- allows us to interrupt selection, hover and drag behaviors
-			$tree.bind('before.jstree', function( event, data ) {
-				// Override default behavior for specific functions
-				switch(data.func) {
-					case "select_node":
-
-						// The argument that contains the node being selected is inconsistent.
-						// The following values occur:
-						// 1. String of the HTML ID attribute of the list item -- "#<post-id>" (happens with initially_select)
-						// 2. HTMLElement of the anchor (happens on manual selection)
-						// 3. jQuery object of the selected list item (happens on node closing)
-						if(typeof data.args[0] == 'string') {
-							if('#' + currentNodeId != data.args[0]) {
-								// console.log( 'Selection prohibited 1!' );
-								// console.log('Current post: #' + currentNodeId );
-								// console.log('Args[0]: ' + data.args[0] );
-								return false;
-							}
-						}
-
-						if(data.args[0] instanceof HTMLElement) {
-							// console.log('Checking before selection:');
-							// console.log('Current node ID: ' + currentNodeId );
-							// console.log('Parent LI ID: ' + $(data.args[0]).parent('li').attr('id'));
-							if(currentNodeId != $(data.args[0]).parent('li').attr('id')) {
-								// console.log('Selection prohibited 2!');
-								return false;
-							}
-						}
-
-						if(data.args[0] instanceof jQuery) {
-							if(currentNodeId != data.args[0].attr('id')) {
-								// console.log('Selection prohibited 3!');
-								return false;
-							}
-						}
-						break;
-
-						// Don't allow de-selection of post being edited
-					case "deselect_node":
-						if( currentNodeId == $(data.args[0]).parent('li').attr('id')) {
-							// console.log('Preventing deselection!');
-							return false;
-						}
-						break;
-
-					case "hover_node":
-					case "start_drag":
-						var $node = $(data.args[0]);
-
-						// Can only hover on current node
-						if(currentNodeId != $node.parent('li').attr('id')) {
-							// console.log('Preventing hover or drag!');
-							return false;
-						}
-						break;
-				}
-			});
-
-			$tree.bind('move_node.jstree', function( event, data ) {
-
-				var $parent = data.rslt.np;
-				var menu_order = data.rslt.o.index() + 1;
-				var parent_id;
-
-				// Set new parent ID
-				if( $tree.attr('id') == $parent.attr('id')) {
-					parent_id = 0;
-				} else {
-					parent_id = parseInt(my.stripNodePrefix( $parent.attr('id') ),10);
-				}
-
-				var post = my.nodeToPost( data.rslt.o );
-
-				// Extra post parameters that may be helpful to consumers
-				post['parent'] = parent_id;
-				post['menu_order'] = menu_order;
-
-				that.updatePost(post);
-				that.broadcast( 'postMoved', [post, parent_id, menu_order]);
-
-			});
-
-			// @todo make sure there are no conflicts with buse implementation
-			that.checkMove = function( m ) {
-				var attempted_parent_id = m.np.attr('id');
-
-				// Can ONLY move current post being edited
-				if( s.currentPost != m.o.attr('id')) {
-					// console.log('No moving allowed -- illegal selection!');
-					return false;
-				}
-
-				// Don't allow top level posts if global option prohibits it
-				if(m.cr === -1 && !Nav.settings.allowTop ) {
-					// console.log('Move denied, top level posts cannot be created!');
-					// @todo pop up a friendlier notice explaining this
-					return false;
-				}
-
-				// @todo needs to be extendable
-
-				return true;
-			};
-
+			// Public
 			that.getCurrentPost = function() {
 				if( s.currentPost === null ||
 					typeof s.currentPost === 'undefined' )
@@ -792,7 +614,6 @@ var bu = bu || {};
 
 				var $node = my.getNodeForPost( s.currentPost );
 				var post = my.nodeToPost( $node );
-
 				return post;
 			};
 
@@ -805,13 +626,9 @@ var bu = bu || {};
 
 				// Select and update tree state
 				that.selectPost( post );
-
 			};
 
 			return that;
-
 		}
-
 	};
-
 })(jQuery);

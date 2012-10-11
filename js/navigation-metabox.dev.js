@@ -109,8 +109,7 @@ if((typeof bu === 'undefined' ) ||
 
 		updateBreadcrumbs: function( post ) {
 			var ancestors = Navtree.getAncestors( post.ID );
-			var ancestorTitles = $.map( ancestors.reverse(), function(post){ return post.title; });
-			var breadcrumbs = ancestorTitles.join(' > ');
+			var breadcrumbs = ancestors.join(' > ');
 
 			// Update breadcrumbs
 			if (breadcrumbs) {

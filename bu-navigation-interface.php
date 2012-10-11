@@ -25,10 +25,8 @@ class BU_Navman_Interface {
 			$post_types = implode(',', $post_types );
 
 		$defaults = array(
-			'interface_path' => plugins_url( 'images', __FILE__ ), 
-			'themes_path' => plugins_url( 'css/vendor/jstree/themes', __FILE__ ), 
-			'rpc_url' => admin_url('admin-ajax.php?action=bu_getpages&post_type=' . $post_types ),
-			'post_types' => $post_types
+			'themePath' => plugins_url( 'css/vendor/jstree/themes/bu-jstree', __FILE__ ), 
+			'rpcUrl' => admin_url('admin-ajax.php?action=bu_getpages&post_type=' . $post_types ),
 			);
 
 		$this->config = wp_parse_args( $config, $defaults );
@@ -61,12 +59,6 @@ class BU_Navman_Interface {
 		// Main configuration file
 		wp_enqueue_script( 'bu-navigation', $scripts_path . '/bu-navigation' . $suffix . '.js', array( 'jquery', 'bu-jquery-tree', 'bu-jquery-cookie', 'json2' ), '0.9', true );
 
-		// Styles
-/* 		wp_enqueue_style( 'bu-jquery-tree-classic', $vendor_path . '/jstree/themes/classic/style.css', array(), '1.8.1'); */
-/* 		wp_enqueue_style( 'bu-jquery-tree', $styles_path . '/bu-navigation-tree.css' ); */
-
-		// wp_localize_script( 'bu-navigation', 'buNavSettings', $data );
-
 		do_action( 'bu_navigation_interface_scripts' );
 
 		// Hack due to lack of support for array data to wp_localize_script in WP < 3.3
@@ -87,9 +79,8 @@ class BU_Navman_Interface {
 		$pages = $this->get_pages( 0, array( 'depth' => 1 ) );
 
 		$defaults = array(
-			'interfacePath' => $this->config['interface_path'],
-			'themesPath' => $this->config['themes_path'],
-			'rpcUrl' => $this->config['rpc_url'],
+			'themePath' => $this->config['themePath'],
+			'rpcUrl' => $this->config['rpcUrl'],
 			'allowTop' => $GLOBALS['bu_navigation_plugin']->get_setting('allow_top'),
 			'initialTreeData' => $pages
 			);
@@ -237,6 +228,7 @@ class BU_Navman_Interface {
 					// Fetch children recursively
 					if( $has_children ) {
 
+						$p['attr']['rel'] = 'section';
 						$p['state'] = 'closed';
 
 						if( $load_children ) {
@@ -280,7 +272,10 @@ class BU_Navman_Interface {
 			'data' => $page->navigation_label,
 			'metadata' => array(
 				'post_status' => $page->post_status,
-				'post_type' => $page->post_type
+				'post_type' => $page->post_type,
+				'excluded' => $page->excluded,
+				'restricted' => $page->restricted,
+				'denied' => $page->perm
 				)
 			);
 
@@ -290,32 +285,6 @@ class BU_Navman_Interface {
 				BU_NAV_META_TARGET => $page->target
 				);
 		}
-
-		// Build classes based on page properties
-		$classes = array();
-
-		// Excluded from navigation
-		if( isset( $page->excluded ) && $page->excluded ) {
-			$p['attr']['rel'] .= '_excluded';
-			array_push($classes, 'excluded');
-		}
-
-		// ACL restricted (from access-control plugin)
-		if( isset( $page->restricted ) && $page->restricted ) {
-			$p['attr']['rel'] .= '_restricted';
-			array_push( $classes, 'restricted' );
-		}
-
-		// Editing denied for current user (from BU Section Editing plugin)
-		if( isset( $page->perm ) ) {
-
-			if( $page->perm == 'denied' )
-				$p['attr']['rel'] .= '_denied';
-
-			array_push($classes,$page->perm);
-		}
-
-		$p['attr']['class'] = implode(' ', $classes);
 
 		return $p;
 

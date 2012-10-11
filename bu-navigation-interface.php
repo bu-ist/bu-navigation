@@ -62,8 +62,8 @@ class BU_Navman_Interface {
 		wp_enqueue_script( 'bu-navigation', $scripts_path . '/bu-navigation' . $suffix . '.js', array( 'jquery', 'bu-jquery-tree', 'bu-jquery-cookie', 'json2' ), '0.9', true );
 
 		// Styles
-		wp_enqueue_style( 'bu-jquery-tree-classic', $vendor_path . '/jstree/themes/classic/style.css', array(), '1.8.1');
-		wp_enqueue_style( 'bu-jquery-tree', $styles_path . '/bu-navigation-tree.css' );
+/* 		wp_enqueue_style( 'bu-jquery-tree-classic', $vendor_path . '/jstree/themes/classic/style.css', array(), '1.8.1'); */
+/* 		wp_enqueue_style( 'bu-jquery-tree', $styles_path . '/bu-navigation-tree.css' ); */
 
 		// wp_localize_script( 'bu-navigation', 'buNavSettings', $data );
 

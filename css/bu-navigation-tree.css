@@ -67,53 +67,6 @@
  color: white;
 }
 
-/*.bu_nav_tree ul li > a ins,
-.bu_nav_tree ul li[rel="page"] > a ins,
-.bu_nav_tree ul li[rel="page_denied"] > a ins {
-	background-image: url(icons/page_regular.png);
-}
-
-.bu_nav_tree ul li[rel="folder"] > a ins,
-.bu_nav_tree ul li[rel="folder_denied"] > a ins {
-	background-image: url(icons/folder_regular.png);
-}
-
-.bu_nav_tree ul li[rel="folder_excluded"] > a ins,
-.bu_nav_tree ul li[rel="folder_excluded_denied"] > a ins {
-	background-image: url(icons/folder_hidden.png);
-}
-
-.bu_nav_tree ul li[rel="folder_restricted"] > a ins,
-.bu_nav_tree ul li[rel="folder_restricted_denied"] > a ins
-{
-	background-image: url(icons/folder_lock.png);
-}
-
-.bu_nav_tree ul li[rel="folder_excluded_restricted"] > a ins,
-.bu_nav_tree ul li[rel="folder_excluded_restricted_denied"] > a ins {
-	background-image: url(icons/folder_hidden_restricted.png);
-}
-
-.bu_nav_tree ul li[rel="page_excluded"] > a ins,
-.bu_nav_tree ul li[rel="page_excluded_denied"] > a ins {
-	background-image: url(icons/page_hidden.png);
-}
-
-.bu_nav_tree ul li[rel="page_restricted"] > a ins,
-.bu_nav_tree ul li[rel="page_restricted_denied"] > a ins {
-	background-image: url(icons/page_restricted.png);
-}
-
-.bu_nav_tree ul li[rel="page_excluded_restricted"] > a ins,
-.bu_nav_tree ul li[rel="page_excluded_restricted_denied"] > a ins {
-	background-image: url(icons/page_hidden_restricted.png);
-}
-
-.bu_nav_tree ul li[rel="link"] > a ins,
-.bu_nav_tree ul li[rel="link_restricted"] > a ins {
-	background-image: url(icons/page_white_link.png);
-}*/
-
 .navform div input.error {
 	margin: 0;
 	-moz-border-radius-bottomleft: 4px;

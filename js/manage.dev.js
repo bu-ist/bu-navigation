@@ -1,177 +1,179 @@
-/* @todo refactor to be consistent with navigation attributes metabox, recompress */
-
-var navman = null;
+// @todo move these outside of global scope
 var navman_dirty = false;
 
-var navman_links = [];
 var navman_delete = [];
 var navman_edits = {};
 var navman_editing = null;
 
-function showPageDetail(data)
-{
-	jQuery("#navman_pagedetail h3").html(data.post_title);
-	jQuery("#navman_drop_target").html(data.post_title);
-	jQuery("#navman_drop").attr("rel", data.ID);
-	jQuery("#navman_pagedetail").show();
-}
+// Check prerequisites
+if((typeof bu === 'undefined') || (typeof bu.navigation === 'undefined') || (typeof bu.navigation.tree === 'undefined'))
+	throw new TypeError('BU Navigation Manager script dependencies have not been met!');
 
-function hidePageDetail()
-{
-	jQuery("#navman_pagedetail").hide();
-}
+// @todo only run Navman.init on DOM ready
+jQuery(document).ready( function($) {
 
-function editNode(n)
-{
+	// If we are the first view object, set up our namespace
+	bu.navigation.views = bu.navigation.views || {};
 
-    var $node = jQuery(n);
-	if ($node.attr("rel") === "link" || $node.attr("rel") === "link_restricted")
-	{
-		if ($node.is('[class*="newlink_"]'))
-		{
-			/* this is a new link (unsaved) */
-			var re = /newlink_(\d+)/;
-			var id = re.exec($node.attr("class"))[1];
+	var Navman, Linkman, Navtree;
 
-			if (id)
-			{
-				var l = navman_links[id];
+	// @todo implement for consistency with navigation-metabox.js
+	// Navman = bu.navigation.views.Navman = {
 
-				jQuery("#editlink_id").attr("value", "newlink_" + id);
-				jQuery("#editlink_address").attr("value", l.address);
-				jQuery("#editlink_label").attr("value", l.label);
+	// 	el: '#navman_container',
 
-				if (l.target == "new")
-				{
-					jQuery("#editlink_target_new").attr("checked", "checked");
-				}
-				else
-				{
-					jQuery("#editlink_target_same").attr("checked", "checked");
-				}
+	// 	ui: {
+	// 		deleteBtns: '',
+	// 		editBtns: '',
+	// 		saveBtn: ''
+	// 	},
 
-				navman_editing = $node;
-				jQuery("#navman_editlink").dialog('open');
-			}
+	// 	events: [
+	// 		'selector event'
+	// 	],
+
+	// 	initialize: function( config ) {
+
+	// 	}
+
+	// };
+
+	// @todo implement for consistency with navigation-metabox.js
+	// Linkman = bu.navigation.views.Linkman = {
+
+	// 	el: '#navman_container',
+
+	// 	ui: {
+	// 		urlField: '',
+	// 		labelField: '',
+	// 		targetField: '',
+	// 		cancelBtn: '',
+	// 		saveBtn: ''
+	// 	},
+
+	// 	events: [
+	// 		'selector event'
+	// 	],
+
+	// 	initialize: function( config ) {
+
+	// 	}
+
+	// };
+
+	// Setup initial state
+	$("div.inner-sidebar").show();
+	$("input[name='bu_navman_delete']").attr("disabled", "disabled");
+	$("input[name='bu_navman_edit']").attr("disabled", "disabled");
+
+	// Create post navigation tree, pass in initial posts from server
+	Navtree = bu.navigation.tree('navman', {el: '#navman_container'});
+
+	// Navigation tree listeners
+
+	// @todo this goes away with new ui
+	Navtree.listenFor( 'selectPost', function( post ) {
+		$("input[name='bu_navman_delete']").removeAttr("disabled");
+		$("input[name='bu_navman_edit']").removeAttr("disabled");
+	});
+
+	// @todo this goes away with new ui
+	Navtree.listenFor( 'deselectPost', function( post ) {
+		$("input[name='bu_navman_delete']").attr("disabled", "disabled");
+		$("input[name='bu_navman_edit']").attr("disabled", "disabled");
+	});
+
+	Navtree.listenFor( 'editPost', function( post ) {
+		editPost( post );
+	});
+	
+	Navtree.listenFor( 'removePost', function( post ) {
+		var id = post.ID;
+		if (id) {
+			navman_delete.push(id);
+			navman_dirty = true;
 		}
-		else
-		{
-			var re = /^p(\d+)/;
-			var id = re.exec($node.attr("id"))[1];
+	});
 
-			if ((id) && (navman_edits[id]))
-			{
-				/* existing link with unsaved changes */
-				jQuery("#editlink_id").attr("value", navman_edits[id].ID);
-				jQuery("#editlink_address").attr("value", navman_edits[id].post_content);
-				jQuery("#editlink_label").attr("value", navman_edits[id].post_title);
+	// @todo this goes away with new ui
+	$('input[name="bu_navman_edit"]').click(function (e) {
+		var post = Navtree.getSelected();
+		editPost( post );
+	});
 
-				if (navman_edits[id].target == "new")
-				{
-					jQuery("#editlink_target_new").attr("checked", "checked");
-				}
-				else
-				{
-					jQuery("#editlink_target_same").attr("checked", "checked");
-				}
+	// @todo this goes away with new ui
+	$('input[name="bu_navman_delete"]').click(function (e) {
+		var post = Navtree.getSelected();
+		Navtree.removePost( post );
+	});
 
-				navman_editing = $node;
-				jQuery("#navman_editlink").dialog('open');
-			}
-			else
-			{
-				/* this is an existing link */
-				jQuery.getJSON(rpcPageURL, {"id" : $node.attr("id")}, function (data) {
-					jQuery("#editlink_id").attr("value", data.ID);
-					jQuery("#editlink_address").attr("value", data.post_content);
-					jQuery("#editlink_label").attr("value", data.post_title);
+	// Toolbar event handlers
 
-					if (data.target == "new")
-					{
-						jQuery("#editlink_target_new").attr("checked", "checked");
-					}
-					else
-					{
-						jQuery("#editlink_target_same").attr("checked", "checked");
-					}
+	// Expand all
+	$('#navman_expand_all, #navman_expand_all_b').click(function(e) {
+		e.preventDefault();
+		e.stopImmediatePropagation();
+		Navtree.showAll();
+	});
 
-					navman_editing = $node;
-					jQuery("#navman_editlink").dialog('open');
-					});
-				}
-			}
-	}
-	else
-	{
-		var re = /^p(\d+)/;
-		var id = re.exec($node.attr("id"))[1];
+	// Collapse all
+	$('#navman_collapse_all, #navman_collapse_all_b').click(function(e) {
+		e.preventDefault();
+		e.stopImmediatePropagation();
+		Navtree.hideAll();
+	});
 
-		var url = "post.php?action=edit&post=" + id;
-		window.location = url;
-	}
-}
+	// Save
+	$('#bu_navman_save, #bu_navman_save_b').click(function(e) {
+		navman_dirty = false;
+	});
 
-jQuery(document).ready( function($)
-{
-	/* edit link dialog */
-	jQuery("#navman_editlink").dialog({
+	$('#navman_form').submit(function (e) {
+		var posts = Navtree.getPosts();
+		$("#navman_data").attr("value", JSON.stringify(posts));
+		$("#navman_delete").attr("value", JSON.stringify(navman_delete));
+		$("#navman_edits").attr("value", JSON.stringify(navman_edits));
+	});
+
+	// Edit link dialog
+	$('#navman_editlink').dialog({
 		autoOpen: false,
 		buttons: {
 			"Ok": function() {
 
-				if (jQuery("#navman_editlink_form").valid())
-				{
-					if (jQuery("#editlink_id").attr("value").indexOf("newlink_") != -1)
-					{
-						/* changes to an unsaved link */
-						var re = /newlink_(\d+)/;
-						var id = re.exec(jQuery("#editlink_id").attr("value"))[1];
+				if ($("#navman_editlink_form").valid()) {
 
-						if (id)
-						{
-							navman_links[id] = {
-								"address": jQuery("#editlink_address").attr("value"),
-								"label": jQuery("#editlink_label").attr("value"),
-								"target": jQuery("input[name='editlink_target']:checked").attr("value")
-							};
+					// Global link being edited
+					var link = navman_editing;
+	
+					link.content = $("#editlink_address").attr("value");
+					link.title = $("#editlink_label").attr("value");
+					link.meta.bu_link_target = $("input[name='editlink_target']:checked").attr("value");
 
-							$navman.jstree("rename_node", navman_editing, navman_links[id].label);
-						}
-					}
-					else
-					{
-						/* changes to an existing link */
-						var data =
-						{
-							"ID": jQuery("#editlink_id").attr("value"),
-							"post_title": jQuery("#editlink_label").attr("value"),
-							"post_content": jQuery("#editlink_address").attr("value"),
-							"target": jQuery("input[name='editlink_target']:checked").attr("value")
-						};
-						navman_edits[data.ID] = data;
-
-						$navman.jstree("rename_node", navman_editing, data.post_title);
+					// Editing existing link
+					if ( link.status !== 'new' ) {
+						navman_edits[link.ID] = link;
 					}
 
-					jQuery("#navman_editlink").dialog('close');
+					Navtree.updatePost( link );
 
-					jQuery("#editlink_id").attr("value", "");
-					jQuery("#editlink_address").attr("value", "");
-					jQuery("#editlink_label").attr("value", "");
-					jQuery("#editlink_target_same").attr("checked", "");
+					// Clear dialog
+					$("#navman_editlink").dialog('close');
+					$("#editlink_id").attr("value", "");
+					$("#editlink_address").attr("value", "");
+					$("#editlink_label").attr("value", "");
+					$("#editlink_target_same").attr("checked", "");
 
 					navman_dirty = true;
-
 					navman_editing = null;
 				}
 			},
 			"Cancel": function() {
-				jQuery("#navman_editlink").dialog('close');
-
-				jQuery("#editlink_id").attr("value", "");
-				jQuery("#editlink_address").attr("value", "");
-				jQuery("#editlink_label").attr("value", "");
-				jQuery("#editlink_target_same").attr("checked", "");
+				$("#navman_editlink").dialog('close');
+				$("#editlink_id").attr("value", "");
+				$("#editlink_address").attr("value", "");
+				$("#editlink_label").attr("value", "");
+				$("#editlink_target_same").attr("checked", "");
 
 				navman_editing = null;
 			}
@@ -182,434 +184,72 @@ jQuery(document).ready( function($)
 		resizable: false
 	});
 
-	/* show the inner sidebar */
-	jQuery("div.inner-sidebar").show();
-	hidePageDetail();
+	// Add link handler
 
-	var options = {
-		themes : {
-			theme : "classic"
-		},
-        core : {
-            animation : 0,
-	    html_titles: true
-        },
-        plugins : ["themes", "json_data", "ui", "contextmenu", "types", "dnd", "crrm"],
-		types : {
-			types : {
-                "default" : {
-                    clickable	: true,
-                    renameable	: true,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
+	$("#addlink_add").click(function (e) {
 
-                    icon: {
-                        "image": interfacePath + "/icons/page_regular.png"
-                    }
-                },
-                "folder" : {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/folder_regular.png"
-                    }
-                },
-                "folder_excluded": {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/folder_hidden.png"
-                    }
-                },
-                "folder_excluded_denied": {
-                    clickable	: false,
-                    renameable	: false,
-                    deletable	: false,
-                    creatable	: false,
-                    draggable	: false,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/folder_hidden.png"
-                    }
-                },
-                "folder_restricted": {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/folder_lock.png"
-                    }
-                },
-                "folder_denied": {
-                    clickable	: false,
-                    renameable	: false,
-                    deletable	: false,
-                    creatable	: false,
-                    draggable	: false,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/folder_regular.png"
-                    }
-                },
-                "folder_restricted_denied": {
-                    clickable	: false,
-                    renameable	: false,
-                    deletable	: false,
-                    creatable	: false,
-                    draggable	: false,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/folder_lock.png"
-                    }
-                },
-                "folder_excluded_restricted": {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/folder_hidden_restricted.png"
-                    }
-                },
-                "folder_excluded_restricted_denied": {
-                    clickable	: false,
-                    renameable	: false,
-                    deletable	: false,
-                    creatable	: false,
-                    draggable	: false,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/folder_hidden_restricted.png"
-                    }
-                },
-                "page": {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/page_regular.png"
-                    }
-                },
-                "page_excluded": {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/page_hidden.png"
-                    }
-                },
-                "page_restricted": {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/page_restricted.png"
-                    }
-                },
-                "page_denied": {
-                    clickable	: false,
-                    renameable	: false,
-                    deletable	: false,
-                    creatable	: false,
-                    draggable	: false,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/page_regular.png"
-                    }
-                },
-                "page_excluded_denied": {
-                    clickable	: false,
-                    renameable	: false,
-                    deletable	: false,
-                    creatable	: false,
-                    draggable	: false,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/page_hidden.png"
-                    }
-                },
-                "page_restricted_denied": {
-                    clickable	: false,
-                    renameable	: false,
-                    deletable	: false,
-                    creatable	: false,
-                    draggable	: false,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/page_restricted.png"
-                    }
-                },
-                "page_excluded_restricted": {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/page_hidden_restricted.png"
-                    }
-                },
-                "page_excluded_restricted_denied": {
-                    clickable	: false,
-                    renameable	: false,
-                    deletable	: false,
-                    creatable	: false,
-                    draggable	: false,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/page_hidden_restricted.png"
-                    }
-                },
-                "link": {
-                    icon: {
-                        image: interfacePath + "/icons/page_white_link.png"
-                    },
-                    max_children: 0
-                },
-                "link_restricted": {
-                    icon: {
-                        image: interfacePath + "/icons/page_white_link.png"
-                    },
-                    max_children: 0
-                }
-            }
-		},
-		"json_data": {
-            "data" : pages,
-            "ajax" : {
-                url : rpcURL,
-                type : "POST",
-                data : function (n) {
-                    return {id : n.attr ? n.attr("id") : 0}
-                }
-            },
-            "progressive_render" : true
-        },
-        "crrm" : {
-        	   "move" : {
-                "check_move" : function (m) {
+		if ($("#navman_addlink_form").valid()) {
 
-                    // Don't allow top level pages for section editors or of global option prohibits it
-                    if( m.cr == -1 && ( isSectionEditor || ! allowTop ) ) {
-                        console.log('Move denied, top level pages cannot be created!');
-                        return false;
-                    }
+			var address = $("#addlink_address").attr("value").replace(/^\s+|\s+$/g,"");
+			var label = $("#addlink_label").attr("value").replace(/^\s+|\s+$/g,"");
+			var target = $("input[name='addlink_target']:checked").attr("value");
 
-                    // Section editor specific
-                    if( isSectionEditor ) {
+			$("#addlink_address").attr("value", "");
+			$("#addlink_label").attr("value", "");
 
-                        // Can't move a denied post
-                        if( m.o.hasClass( 'denied' ) ) {
-                            console.log('Cannot move a denied post!');
-                            return false;
-                        }
-
-                        // Can't move inside denied post
-                        if( m.np.hasClass( 'denied' ) ) {
-                            console.log('Move denied, destination parent invalid');
-                            return false;
-                        }
-
-                    }
-
-                    return true;
-                }
-            }
-        },
-        contextmenu : {
-                items : function() {
-                    return {
-                        "edit" : {
-                            "label" : "Edit",
-                            "action" : editNode,
-                            "icon" : "remove"
-                        },
-                        "remove" : {
-                            "label" : "Remove",
-                            "action" : function (obj) {if(this.is_selected(obj)) {this.remove();} else {this.remove(obj);}}
-                        }
-                    }
-                }
-        }
-	};
-    $navman = jQuery("#navman_container");
-
-    $navman.bind("select_node.jstree", function() {
-        jQuery("input[name='bu_navman_delete']").removeAttr("disabled");
-        jQuery("input[name='bu_navman_edit']").removeAttr("disabled");
-    });
-
-    $navman.bind("deselect_node.jstree", function() {
-        jQuery("input[name='bu_navman_delete']").attr("disabled", "disabled");
-        jQuery("input[name='bu_navman_edit']").attr("disabled", "disabled");
-        hidePageDetail();
-    });
-
-	$navman.bind("remove.jstree", function(n, prev) {
-		var node = jQuery(prev.rslt.obj);
-
-		var re = /^p(\d+)/;
-		var id = re.exec(node.attr('id'))[1];
-
-		if (id) {
-			navman_delete.push(id);
-			navman_dirty = true;
-		}
-    		console.log(navman_delete);
-	});
-
-    $navman.jstree(options);
-
-	/* expand/collapse */
-	jQuery("#navman_expand_all").click(function(e) {
-		$navman.jstree("open_all");
-		e.preventDefault();
-		e.stopImmediatePropagation();
-	});
-
-	jQuery("#navman_collapse_all").click(function(e) {
-		$navman.jstree("close_all");
-		e.preventDefault();
-		e.stopImmediatePropagation();
-	});
-
-	jQuery("#bu_navman_save").click(function(e) {
-		navman_dirty = false;
-	});
-
-	jQuery("#navman_expand_all_b").click(function(e) {
-		$navman.jstree("open_all");
-		e.preventDefault();
-		e.stopImmediatePropagation();
-	});
-
-	jQuery("#navman_collapse_all_b").click(function(e) {
-		navman.jstree("close_all");
-		e.preventDefault();
-		e.stopImmediatePropagation();
-	});
-
-	jQuery("#bu_navman_save_b").click(function(e) {
-		navman_dirty = false;
-	});
-
-	/* handler for adding link */
-	jQuery("#addlink_add").click(function (e) {
-		if (jQuery("#navman_addlink_form").valid())
-		{
-			var address = jQuery("#addlink_address").attr("value").replace(/^\s+|\s+$/g,"");
-			var label = jQuery("#addlink_label").attr("value").replace(/^\s+|\s+$/g,"");
-			var target = jQuery("input[name='addlink_target']:checked").attr("value");
-
-			jQuery("#addlink_address").attr("value", "");
-			jQuery("#addlink_label").attr("value", "");
-
-			var className = 'newlink_' + navman_links.length;
-
-			var data = {
-				"attr": {"rel": "link", "class": className},
-				"data": {"title": label}
+			var post = {
+				"status": "new",
+				"type": "link",
+				"content": address,
+				"title": label,
+				"meta": {
+					"bu_link_target": target
+				}
 			};
 
-			var link = {"address": address, "label": label, "target": target};
-			navman_links.push(link);
+			// Insert link
+			Navtree.insertPost( post );
 
-			$navman.jstree("create", null, "after", data, null, true);
 			navman_dirty = true;
 		}
+
 	});
 
-	/* delete/rename buttons */
-	jQuery("input[name='bu_navman_delete']").attr("disabled", "disabled");
-	jQuery("input[name='bu_navman_edit']").attr("disabled", "disabled");
+	function editPost( post ) {
 
-	jQuery("input[name='bu_navman_delete']").click(function (e) {
-		$navman.jstree("remove");
-	});
+		if( post.type == 'link' ) {
 
+			$("#editlink_id").attr("value", post.ID );
+			$("#editlink_address").attr("value", post.content);
+			$("#editlink_label").attr("value", post.title);
 
-	jQuery("input[name='bu_navman_edit']").click(function (e) {
-		var n = $navman.jstree("get_selected");
-		editNode(n);
-	});
+			if (post.meta.bu_link_target == "new")
+			{
+				$("#editlink_target_new").attr("checked", "checked");
+			}
+			else
+			{
+				$("#editlink_target_same").attr("checked", "checked");
+			}
 
-	jQuery("#navman_form").submit(function (e) {
-		var data = $navman.jstree("get_json", -1);
+			navman_editing = post;
+			$("#navman_editlink").dialog('open');
 
-		jQuery("#navman_data").attr("value", JSON.stringify(data));
-		jQuery("#navman_links").attr("value", JSON.stringify(navman_links));
-		jQuery("#navman_delete").attr("value", JSON.stringify(navman_delete));
-		jQuery("#navman_edits").attr("value", JSON.stringify(navman_edits));
-	});
+		} else {
+
+			var url = "post.php?action=edit&post=" + post.ID;
+			window.location = url;
+
+		}
+
+	}
+
 });
 
-window.onbeforeunload = function()
-{
-	if (navman_dirty)
-	{
+window.onbeforeunload = function() {
+	if (navman_dirty) {
 		return 'You have made changes to your navigation that have not yet been saved.';
 	}
-	else
-	{
-		return;
-	}
+
+	return;
 };

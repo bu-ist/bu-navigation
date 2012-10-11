@@ -57,19 +57,24 @@ class BU_Navman_Interface {
 		wp_enqueue_script( 'json2' );
 
 		// Main configuration file
-		wp_enqueue_script( 'bu-jquery-tree-config', $scripts_path . '/bu.jstree.config.js', array( 'jquery', 'bu-jquery-tree', 'bu-jquery-cookie', 'json2' ) );
+		wp_enqueue_script( 'bu-navigation', $scripts_path . '/bu-navigation' . $suffix . '.js', array( 'jquery', 'bu-jquery-tree', 'bu-jquery-cookie', 'json2' ), '0.9', true );
 
 		// Styles
 		wp_enqueue_style( 'bu-jquery-tree-classic', $vendor_path . '/jstree/themes/classic/style.css', array(), '1.8.1');
 		wp_enqueue_style( 'bu-jquery-tree', $styles_path . '/bu-navigation-tree.css' );
 
 		// Dynamic script context
-		$data = array(
+		$data = apply_filters( 'bu_navigation_script_settings', array(
 			'interfacePath' => $this->config['interface_path'],
 			'rpcUrl' => $this->config['rpc_url'],
-			);
+			'allowTop' => $GLOBALS['bu_navigation_plugin']->get_setting('allow_top'),
+			'initialTreeData' => json_encode( $this->get_pages( 0, array( 'depth' => 1 ) ) )
+			)
+		);
 
-		wp_localize_script( 'bu-jquery-tree-config', 'buNavTree', $data );
+		wp_localize_script( 'bu-navigation', 'buNavSettings', $data );
+
+		do_action( 'bu_navigation_interface_scripts' );
 
 	}
 
@@ -114,7 +119,7 @@ class BU_Navman_Interface {
 		$root_pages = bu_navigation_get_pages( array(
 			'sections' => $sections,
 			'post_types' => $this->post_types,
-			'post_status' => array( 'draft', 'pending', 'publish', 'trash' )
+			'post_status' => array( 'draft', 'pending', 'publish' )
 			)
 		);
 
@@ -211,9 +216,17 @@ class BU_Navman_Interface {
 				),
 			'data' => $page->navigation_label,
 			'metadata' => array(
-				'post_status' => $page->post_status
+				'post_status' => $page->post_status,
+				'post_type' => $page->post_type
 				)
 			);
+
+		if( 'link' == $page->post_type ) {
+			$p['metadata']['post_content'] = $page->post_content;
+			$p['metadata']['post_meta'] = array(
+				BU_NAV_META_TARGET => $page->target
+				);
+		}
 
 		// Build classes based on page properties
 		$classes = array();

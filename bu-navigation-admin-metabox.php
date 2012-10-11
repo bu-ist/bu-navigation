@@ -1,5 +1,4 @@
 <?php
-
 require_once(dirname(__FILE__) . '/bu-navigation-interface.php' );
 
 /**
@@ -43,6 +42,7 @@ class BU_Navigation_Admin_Metabox {
 	public function register_hooks() {
 		global $wp_version;
 
+		add_filter('bu_navigation_script_settings', array($this, 'script_settings' ));
 		add_action('admin_enqueue_scripts', array($this, 'admin_page_scripts'));
 		add_action('admin_enqueue_scripts', array($this, 'admin_page_styles'));
 		add_action('add_meta_boxes', array($this, 'register_metaboxes'), 10, 2);
@@ -61,6 +61,28 @@ class BU_Navigation_Admin_Metabox {
 			add_action('wp_ajax_check_hidden_page', array($this, 'ajax_check_hidden_page'));
 		}
 		
+	}
+
+	public function script_settings( $config ) {
+
+		$post = $this->post;
+		$post_id = is_object( $post ) ? $post->ID : null;
+
+		// Pass current post ancestors if present to assist in selecting current post
+		$ancestors = null;
+
+		// @todo setup an else clause here that fetches ancestors if they aren't set on the
+		// post object.  Something in our environment seems to be removing them randomly,
+		// and with memcache that can stick around for a while in the cache.
+
+		if( is_object( $post ) && isset( $post->ancestors ) && ! empty( $post->ancestors ))
+			$ancestors = $post->ancestors;
+
+		$config['currentPost'] = $post_id;
+		$config['ancestors'] = $ancestors;
+
+		return $config;
+
 	}
 	
 	/**
@@ -86,7 +108,7 @@ class BU_Navigation_Admin_Metabox {
 		// Load default navigation manager scripts & styles
 		self::$interface->enqueue_scripts();
 
-		wp_enqueue_script('bu-navigation-metabox', $scripts_path . '/navigation-metabox' . $suffix . '.js', array('jquery','bu-jquery-tree'));
+		wp_enqueue_script('bu-navigation-metabox', $scripts_path . '/navigation-metabox' . $suffix . '.js', array('bu-navigation'), '0.3', true );
 
 	}
 
@@ -170,9 +192,8 @@ class BU_Navigation_Admin_Metabox {
 			$select_parent_txt = "Move $lc_label";
 		}
 
-		// Print dynamic Javascript data
-		$this->print_script_context();
-
+		$pages = self::$interface->get_pages( 0, array( 'depth' => 1 ) );
+		
 		include('interface/metabox-navigation-attributes.php');
 
 	}
@@ -190,79 +211,6 @@ class BU_Navigation_Admin_Metabox {
 
 		include('interface/metabox-custom-template.php');
 	
-	}
-
-	/**
-	 * Outputs a block of Javascript that contains a global object used by
-	 * the navigation-attributes.js script
-	 */ 
-	public function print_script_context() {
-
-		$properties = array();
-
-		$context = $this->get_script_data();
-
-		foreach( $context as $key => $value ) {
-			array_push( $properties, "\"$key\": " . json_encode( $value ) );
-		}
-
-		echo "<script type=\"text/javascript\">//<![CDATA[\r";
-		echo "if( typeof bu === \"undefined\" ) var bu = {};\r";
-		echo "if( typeof bu.navigation === \"undefined\" ) bu.navigation = {};\r";
-		echo "bu.navigation.settings = {\r" . implode(",\r", $properties ) . "\r};\r";
-		echo "//]]>\r</script>";
-
-	}
-
-	/**
-	 * Dynamic variables to be passed to the navigation-attributes.js script
-	 */ 
-	public function get_script_data() {
-
-		$post = $this->post;
-		$post_id = is_object( $post ) ? $post->ID : null;
-
-		// Pass current post ancestors if present to assist in selecting current post
-		$ancestors = null;
-
-		// @todo setup an else clause here that fetches ancestors if they aren't set on the
-		// post object.  Something in our environment seems to be removing them randomly,
-		// and with memcache that can stick around for a while in the cache.
-
-		if( is_object( $post ) && isset( $post->ancestors ) && ! empty( $post->ancestors ))
-			$ancestors = $post->ancestors;
-
-		// Does the current user have any editing restrictions from the section editing plugin?
-		// @todo loosen this coupling somehow
-		$is_section_editor = false;
-
-		if( class_exists( 'BU_Section_Editing_Plugin' ) ) {
-			$is_section_editor = BU_Section_Editing_Plugin::is_allowed_user( get_current_user_id() );
-		}
-
-		$data = array(
-			'tree' => self::$interface->get_pages( 0, array( 'depth' => 1 ) ),
-			'ancestors' => $ancestors,
-			'current_post' => $post_id,
-			'allow_top' => $this->allow_top_level_page(),
-			'is_section_editor' => $is_section_editor,
-			);
-
-		return $data;
-
-	}
-
-	/**
-	 * @todo move this out of here, in to a global settings class
-	 */ 
-	public function allow_top_level_page() {
-
-		// the 'allow top level page' option (in Site Design -> Primary Navigation screen) only applies to pages
-		if ($this->post_type == 'page' && defined('BU_NAV_OPTION_ALLOW_TOP')) {
-			return (bool)get_option(BU_NAV_OPTION_ALLOW_TOP);
-		} else {
-			return true;
-		}
 	}
 
 	protected function get_post_type_labels( $post_type ) {

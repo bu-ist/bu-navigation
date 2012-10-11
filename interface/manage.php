@@ -1,24 +1,6 @@
 <div class="wrap">
     <h2>Edit Navigation</h2>
 
-    <!-- @todo use admin notices for this -->
-	<?php if( $editing_user ): ?>
-	<?php $user_detail = get_userdata($editing_user); ?>
-	<div id="message" class="updated fade">
-		<p>Warning: <strong><?php echo $user_detail->display_name; ?></strong> is currently editing this site's navigation.</p>
-	</div>
-	<?php endif; ?>
-
-	<?php if( $saved === TRUE ): ?>
-		<div id="message" class="updated fade">
-			<p>Your navigation changes were saved.</p>
-		</div>
-	<?php elseif( $saved === FALSE ): ?>
-		<div class="error">
-			<p><strong>Error:</strong> Errors occurred while saving your navigation changes.</p>
-		</div>
-	<?php endif; ?>
-
 	<div class="metabox-holder has-right-sidebar">
 		<?php if( $post_type == 'page' ): ?>
 		<div class="inner-sidebar">
@@ -117,16 +99,3 @@
 		<?php endif; ?>
 	</div>
 </div>
-
-<!-- @todo rethink/refactor and treat consistently with navigation-attributes metabox dynamic script context -->
-<script type="text/javascript">
-//<![CDATA[
-/* top-level pages */
-var pages = [<?php echo $pages_json; ?>];
-var interfacePath = "<?php echo $interface_path; ?>";
-var rpcURL = "<?php echo $rpc_url; ?>";
-var rpcPageURL = "<?php echo $rpc_page_url; ?>";
-var isSectionEditor = <?php echo json_encode( $is_section_editor ); ?>;
-var allowTop = <?php echo json_encode( $allow_top ); ?>;
-//]]>
-</script>

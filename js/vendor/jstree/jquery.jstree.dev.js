@@ -3769,7 +3769,6 @@
 					y = o.top + this.data.core.li_height;
 				}
 				i = obj.data("jstree") && obj.data("jstree").contextmenu ? obj.data("jstree").contextmenu : s.items;
-                console.log(i);
 				if($.isFunction(i)) { i = i.call(this, obj); }
 				this.data.contextmenu = true;
 				$.vakata.context.show(i, a, x, y, this, obj, this._get_settings().core.rtl);

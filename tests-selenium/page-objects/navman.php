@@ -38,7 +38,7 @@ class BUN_Navman_Page {
 	// Tree types (li rel attribute)
 	const TYPES_PAGE = 'page';
 	const TYPES_LINK = 'link';
-	const TYPES_EXCLUDED = 'page_excluded';
+	const TYPES_LINK = 'section';
 
 	// HTML ID prefix for jstree lis
 	const LEAF_ID_PREFIX = 'p';
@@ -48,7 +48,7 @@ class BUN_Navman_Page {
 	const GET_PAGE_ANCHOR_XPATH = '//li[@id="%s"]/a';
 	const OPEN_SECTION_ICON_XPATH = '//li[@id="%s"]/ins[@class="jstree-icon"]';
 	const NAVMAN_SAVE_NOTIFICATION_XPATH = '//div[@id="message"]/p';
-	const NEW_LINK_XPATH = '//li[@rel="link" and contains(@class, "newlink_%s")]';
+	const NEW_LINK_XPATH = '//li[@rel="link" and contains(@id, "post-new-%s")]';
 
 	// Move page constants
 	const MOVE_PAGE_BEFORE_Y_OFFSET = 2;
@@ -330,7 +330,7 @@ class BUN_Navman_Page {
 	public function assertChangesWereSaved() {
 
 		$msg = $this->webdriver->getElement( LocatorStrategy::xpath, self::NAVMAN_SAVE_NOTIFICATION_XPATH );
-		$this->webdriver->assertEquals( $msg->getText(), 'Your navigation changes were saved.' );
+		$this->webdriver->assertEquals( 'Your navigation changes have been saved', $msg->getText() );
 
 	}
 

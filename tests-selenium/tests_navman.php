@@ -95,12 +95,12 @@ require_once 'page-objects/navman.php';
 	/**
 	 * @group bu-navigation-types
 	 */ 
-	public function test_hidden_page() {
+	public function test_section() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
-		$page = $navman->getPage( $this->pages['hidden'] );
-
-		$this->assertEquals( $page->getAttribute('rel'), BUN_Navman_Page::TYPES_EXCLUDED );
+		$page = $navman->getPage( $this->pages['parent'] );
+		
+		$this->assertEquals( $page->getAttribute('rel'), BUN_Navman_Page::TYPES_SECTION );
 
 	}
 

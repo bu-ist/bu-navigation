@@ -1,19 +1,28 @@
 /*
- * jsTree classic theme 1.0
+ * jsTree BU theme 1.0
  * Supported features: dots/no-dots, icons/no-icons, focused, loading
  * Supported plugins: ui (hovered, clicked), checkbox, contextmenu, search
  */
+ 
+.jstree-bu ins {
+	background-image: url("sprite.png");
+	background-repeat: no-repeat;
+	background-color: transparent;
+}
 
-.jstree-bu li, 
-.jstree-bu ins { background-image:url("d.png"); background-repeat:no-repeat; background-color:transparent; }
-.jstree-bu li { background-position:-90px 0; background-repeat:repeat-y;  }
+.jstree-bu ins {
+	margin: 8px 4px 0 0 !important;
+}
+
+.jstree-bu a ins {
+	margin: 0 4px 0 0 !important;
+}
+
+/* .jstree-bu li { background-position:-90px 0; background-repeat:repeat-y;  } */
 .jstree-bu li.jstree-last { background:transparent; }
 .jstree-bu .jstree-open > ins { background-position:-72px 0; }
 .jstree-bu .jstree-closed > ins { background-position:-54px 0; }
-.jstree-bu .jstree-leaf > ins { background-position:-36px 0; }
 
-.jstree-bu .jstree-hovered { background:#e7f4f9; border:1px solid #e7f4f9; padding:0 2px 0 1px; }
-.jstree-bu .jstree-clicked { background:navy; border:1px solid navy; padding:0 2px 0 1px; color:white; }
 .jstree-bu a .jstree-icon { background-position:-56px -19px; }
 .jstree-bu .jstree-open > a .jstree-icon { background-position:-56px -36px; }
 .jstree-bu a.jstree-loading .jstree-icon { background:url("throbber.gif") center center no-repeat !important; }
@@ -75,3 +84,119 @@
 .jstree-bu .jstree-checked a .jstree-checkbox { _background-position:-38px -19px; }
 .jstree-bu .jstree-unchecked a .jstree-checkbox { _background-position:-2px -19px; }
 /* IE6 END */
+
+
+
+
+.jstree-bu ul {
+	width: 79.123456789%;
+}
+
+.jstree-bu ul li {
+	position: relative !important;
+	clear: left !important;
+	display: block !important;
+	margin-bottom: 3px !important;
+}
+ 
+.jstree-bu ul li a {
+	display: inline-block !important;
+	float: left !important;
+	width: *;
+	padding: 8px 15px 8px 6px !important;
+	border: 1px solid #dfdfdf;
+	border-radius: 4px;
+	background: #eee !important;
+	background: -moz-linear-gradient(top, #ffffff 0%, #eeeeee 100%) !important;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #ffffff), color-stop(100%, #eeeeee)) !important;
+	background: -webkit-linear-gradient(top, #ffffff 0%,#eeeeee 100%) !important;
+	background: -o-linear-gradient(top, #ffffff 0%,#eeeeee 100%) !important;
+	background: -ms-linear-gradient(top, #ffffff 0%,#eeeeee 100%) !important;
+	background: linear-gradient(to bottom, #ffffff 0%,#eeeeee 100%) !important;
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eeeeee',GradientType=0 ) !important;
+}
+
+/*
+.jstree-bu ul li a:hover {
+	background: #f5f5f5 !important;
+	background: -moz-linear-gradient(top, #ffffff 0%, #f5f5f5 100%) !important;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #ffffff), color-stop(100%, #f5f5f5)) !important;
+	background: -webkit-linear-gradient(top, #ffffff 0%,#f5f5f5 100%) !important;
+	background: -o-linear-gradient(top, #ffffff 0%,#f5f5f5 100%) !important;
+	background: -ms-linear-gradient(top, #ffffff 0%,#f5f5f5 100%) !important;
+	background: linear-gradient(to bottom, #ffffff 0%,#f5f5f5 100%) !important;
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f5f5f5',GradientType=0 ) !important;
+}
+*/
+
+.jstree-bu .jstree-clicked {
+	color:white;
+	border: 1px solid #666;
+	background: #7f7f7f !important;
+	background: -moz-linear-gradient(top, #7f7f7f 0%, #6e6e6e 100%) !important;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #7f7f7f), color-stop(100%, #6e6e6e)) !important;
+	background: -webkit-linear-gradient(top, #7f7f7f 0%,#6e6e6e 100%) !important;
+	background: -o-linear-gradient(top, #7f7f7f 0%,#6e6e6e 100%) !important;
+	background: -ms-linear-gradient(top, #7f7f7f 0%,#6e6e6e 100%) !important;
+	background: linear-gradient(to bottom, #7f7f7f 0%,#6e6e6e 100%) !important;
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7f7f7f', endColorstr='#6e6e6e',GradientType=0 ) !important;
+}
+
+.jstree-bu .jstree-icon {
+	display: inline-block !important;
+	float: left !important;
+	width: 16px !important;
+	height: 16px !important;
+	margin-right: 6px !important;
+}
+
+.jstree-bu .jstree-closed > ins {
+	background-position: 0 -16px;
+}
+
+.jstree-bu .jstree-open > ins {
+	background-position: -16px -16px;
+}
+
+.jstree-bu .jstree-leaf > ins {
+	background-position: -48px -32px;
+}
+
+.jstree-bu .jstree-closed > ins:hover, .jstree-bu .jstree-open > ins:hover {
+	cursor: pointer;
+}
+
+.jstree-bu li[rel="section"] > a > .jstree-icon {
+	background-image:url("sprite.png") !important;
+	background-repeat:no-repeat !important;
+	background-color:transparent !important;
+	background-position: 0 0 !important;
+}
+
+.jstree-bu li[rel="page"] > a > .jstree-icon {
+	background-image:url("sprite.png") !important;
+	background-repeat:no-repeat !important;
+	background-color:transparent !important;
+	background-position: -32px 0 !important;
+}
+
+.jstree-bu li[rel="link"] > a > .jstree-icon {
+	background-image:url("sprite.png") !important;
+	background-repeat:no-repeat !important;
+	background-color:transparent !important;
+	background-position: -48px 0 !important;
+}
+
+.jstree-bu .post_status {
+	position: relative !important;
+	top: -26px !important;
+	float: right !important;
+	margin-right: 10px !important;
+	padding: 0 4px 0 4px !important;
+	border-radius: 4px !important;
+}
+
+.jstree-bu .post_status.draft {
+	background: #464646 !important;
+	color: #aaa !important;
+}

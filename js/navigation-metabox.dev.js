@@ -1,12 +1,13 @@
 // Bail if globals we depend on are undefined
 if((typeof bu === 'undefined' ) ||
-	(typeof bu.navigation === 'undefined' ) )
+	(typeof bu.plugins === 'undefined' ) ||
+	(typeof bu.plugins.navigation === 'undefined' ) )
 		throw new TypeError('BU Navigation Metabox dependencies have not been met!');
 
 (function($) {
 
 	// Append to views namespace for global access
-	bu.navigation.views = bu.navigation.views || {};
+	bu.plugins.navigation.views = bu.plugins.navigation.views || {};
 
 	// Aliases
 	var Metabox, MovePostModal, Navtree;
@@ -14,7 +15,7 @@ if((typeof bu === 'undefined' ) ||
 	/**
 	 * Navigation attributes metabox
 	 */
-	Metabox = bu.navigation.views.Metabox = {
+	Metabox = bu.plugins.navigation.views.Metabox = {
 
 		// Metabox container
 		el: '#bupageparentdiv',
@@ -44,7 +45,7 @@ if((typeof bu === 'undefined' ) ||
 
 			// Configuration
 			config = config || {};
-			this.settings = $.extend({}, bu.navigation.settings, config );
+			this.settings = $.extend({}, bu.plugins.navigation.settings, config );
 
 			// References to key elements
 			this.$el = $(this.el);
@@ -129,7 +130,7 @@ if((typeof bu === 'undefined' ) ||
 	 *
 	 * @todo refactor for consistency with Metabox (object literal)
 	 */
-	ModalPostTree = bu.navigation.views.ModalPostTree = function( config ) {
+	ModalPostTree = bu.plugins.navigation.views.ModalPostTree = function( config ) {
 
 		var that = {}; // Instance object
 
@@ -160,7 +161,7 @@ if((typeof bu === 'undefined' ) ||
 		var initialize = function(config) {
 
 			// Create post navigation tree, pass in initial posts from server
-			Navtree = bu.navigation.tree('edit_post', { el: c.treeContainer});
+			Navtree = bu.plugins.navigation.tree('edit_post', { el: c.treeContainer});
 			Navtree.listenFor('postsSelected', that.onPostsSelected);
 
 			$toolbar = $(c.toolbarContainer);
@@ -290,4 +291,4 @@ var tb_position;
 })(jQuery);
 
 // Start the show
-jQuery(document).ready( function(){ bu.navigation.views.Metabox.initialize(); });
+jQuery(document).ready( function(){ bu.plugins.navigation.views.Metabox.initialize(); });

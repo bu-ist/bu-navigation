@@ -4,46 +4,103 @@
  * ========================================================================
  */
 var bu = bu || {};
-	bu.navigation = {};
+	bu.plugins = bu.plugins || {};
+	bu.plugins.navigation = {};
 
-// -----------------------------
-// BU Navigation global settings
-// -----------------------------
 (function($){
 
-	// Plugin lias
-	var Nav = bu.navigation;
+	// Simple pub/sub pattern
+	bu.signals = (function() {
+		var listeners = {};
+		var that = this;
 
-	// Global plugin settings
-	Nav.settings = buNavSettings || {};
+		return {
+			listenFor: function( event, callback ) {
+
+				if( typeof listeners[event] === 'undefined')
+					listeners[event] = [];
+
+				listeners[event].push( callback );
+				return that;
+
+			},
+			broadcast: function( event, data ) {
+
+				if( listeners[event] ) {
+					for( var i = 0; i < listeners[event].length; i++) {
+						listeners[event][i].apply( this, data || [] );
+					}
+				}
+				return that;
+			}
+		};
+	})();
+
+	// Simple filter mechanism, modeled after Plugins API
+	// @todo partially implemented
+	bu.hooks = (function(){
+		var filters = {};
+		var that = this;
+
+		return {
+			addFilter: function( name, func ) {
+				if( typeof filters[name] === 'undefined' )
+					filters[name] = [];
+
+				filters[name].push(func);
+				return that;
+
+			},
+			applyFilters: function( name, obj ) {
+				if( typeof filters[name] === 'undefined' )
+					return obj;
+
+				var args = Array.prototype.slice.apply(arguments);
+				extra = args.slice(1);
+
+				var i = 0;
+				for( i = 0; i < filters[name].length; i++ ) {
+					obj = filters[name][i].apply( this, extra );
+				}
+
+				return obj;
+			}
+		};
+	})();
 
 })(jQuery);
 
-// ----------------------------
-// BU Navigation tree instances
-// ----------------------------
+// =============================================//
+// BU Navigation plugin settings & tree objects //
+// =============================================//
 (function($){
 
 	// Plugin alias
-	var Nav = bu.navigation;
+	var Nav = bu.plugins.navigation;
+
+	// Global plugin settings
+	Nav.settings = buNavSettings || {};
 	
 	// Tree constructor
 	Nav.tree = function( type, config ) {
 		if( typeof type === 'undefined')
-			throw new TypeError('Invalid navigation tree type!');
+			type = 'base';
 
 		return Nav.trees[type](config).initialize();
 	};
 
-	// ====== BU Navigation Tree Types ====== //
+	// Tree instances
 	Nav.trees = {
 
-		// ----------------------------
-		// Base navigation tree type - extend me!
-		// ----------------------------
+		// ---------------------------------------//
+		// Base navigation tree type - extend me! //
+		// ---------------------------------------//
 		base: function( config, my ) {
 			var that = {};
 			my = my || {};
+
+			// "Implement" the signals interface
+			$.extend( true, that, bu.signals );
 
 			// Configuration defaults
 			var default_config = {
@@ -63,58 +120,12 @@ var bu = bu || {};
 			var s = Nav.settings;
 			var c = that.config;
 			var d = that.data;
-			
-
-			// Simple pub/sub pattern - belongs elsewhere
-			var listeners = {};
-			var events = ['selectPost','movePost'];
-
-			that.listenFor = function( event, callback ) {
-
-				// @todo verify event string from events var
-				// @todo verify callback is callable
-
-				if( typeof listeners[event] === 'undefined')
-					listeners[event] = [];
-
-				listeners[event].push( callback );
-
-				return that;
-			};
-
-			that.broadcast = function( event, data ) {
-				var i;
-
-				if( listeners[event] ) {
-					for( i = 0; i < listeners[event].length; i++) {
-						listeners[event][i].apply( that, data );
-					}
-				}
-			};
 
 			// Need valid tree element to continue
 			var $tree = that.$el = $(c.el);
 
 			if( $tree.length === 0 )
-				return false;
-
-			// Need to implement this in a filterable way
-			var checkMove = function(m) {
-				var attempted_parent_id = m.np.attr('id');
-
-				// Don't allow top level posts if global option prohibits it
-				if(m.cr === -1 && ! Nav.settings.allowTop ) {
-					// console.log('Move denied, top level posts cannot be created!');
-					// @todo pop up a friendlier notice explaining this
-					return false;
-				}
-
-				// @todo needs to be extendable
-				// maybe register for the checkMove filter, and if any one of those
-				// returns false then return false
-
-				return true;
-			};
+				throw new TypeError('Invalid DOM selector, can\'t create BU Navigation Tree');
 
 			// jsTree Settings object
 			d.treeConfig = {
@@ -176,7 +187,7 @@ var bu = bu || {};
 							return { id : n.attr ? n.attr("id") : 0 };
 						}
 					},
-					"progressive_render" : true
+					"progressive_render" : false	// counting needs a fully loaded DOM
 				},
 				"crrm": {
 					"move": {
@@ -309,17 +320,14 @@ var bu = bu || {};
 
 			my.nodeToPost = function( node ) {
 				if( typeof node === 'undefined' )
-					throw new TypeError('Invalid node argument!');
+					throw new TypeError('Invalid node!');
 
 				var id = node.attr('id');
 
 				if( id.indexOf('post-new') === -1 )
 					id = my.stripNodePrefix( id );
 
-				// @todo make the values returned from this
-				// method extendable
-
-				return {
+				var post = {
 					ID: id,
 					title: $tree.jstree('get_text', node ),
 					content: node.data('post_content'),
@@ -329,11 +337,13 @@ var bu = bu || {};
 					menu_order: node.data('menu_order'),
 					meta: node.data('post_meta') || {}
 				};
+				return bu.hooks.applyFilters('nodeToPost',post);
+
 			};
 
 			my.postToNode = function( post, args ) {
 				if( typeof post === 'undefined' )
-					throw new TypeError('Invalid post argument!');
+					throw new TypeError('Invalid post!');
 
 				var default_args = {
 					'hasChildren': false,
@@ -376,16 +386,13 @@ var bu = bu || {};
 					}
 				};
 
-				// @todo provide a flexible mechanism for external js
-				// to filter this default data array
-
-				return data;
+				return bu.hooks.applyFilters('postToNode', data );
 
 			};
 
 			my.getNodeForPost = function( post ) {
 				if( typeof post === 'undefined' )
-					throw new TypeError('Invalid post argument!');
+					throw new TypeError('Invalid post!');
 
 				var node_id;
 
@@ -414,21 +421,102 @@ var bu = bu || {};
 				return newPosts.length;
 
 			};
-
-			my.appendPostStatus = function( $node ) {
-				var post_status = $node.data('post_status') || 'publish';
-				if(post_status != 'publish') $node.children('a').after('<span class="post_status ' + post_status + '">' + post_status + '</span>');
-			};
 			
 			my.stripNodePrefix = function( str ) {
 				return str.replace( c.nodePrefix, '');
 			};
 
-			/**
-			 * jsTree event handlers
-			 */
+			// ======= Private ======= //
+
+			var lazyLoad = function() {
+
+				// Lazy loading causes huge performance issues in IE < 8
+				if( $.browser.msie === true &&  parseInt($.browser.version, 10) < 8 )
+					return;
+
+				// Start lazy loading once tree is fully loaded
+				$tree.find('ul > .jstree-closed').each( function(){
+					var $node = $(this);
+					// Load using API -- they require callback functions, but we're
+					// handling actions in the load_node.jstree even handler below
+					// so we just pass empty functions
+					$tree.jstree('load_node', $node, function(){}, function(){} );
+				});
+			};
+
+			var calculateCounts = function($node, includeDescendents) {
+				if( typeof countChildren === 'undefined' )
+					countChildren = true;
+
+				var count = $node.find('li').length;
+				$a = $node.children('a');
+
+				if(count) {
+
+					$count = $a.children('.count');
+
+					if($count.length === 0) {
+
+						$statuses = $a.children('.post-statuses');
+						$count = $(' <span class="count">');
+
+						// Count should appear before statuses
+						if( $statuses.length ) {
+							$statuses.before($count);
+						} else {
+							$a.append($count);
+						}
+
+					}
+
+					$count.text('(' + count + ')');
+
+				} else {
+
+					// Remove count if empty
+					$a.children('.count').remove();
+
+				}
+
+				// Recurse to all descendents
+				if(includeDescendents) {
+					$node.find('> ul > li').each(function(){
+						calculateCounts($(this));
+					});
+				}
+			};
+
+			var appendPostStatus = function( $node ) {
+				var post_status = $node.data('post_status') || 'publish';
+				$a = $node.children('a');
+
+				if( $a.children('post-statuses').length === 0 ) {
+					$a.append(' <span class="post-statuses">');
+				}
+
+				if(post_status != 'publish') $a.children('.post-statuses').append(' <span class="post_status ' + post_status + '">' + post_status + '</span>');
+			};
+
+			var checkMove = function( m ) {
+				var attempted_parent_id = m.np.attr('id');
+				var allowed = true;
+
+				// Don't allow top level posts if global option prohibits it
+				if(m.cr === -1 && ! Nav.settings.allowTop ) {
+					// console.log('Move denied, top level posts cannot be created!');
+					// @todo pop up a friendlier notice explaining this
+					allowed = false;
+				}
+
+				return bu.hooks.applyFilters( 'moveAllowed', allowed, m );
+			};
+
+			// ======= jsTree Event Handlers ======= //
 
 			$tree.bind('loaded.jstree', function( event, data ) {
+				if(s.lazyLoad) {
+					lazyLoad();
+				}
 				that.broadcast( 'postsLoaded' );
 			});
 
@@ -436,42 +524,49 @@ var bu = bu || {};
 				that.broadcast( 'postsSelected' );
 			});
 
-			// Used to append post status spans to each tree element
+			$tree.bind('load_node.jstree', function( event, data ) {
+				if( data.rslt.obj !== -1 ) {
+					var $node = data.rslt.obj;
+					calculateCounts( $node );
+				}
+			});
+
+			// Append extra markup to each tree node
 			$tree.bind('clean_node.jstree', function( event, data ) {
-				var nodes = data.rslt.obj;
-				if (nodes && nodes != -1) {
-					nodes.each(function(i, li) {
-						var $li = $(li);
+				var $nodes = data.rslt.obj;
 
-						if($li.data('meta-loaded')) return;
+				// skip root node
+				if ($nodes && $nodes !== -1) {
+					$nodes.each(function(i, node) {
+						var $node = $(node);
 
-						// Add post status span after link
-						my.appendPostStatus($li);
-
-						// Prevent duplicate spans from being added on moves
-						$li.data('meta-loaded', true);
+						// Append post statuses inside node anchor
+						if( $node.find('> a .post-statuses').length === 0 ) {
+							appendPostStatus($node);
+						}
 					});
 				}
 			});
 
-			$tree.bind('create_node.jstree', function( event, data ) {
+			$tree.bind('create_node.jstree', function(event, data ) {
 				var $node = data.rslt.obj;
 				var post = my.nodeToPost( $node );
 				that.broadcast( 'postCreated', [ post ] );
 			});
 
-			$tree.bind('select_node.jstree', function( event, data ) {
+			$tree.bind('select_node.jstree', function(event, data ) {
 				var post = my.nodeToPost(data.rslt.obj);
-				that.broadcast( 'selectPost', [ post ]);
+				that.broadcast( 'selectPost', [ post, that ]);
 			});
 
-			$tree.bind('deselect_node.jstree', function( event, data ) {
+			$tree.bind('deselect_node.jstree', function(event, data ) {
 				var post = my.nodeToPost( data.rslt.obj );
-				that.broadcast( 'deselectPost', [ post ]);
+				that.broadcast( 'deselectPost', [ post, that ]);
 			});
 
-			$tree.bind('move_node.jstree', function( event, data ) {
+			$tree.bind('move_node.jstree', function(event, data ) {
 				var $parent = data.rslt.np,
+					$oldparent = data.rslt.op,
 					menu_order = data.rslt.o.index() + 1,
 					parent_id;
 
@@ -482,6 +577,19 @@ var bu = bu || {};
 					parent_id = parseInt(my.stripNodePrefix($parent.attr('id') ),10);
 				}
 
+				// Recalculate counts
+				$newsection = $parent.parentsUntil($tree,'li');
+				$oldsection = $oldparent.parentsUntil($tree,'li');
+				$newsection = $newsection.length ? $newsection.last() : $parent;
+				$oldsection = $oldsection.length ? $oldsection.last() : $oldparent;
+
+				if( $oldsection.is($newsection) ) {
+					calculateCounts($newsection);
+				} else {
+					calculateCounts($oldsection);
+					calculateCounts($newsection);
+				}
+
 				// Extra post parameters that may be helpful to consumers
 				var post = my.nodeToPost( data.rslt.o );
 				post['parent'] = parent_id;
@@ -489,6 +597,23 @@ var bu = bu || {};
 
 				that.updatePost(post);
 				that.broadcast( 'postMoved', [post, parent_id, menu_order]);
+			});
+
+			// If the event doesn't contain the current selection, deselect all
+			$(document).bind("mousedown", function (e) {
+				if(!$.contains($tree.jstree('get_selected'), e.target)) {
+					$tree.jstree('deselect_all');
+				}
+			});
+
+			$(document).bind('drag_start.vakata', function(event, data) {
+				var $node = data.data.obj;
+				$node.addClass('bu-dnd-placeholder');
+			});
+
+			$(document).bind('drag_stop.vakata', function(event, data) {
+				var $node = data.data.obj;
+				$node.removeClass('bu-dnd-placeholder');
 			});
 
 			return that;
@@ -510,6 +635,7 @@ var bu = bu || {};
 			d.treeConfig["plugins"].push("contextmenu");
 
 			d.treeConfig["contextmenu"] = {
+				'show_at_node': false,
 				"items": function() {
 					return {
 						"edit" : {
@@ -525,8 +651,6 @@ var bu = bu || {};
 				}
 			};
 
-			// Context menu event translators
-
 			var editPost = function( node ) {
 				var post = my.nodeToPost( node );
 				that.broadcast( 'editPost', [ post ]);
@@ -536,6 +660,44 @@ var bu = bu || {};
 				var post = my.nodeToPost( node );
 				that.removePost( post );
 			};
+
+			// Prevent default right click behavior
+			$tree.bind('loaded.jstree', function(e,data) {
+
+				$tree.undelegate('a', 'contextmenu.jstree');
+
+			});
+
+			// Append options menu to each node
+			$tree.bind('clean_node.jstree', function( event, data ) {
+				var $nodes = data.rslt.obj;
+
+				// skip root node
+				if ($nodes && $nodes != -1) {
+					$nodes.each(function(i, node) {
+						var $node = $(node);
+						var $a = $node.children('a');
+
+						if( $a.children('.edit-options').length ) return;
+
+						$a.append('<button class="edit-options">Options</button>');
+					});
+				}
+			});
+
+			$tree.delegate(".edit-options", "click", function(e){
+				e.preventDefault();
+				e.stopPropagation();
+
+				$tree.jstree('deselect_all');
+
+				var pos = $(this).offset();
+				var yOffset = $(this).height() + 5;
+				var obj = $(this).parent('a').parent('li');
+
+				$tree.jstree('select_node', obj );
+				$tree.jstree('show_contextmenu', obj, pos.left, pos.top + yOffset );
+			});
 
 			return that;
 		},
@@ -555,7 +717,8 @@ var bu = bu || {};
 			var s = Nav.settings;	// global plugin settings
 
 			var $tree = that.$el;
-			var currentNodeId = c.nodePrefix + s.currentPost;
+			var currentPost = s.currentPost;
+			var currentNodeId = c.nodePrefix + currentPost;
 
 			// Extra configuration
 			var extraTreeConfig = {
@@ -568,7 +731,7 @@ var bu = bu || {};
 			var toSelect = [],
 				toOpen = [],
 				i;
-			if ( s.currentPost ) {
+			if ( currentPost ) {
 				toSelect.push( '#' + currentNodeId );
 				if ( s.ancestors && s.ancestors.length ) {
 					// We want old -> young, which is not how they're passed
@@ -590,15 +753,17 @@ var bu = bu || {};
 			}
 
 			// Extend config object to restrict selection, hover and dragging to current post
-			var checkCurrentPost = function( node ) {
+			var assertCurrentPost = function( node ) {
 				var post = my.nodeToPost(node);
-				return post.ID == s.currentPost;
+				return post.ID == currentPost;
 			};
+
 			var typeChecks = {
-				"select_node"		: checkCurrentPost,
-				"hover_node"		: checkCurrentPost,
-				"start_drag"		: checkCurrentPost
+				"select_node"		: assertCurrentPost,
+				"hover_node"		: assertCurrentPost,
+				"start_drag"		: assertCurrentPost
 			};
+
 			$.each( d.treeConfig['types']['types'], function( type, typeConfig ){
 				extraTreeConfig['types']['types'][type] = $.extend(typeConfig,typeChecks);
 			});
@@ -608,11 +773,11 @@ var bu = bu || {};
 
 			// Public
 			that.getCurrentPost = function() {
-				if( s.currentPost === null ||
-					typeof s.currentPost === 'undefined' )
+				if( currentPost === null ||
+					typeof currentPost === 'undefined' )
 					return false;
 
-				var $node = my.getNodeForPost( s.currentPost );
+				var $node = my.getNodeForPost( currentPost );
 				var post = my.nodeToPost( $node );
 				return post;
 			};
@@ -621,7 +786,7 @@ var bu = bu || {};
 				var $node = my.getNodeForPost( post );
 
 				// Update all state vars relevant to current post
-				s.currentPost = post.ID;
+				currentPost = post.ID;
 				currentNodeId = $node.attr('id');
 
 				// Select and update tree state

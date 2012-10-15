@@ -6,19 +6,21 @@ var navman_edits = {};
 var navman_editing = null;
 
 // Check prerequisites
-if((typeof bu === 'undefined') || (typeof bu.navigation === 'undefined') || (typeof bu.navigation.tree === 'undefined'))
+if((typeof bu === 'undefined') ||
+	(typeof bu.plugins.navigation === 'undefined') ||
+	(typeof bu.plugins.navigation.tree === 'undefined') )
 	throw new TypeError('BU Navigation Manager script dependencies have not been met!');
 
 // @todo only run Navman.init on DOM ready
 jQuery(document).ready( function($) {
 
 	// If we are the first view object, set up our namespace
-	bu.navigation.views = bu.navigation.views || {};
+	bu.plugins.navigation.views = bu.plugins.navigation.views || {};
 
 	var Navman, Linkman, Navtree;
 
 	// @todo implement for consistency with navigation-metabox.js
-	// Navman = bu.navigation.views.Navman = {
+	// Navman = bu.plugins.navigation.views.Navman = {
 
 	// 	el: '#navman_container',
 
@@ -39,7 +41,7 @@ jQuery(document).ready( function($) {
 	// };
 
 	// @todo implement for consistency with navigation-metabox.js
-	// Linkman = bu.navigation.views.Linkman = {
+	// Linkman = bu.plugins.navigation.views.Linkman = {
 
 	// 	el: '#navman_container',
 
@@ -67,7 +69,7 @@ jQuery(document).ready( function($) {
 	$("input[name='bu_navman_edit']").attr("disabled", "disabled");
 
 	// Create post navigation tree, pass in initial posts from server
-	Navtree = bu.navigation.tree('navman', {el: '#navman_container'});
+	Navtree = bu.plugins.navigation.tree('navman', {el: '#navman_container'});
 
 	// Navigation tree listeners
 

@@ -82,6 +82,7 @@ class BU_Navman_Interface {
 			'themePath' => $this->config['themePath'],
 			'rpcUrl' => $this->config['rpcUrl'],
 			'allowTop' => $GLOBALS['bu_navigation_plugin']->get_setting('allow_top'),
+			'lazyLoad' => true,
 			'initialTreeData' => $pages
 			);
 
@@ -234,8 +235,9 @@ class BU_Navman_Interface {
 						if( $load_children ) {
 							$descendants = $this->get_formatted_pages( $page->ID, $pages_by_parent );
 
-							if( count( $descendants ) > 0 )
+							if( count( $descendants ) > 0 ) {
 								$p['children'] = $descendants;
+							}
 						}
 
 					}
@@ -273,9 +275,9 @@ class BU_Navman_Interface {
 			'metadata' => array(
 				'post_status' => $page->post_status,
 				'post_type' => $page->post_type,
-				'excluded' => $page->excluded,
-				'restricted' => $page->restricted,
-				'denied' => $page->perm
+				'excluded' => isset($page->excluded) ? $page->excluded : null,
+				'restricted' => isset($page->restricted) ? $page->restricted : null,
+				'denied' => isset($page->perm) ? $page->perm : null
 				)
 			);
 

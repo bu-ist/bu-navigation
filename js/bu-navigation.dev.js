@@ -674,7 +674,7 @@ var bu = bu || {};
 
 						if( $a.children('.edit-options').length ) return;
 
-						var $button = $('<button class="edit-options">options <ins class="jstree-icon"> </ins></button>');
+						var $button = $('<button class="edit-options"><ins class="jstree-icon">&#160;</ins>options</button>');
 						var $statuses = $a.children('.post-statuses');
 
 						// Button should appear before statuses
@@ -698,13 +698,25 @@ var bu = bu || {};
 				var yOffset = $(this).height() + 5;
 				var obj = $(this).parent('a').parent('li');
 
+				$(this).addClass('clicked');
 				$tree.jstree('select_node', obj );
 				$tree.jstree('show_contextmenu', obj, pos.left, pos.top + yOffset );
 			});
 
+			$tree.bind('deselect_all.jstree', function(e, data){
+				var $node = data.rslt.obj;
+
+				if( $node.attr('id') !== $tree.attr('id') ) {
+					$node.find('> a > .edit-options').removeClass('clicked');
+				}
+			});
+
 			// If the event doesn't contain the current selection, deselect all
 			$(document).bind("mousedown", function (e) {
-				if(!$.contains($tree.jstree('get_selected'), e.target)) {
+				var $selected = $tree.jstree('get_selected', $tree);
+				var $match = $selected.filter( e.target );
+				
+				if($match.length === 0) {
 					$tree.jstree('deselect_all');
 				}
 			});

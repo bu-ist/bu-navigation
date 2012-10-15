@@ -27,6 +27,7 @@ if((typeof bu === 'undefined' ) ||
 			breadcrumbs: '#bu_nav_attributes_location_breadcrumbs'
 		},
 
+		// Form fields
 		inputs: {
 			label: '#bu-page-navigation-label',
 			visible: '#bu-page-navigation-display',
@@ -43,14 +44,15 @@ if((typeof bu === 'undefined' ) ||
 
 		initialize: function(config) {
 
-			// Configuration
+			// Merge config argument with global plugin settings object
 			config = config || {};
 			this.settings = $.extend({}, bu.plugins.navigation.settings, config );
 
 			// References to key elements
 			this.$el = $(this.el);
 
-			// Build navigation tree in modal
+			// Load navigation tree
+			// @todo we should consider only loading nav tree on "Move page" button click
 			this.loadNavTree();
 
 			// Bind event handlers
@@ -58,65 +60,81 @@ if((typeof bu === 'undefined' ) ||
 
 		},
 
-		loadNavTree: function() {
+		loadNavTree: function(e) {
 
-			// Tree config that varies based on new vs. existing post edit
-			var isNew = $('#auto_draft').val() == '1' ? true : false;
-			var postID = isNew ? $('#post_ID').val() : this.settings.currentPost;
+			if( typeof this.data.modalTree === 'undefined' ) {
 
-			// Instantiate navtree object
-			this.data.modalTree = ModalPostTree({
-				treeContainer: this.ui.treeContainer,
-				currentPost: postID,
-				ancestors: this.settings.ancestors,
-				isNewPost: isNew
-			});
+				// Tree config that varies based on new vs. existing post edit
+				var isNew = $('#auto_draft').val() == '1' ? true : false;
+				var postID = isNew ? $('#post_ID').val() : this.settings.currentPost;
+
+				// Instantiate navtree object
+				this.data.modalTree = ModalPostTree({
+					treeContainer: this.ui.treeContainer,
+					currentPost: postID,
+					ancestors: this.settings.ancestors,
+					isNewPost: isNew
+				});
+
+				// Subscribe to relevant signals to trigger UI updates
+				this.data.modalTree.listenFor( 'update', $.proxy(this.updateLocation,this) );
+
+			}
 
 		},
 
 		attachHandlers: function() {
 
-			// Metabox actions
-			this.$el.delegate(this.inputs.label, 'blur', this.onLabelChange);
-			this.$el.delegate(this.inputs.visible, 'click', this.onToggleVisibility);
+			// should we load tree only when "Move page" button is clicked?
+			// this.$el.delegate(this.ui.moveBtn, 'click', $.proxy( this.loadNavTree, this ) );
 
-			// Global actions
-			$(document.body).bind('navigation:post-moved', this.updateLocation );
+			// Metabox actions
+			this.$el.delegate(this.inputs.label, 'blur', $.proxy(this.onLabelChange,this));
+			this.$el.delegate(this.inputs.visible, 'click', $.proxy(this.onToggleVisibility,this));
 	
 		},
 
 		// Event handlers
 
 		onLabelChange: function(e) {
-			//@todo implement
+			var label = $(this.inputs.label).attr('value');
+			var post = { ID: this.settings.currentPost, title: label };
+
+			// Label update should be reflected in tree view
+			Navtree.updatePost( post );
+			Navtree.save();
+
+			this.updateBreadcrumbs( post );
+
 		},
 
 		onToggleVisibility: function(e) {
 			//@todo implement
+			//@todo check top-level settings, prevent toggle if needed
 		},
 
 		// Methods
 
-		updateLocation: function( e, data) {
-			var post = data.post;
+		updateLocation: function( post ) {
 
-			Metabox.updateBreadcrumbs( post );
+			this.updateBreadcrumbs( post );
 
 			// Set form field values
-			$(Metabox.inputs.parent).val(post.parent);
-			$(Metabox.inputs.order).val(post.menu_order);
+			$(this.inputs.parent).val(post.parent);
+			$(this.inputs.order).val(post.menu_order);
 
 		},
 
 		updateBreadcrumbs: function( post ) {
+
 			var ancestors = Navtree.getAncestors( post.ID );
 			var breadcrumbs = ancestors.join(' > ');
 
 			// Update breadcrumbs
-			if (breadcrumbs) {
-				$(Metabox.ui.breadcrumbs).html('<p>' + breadcrumbs + '</p>');
+			if (ancestors.length > 1) {
+				$(this.ui.breadcrumbs).html('<p>' + breadcrumbs + '</p>');
 			} else {
-				$(Metabox.ui.breadcrumbs).html('<p>Top Level Page</p>');
+				$(this.ui.breadcrumbs).html('<p>Top Level Page</p>');
 			}
 		}
 
@@ -152,6 +170,9 @@ if((typeof bu === 'undefined' ) ||
 
 		c = $.extend(c, config);
 
+		// Signals
+		$.extend( true, that, bu.signals );
+
 		// Alias
 		var $toolbar;
 
@@ -162,6 +183,8 @@ if((typeof bu === 'undefined' ) ||
 
 			// Create post navigation tree, pass in initial posts from server
 			Navtree = bu.plugins.navigation.tree('edit_post', { el: c.treeContainer});
+
+			// Subscribe to relevant navtree signals
 			Navtree.listenFor('postsSelected', that.onPostsSelected);
 
 			$toolbar = $(c.toolbarContainer);
@@ -199,7 +222,7 @@ if((typeof bu === 'undefined' ) ||
 
 			e.preventDefault();
 
-			$(document.body).trigger('navigation:post-moved', { post: Navtree.getCurrentPost() });
+			that.broadcast( 'update', [ Navtree.getCurrentPost() ]);
 
 			// Update rollback object
 			Navtree.save();

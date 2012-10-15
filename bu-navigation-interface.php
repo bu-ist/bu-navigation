@@ -83,6 +83,7 @@ class BU_Navman_Interface {
 			'rpcUrl' => $this->config['rpcUrl'],
 			'allowTop' => $GLOBALS['bu_navigation_plugin']->get_setting('allow_top'),
 			'lazyLoad' => true,
+			'showCounts' => true,
 			'initialTreeData' => $pages
 			);
 

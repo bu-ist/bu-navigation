@@ -143,38 +143,22 @@ var bu = bu || {};
 						"default" : {
 							"max_children"		: -1,
 							"max_depth"			: -1,
-							"valid_children"	: "all",
-							"icon": {
-								"image": s.themePath + "/icons/page_regular.png"
-								// "position": "0 0"	// page section offset
-							}
+							"valid_children"	: "all"
 						},
 						"page": {
 							"max_children"		: -1,
 							"max_depth"			: -1,
-							"valid_children"	: "all",
-							"icon": {
-								"image": s.themePath + "/icons/page_regular.png"
-								// "position": "0 0"	// page section offset
-							}
+							"valid_children"	: "all"
 						},
 						"section": {
 							"max_children"		: -1,
 							"max_depth"			: -1,
-							"valid_children"	: "all",
-							"icon": {
-								"image": s.themePath + "/icons/page_regular.png"
-								// "position": "5px 5px"	// section icon offset
-							}
+							"valid_children"	: "all"
 						},
 						"link": {
 							"max_children"		: 0,
 							"max_depth"			: 0,
-							"valid_children"	: "none",
-							"icon": {
-								"image": s.themePath + "/icons/page_link.png"
-								// "position": "5px 5px"	// link icon offset
-							}
+							"valid_children"	: "none"
 						}
 					}
 				},
@@ -187,7 +171,7 @@ var bu = bu || {};
 							return { id : n.attr ? n.attr("id") : 0 };
 						}
 					},
-					"progressive_render" : false	// counting needs a fully loaded DOM
+					"progressive_render" : true
 				},
 				"crrm": {
 					"move": {
@@ -195,6 +179,11 @@ var bu = bu || {};
 					}
 				}
 			};
+
+			if( s.showCounts ) {
+				// counting needs a fully loaded DOM
+				d.treeConfig['json_data']['progressive_render'] = false;
+			}
 
 			// ======= Public API ======= //
 
@@ -248,22 +237,26 @@ var bu = bu || {};
 
 				if( $node ) {
 
+					// Merge original values with updates
+					origPost = my.nodeToPost( $node );
+					updated = $.extend(true, {}, origPost, post);
+
 					// Set node text with navigation label
-					$tree.jstree('set_text', $node, post.title );
+					$tree.jstree('set_text', $node, updated.title );
 
 					// Update metadata stored with node
 					// @todo do this dynamically by looping through post props
-					$node.data('post_content', post.content);
-					$node.data('post_title', post.title);
-					$node.data('post_status', post.status);
-					$node.data('post_type', post.type);
-					$node.data('post_parent', post.parent);
-					$node.data('menu_order', post.menu_order);
-					$node.data('post_meta', post.meta);
+					$node.data('post_content', updated.content);
+					$node.data('post_title', updated.title);
+					$node.data('post_status', updated.status);
+					$node.data('post_type', updated.type);
+					$node.data('post_parent', updated.parent);
+					$node.data('menu_order', updated.menu_order);
+					$node.data('post_meta', updated.meta);
 
 				}
 
-				that.broadcast('updatePost', [ post ]);
+				that.broadcast('updatePost', [ updated ]);
 			};
 
 			// Remove post
@@ -297,6 +290,9 @@ var bu = bu || {};
 
 			// Restore tree state
 			that.restore = function() {
+				if( typeof d.rollback === 'undefined' )
+					return;
+
 				/*
 				HUGE hack alert...
 				Using the rollback object to store a snapshot and restore is not
@@ -449,20 +445,20 @@ var bu = bu || {};
 					includeDescendents = true;
 
 				var count = $node.find('li').length;
-				$a = $node.children('a');
+				var $a = $node.children('a');
 
 				if(count) {
 
-					$count = $a.children('.count');
+					var $count = $a.children('.count');
 
 					if($count.length === 0) {
 
-						$statuses = $a.children('.post-statuses');
+						var $options = $a.children('.edit-options');
 						$count = $(' <span class="count">');
 
 						// Count should appear before statuses
-						if( $statuses.length ) {
-							$statuses.before($count);
+						if( $options.length ) {
+							$options.before($count);
 						} else {
 							$a.append($count);
 						}
@@ -488,7 +484,7 @@ var bu = bu || {};
 
 			var appendPostStatus = function( $node ) {
 				var post_status = $node.data('post_status') || 'publish';
-				$a = $node.children('a');
+				var $a = $node.children('a');
 
 				if( $a.children('post-statuses').length === 0 ) {
 					$a.append(' <span class="post-statuses">');
@@ -513,21 +509,27 @@ var bu = bu || {};
 
 			// ======= jsTree Event Handlers ======= //
 
+			// Tree instance is loaded (before initial opens/selections are made)
 			$tree.bind('loaded.jstree', function( event, data ) {
-				if(s.lazyLoad) {
-					lazyLoad();
-				}
 				that.broadcast( 'postsLoaded' );
 			});
 
+			// Post initial opens/selections are made
 			$tree.bind('reselect.jstree', function( event, data ) {
+				if(s.lazyLoad) {
+					lazyLoad();
+				}
 				that.broadcast( 'postsSelected' );
 			});
 
+			// After node is loaded from server using json_data
 			$tree.bind('load_node.jstree', function( event, data ) {
 				if( data.rslt.obj !== -1 ) {
 					var $node = data.rslt.obj;
-					calculateCounts( $node );
+
+					if( s.showCounts ) {
+						calculateCounts( $node );
+					}
 				}
 			});
 
@@ -541,7 +543,7 @@ var bu = bu || {};
 						var $node = $(node);
 
 						// Append post statuses inside node anchor
-						if( $node.find('> a .post-statuses').length === 0 ) {
+						if( $node.find('> a > .post-statuses').length === 0 ) {
 							appendPostStatus($node);
 						}
 					});
@@ -597,13 +599,6 @@ var bu = bu || {};
 
 				that.updatePost(post);
 				that.broadcast( 'postMoved', [post, parent_id, menu_order]);
-			});
-
-			// If the event doesn't contain the current selection, deselect all
-			$(document).bind("mousedown", function (e) {
-				if(!$.contains($tree.jstree('get_selected'), e.target)) {
-					$tree.jstree('deselect_all');
-				}
 			});
 
 			$(document).bind('drag_start.vakata', function(event, data) {
@@ -671,7 +666,6 @@ var bu = bu || {};
 			// Append options menu to each node
 			$tree.bind('clean_node.jstree', function( event, data ) {
 				var $nodes = data.rslt.obj;
-
 				// skip root node
 				if ($nodes && $nodes != -1) {
 					$nodes.each(function(i, node) {
@@ -680,7 +674,16 @@ var bu = bu || {};
 
 						if( $a.children('.edit-options').length ) return;
 
-						$a.append('<button class="edit-options">Options</button>');
+						var $button = $('<button class="edit-options">options <ins class="jstree-icon"> </ins></button>');
+						var $statuses = $a.children('.post-statuses');
+
+						// Button should appear before statuses
+						if( $statuses.length ) {
+							$statuses.before($button);
+						} else {
+							$a.append($button);
+						}
+
 					});
 				}
 			});
@@ -699,11 +702,20 @@ var bu = bu || {};
 				$tree.jstree('show_contextmenu', obj, pos.left, pos.top + yOffset );
 			});
 
+			// If the event doesn't contain the current selection, deselect all
+			$(document).bind("mousedown", function (e) {
+				if(!$.contains($tree.jstree('get_selected'), e.target)) {
+					$tree.jstree('deselect_all');
+				}
+			});
+
 			return that;
 		},
 
 		// ----------------------------
 		// Edit post tree
+		// @todo
+		//	- prevent deseleciton of current post (lost it when we triggered deselect_all on document.body click)
 		// ----------------------------
 		edit_post: function( config, my ) {
 			my = my || {};

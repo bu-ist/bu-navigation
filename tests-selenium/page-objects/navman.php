@@ -38,7 +38,7 @@ class BUN_Navman_Page {
 	// Tree types (li rel attribute)
 	const TYPES_PAGE = 'page';
 	const TYPES_LINK = 'link';
-	const TYPES_LINK = 'section';
+	const TYPES_SECTION = 'section';
 
 	// HTML ID prefix for jstree lis
 	const LEAF_ID_PREFIX = 'p';

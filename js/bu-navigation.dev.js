@@ -445,8 +445,8 @@ var bu = bu || {};
 			};
 
 			var calculateCounts = function($node, includeDescendents) {
-				if( typeof countChildren === 'undefined' )
-					countChildren = true;
+				if( typeof includeDescendents === 'undefined' )
+					includeDescendents = true;
 
 				var count = $node.find('li').length;
 				$a = $node.children('a');

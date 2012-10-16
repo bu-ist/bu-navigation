@@ -150,7 +150,7 @@ class BU_Navigation_Admin_Metabox {
 
 		// retrieve previously saved settings for this post (if any)
 		$nav_meta_data = $this->get_nav_meta_data($post);
-		$nav_label = htmlspecialchars($nav_meta_data['label']);
+		$nav_label = esc_attr($nav_meta_data['label']);
 		$nav_exclude = $nav_meta_data['exclude'];
 
 		// new pages are not in the nav already, so we need to fix this

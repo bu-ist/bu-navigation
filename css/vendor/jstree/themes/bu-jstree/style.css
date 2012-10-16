@@ -68,7 +68,7 @@ html[xmlns] #navman_container li {
 	display: block;
 	float: left;
 	padding: 8px !important;
-	margin-bottom: 4px !important;
+	margin-bottom: 3px !important;
 	border: 1px solid #dfdfdf;
 	border-radius: 4px;
 	background: #eee !important;
@@ -122,6 +122,164 @@ html[xmlns] #navman_container li {
 	color: #999;
 }
 
+#vakata-contextmenu {
+	margin-top: 11px !important;
+}
+
+#vakata-contextmenu.jstree-bu-context, 
+#vakata-contextmenu.jstree-bu-context li ul {
+	background: white;
+	border: none !important;
+	-moz-box-shadow: 1px 3px 5px #ccc;
+	-webkit-box-shadow: 1px 3px 5px #ccc;
+	box-shadow: 1px 3px 5px #ccc;
+}
+
+#vakata-contextmenu.jstree-bu-context li {
+	
+}
+
+#vakata-contextmenu.jstree-bu-context a {
+	padding: 5px;
+}
+
+#vakata-contextmenu.jstree-bu-context a:hover, 
+#vakata-contextmenu.jstree-bu-context .vakata-hover > a {
+	background: #e8eff7;
+	color: black;
+}
+
+#vakata-contextmenu.jstree-bu-context li.jstree-contextmenu-disabled a, 
+#vakata-contextmenu.jstree-bu-context li.jstree-contextmenu-disabled a:hover {
+	color: silver;
+	background: transparent;
+	border: 0;
+	padding: 1px 4px;
+}
+
+#vakata-contextmenu.jstree-bu-context li.vakata-separator {
+	background: white;
+	margin: 0;
+}
+
+#vakata-contextmenu.jstree-bu-context li ul {
+	margin-left: -4px;
+}
+
+.jstree-bu li[rel="section"] > a > .jstree-icon {
+	background-image: url("sprite.png") !important;
+	background-repeat: no-repeat !important;
+	background-color: transparent !important;
+	background-position: 0 0 !important;
+}
+
+.jstree-bu li[rel="page"] > a > .jstree-icon {
+	background-image: url("sprite.png") !important;
+	background-repeat: no-repeat !important;
+	background-color: transparent !important;
+	background-position: -32px 0 !important;
+}
+
+.jstree-bu li[rel="link"] > a > .jstree-icon {
+	background-image: url("sprite.png") !important;
+	background-repeat: no-repeat !important;
+	background-color: transparent !important;
+	background-position: -48px 0 !important;
+}
+
+#vakata-dragged.jstree-bu .jstree-ok {
+	background: url("sprite.png") 0px -32px no-repeat !important;
+}
+
+#vakata-dragged.jstree-bu .jstree-invalid {
+	background: url("sprite.png") -16px 0px no-repeat !important;
+}
+
+.jstree-bu .post-statuses {
+	float: right;
+}
+
+.jstree-bu .post-statuses .post_status {
+	margin-right: 10px !important;
+	padding: 3px 4px !important;
+	border-radius: 2px !important;
+	font-weight: 100 !important;
+	font-size: 80% !important;
+}
+
+.jstree-bu .post-statuses .post_status.draft {
+	background: #464646 !important;
+	color: #aaa !important;
+}
+
+.jstree-bu .edit-options {
+	visibility: hidden;
+	border: 0 !important;
+	background: transparent;
+	color: #888;
+	font-weight: 100;
+	float: right;
+	padding: 9px 5px 10px 5px;
+	margin: -8px -8px 0 0;
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+	cursor: pointer;
+}
+
+.jstree-bu .jstree-hovered .edit-options {
+	visibility: visible;
+}
+
+.jstree-bu .jstree-clicked .edit-options {
+	visibility: visible;
+	color: #ccc;
+}
+
+.jstree-bu .edit-options.clicked {
+	visibility: visible;
+	background: white !important;
+	color: black !important;	
+}
+
+.jstree-bu .edit-options .jstree-icon {
+	float: right !important;
+	background-position: -32px -16px;
+	margin: 0 0 0 4px !important;
+}
+
+.jstree-bu a.jstree-loading .jstree-icon {
+	background: url("throbber.gif") center center no-repeat !important;
+}
+
+.jstree-bu .bu-dnd-placeholder a {
+	text-indent: -9999em !important;
+	background: #d0d0d0 !important;
+	background: -moz-linear-gradient(top, #d0d0d0 0%, #dbdbdb 100%) !important;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #d0d0d0), color-stop(100%, #dbdbdb)) !important;
+	background: -webkit-linear-gradient(top, #d0d0d0 0%,#dbdbdb 100%) !important;
+	background: -o-linear-gradient(top, #d0d0d0 0%,#dbdbdb 100%) !important;
+	background: -ms-linear-gradient(top, #d0d0d0 0%,#dbdbdb 100%) !important;
+	background: linear-gradient(to bottom, #d0d0d0 0%,#dbdbdb 100%) !important;
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0d0d0', endColorstr='#dbdbdb',GradientType=0 ) !important;
+	border: 1px dashed #9c9c9c !important;
+	box-shadow: inset 3px 3px 3px #bbb;
+}
+
+.jstree-bu .bu-dnd-placeholder ins, .jstree-bu .bu-dnd-placeholder .edit-options {
+	visibility: hidden;
+}
+
+
+
+
+
+
+
+
+
+/* Still working on this bit... */
+
+
 /* .jstree-bu li { background-position:-90px 0; background-repeat:repeat-y;  } */
 .jstree-bu li.jstree-last { background:transparent; }
 .jstree-bu .jstree-open > ins { background-position:-72px 0; }
@@ -129,7 +287,6 @@ html[xmlns] #navman_container li {
 
 .jstree-bu a .jstree-icon { background-position:-56px -19px; }
 .jstree-bu .jstree-open > a .jstree-icon { background-position:-56px -36px; }
-.jstree-bu a.jstree-loading .jstree-icon { background:url("throbber.gif") center center no-repeat !important; }
 
 .jstree-bu.jstree-focused { background:white; }
 
@@ -151,60 +308,19 @@ html[xmlns] #navman_container li {
 .jstree-bu .jstree-unchecked > a > .jstree-checkbox:hover { background-position:-2px -37px; }
 .jstree-bu .jstree-undetermined > a > .jstree-checkbox:hover { background-position:-20px -37px; }
 
-#vakata-dragged.jstree-bu ins { background:transparent !important; }
-#vakata-dragged.jstree-bu .jstree-ok { background:url("d.png") -2px -53px no-repeat !important; }
-#vakata-dragged.jstree-bu .jstree-invalid { background:url("d.png") -18px -53px no-repeat !important; }
-#jstree-marker.jstree-bu { background:url("d.png") -41px -57px no-repeat !important; text-indent:-100px; }
+#vakata-dragged.jstree-bu ins { background: transparent !important; }
+
+#jstree-marker.jstree-bu {
+/* 	background: url("d.png") -41px -57px no-repeat !important; */
+	background: #6da73d !important;
+	text-indent: -100px;
+}
 
 .jstree-bu a.jstree-search { color:aqua; }
 .jstree-bu .jstree-locked a { color:silver; cursor:default; }
 
-#vakata-contextmenu.jstree-bu-context, 
-#vakata-contextmenu.jstree-bu-context li ul {
-	background: white;
-	-moz-box-shadow: 1px 1px 5px #999;
-	-webkit-box-shadow: 1px 1px 5px #999;
-	box-shadow: 1px 1px 5px #999;
-}
-
-#vakata-contextmenu.jstree-bu-context li {
-	
-}
-
-#vakata-contextmenu.jstree-bu-context a {
-	
-}
-
-#vakata-contextmenu.jstree-bu-context a:hover, 
-#vakata-contextmenu.jstree-bu-context .vakata-hover > a {
-	padding: 0 5px;
-	background: #e8eff7;
-	border: 1px solid #aecff7;
-	color: black;
-	-moz-border-radius: 2px;
-	-webkit-border-radius: 2px;
-	border-radius: 2px;
-}
-
-#vakata-contextmenu.jstree-bu-context li.jstree-contextmenu-disabled a, 
-#vakata-contextmenu.jstree-bu-context li.jstree-contextmenu-disabled a:hover {
-	color: silver;
-	background: transparent;
-	border: 0;
-	padding: 1px 4px;
-}
-
-#vakata-contextmenu.jstree-bu-context li.vakata-separator {
-	background: white;
-	border-top: 1px solid #e0e0e0;
-	margin: 0;
-}
-
-#vakata-contextmenu.jstree-bu-context li ul {
-	margin-left: -4px;
-}
-
 /* IE6 BEGIN */
+/*
 .jstree-bu li, 
 .jstree-bu ins,
 #vakata-dragged.jstree-bu .jstree-invalid, 
@@ -221,63 +337,5 @@ html[xmlns] #navman_container li {
 .jstree-bu .jstree-undetermined a .jstree-checkbox { _background-position:-20px -19px; }
 .jstree-bu .jstree-checked a .jstree-checkbox { _background-position:-38px -19px; }
 .jstree-bu .jstree-unchecked a .jstree-checkbox { _background-position:-2px -19px; }
+*/
 /* IE6 END */
-
-
-
-
-
-.jstree-bu li[rel="section"] > a > .jstree-icon {
-	background-image:url("sprite.png") !important;
-	background-repeat:no-repeat !important;
-	background-color:transparent !important;
-	background-position: 0 0 !important;
-}
-
-.jstree-bu li[rel="page"] > a > .jstree-icon {
-	background-image:url("sprite.png") !important;
-	background-repeat:no-repeat !important;
-	background-color:transparent !important;
-	background-position: -32px 0 !important;
-}
-
-.jstree-bu li[rel="link"] > a > .jstree-icon {
-	background-image:url("sprite.png") !important;
-	background-repeat:no-repeat !important;
-	background-color:transparent !important;
-	background-position: -48px 0 !important;
-}
-
-.jstree-bu .post-statuses {
-	float: right;
-}
-
-.jstree-bu .post-statuses .post_status {
-	margin-right: 10px !important;
-	padding: 1px 4px !important;
-	border-radius: 2px !important;
-	font-weight: 100 !important;
-	font-size: 80% !important;
-}
-
-.jstree-bu .post-statuses .post_status.draft {
-	background: #464646 !important;
-	color: #aaa !important;
-}
-
-.jstree-bu .edit-options {
-	border: 0 !important;
-	background: transparent;
-	color: #888;
-	font-weight: 100;
-	float: right;
-	padding: 9px 10px 10px 10px;
-	margin: -8px -8px 0 0;
-	border-top-right-radius: 4px;
-	border-bottom-right-radius: 4px;
-}
-
-.jstree-bu .jstree-clicked .edit-options {
-	background: white !important;
-	color: black !important;	
-}

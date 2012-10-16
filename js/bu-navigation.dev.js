@@ -104,7 +104,7 @@ var bu = bu || {};
 
 			// Configuration defaults
 			var default_config = {
-				el : '#navman_container',
+				el : '#nav-tree-container',
 				nodePrefix : 'p'
 			};
 
@@ -221,6 +221,13 @@ var bu = bu || {};
 
 			};
 
+			that.setPostLabel = function( post, label ) {
+
+				var $node = my.getNodeForPost( post );
+				return my.setNodeLabel( $node, label );
+
+			};
+
 			that.insertPost = function( post, args ) {
 				var defaults = {
 					position: 'after',
@@ -234,9 +241,12 @@ var bu = bu || {};
 
 				$tree.jstree( 'create', a.which, a.position, node, a.callback, a.skip_rename );
 
+				// Grab insert ID
+				post.ID = node['attr']['id'];
+
 				that.broadcast('insertPost', [post]);
 
-				return node['attr']['id'];
+				return post;
 			};
 
 			that.updatePost = function( post ) {
@@ -249,7 +259,7 @@ var bu = bu || {};
 					updated = $.extend(true, {}, origPost, post);
 
 					// Set node text with navigation label
-					$tree.jstree('set_text', $node, updated.title );
+					my.setNodeLabel( $node, updated.title );
 
 					// Update metadata stored with node
 					// @todo do this dynamically by looping through post props
@@ -264,6 +274,8 @@ var bu = bu || {};
 				}
 
 				that.broadcast('updatePost', [ updated ]);
+
+				return updated;
 			};
 
 			// Remove post
@@ -402,7 +414,6 @@ var bu = bu || {};
 
 				// @todo clean up type coercion
 				if( post && typeof post === 'object' ) {
-					console.log(post);
 					node_id = post.ID;
 					if( node_id.indexOf('post-new') === -1 ) {
 						node_id = c.nodePrefix + node_id;
@@ -421,12 +432,21 @@ var bu = bu || {};
 				return false;
 			};
 
-			// custom replacement for jstree.get_text() -- needed due to extra markup inside a tags
+			// hacky workaround replacement for jstree.get_text
 			my.getNodeLabel = function( $node ) {
 
 				var $a = $node.children('a').clone();
-				$a.children('.jstree-icon, .post-statuses, .count, .edit-options').remove();
-				return $.trim($a.html());
+				var label = $a.contents().filter(function() { return this.nodeType == 3; });
+				return $.trim(label[0].nodeValue);
+
+			};
+
+			// hacky workaround replacement for jstree.set_text
+			my.setNodeLabel = function( $node, label ) {
+
+				var $a = $node.children('a');
+
+				$a.contents().filter(function() { return this.nodeType == 3; }).first()[0].textContent = label;
 
 			};
 
@@ -549,6 +569,7 @@ var bu = bu || {};
 
 			// Tree instance is loaded (before initial opens/selections are made)
 			$tree.bind('loaded.jstree', function( event, data ) {
+				$tree.jstree('data').data.core.li_height = 36;	// hackety hack ... investigate cause of issue
 				that.broadcast( 'postsLoaded' );
 			});
 

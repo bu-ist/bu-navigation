@@ -18,6 +18,7 @@
 .jstree-bu li {
 	display: inline-block;
 	clear: both;
+/* 	width: 100%; */
 }
  
 html[xmlns] .jstree-bu li {
@@ -32,23 +33,23 @@ html[xmlns] .jstree-bu li {
 	background-image: url("sprite.png") !important;
 	background-repeat: no-repeat !important;
 	background-color: transparent !important;
+	margin: 8px 4px 0 0 !important;
 }
 
 .jstree-bu ul {
-	width: 79.123456789% !important;
+	padding-left: 18px !important;
 }
 
 .jstree-bu ul ul {
-	
+	padding-left: 0 !important;	
 }
 
 .jstree-bu ul ul ul {
-	
+	padding-left: 0 !important;
 }
 
 .jstree-bu ul li {
 	display: block !important;
-	width: 100% !important;
 	height: 1% !important;
 }
 
@@ -64,15 +65,13 @@ html[xmlns] .jstree-bu li {
 	display: inline-block !important;
 	width: 16px !important;
 	height: 16px !important;
-	margin: 8px 4px 0 0 !important;
+	margin: 8px 4px 0 -18px !important;
 	float: left !important;
 }
 
 .jstree-bu li a {
-	width: 95%;
-	display: block;
-	float: left;
-	padding: 8px !important;
+	display: block !important;
+	padding: 8px 0 8px 0 !important;
 	margin-bottom: 3px !important;
 	border: 1px solid #dfdfdf;
 	border-radius: 3px;
@@ -115,21 +114,18 @@ html[xmlns] .jstree-bu li {
 	cursor: pointer;
 }
 
-.jstree-bu ins {
-	margin: 8px 4px 0 0 !important;
-}
-
 .jstree-bu a ins {
-	margin: 0 4px 0 0 !important;
+	margin: 0 4px 0 8px !important;
 }
 
 .jstree-bu li .count {
 	color: #999;
+	font-weight: 100 !important;
 }
 
 #vakata-contextmenu {
 	margin-top: 11px !important;
-	margin-left: -110px !important;
+	margin-left: -105px !important;
 }
 
 #vakata-contextmenu.jstree-bu-context, 
@@ -222,8 +218,8 @@ html[xmlns] .jstree-bu li {
 	color: #888;
 	font-weight: 100;
 	float: right;
-	padding: 9px 5px 10px 5px;
-	margin: -9px -9px 0 0;
+	padding: 9px 5px 10px 10px;
+	margin: -9px -1px 0 0;
 	border-top-right-radius: 3px;
 	border-bottom-right-radius: 3px;
 	cursor: pointer;
@@ -320,6 +316,7 @@ html[xmlns] .jstree-bu li {
 
 #vakata-dragged .count {
 	color: #b3ce9d;
+	font-weight: 100;
 }
 
 #vakata-dragged .jstree-ok {

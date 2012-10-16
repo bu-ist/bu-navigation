@@ -8,8 +8,8 @@ var navman_editing = null;
 // Check prerequisites
 if((typeof bu === 'undefined') ||
 	(typeof bu.plugins.navigation === 'undefined') ||
-	(typeof bu.plugins.navigation.tree === 'undefined') )
-	throw new TypeError('BU Navigation Manager script dependencies have not been met!');
+	(typeof bu.plugins.navigation.tree === 'undefined'))
+		throw new TypeError('BU Navigation Manager script dependencies have not been met!');
 
 // @todo only run Navman.init on DOM ready
 jQuery(document).ready( function($) {

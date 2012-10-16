@@ -48,6 +48,12 @@ if((typeof bu === 'undefined' ) ||
 			config = config || {};
 			this.settings = $.extend({}, bu.plugins.navigation.settings, config );
 
+			if( typeof this.settings.isNewPost === 'undefined' );
+				this.settings.isNewPost = $('#auto_draft').val() == 1 ? true : false;
+
+			if( this.settings.isNewPost )
+				this.settings.currentPost = $('#post_ID').val();
+
 			// References to key elements
 			this.$el = $(this.el);
 
@@ -64,16 +70,12 @@ if((typeof bu === 'undefined' ) ||
 
 			if( typeof this.data.modalTree === 'undefined' ) {
 
-				// Tree config that varies based on new vs. existing post edit
-				var isNew = $('#auto_draft').val() == '1' ? true : false;
-				var postID = isNew ? $('#post_ID').val() : this.settings.currentPost;
-
 				// Instantiate navtree object
 				this.data.modalTree = ModalPostTree({
 					treeContainer: this.ui.treeContainer,
-					currentPost: postID,
+					currentPost: this.settings.currentPost,
 					ancestors: this.settings.ancestors,
-					isNewPost: isNew
+					isNewPost: this.settings.isNewPost
 				});
 
 				// Subscribe to relevant signals to trigger UI updates

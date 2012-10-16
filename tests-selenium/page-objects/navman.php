@@ -107,7 +107,7 @@ class BUN_Navman_Page {
  		if( $expand_first )
  			$this->expandAll();
 
- 		return $this->webdriver->getElement( LocatorStrategy::cssSelector, '#navman_container li[class*="jstree-closed"], #navman_container li[class*="jstree-open"]');
+ 		return $this->webdriver->getElement( LocatorStrategy::cssSelector, '#nav-tree-container li[class*="jstree-closed"], #nav-tree-container li[class*="jstree-open"]');
 
 	}
 

@@ -1,141 +1,106 @@
-/* @todo remove uneeded styles */
-
-.navform div label
-{
+/* Edit link form */
+.navform div label {
 	padding-bottom: 4px;
 }
 
-.navform
-{
+.navform {
 	font-size: 11px;
 }
 
-.navform div
-{
+.navform div {
 	clear: both;
 	margin: 6px 0;
 }
 
-.navform label
-{
+.navform label {
 	display: block;
 	float: left;
-	width: 93px;
 	padding-left: 8px;
+	width: 93px;
 }
 
-.navformwide label
-{
+.navformwide label {
 	width: 130px;
 }
 
-.navform div.radios label
-{
+.navform div.radios label {
 	display: inline;
 	float: none;
-	width: auto;
 	padding: 0;
+	width: auto;
 }
 
-.navform sup.req
-{
+.navform sup.req {
 	color: #cc0000;
 	font-weight: bold;
 }
 
-.navform div.radios
-{
+.navform div.radios {
 	margin-left: 8px;
 }
 
-.navform div.buttons
-{
+.navform div.buttons {
 	text-align: center;
 }
 
-.has-right-sidebar #navman_main
-{
-	clear: left;
-	float: left;
-	margin-right: -340px;
-	width: 100%;
-}
-
-#navman_pagedetail
-{
-	position: fixed;
-	width: 281px;
-}
-
-#navman_pagedetail p
-{
-	padding: 8px;
-}
-
-#navman_drop
-{
-	border: 1px dotted;
-	margin: 8px;
-	padding: 16px;
-}
-
-#navman_drop:hover
-{
-	background: #efefef;
-}
-
-#navman_container {
-    background: transparent;
-}
-
-.jstree-classic a.jstree-loading.jstree-clicked .jstree-icon { background:url("../images/throbber-dark.gif") center center no-repeat !important; }
-
-#navman_container .allowed > a {
-	background-color: transparent;
-}
-
-#navman_container .denied > a {
-	background-color: rgba(255, 0, 0, 0.2);
-}
-
-.jstree-classic li > a.jstree-clicked {
-	background-color: #555 !important;
-	border-color: #555 !important;
-}
-
-#navman_container li.excluded > a.jstree-clicked {
-	color: white !important;
-}
-
-#navman_container li.excluded > a {
-	color: black !important;
-}
-
-.navform div input.error
-{
+.navform div input.error {
 	margin: 0;
+	padding: 3px;
 	-moz-border-radius-bottomleft: 4px;
 	-moz-border-radius-bottomright: 4px;
 	-moz-border-radius-topleft: 4px;
 	-moz-border-radius-topright: 4px;
-	padding: 3px;
 }
 
-.navform label.error
-{
+.navform label.error {
 	clear: both;
-	width: auto;
-	margin-left: 101px;
 	margin-top: 4px;
+	margin-left: 101px;
+	width: auto;
 	color: red;
 }
 
-.navformwide label.error
-{
+.navformwide label.error {
 	margin-left: 138px;
 }
 
-#navman_container li
-{
-	width: auto;
+/* Start new styles */
+
+#navman-container {
+	margin-top: 20px;
+	margin-right: 250px;
+}
+
+.navman-toolbar {
+	margin-bottom: 20px;
+}
+
+.navman-toolbar a {
+	text-decoration: none;
+}
+
+.navman-body {
+	float: left;
+	width: 100%;
+}
+
+.navman-actions {
+	float: right;
+	margin-right: -250px;
+	width: 220px;
+}
+
+.navman-actions .metabox-holder {
+	position: relative;
+	padding-top: 0 !important;
+	min-width: 200px;
+}
+
+.navman-actions .actions {
+	padding: 10px 10px 8px;
+	text-align: center;
+}
+
+#nav-tree-container {
+    background: transparent;
 }

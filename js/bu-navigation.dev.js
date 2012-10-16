@@ -501,14 +501,34 @@ var bu = bu || {};
 			};
 
 			var appendPostStatus = function( $node ) {
-				var post_status = $node.data('post_status') || 'publish';
 				var $a = $node.children('a');
-
 				if( $a.children('post-statuses').length === 0 ) {
 					$a.append(' <span class="post-statuses">');
 				}
 
-				if(post_status != 'publish') $a.children('.post-statuses').append(' <span class="post_status ' + post_status + '">' + post_status + '</span>');
+				// Setup default statuses
+				var post_status = $node.data('post_status') || 'publish';
+				var excluded = $node.data('excluded') || null;
+				var restricted = $node.data('restricted') || null;
+
+				var $statuses = $a.children('.post-statuses');
+				var statuses = [];
+
+				if(post_status != 'publish')
+					statuses.push({ "class": post_status, "label": post_status });
+				if(restricted)
+					statuses.push({ "class": 'restricted', "label": 'restricted' });
+				if(excluded)
+					statuses.push({ "class": 'excluded', "label": 'not in nav' });
+
+				// Allow customization
+				statuses = bu.hooks.applyFilters( 'navPostStatuses', statuses );
+
+				// Append markup
+				for( var i = 0; i < statuses.length; i++ ) {
+					$statuses.append('<span class="post_status ' + statuses[i]['class'] + '">' + statuses[i]['label'] + '</span>');
+				}
+
 			};
 
 			var checkMove = function( m ) {

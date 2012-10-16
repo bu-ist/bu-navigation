@@ -214,6 +214,13 @@ var bu = bu || {};
 				$tree.jstree('close_all');
 			};
 
+			that.getPostLabel = function( post ) {
+
+				var $node = my.getNodeForPost( post );
+				return my.getNodeLabel( $node );
+
+			};
+
 			that.insertPost = function( post, args ) {
 				var defaults = {
 					position: 'after',
@@ -280,6 +287,7 @@ var bu = bu || {};
 			// Get post ancestors (by title)
 			that.getAncestors = function( postID ) {
 				var $node = my.getNodeForPost( postID );
+				// @todo write custom 'get_path' method that uses my.getNodeTitle instead of get_text
 				return $tree.jstree('get_path', $node);
 			};
 
@@ -325,7 +333,7 @@ var bu = bu || {};
 
 				var post = {
 					ID: id,
-					title: $tree.jstree('get_text', node ),
+					title: my.getNodeLabel( node ),
 					content: node.data('post_content'),
 					status: node.data('post_status'),
 					type: node.data('post_type'),
@@ -394,6 +402,7 @@ var bu = bu || {};
 
 				// @todo clean up type coercion
 				if( post && typeof post === 'object' ) {
+					console.log(post);
 					node_id = post.ID;
 					if( node_id.indexOf('post-new') === -1 ) {
 						node_id = c.nodePrefix + node_id;
@@ -410,6 +419,15 @@ var bu = bu || {};
 					return $node;
 
 				return false;
+			};
+
+			// custom replacement for jstree.get_text() -- needed due to extra markup inside a tags
+			my.getNodeLabel = function( $node ) {
+
+				var $a = $node.children('a').clone();
+				$a.children('.jstree-icon, .post-statuses, .count, .edit-options').remove();
+				return $.trim($a.html());
+
 			};
 
 			my.getNextPostID = function() {

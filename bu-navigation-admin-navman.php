@@ -19,8 +19,10 @@ require_once(dirname(__FILE__) . '/bu-navigation-interface.php' );
  */ 
 class BU_Navigation_Admin_Navman {
 
-	public $page;
 	static $interface;
+	public $page;
+
+	private $plugin;
 
 	const OPTION_LOCK_TIME = '_bu_navman_lock_time';
 	const OPTION_LOCK_USER = '_bu_navman_lock_user';
@@ -32,6 +34,8 @@ class BU_Navigation_Admin_Navman {
 	private $message_queue = array();
 
 	public function __construct( $post_type ) {
+
+		$this->plugin = $GLOBALS['bu_navigation_plugin'];
 
 		// @todo test with multiple supported custom post types
 		$this->post_type = $post_type;

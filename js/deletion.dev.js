@@ -10,7 +10,7 @@
 				post_id: id
 			};
 			
-			// check the post through an non-asynchronous ajax request 
+			// check the post through an non-asynchronous ajax request
 			$.ajax({
 				url: ajaxurl,
 				type: 'POST',
@@ -38,6 +38,7 @@
 				if ( window.confirm(warning) ) {
 					return true;
 				} else {
+					// @todo remove spinner in #save-action
 					return false;
 				}
 				
@@ -53,10 +54,17 @@
 		 */
 		$('a.submitdelete').live('click', function(){
 			
-			var id = ( typeof(inlineEditPost) != "undefined" ) ? inlineEditPost.getId(this) : post_id;
-			// check post by ajax and do action accordingly
-			var resp = ajaxCheck(id);
-			return processResp(resp);
+			var id = ( typeof(inlineEditPost) != "undefined" ) ? inlineEditPost.getId(this) : buNavSettings.currentPost;
+
+			// New posts won't have an ID, but there is no need to check for them anyways
+			if( id ) {
+				// check post by ajax and do action accordingly
+				var resp = ajaxCheck(id);
+				return processResp(resp);
+			}
+
+			return true;
+
 		});
 		
 		/**

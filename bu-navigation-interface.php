@@ -10,6 +10,7 @@ class BU_Navman_Interface {
 
 	private $config;
 	private $post_types;
+	private $plugin;
 
 	/**
 	 * Setup an object capable of creating the navigation management interface
@@ -20,6 +21,8 @@ class BU_Navman_Interface {
 	 * @param $config an array of extra optional configuration items
 	 */
 	public function __construct( $post_types = 'post', $config = array() ) {
+
+		$this->plugin = $GLOBALS['bu_navigation_plugin'];
 
 		if( is_array( $post_types ) )
 			$post_types = implode(',', $post_types );
@@ -81,7 +84,7 @@ class BU_Navman_Interface {
 		$defaults = array(
 			'themePath' => $this->config['themePath'],
 			'rpcUrl' => $this->config['rpcUrl'],
-			'allowTop' => $GLOBALS['bu_navigation_plugin']->get_setting('allow_top'),
+			'allowTop' => $this->plugin->get_setting('allow_top'),
 			'lazyLoad' => true,
 			'showCounts' => true,
 			'initialTreeData' => $pages

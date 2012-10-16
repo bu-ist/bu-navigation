@@ -6,8 +6,11 @@
 class BU_Navigation_Admin_Primary {
 
 	public $page;
+	private $plugin;
 
 	public function __construct() {
+
+		$this->plugin = $GLOBALS['bu_navigation_plugin'];
 
 		// Attach WP actions/filters
 		$this->register_hooks();
@@ -50,7 +53,7 @@ class BU_Navigation_Admin_Primary {
 		// Save first
 		$saved = $this->save();
 
-		$settings = $GLOBALS['bu_navigation_plugin']->get_settings();
+		$settings = $this->plugin->get_settings();
 		
 		/* default options */
 		$bu_navigation_primarynav = $settings['display'];
@@ -97,7 +100,7 @@ class BU_Navigation_Admin_Primary {
 				'allow_top' => (int) $bu_allow_top_level_page
 				);
 
-			$GLOBALS['bu_navigation_plugin']->update_settings( $updates );
+			$this->plugin->update_settings( $updates );
 			
 			$bu_navigation_changes_saved = true;
 			

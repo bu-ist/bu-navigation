@@ -16,6 +16,7 @@ require_once(dirname(__FILE__) . '/bu-navigation-interface.php' );
 class BU_Navigation_Admin_Metabox {
 
 	static $interface;
+	public $plugin;
 
 	public $post;
 	public $post_type;
@@ -23,13 +24,15 @@ class BU_Navigation_Admin_Metabox {
 
 	public function __construct( $post, $post_type ) {
 
+		$this->plugin = $GLOBALS['bu_navigation_plugin'];
+
 		// Set up properties
 		if( is_numeric( $post ) )
 			$post = get_post( $post );
 
 		$this->post = $post;
 		$this->post_type = $post_type;
-		$this->post_type_labels = $this->get_post_type_labels( $this->post_type );
+		$this->post_type_labels = BU_Navigation_Plugin::$admin->get_post_type_labels( $this->post_type );
 
 		// Attach WP actions/filters
 		$this->register_hooks();
@@ -40,7 +43,6 @@ class BU_Navigation_Admin_Metabox {
 	 * Attach WP actions and filters utilized by our meta boxes
 	 */ 
 	public function register_hooks() {
-		global $wp_version;
 
 		add_filter('bu_navigation_script_settings', array($this, 'script_settings' ));
 		add_action('admin_enqueue_scripts', array($this, 'admin_page_scripts'));
@@ -48,18 +50,6 @@ class BU_Navigation_Admin_Metabox {
 		add_action('add_meta_boxes', array($this, 'register_metaboxes'), 10, 2);
 
 		add_action('save_post', array($this, 'save_nav_meta_data'), 10, 2);
-
-		// for WP 3.2: change delete_post to before_delete_post (because at that point, the children posts haven't moved up)
-		if( version_compare( $wp_version, '3.2', '<' ) ) {
-			add_action('delete_post', array($this, 'handle_hidden_page_deletion'));
-		} else {
-			add_action('before_delete_post', array($this, 'handle_hidden_page_deletion'));
-		}
-
-		// @todo move this outisde of here
-		if( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-			add_action('wp_ajax_check_hidden_page', array($this, 'ajax_check_hidden_page'));
-		}
 		
 	}
 
@@ -81,6 +71,9 @@ class BU_Navigation_Admin_Metabox {
 		$config['currentPost'] = $post_id;
 		$config['ancestors'] = $ancestors;
 
+		if( is_null( $post_id ) )
+			$config['isNewPost'] = true;
+
 		return $config;
 
 	}
@@ -91,14 +84,8 @@ class BU_Navigation_Admin_Metabox {
 	public function admin_page_scripts($hook_suffix) {
 		
 		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
-
 		$scripts_path = plugins_url('js',__FILE__);
 		$vendor_path = plugins_url('js/vendor',__FILE__);
-		
-		// @todo this script needs to be loaded for edit.php as well -- should be moved out of here and
-		// to higher levels
-		wp_enqueue_script( 'bu-page-parent-deletion', $scripts_path . '/deletion' . $suffix . '.js', array('jquery'));
-		wp_localize_script( 'bu-page-parent-deletion', 'bu_navigation_pt_labels', $this->post_type_labels );
 
 		// Instantiate navman tree interface object
 		// @todo this logic should be centralized somewhere else
@@ -211,21 +198,6 @@ class BU_Navigation_Admin_Metabox {
 
 		include('interface/metabox-custom-template.php');
 	
-	}
-
-	protected function get_post_type_labels( $post_type ) {
-				
-		$pt_obj = get_post_type_object($post_type);
-
-		if( ! is_object( $pt_obj ) )
-			return false;
-
-		return array(
-			'post_type' => $post_type,
-			'singular' => $pt_obj->labels->singular_name,
-			'plural' => $pt_obj->labels->name,
-		);
-
 	}
 
 	/**
@@ -346,117 +318,6 @@ class BU_Navigation_Admin_Metabox {
 			// error_log("No siblings found for post {$post->ID}, done!");
 
 		}
-
-	}
-
-	/**
-	 * @todo
-	 *  - relocate
-	 *  - needs unit tests (selenium)
-	 * 
-	 * when deleting posts that are hidden, the children will get moved up one level (to take place of the current post),
-	 * but if they were hidden (as a result of the current post being hidden), they will become unhidden.
-	 * So we must go through all the children and mark them hidden.
-	 */
-	public function handle_hidden_page_deletion($post_id) {
-		global $wpdb;
-		
-		$post = get_post($post_id);
-		if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) return;
-			
-		$exclude = get_post_meta($post_id, '_bu_cms_navigation_exclude', true);
-		
-		if ($exclude) {	// post was hidden
-			error_log("$post_id is now exclude: $exclude");
-			// get children
-			$children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d", $post_id);
-			$children = $wpdb->get_results($children_query);
-			
-			// mark each hidden
-			foreach ( (array) $children as $child ) {
-				error_log("setting the child $post_id to exclude: $exclude");
-				update_post_meta($child->ID, '_bu_cms_navigation_exclude', $exclude);
-			}
-		}
-	}
-	
-	/**
-	 * @todo
-	 *  - relocate
-	 *  - needs unit tests (selenium)
-	 * 
-	 * - prints json formatted data that tells the browser to either show a warning or not
-	 * - dies.
-	 */
-	public function ajax_check_hidden_page() {
-		global $wpdb;
-		
-		$response = array();
-		$post_id = (int) $_POST['post_id'];
-		$post = get_post($post_id);
-		
-		// case: not a supported post_type
-		if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) {
-			echo json_encode( array( 'ignore' => true ) );
-			die;
-		}
-		
-		// get post type labels
-		$pt_labels = $this->post_type_labels;
-		
-		// get children pages/links
-		$page_children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='$post->post_type'", $post_id);
-		$page_children = $wpdb->get_results($page_children_query);
-		$link_children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='link'", $post_id);
-		$link_children = $wpdb->get_results($link_children_query);
-	
-		// case no children, output the "ignore" flag
-		if ( count($page_children) == 0 and count($link_children) == 0 ) {
-			echo json_encode( array( 'ignore' => true, 'children' => 0 ) );
-			die;
-		}
-		
-		$hidden = get_post_meta($post_id, '_bu_cms_navigation_exclude', true);
-		// case: wasn't hidden, output the "ignore" flag
-		if ( !$hidden ) {
-			echo json_encode( array( 'ignore' => true, 'children' => 0 ) );
-			die;
-		}
-		
-		// case: child pages and/or links exist
-		// construct output msg based on how many child pages/links exist
-		$msg = sprintf('"%s" is a hidden ' . strtolower($pt_labels['singular']) . ' with ', $post->post_title);
-		$children_msgs = array();
-		
-		if (count($page_children) > 1) {
-			$children_msgs['page'] = count($page_children) . " child " . strtolower($pt_labels['plural']);
-		} else if ( count($page_children) == 1 ) {
-			$children_msgs['page'] = "a child " . strtolower($pt_labels['singular']);
-		}
-		
-		if (count($link_children) > 1) {
-			$children_msgs['link'] = count($link_children) . " child links";
-		} else if ( count($link_children) == 1 ) {
-			$children_msgs['link'] = "a child link";
-		}
-		
-		$children_msgs_vals = array_values($children_msgs);
-		$children_msg = count($children_msgs) > 1 ? implode(' and ', $children_msgs_vals) : current($children_msgs);
-		$msg .= $children_msg . ".";
-		
-		if ( $children_msgs['page'] )
-			$msg .= sprintf(' If you delete this %1$s, %2$s will move up one node in the %1$s hierarchy, and will autmatically be marked as hidden.', strtolower($pt_labels['singular']), $children_msgs['page']);
-			
-		if ( $children_msgs['link'] )
-			$msg .= sprintf(' If you delete this %1$s, %2$s will move up one node in the %1$s hierarchy, and will be displayed in navigation menus.', strtolower($pt_labels['singular']), $children_msgs['link']);
-		
-		$response = array (
-			'ignore' => false,
-			'msg' => $msg,
-		);
-		
-		echo json_encode( $response );
-		die;
 
 	}
 

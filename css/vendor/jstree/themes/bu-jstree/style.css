@@ -16,6 +16,7 @@
 }
  
 #navman_container li {
+	display: inline-block;
 }
  
 html[xmlns] #navman_container li {
@@ -33,8 +34,7 @@ html[xmlns] #navman_container li {
 }
 
 .jstree-bu ul {
-	width: 74%;
-	margin-left: 16px;
+	width: 79.123456789% !important;
 }
 
 .jstree-bu ul ul {
@@ -42,6 +42,9 @@ html[xmlns] #navman_container li {
 }
 
 .jstree-bu ul li {
+	display: block !important;
+	width: 100% !important;
+	height: 1% !important;
 }
 
 .jstree-bu ul li a {
@@ -53,16 +56,17 @@ html[xmlns] #navman_container li {
 }
 
 .jstree-bu li ins {
-	display: block;
+	display: inline-block !important;
 	width: 16px !important;
 	height: 16px !important;
-	margin: 8px 4px 0 -16px !important;
+	margin: 8px 4px 0 0 !important;
 	float: left !important;
 }
 
 .jstree-bu li a {
-	width: auto;
+	width: 95%;
 	display: block;
+	float: left;
 	padding: 8px !important;
 	margin-bottom: 4px !important;
 	border: 1px solid #dfdfdf;

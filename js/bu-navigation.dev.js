@@ -132,7 +132,7 @@ var bu = bu || {};
 				"plugins" : ["themes", "types", "json_data", "ui", "dnd", "crrm"],
 				"core" : {
 					"animation" : 0,
-					"html_titles": true
+					"html_titles": false
 				},
 				"themes" : {
 					"theme" : "bu",
@@ -214,17 +214,19 @@ var bu = bu || {};
 				$tree.jstree('close_all');
 			};
 
+			// @todo test
 			that.getPostLabel = function( post ) {
 
 				var $node = my.getNodeForPost( post );
-				return my.getNodeLabel( $node );
+				return $tree.jstree('get_text', $node );
 
 			};
 
+			// @todo test
 			that.setPostLabel = function( post, label ) {
 
 				var $node = my.getNodeForPost( post );
-				return my.setNodeLabel( $node, label );
+				$tree.jstree('set_text', $node, label );
 
 			};
 
@@ -259,7 +261,7 @@ var bu = bu || {};
 					updated = $.extend(true, {}, origPost, post);
 
 					// Set node text with navigation label
-					my.setNodeLabel( $node, updated.title );
+					$tree.jstree('set_text', $node, updated.title );
 
 					// Update metadata stored with node
 					// @todo do this dynamically by looping through post props
@@ -345,7 +347,7 @@ var bu = bu || {};
 
 				var post = {
 					ID: id,
-					title: my.getNodeLabel( node ),
+					title: $tree.jstree('get_text', node),
 					content: node.data('post_content'),
 					status: node.data('post_status'),
 					type: node.data('post_type'),
@@ -430,24 +432,6 @@ var bu = bu || {};
 					return $node;
 
 				return false;
-			};
-
-			// hacky workaround replacement for jstree.get_text
-			my.getNodeLabel = function( $node ) {
-
-				var $a = $node.children('a').clone();
-				var label = $a.contents().filter(function() { return this.nodeType == 3; });
-				return $.trim(label[0].nodeValue);
-
-			};
-
-			// hacky workaround replacement for jstree.set_text
-			my.setNodeLabel = function( $node, label ) {
-
-				var $a = $node.children('a');
-
-				$a.contents().filter(function() { return this.nodeType == 3; }).first()[0].textContent = label;
-
 			};
 
 			my.getNextPostID = function() {

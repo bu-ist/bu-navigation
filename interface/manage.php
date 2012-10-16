@@ -1,9 +1,9 @@
 <div class="wrap">
 	<div id="icon-edit-pages" class="icon32"><br></div>
 	<?php // @todo dynamic post type label for title ?>
-    <h2>Page Order</h2>
+	<h2>Page Order</h2>
 
-    <div id="navman-container">
+	<div id="navman-container">
 		<form method="post" id="navman_form" action="">
 			<input type="hidden" id="navman_data" name="navman_data" value="" />
 			<input type="hidden" id="navman_delete" name="navman_delete" value="" />
@@ -16,12 +16,9 @@
 				| <a href="#" id="navman_add_link">Add a Link</a> 
 				<?php endif; ?>
 			</div>
-
 			<div class="navman-body">
-					<!-- Tree container -->
 					<div id="nav-tree-container"></div>
 			</div>
-
 			<div class="navman-actions">
 				<div class="postbox metabox-holder">
 					<h3>Publish Navigation</h3>

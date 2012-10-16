@@ -266,8 +266,13 @@ class BU_Navman_Interface {
 	public function format_page( $page ) {
 
 		// Label
-		if( !isset( $page->navigation_label ) )
+		if( !isset( $page->navigation_label ) ) {
 			$page->navigation_label = apply_filters('the_title', $page->post_title);
+		}
+
+		// wptexturize converts quotes to smart quotes, need to reverse that for display here
+		$page->navigation_label = wp_specialchars_decode( $page->navigation_label, ENT_QUOTES );
+		$page->navigation_label = $this->convert_smart_chars( $page->navigation_label );
 
 		// Default attributes
 		$p = array(
@@ -401,6 +406,14 @@ class BU_Navman_Interface {
 		$fields[] = 'post_status';
 
 		return $fields;
+
+	}
+
+	public function convert_smart_chars( $input ) {
+
+		$search = array("&#8216;", "&#8217;", "&#8220;", "&#8221;", "&#8211;", "&#8212;");
+		$replace = array("'", "'", '"', '"', '-', '--');
+		return str_replace($search, $replace, $input);
 
 	}
 

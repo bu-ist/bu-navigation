@@ -75,7 +75,7 @@ html[xmlns] .jstree-bu li {
 	padding: 8px !important;
 	margin-bottom: 3px !important;
 	border: 1px solid #dfdfdf;
-	border-radius: 4px;
+	border-radius: 3px;
 	background: #eee !important;
 	background: -moz-linear-gradient(top, #ffffff 0%, #eeeeee 100%) !important;
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #ffffff), color-stop(100%, #eeeeee)) !important;
@@ -129,7 +129,7 @@ html[xmlns] .jstree-bu li {
 
 #vakata-contextmenu {
 	margin-top: 11px !important;
-	margin-right: 75px !important;
+	margin-left: -110px !important;
 }
 
 #vakata-contextmenu.jstree-bu-context, 
@@ -211,8 +211,8 @@ html[xmlns] .jstree-bu li {
 }
 
 .jstree-bu .post-statuses .post_status.new {
-	background: #8fc562 !important;
-	color: #b0d194 !important;
+	background: #a4cd43 !important;
+	color: #deeedf !important;
 }
 
 .jstree-bu .edit-options {
@@ -223,7 +223,7 @@ html[xmlns] .jstree-bu li {
 	font-weight: 100;
 	float: right;
 	padding: 9px 5px 10px 5px;
-	margin: -8px -8px 0 0;
+	margin: -9px -9px 0 0;
 	border-top-right-radius: 3px;
 	border-bottom-right-radius: 3px;
 	cursor: pointer;
@@ -236,12 +236,19 @@ html[xmlns] .jstree-bu li {
 .jstree-bu .jstree-clicked .edit-options {
 	visibility: visible;
 	color: #ccc;
+	border-left: 1px solid transparent !important;
+}
+
+.jstree-bu .jstree-clicked:hover:hover {
+	cursor: move !important;
 }
 
 .jstree-bu .edit-options.clicked {
 	visibility: visible;
 	background: white !important;
-	color: black !important;	
+	color: black !important;
+	box-shadow: 1px 2px 4px #ccc;
+	border-left: 1px solid #646464 !important;
 }
 
 .jstree-bu .edit-options .jstree-icon {
@@ -283,6 +290,13 @@ html[xmlns] .jstree-bu li {
 	height: 3px !important;
 	border: 0px !important;
 	box-shadow: 0 0 4px #86c552 !important;
+}
+
+#jstree-marker-line.jstree-bu.denied {
+	background: #ca4242 !important;
+	height: 3px !important;
+	border: 0px !important;
+	box-shadow: 0 0 4px #de8585 !important;
 }
 
 #vakata-dragged {

@@ -18,7 +18,6 @@
 .jstree-bu li {
 	display: inline-block;
 	clear: both;
-/* 	width: 100%; */
 }
  
 html[xmlns] .jstree-bu li {
@@ -30,14 +29,14 @@ html[xmlns] .jstree-bu li {
 }
  
 .jstree-bu ins {
-	background-image: url("sprite.png") !important;
-	background-repeat: no-repeat !important;
-	background-color: transparent !important;
-	margin: 8px 4px 0 0 !important;
+	background-image: url("sprite.png");
+	background-repeat: no-repeat;
+	background-color: transparent;
+	margin: 8px 4px 0 0;
 }
 
 .jstree-bu ul {
-	padding-left: 18px !important;
+	padding-left: 18px;
 }
 
 .jstree-bu ul ul {
@@ -341,7 +340,31 @@ html[xmlns] .jstree-bu li {
 	font-weight: 100;
 }
 
-#vakata-dragged.denied {
+#vakata-dragged.jstree-ok {
+	width: 768px;
+	display: block;
+	float: left;
+	padding: 8px 8px 8px 24px !important;
+	border: 1px solid #508a21;
+	border-radius: 4px;
+	background: #eee !important;
+	background: -moz-linear-gradient(top, #6da73e 0%, #508a21 100%) !important;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #6da73e), color-stop(100%, #508a21)) !important;
+	background: -webkit-linear-gradient(top, #6da73e 0%,#508a21 100%) !important;
+	background: -o-linear-gradient(top, #6da73e 0%,#508a21 100%) !important;
+	background: -ms-linear-gradient(top, #6da73e 0%,#508a21 100%) !important;
+	background: linear-gradient(to bottom, #6da73effffff 0%,#508a21 100%) !important;
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6da73e', endColorstr='#508a21',GradientType=0 ) !important;
+	color: white;
+	cursor: move !important;
+}
+
+#vakata-dragged.jstree-ok .count {
+	color: #b3ce9d;
+	font-weight: 100;
+}
+
+#vakata-dragged.jstree-invalid {
 	width: 768px;
 	display: block;
 	float: left;
@@ -360,21 +383,19 @@ html[xmlns] .jstree-bu li {
 	cursor: not-allowed !important;
 }
 
-#vakata-dragged.denied .count {
+#vakata-dragged.jstree-invalid .count {
 	color: #e3a0a0;
 	font-weight: 100;
 }
 
 #vakata-dragged .jstree-ok {
 	float: left !important;
-/* 	display: none !important; */
 	margin: 4px 22220px 0 0 !important;
 	background: url("sprite.png") 0px -32px no-repeat !important;
 }
 
 #vakata-dragged .jstree-invalid {
 	float: left !important;
-/* 	display: none !important; */
 	margin: 5px 1123123px 0 0 !important;
 	background: url("sprite.png") -16px 0px no-repeat !important;
 }
@@ -387,6 +408,8 @@ html[xmlns] .jstree-bu li {
 .metabox-holder .inside .actions {
 	background: #ebf2fb;
 	border-top: 1px solid #ddd;
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
 }
 
 

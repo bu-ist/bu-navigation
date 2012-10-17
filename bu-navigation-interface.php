@@ -30,6 +30,10 @@ class BU_Navman_Interface {
 		$defaults = array(
 			'themePath' => plugins_url( 'css/vendor/jstree/themes/bu-jstree', __FILE__ ), 
 			'rpcUrl' => admin_url('admin-ajax.php?action=bu_getpages&post_type=' . $post_types ),
+			'allowTop' => $this->plugin->get_settings('allow_top'),
+			'lazyLoad' => true,
+			'showCounts' => true,
+			'nodePrefix' => 'p'
 			);
 
 		$this->config = wp_parse_args( $config, $defaults );
@@ -68,7 +72,7 @@ class BU_Navman_Interface {
 		if( version_compare( $wp_version, '3.3', '<' ) ) {
 			add_action( 'admin_print_footer_scripts', array( $this, 'print_footer_scripts' ) );
 		} else {
-			wp_localize_script( 'bu-navigation', 'buNavSettings', $this->get_script_settings() );
+			wp_localize_script( 'bu-navigation', 'buNavSettings', $this->get_script_context() );
 		}
 
 	}
@@ -76,21 +80,16 @@ class BU_Navman_Interface {
 	/**
 	 * Global settings object that our Javascript files depend on
 	 */ 
-	public function get_script_settings() {
+	public function get_script_context() {
+
+		$settings = $this->config;
 
 		// We handle loading of top level pages (only) on page load
 		$pages = $this->get_pages( 0, array( 'depth' => 1 ) );
 
-		$defaults = array(
-			'themePath' => $this->config['themePath'],
-			'rpcUrl' => $this->config['rpcUrl'],
-			'allowTop' => $this->plugin->get_setting('allow_top'),
-			'lazyLoad' => true,
-			'showCounts' => true,
-			'initialTreeData' => $pages
-			);
+		$settings['initialTreeData'] = $pages;
 
-		return apply_filters( 'bu_navigation_script_settings', $defaults );
+		return apply_filters( 'bu_navigation_script_context', $settings );
 
 	}
 
@@ -103,7 +102,7 @@ class BU_Navman_Interface {
 		// Check if bu-navigation script is queued
 		if( in_array( 'bu-navigation', array_keys( $wp_scripts->registered ) ) ) {
 
-			$data = $this->get_script_settings();
+			$data = $this->get_script_context();
 			$this->localize( 'buNavSettings', $data );
 
 		}
@@ -228,7 +227,7 @@ class BU_Navman_Interface {
 						$has_children = true;
 
 					// Format attributes for jstree
-					$p = $this->format_page( $page, $has_children );
+					$p = $this->format_page( $page );
 
 					// Fetch children recursively
 					if( $has_children ) {
@@ -277,7 +276,7 @@ class BU_Navman_Interface {
 		// Default attributes
 		$p = array(
 			'attr' => array(
-				'id' => sprintf('p%d', $page->ID),
+				'id' => $this->add_node_prefix( $page->ID ),
 				'rel' => ($page->post_type == 'link' ? $page->post_type : 'page' ),
 				),
 			'data' => $page->navigation_label,
@@ -414,6 +413,18 @@ class BU_Navman_Interface {
 		$search = array("&#8216;", "&#8217;", "&#8220;", "&#8221;", "&#8211;", "&#8212;");
 		$replace = array("'", "'", '"', '"', '-', '--');
 		return str_replace($search, $replace, $input);
+
+	}
+
+	public function strip_node_prefix( $id ) {
+
+		return intval(str_replace( $this->config['nodePrefix'], '', $id ));
+
+	}
+
+	public function add_node_prefix( $id ) {
+
+		return sprintf('%s%d', $this->config['nodePrefix'], $id );
 
 	}
 

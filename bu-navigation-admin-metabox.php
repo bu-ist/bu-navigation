@@ -10,7 +10,7 @@ require_once(dirname(__FILE__) . '/bu-navigation-interface.php' );
  * 	-> Showing/hiding of post in navigation menus
  * 
  * @todo
- *  - Move hidden page deletion behavior to higher level admin class
+ *	- Need to trigger sibling reorganization for restore from trash action
  *  - Add "Help" for navigation, label, visibilty
  */ 
 class BU_Navigation_Admin_Metabox {
@@ -34,6 +34,28 @@ class BU_Navigation_Admin_Metabox {
 		$this->post_type = $post_type;
 		$this->post_type_labels = BU_Navigation_Plugin::$admin->get_post_type_labels( $this->post_type );
 
+		// Instantiate navman tree interface object
+		$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
+
+		$post_id = is_object( $this->post ) ? $this->post->ID : null;
+		$is_new = is_null( $post_id ) ? true : false;
+		$ancestors = null;
+
+		// @todo setup an else clause here that fetches ancestors if they aren't set on the
+		// post object.  Something in our environment seems to be removing them randomly,
+		// and with memcache that can stick around for a while in the cache.
+
+		if( is_object( $post ) && isset( $post->ancestors ) && ! empty( $post->ancestors ))
+			$ancestors = $post->ancestors;
+
+		$extra_config = array(
+			'currentPost' => $post_id,
+			'ancestors' => $ancestors,
+			'isNewPost' => $is_new
+			);
+
+		self::$interface = new BU_Navman_Interface( $post_types, $extra_config );
+
 		// Attach WP actions/filters
 		$this->register_hooks();
 
@@ -44,38 +66,12 @@ class BU_Navigation_Admin_Metabox {
 	 */ 
 	public function register_hooks() {
 
-		add_filter('bu_navigation_script_settings', array($this, 'script_settings' ));
 		add_action('admin_enqueue_scripts', array($this, 'admin_page_scripts'));
 		add_action('admin_enqueue_scripts', array($this, 'admin_page_styles'));
 		add_action('add_meta_boxes', array($this, 'register_metaboxes'), 10, 2);
 
 		add_action('save_post', array($this, 'save_nav_meta_data'), 10, 2);
 		
-	}
-
-	public function script_settings( $config ) {
-
-		$post = $this->post;
-		$post_id = is_object( $post ) ? $post->ID : null;
-
-		// Pass current post ancestors if present to assist in selecting current post
-		$ancestors = null;
-
-		// @todo setup an else clause here that fetches ancestors if they aren't set on the
-		// post object.  Something in our environment seems to be removing them randomly,
-		// and with memcache that can stick around for a while in the cache.
-
-		if( is_object( $post ) && isset( $post->ancestors ) && ! empty( $post->ancestors ))
-			$ancestors = $post->ancestors;
-
-		$config['currentPost'] = $post_id;
-		$config['ancestors'] = $ancestors;
-
-		if( is_null( $post_id ) )
-			$config['isNewPost'] = true;
-
-		return $config;
-
 	}
 	
 	/**
@@ -86,11 +82,6 @@ class BU_Navigation_Admin_Metabox {
 		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
 		$scripts_path = plugins_url('js',__FILE__);
 		$vendor_path = plugins_url('js/vendor',__FILE__);
-
-		// Instantiate navman tree interface object
-		// @todo this logic should be centralized somewhere else
-		$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
-		self::$interface = new BU_Navman_Interface( $post_types );
 
 		// Load default navigation manager scripts & styles
 		self::$interface->enqueue_scripts();
@@ -166,7 +157,7 @@ class BU_Navigation_Admin_Metabox {
 
 		if( empty( $current_parent ) ) {
 			if( $post->post_status == 'publish' ) {
-				$current_parent_label = '<p>Current Parent: <span>None (top-level page)</span></p>';
+				$current_parent_label = '<p>Main Page (no parent)</p>';
 				$select_parent_txt = "Move $lc_label";
 			} else {
 				$current_parent_label = '<p>No post parent has been set</p>';
@@ -175,7 +166,7 @@ class BU_Navigation_Admin_Metabox {
 		} else {
 			$parent = get_post( $current_parent );
 			$parent_meta = $this->get_nav_meta_data( $parent );
-			$current_parent_label = '<p>Current Parent: <span>' . $parent_meta['label'] . '</span></p>';
+			$current_parent_label = '<p>' . $parent_meta['label'] . ' > ' . $nav_label . '</p>';
 			$select_parent_txt = "Move $lc_label";
 		}
 
@@ -243,13 +234,6 @@ class BU_Navigation_Admin_Metabox {
 			
 		}
 
-		/* 
-		Reorder siblings, old and new, if post_parent or menu_order has changed
-		@todo 
-			- review these more carefully
-			- make sure to consider new post menu_order of 0 in reordering top level pages
-		*/
-
 		// Reorder old siblings if my parent has changed
 		if( $this->post->post_parent != $post->post_parent ) {
 			// error_log('Post parent has changed!  Reordering old and new siblings...');
@@ -282,7 +266,7 @@ class BU_Navigation_Admin_Metabox {
 		// Fetch siblings, as currently ordered by menu_order
 		$siblings = bu_navigation_get_pages( array(
 			'sections' => array($post->post_parent),
-			'post_status' => false,	// @todo this includes auto-drafts/revisions...
+			'post_status' => array('publish','pending','draft'),	// ignore post statuses that are not being displayed
 			'suppress_filter_pages' => true,	// suppress is spelled with two p's...
 			'post_type' => $post_types,	// handle custom post types support
 		));
@@ -306,6 +290,7 @@ class BU_Navigation_Admin_Metabox {
 				}
 
 				// Commit new order for this sibling
+				// @todo why not wp_update_post?  this will cause issues in new environment due to cacheing
 				$update = $wpdb->prepare("UPDATE $wpdb->posts SET menu_order = %d WHERE ID = %d", $i, $sib->ID);
 				$wpdb->query( $update );
 				// error_log("Updating menu order for {$sib->post_title} to: $i");

@@ -40,6 +40,10 @@ class BU_Navigation_Admin_Navman {
 		// @todo test with multiple supported custom post types
 		$this->post_type = $post_type;
 
+		// Instantiate navman tree interface object
+		$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
+		self::$interface = new BU_Navman_Interface( $post_types );
+
 		// Attach WP actions/filters
 		$this->register_hooks();
 
@@ -99,11 +103,6 @@ class BU_Navigation_Admin_Navman {
 		if( is_array( $this->pages ) && in_array( $page, $this->pages ) ) {
 			
 			$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
-
-			// Instantiate navman tree interface object
-			// @todo this logic should be centralized somewhere else
-			$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
-			self::$interface = new BU_Navman_Interface( $post_types );
 
 			// Load default navigation manager scripts & styles
 			self::$interface->enqueue_scripts();
@@ -399,15 +398,13 @@ class BU_Navigation_Admin_Navman {
 		foreach ($nodes as $node) {
 
 			// Strip jsree node prefix (p) to get actual post ID
-			// @todo consolidate this action in one place
-			// $id = intval(substr($node->attr->id, 1));
 			$id = $node->attr->id;
 			$post_type = $node->metadata->post_type;
 			$post_status = $node->metadata->post_status;
 
 			// Existing post
 			if( strpos( $id, 'post-new' ) === false )
-				$id = intval(substr($id,1));
+				$id = self::$interface->strip_node_prefix( $id );
 
 			// New link (only "new" case at this time)
 			if( 'link' == $post_type ) {

@@ -105,7 +105,7 @@ var bu = bu || {};
 			// Configuration defaults
 			var default_config = {
 				el : '#nav-tree-container',
-				nodePrefix : 'p'
+				nodePrefix : Nav.settings.nodePrefix
 			};
 
 			that.config = $.extend({}, default_config, config || {} );
@@ -244,7 +244,7 @@ var bu = bu || {};
 				$tree.jstree( 'create', a.which, a.position, node, a.callback, a.skip_rename );
 
 				// Grab insert ID
-				post.ID = node['attr']['id'];
+				post.ID = my.stripNodePrefix( node['attr']['id'] );
 
 				that.broadcast('insertPost', [post]);
 

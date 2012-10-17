@@ -324,7 +324,7 @@ class BU_Navigation_Admin_Navman {
 	 * @todo write unit tests
 	 */ 
 	public function process_deletions( $pages_to_delete ) {
-		error_log('=== Processing post removals ===');
+		// error_log('=== Processing post removals ===');
 		$success = true;
 
 		if ((is_array($pages_to_delete)) && (count($pages_to_delete) > 0)) {
@@ -334,7 +334,7 @@ class BU_Navigation_Admin_Navman {
 					error_log(sprintf('navman: Unable to delete post %d', $id));
 					$success = false;
 				} else {
-					error_log('Post deleted: ' . $id );
+					// error_log('Post deleted: ' . $id );
 				}
 			}
 		}
@@ -347,7 +347,7 @@ class BU_Navigation_Admin_Navman {
 	 * @todo write unit tests
 	 */ 
 	public function process_edits( $pages_to_edit ) {
-		error_log('=== Processing link updates ===');
+		// error_log('=== Processing link updates ===');
 		$success = true;
 
 		if ((is_array($pages_to_edit)) && (count($pages_to_edit) > 0)) {
@@ -376,12 +376,12 @@ class BU_Navigation_Admin_Navman {
 
 				update_post_meta($id, 'bu_link_target', $target);
 
-				error_log("Link $id updated!");
-				error_log("Label: {$data['post_title']}, URL: {$data['post_content']}, Target: $target");
+				// error_log("Link $id updated!");
+				// error_log("Label: {$data['post_title']}, URL: {$data['post_content']}, Target: $target");
 			}
 		}
 
-		error_log('Finished processessing edits, return status: ' . $success );
+		// error_log('Finished processessing edits, return status: ' . $success );
 		return $success;	
 	}
 
@@ -390,14 +390,14 @@ class BU_Navigation_Admin_Navman {
 	 */ 
 	public function process_nodes( $parent_id, $nodes ) {
 
-		error_log("=== Processing nodes for post parent $parent_id ===");
+		// error_log("=== Processing nodes for post parent $parent_id ===");
 
 		$updates = array();
 		$updates[$parent_id] = array();
 
 		foreach ($nodes as $node) {
 
-			// Strip jsree node prefix (p) to get actual post ID
+			// Translate jstree json data to post array for insertion
 			$id = $node->attr->id;
 			$post_type = $node->metadata->post_type;
 			$post_status = $node->metadata->post_status;
@@ -426,7 +426,7 @@ class BU_Navigation_Admin_Navman {
 
 					$id = wp_insert_post($data);
 
-					error_log('Insert ID: ' . $id );
+					// error_log('Insert ID: ' . $id );
 
 					if ($id === 0) {
 						error_log(sprintf('bu_navman_process_nodes could not create link: %s', print_r($node, true)));
@@ -436,7 +436,7 @@ class BU_Navigation_Admin_Navman {
 					$target = ($node->metadata->post_meta->bu_link_target === 'new') ? 'new' : 'same';
 
 					update_post_meta($id, 'bu_link_target', $target );
-					error_log("Inserting new link - ID: $id, Label: {$data['post_title']}, URL: {$data['post_content']}, Target: $target, Parent: $parent_id");
+					// error_log("Inserting new link - ID: $id, Label: {$data['post_title']}, URL: {$data['post_content']}, Target: $target, Parent: $parent_id");
 
 				}
 
@@ -455,7 +455,7 @@ class BU_Navigation_Admin_Navman {
 
 		}
 
-		error_log('Finished processessing nodes, updates made: ' . count($updates) );
+		// error_log('Finished processessing nodes, updates made: ' . count($updates) );
 		return $updates;
 
 	}
@@ -465,7 +465,7 @@ class BU_Navigation_Admin_Navman {
 	 * @todo write unit tests
 	 */ 
 	public function process_moves( $pages_to_move ) {
-		error_log("=== Processing moves ===");
+		// error_log("=== Processing moves ===");
 		global $wpdb;
 		$success = true;
 		
@@ -489,7 +489,7 @@ class BU_Navigation_Admin_Navman {
 						// @todo this will cause caching issues in new environment
 						$stmt = $wpdb->prepare('UPDATE ' . $wpdb->posts . ' SET post_parent = %d, menu_order = %d WHERE ID = %d', $parent_id, $position, $page);
 						$rc = $wpdb->query($stmt);
-						error_log("Updating post $page - Parent: $parent_id, Order: $position");
+						// error_log("Updating post $page - Parent: $parent_id, Order: $position");
 
 						if ($rc === false) $success = false;
 
@@ -509,7 +509,7 @@ class BU_Navigation_Admin_Navman {
 			do_action('bu_navman_pages_moved', $pages_moved);
 		}
 
-		error_log('Finished processessing edits, pages moved: ' . count($pages_moved) . ', return status: ' . $success );
+		// error_log('Finished processessing edits, pages moved: ' . count($pages_moved) . ', return status: ' . $success );
 		return $success;
 
 	}

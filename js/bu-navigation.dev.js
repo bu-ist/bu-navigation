@@ -168,7 +168,7 @@ var bu = bu || {};
 						"url" : s.rpcUrl,
 						"type" : "POST",
 						"data" : function (n) {
-							return { id : n.attr ? n.attr("id") : 0 };
+							return { id : n.attr ? my.stripNodePrefix(n.attr("id")) : 0 };
 						}
 					},
 					"progressive_render" : true

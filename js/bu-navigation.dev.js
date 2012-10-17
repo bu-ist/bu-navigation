@@ -127,6 +127,20 @@ var bu = bu || {};
 			if( $tree.length === 0 )
 				throw new TypeError('Invalid DOM selector, can\'t create BU Navigation Tree');
 
+			var checkMove = function( m ) {
+				var attempted_parent_id = m.np.attr('id');
+				var allowed = true;
+
+				// Don't allow top level posts if global option prohibits it
+				if(m.cr === -1 && ! Nav.settings.allowTop ) {
+					// console.log('Move denied, top level posts cannot be created!');
+					// @todo pop up a friendlier notice explaining this
+					allowed = false;
+				}
+
+				return bu.hooks.applyFilters( 'moveAllowed', allowed, m );
+			};
+
 			// jsTree Settings object
 			d.treeConfig = {
 				"plugins" : ["themes", "types", "json_data", "ui", "dnd", "crrm"],
@@ -135,8 +149,8 @@ var bu = bu || {};
 					"html_titles": false
 				},
 				"themes" : {
-					"theme" : "bu",
-					"url"	: s.themePath + "/style.css"
+					"theme": "bu",
+					"url" : s.themePath + '/style.css'
 				},
 				"types" : {
 					"types" : {
@@ -163,7 +177,6 @@ var bu = bu || {};
 					}
 				},
 				"json_data": {
-					"data" : s.initialTreeData,
 					"ajax" : {
 						"url" : s.rpcUrl,
 						"type" : "POST",
@@ -183,6 +196,10 @@ var bu = bu || {};
 			if( s.showCounts ) {
 				// counting needs a fully loaded DOM
 				d.treeConfig['json_data']['progressive_render'] = false;
+			}
+
+			if( s.initialTreeData ) {
+				d.treeConfig['json_data']['data'] = s.initialTreeData;
 			}
 
 			// ======= Public API ======= //
@@ -535,24 +552,11 @@ var bu = bu || {};
 
 			};
 
-			var checkMove = function( m ) {
-				var attempted_parent_id = m.np.attr('id');
-				var allowed = true;
-
-				// Don't allow top level posts if global option prohibits it
-				if(m.cr === -1 && ! Nav.settings.allowTop ) {
-					// console.log('Move denied, top level posts cannot be created!');
-					// @todo pop up a friendlier notice explaining this
-					allowed = false;
-				}
-
-				return bu.hooks.applyFilters( 'moveAllowed', allowed, m );
-			};
-
 			// ======= jsTree Event Handlers ======= //
 
 			// Tree instance is loaded (before initial opens/selections are made)
 			$tree.bind('loaded.jstree', function( event, data ) {
+				// @todo remove once best approach to loading theme stylesheet is in place
 				$tree.jstree('data').data.core.li_height = 36;	// hackety hack ... investigate cause of issue
 				that.broadcast( 'postsLoaded' );
 			});
@@ -644,14 +648,27 @@ var bu = bu || {};
 				that.broadcast( 'postMoved', [post, parent_id, menu_order]);
 			});
 
+			// Drag & Drop Mods
+
 			$(document).bind('drag_start.vakata', function(event, data) {
-				var $node = data.data.obj;
-				$node.addClass('bu-dnd-placeholder');
+				var $drag_src = data.data.obj;
+				$drag_src.addClass('bu-dnd-placeholder');
+			});
+
+			$(document).bind('drag.vakata', function(event, data) {
+				var $drag_src = data.data.obj;
+				$drag = $.vakata.dnd.helper;
+
+				if( $drag.children('ins').hasClass('jstree-ok') ) {
+					$drag_src.removeClass('jstree-invalid').addClass('jstree-ok');
+				} else {
+					$drag_src.removeClass('jstree-ok').addClass('jstree-invalid');
+				}
 			});
 
 			$(document).bind('drag_stop.vakata', function(event, data) {
-				var $node = data.data.obj;
-				$node.removeClass('bu-dnd-placeholder');
+				var $drag_src = data.data.obj;
+				$drag_src.removeClass('bu-dnd-placeholder jstree-invalid jstree-ok');
 			});
 
 			return that;

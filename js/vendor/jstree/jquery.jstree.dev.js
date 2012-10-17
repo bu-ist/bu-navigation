@@ -352,7 +352,8 @@
 				}
 				this.get_container().html("<ul><li class='jstree-last jstree-leaf'><ins>&#160;</ins><a class='jstree-loading' href='#'><ins class='jstree-icon'>&#160;</ins>" + this._get_string("loading") + "</a></li></ul>");
 				this.data.core.li_height = this.get_container_ul().find("li.jstree-closed, li.jstree-leaf").eq(0).height() || 18;
-
+				// console.log('LI Height Set!');
+				// console.log(this.data.core.li_height);
 				this.get_container()
 					.delegate("li > ins", "click.jstree", $.proxy(function (event) {
 							var trgt = $(event.target);
@@ -2568,12 +2569,15 @@
 				else { o = ["after","inside","before"]; }
 				$.each(o, $.proxy(function (i, val) { 
 					if(this.data.dnd[val]) {
-						$.vakata.dnd.helper.children("ins").attr("class","jstree-ok");
+						// TEMPORARY HACK -- put in place on 10/17 by mgburns
+						$.vakata.dnd.helper.attr("class","jstree-ok").children("ins").attr("class","jstree-ok");
 						r = val;
 						return false;
 					}
 				}, this));
-				if(r === false) { $.vakata.dnd.helper.children("ins").attr("class","jstree-invalid"); }
+				
+				// TEMPORARY HACK -- put in place on 10/17 by mgburns
+				if(r === false) { $.vakata.dnd.helper.attr("class","jstree-invalid").children("ins").attr("class","jstree-invalid"); }
 				
 				pos = rtl ? (this.data.dnd.off.right - 18) : (this.data.dnd.off.left + 10);
 				switch(r) {
@@ -2595,6 +2599,9 @@
 						break;
 				}
 				last_pos = r;
+
+				// added by mgburns, 10/17/2012
+				// this.__callback({"pos": last_pos});
 				return r;
 			},
 			dnd_open : function () {

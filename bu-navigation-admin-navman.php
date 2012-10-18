@@ -42,7 +42,14 @@ class BU_Navigation_Admin_Navman {
 
 		// Instantiate navman tree interface object
 		$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
-		self::$interface = new BU_Navman_Interface( $post_types );
+
+		$settings = array(
+			'format' => 'navman',
+			'postStatuses' => array( 'draft', 'pending', 'publish' ),
+			'nodePrefix' => 'nm'
+			);
+
+		self::$interface = new BU_Navman_Interface( $post_types, $settings );
 
 		// Attach WP actions/filters
 		$this->register_hooks();

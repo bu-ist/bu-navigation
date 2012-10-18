@@ -259,6 +259,8 @@ var bu = bu || {};
 			// Configuration defaults
 			var default_config = {
 				el : '#nav-tree-container',
+				format : Nav.settings.format,
+				postStatuses: Nav.settings.postStatuses,
 				nodePrefix : Nav.settings.nodePrefix
 			};
 
@@ -335,7 +337,12 @@ var bu = bu || {};
 						"url" : s.rpcUrl,
 						"type" : "POST",
 						"data" : function (n) {
-							return { id : n.attr ? my.stripNodePrefix(n.attr("id")) : 0 };
+							return {
+								id : n.attr ? my.stripNodePrefix(n.attr("id")) : 0,
+								format : c.format,
+								prefix : c.nodePrefix,
+								post_status : c.postStatuses
+							};
 						}
 					},
 					"progressive_render" : true

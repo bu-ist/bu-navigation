@@ -5,6 +5,8 @@
  * ntk@bu.edu
  */
 
+// @todo get rid of notices...
+
 define('BU_WIDGET_PAGES_LIST_CLASS', 'smartnav level1'); 				// default class for list 
 define('BU_WIDGET_PAGES_LIST_ID', 'contentnavlist'); 			// default element id for list 
 

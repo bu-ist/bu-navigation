@@ -28,9 +28,11 @@ class BU_Navman_Interface {
 			$post_types = implode(',', $post_types );
 
 		$defaults = array(
-			'themePath' => plugins_url( 'css/vendor/jstree/themes/bu-jstree', __FILE__ ), 
+			'format' => 'legacy',	// until plugins are migrated to new interface...
+			'postStatuses' => array('publish','draft'),
+			'themePath' => plugins_url('css/vendor/jstree/themes/bu-jstree', __FILE__ ), 
 			'rpcUrl' => admin_url('admin-ajax.php?action=bu_getpages&post_type=' . $post_types ),
-			'allowTop' => $this->plugin->get_settings('allow_top'),
+			'allowTop' => $this->plugin->get_setting('allow_top'),
 			'lazyLoad' => true,
 			'showCounts' => true,
 			'nodePrefix' => 'p'
@@ -178,7 +180,7 @@ class BU_Navman_Interface {
 		$root_pages = bu_navigation_get_pages( array(
 			'sections' => $sections,
 			'post_types' => $this->post_types,
-			'post_status' => array( 'draft', 'pending', 'publish' )
+			'post_status' => $this->config['postStatuses']
 			)
 		);
 
@@ -228,12 +230,11 @@ class BU_Navman_Interface {
 						$has_children = true;
 
 					// Format attributes for jstree
-					$p = $this->format_page( $page );
+					$p = $this->format_page( $page, $has_children );
 
 					// Fetch children recursively
 					if( $has_children ) {
 
-						$p['attr']['rel'] = 'section';
 						$p['state'] = 'closed';
 
 						if( $load_children ) {
@@ -263,8 +264,7 @@ class BU_Navman_Interface {
 	 * @param StdClass $page WP post object
 	 * @return array $p array of data with markup attributes for jstree json_data plugin
 	 */ 
-	public function format_page( $page ) {
-
+	public function format_page( $page, $has_children = false ) {
 		// Label
 		if( !isset( $page->navigation_label ) ) {
 			$page->navigation_label = apply_filters('the_title', $page->post_title);
@@ -274,7 +274,7 @@ class BU_Navman_Interface {
 		$page->navigation_label = wp_specialchars_decode( $page->navigation_label, ENT_QUOTES );
 		$page->navigation_label = $this->convert_smart_chars( $page->navigation_label );
 
-		// Default attributes
+		// Base format
 		$p = array(
 			'attr' => array(
 				'id' => $this->add_node_prefix( $page->ID ),
@@ -297,7 +297,17 @@ class BU_Navman_Interface {
 				);
 		}
 
-		return $p;
+		if( $has_children ) {
+			$p['attr']['rel'] = 'section';
+		}
+
+		// Apply general format page filters first
+		$p = apply_filters( 'bu_navigation_interface_format_page', $p, $page, $has_children );
+
+		$format = $this->config['format'];
+
+		// But give priority to more specific format filters
+		return apply_filters( 'bu_navigation_interface_format_page_' . $format, $p, $page, $has_children );
 
 	}
 
@@ -431,3 +441,48 @@ class BU_Navman_Interface {
 	}
 
 }
+
+// ====== Backwards compatibility ====== //
+
+function bu_navman_filter_pages( $pages ) {
+
+	return BU_Navman_Interface::filter_pages( $pages );
+
+}
+
+function bu_navigation_format_page_legacy( $p, $page, $has_children) {
+
+	$p = array(
+		'attr' => array(
+			'id' => sprintf('p%d', $page->ID ),
+			'rel' => ($page->post_type == 'link' ? $page->post_type : 'page' ),
+			),
+		'data' => $page->navigation_label
+		);
+
+	if( $has_children ) {
+		$p['attr']['rel'] = 'folder';
+	}
+
+	$classes = array();
+
+	if (isset($page->excluded) && $page->excluded)
+	{
+		$p['attr']['rel'] .= '_excluded';
+		array_push($classes, 'excluded');
+	}
+
+	if ($page->restricted)
+	{
+		$p['attr']['rel'] .= '_restricted';
+		array_push($classes, 'restricted');
+	}
+
+	$p['attr']['class'] = implode(' ', $classes);
+
+	return $p;
+
+}
+
+add_filter('bu_navigation_interface_format_page_legacy', 'bu_navigation_format_page_legacy', 10, 3 );
+

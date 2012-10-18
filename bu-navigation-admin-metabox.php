@@ -48,13 +48,16 @@ class BU_Navigation_Admin_Metabox {
 		if( is_object( $post ) && isset( $post->ancestors ) && ! empty( $post->ancestors ))
 			$ancestors = $post->ancestors;
 
-		$extra_config = array(
+		$settings = array(
 			'currentPost' => $post_id,
 			'ancestors' => $ancestors,
-			'isNewPost' => $is_new
+			'isNewPost' => $is_new,
+			'format' => 'nav-metabox',
+			'postStatuses' => array( 'draft', 'pending', 'publish' ),
+			'nodePrefix' => 'na'
 			);
 
-		self::$interface = new BU_Navman_Interface( $post_types, $extra_config );
+		self::$interface = new BU_Navman_Interface( $post_types, $settings );
 
 		// Attach WP actions/filters
 		$this->register_hooks();

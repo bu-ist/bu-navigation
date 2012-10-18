@@ -786,12 +786,12 @@ var bu = bu || {};
 				}
 
 				// Recalculate counts
-				$newsection = $parent.parentsUntil($tree,'li');
-				$oldsection = $oldparent.parentsUntil($tree,'li');
+				$newsection = $parent.parentsUntil( '#' + $tree.attr('id'),'li');
+				$oldsection = $oldparent.parentsUntil( '#' + $tree.attr('id'),'li');
 				$newsection = $newsection.length ? $newsection.last() : $parent;
 				$oldsection = $oldsection.length ? $oldsection.last() : $oldparent;
 
-				if( $oldsection.is($newsection) ) {
+				if( $oldsection.is( '#' + $newsection.attr('id') ) ) {
 					calculateCounts($newsection);
 				} else {
 					calculateCounts($oldsection);

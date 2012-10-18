@@ -1,17 +1,18 @@
 <!-- @todo rewrite helper text -->
-<h4><?php _e('Location'); ?></h4>
+<h4><?php _e('Current Location'); ?></h4>
 
 <!-- @todo investigate if these fields are present outside of metabox pre-3.5 -->
-<input type="hidden" name="menu_order" value="<?php echo $current_menu_order; ?>">
-<input type="hidden" name="parent_id" value="<?php echo $current_parent; ?>">
+<input type="hidden" name="menu_order" value="<?php echo $post->menu_order; ?>">
+<input type="hidden" name="parent_id" value="<?php echo $post->post_parent; ?>">
 
 <div id="bu_nav_attributes_location_breadcrumbs">
-	<?php // bu_navigation_breadcrumbs( array( 'echo' => true, 'crumb_current' => false ) ); ?>
-	<?php echo $current_parent_label; ?>
+	<p><?php echo $breadcrumbs; ?></p>
 </div>
 
 <p>
-	<a id="select-parent" href="#TB_inline?width=640&inlineId=edit_page_location" class="thickbox button" ><?php echo $select_parent_txt; ?></a>
+	<a id="select-parent" href="#TB_inline?width=640&inlineId=edit_page_location" class="thickbox button" >
+		<?php echo $move_post_btn_txt; ?>
+	</a>
 </p>
 
 <div id="edit_page_location" style="display:none;">
@@ -40,7 +41,7 @@
 		<input id="bu-page-navigation-label" name="nav_label" type="text" size="30" value="<?php echo $nav_label; ?>"/>
 	</p>
 	<p>
-		<input id="bu-page-navigation-display" name="nav_display" type="checkbox" value="yes" <?php if ( $already_in_nav ) { ?>checked="checked"<?php }?>/>
+		<input id="bu-page-navigation-display" name="nav_display" type="checkbox" value="yes" <?php checked( $nav_display, true ); ?>/>
 		<label class="inline" for="bu-page-navigation-display">Display this <?php echo strtolower($pt_labels['singular']); ?> in navigation lists.</label>
 	</p>
 </div>

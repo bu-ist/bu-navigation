@@ -130,13 +130,13 @@ if((typeof bu === 'undefined' ) ||
 		updateBreadcrumbs: function( post ) {
 
 			var ancestors = Navtree.getAncestors( post.ID );
-			var breadcrumbs = ancestors.join(' > ');
+			var breadcrumbs = ancestors.join("&nbsp;&raquo;&nbsp;");
 
 			// Update breadcrumbs
 			if (ancestors.length > 1) {
 				$(this.ui.breadcrumbs).html('<p>' + breadcrumbs + '</p>');
 			} else {
-				$(this.ui.breadcrumbs).html('<p>Top Level Page</p>');
+				$(this.ui.breadcrumbs).html('<p>Top level page</p>');
 			}
 		}
 

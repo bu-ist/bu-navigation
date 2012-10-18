@@ -145,35 +145,37 @@ class BU_Navigation_Admin_Metabox {
 		$nav_exclude = $nav_meta_data['exclude'];
 
 		// new pages are not in the nav already, so we need to fix this
-		$already_in_nav = $post->post_status == 'auto-draft' ? false : (bool) !$nav_exclude;
+		$nav_display = $post->post_status == 'auto-draft' ? false : (bool) !$nav_exclude;
 
 		// Labels 
+		$breadcrumbs = $this->get_post_breadcrumbs_label( $post );
 		$pt_labels = $this->post_type_labels;
-
-		$current_menu_order = $post->menu_order;
-		$current_parent = $post->post_parent ? $post->post_parent : '';
-		$current_parent_label = $select_parent_txt = '';
 		$lc_label = strtolower( $pt_labels['singular'] );
-
-		if( empty( $current_parent ) ) {
-			if( $post->post_status == 'publish' ) {
-				$current_parent_label = '<p>Main Page (no parent)</p>';
-				$select_parent_txt = "Move $lc_label";
-			} else {
-				$current_parent_label = '<p>No post parent has been set</p>';
-				$select_parent_txt = "Move $lc_label";
-			}
-		} else {
-			$parent = get_post( $current_parent );
-			$parent_meta = $this->get_nav_meta_data( $parent );
-			$current_parent_label = '<p>' . $parent_meta['label'] . ' > ' . $nav_label . '</p>';
-			$select_parent_txt = "Move $lc_label";
-		}
+		$move_post_btn_txt = "Move $lc_label";
 
 		$pages = self::$interface->get_pages( 0, array( 'depth' => 1 ) );
 		
 		include('interface/metabox-navigation-attributes.php');
 
+	}
+
+	/**
+	 * Generate breadcrumbs label for current post
+	 * 
+	 * Will return full breadcrumbs if current post has ancestors, or
+	 * appropriate string if it does not.
+	 */ 
+	public function get_post_breadcrumbs_label( $post ) {
+
+		$output = '';
+
+		if( $post->post_parent ) {
+			$output = bu_navigation_breadcrumbs(array('show_links' => false, 'include_hidden' => true, 'post_status' => array('draft','pending','publish')));
+		} else {
+			$output = __('Top level page');
+		}
+
+		return $output;
 	}
 	
 	/**

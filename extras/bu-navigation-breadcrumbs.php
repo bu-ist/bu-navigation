@@ -1,10 +1,17 @@
 <?php
 
+// modified 10/18 by mgburns
+// @todo BEFORE RE-LAUNCH
+//	- find usage of this method (TechWeb, etc.)
+//	- investigate proper suppress_filters behavior for bu_navigation_get_pages
+//	- investigate proper crumb_current / anchor_current behavior
+
 function bu_navigation_breadcrumbs($args = '')
 {
 	global $post;
-	
+
 	$defaults = array(
+		'post' => $post,
 		'glue' => '&nbsp;&raquo;&nbsp;',
 		'container_tag' => 'div',
 		'container_id' => 'breadcrumbs',
@@ -16,9 +23,27 @@ function bu_navigation_breadcrumbs($args = '')
 		'home' => false,
 		'home_label' => 'Home',
 		'prefix' => '',
-		'suffix' => ''
+		'suffix' => '',
+		'include_statuses' => 'publish',
+		'include_hidden' => false,
+		'show_links' => true
 		);
 	$r = wp_parse_args($args, $defaults);
+
+	if( $r['post'] ) {
+		$p = null;
+
+		if( is_numeric( $r['post'] ) ){
+			$p = get_post( $r['post'] );
+		} else if( is_object( $r['post'] ) ){
+			$p = $r['post'];
+		}
+
+		if( is_null( $p ) ) {
+			error_log('bu_navigation_breadcrumbs - invalid post argument: ' . $r['post'] );
+			return false;
+		}
+	}
 	
 	$attrs = '';
 	
@@ -28,15 +53,26 @@ function bu_navigation_breadcrumbs($args = '')
 	$html = sprintf('<%s%s>%s', $r['container_tag'], $attrs, $r['prefix']);
 	
 	/* grab ancestors */
-	$post_types = ( $post->post_type == 'page' ? array('page', 'link') : array($post->post_type) );
-	$ancestors = bu_navigation_gather_sections($post->ID, array( 'post_types' => $post_types ));
-	if (!in_array($post->ID, $ancestors)) array_push($ancestors, $post->ID);
+	$post_types = ( $p->post_type == 'page' ? array('page', 'link') : array($p->post_type) );
+	$ancestors = bu_navigation_gather_sections($p->ID, array( 'post_types' => $post_types ));
+	if (!in_array($p->ID, $ancestors)) array_push($ancestors, $p->ID);
 	
 //	$front_page = get_option('page_on_front');
 //	if ($r['home'] && (!$ancestors[0])) {
 //		$ancestors[0] = $front_page;
 //	}
-	$pages = bu_navigation_get_pages(array('pages' => $ancestors, 'supress_filter_pages' => true, 'post_types' => $post_types));
+	
+	// @todo suppress was misspelled here, which was consequently excluding navigation excluded pages
+	// while it looks like this was the intended behavior, it is NOT how it has been operating, so
+	// need to investigate the ramifications of this changes
+
+	if( $r['include_hidden'] && has_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude') )
+		remove_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
+
+	$pages = bu_navigation_get_pages(array('pages' => $ancestors, 'post_types' => $post_types, 'post_status' => $r['include_statuses']));
+
+	if( $r['include_hidden'] && has_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude') )
+		add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
 
 	$crumbs = array(); // array of HTML fragments for each crumb
 
@@ -45,40 +81,58 @@ function bu_navigation_breadcrumbs($args = '')
 		foreach ($ancestors as $page_id)
 		{
 			if (!$page_id && $r['home']) {
-				$crumb = sprintf('<a href="%s" class="%s">%s</a>', get_bloginfo('url'), $r['anchor_class'], $r['home_label']);
+				$anchor_open = sprintf('<a href="%s" class="%s">', get_bloginfo('url'), $r['anchor_class'] );
+				$anchor_close = '</a>';
+
+				if( $r['show_links'] ) {
+					$crumb = $anchor_open . $r['home_label'] . $anchor_close;
+				} else {
+					$crumb = $r['home_label'];
+				}
+
 				array_push($crumbs, $crumb);
 				continue;
 			} else if (!array_key_exists($page_id, $pages)) continue;
 			
-			$p = $pages[$page_id];
-			
-			if (!isset($p->navigation_label)) $p->navigation_label = apply_filters('the_title', $p->post_title);
+			$current = $pages[$page_id];
 
-			$title = attribute_escape($p->navigation_label);
-			if ($page_id == $front_page) {
-				$title = str_replace('[label]', $title, $r['home_label']);
-			}
+			if (!isset($current->navigation_label))
+				$current->navigation_label = apply_filters('the_title', $current->post_title);
+
+			$title = esc_attr($current->navigation_label);
+
+			// commented out 10/18 by mgburns -- wasn't doing anything, as $front_page was never set
+			// if ($page_id == $front_page) {
+			// 	$title = str_replace('[label]', $title, $r['home_label']);
+			// }
 			
-			$href = $p->url;
+			$href = $current->url;
 			$classname = $r['anchor_class'];
 			
-			$crumb = '';
+			$crumb = $anchor_open = $anchor_close = '';
+
 			
-			if ($p->ID == $post->ID) $classname .= ' active';
+			if ($current->ID == $p->ID) $classname .= ' active';
 			
-			if (($p->ID == $post->ID) && (!$r['anchor_current']))
-			{
-				$crumb = sprintf('<a class="%s">%s</a>', $classname, $title);
+			if( $r['show_links'] ) {
+				if (($current->ID == $p->ID) && (!$r['anchor_current']))
+				{
+					// @todo ... why is there an anchor here at all?  anchor_current is false
+					$anchor_open = sprintf('<a class="%s">', $classname );
+				}
+				else
+				{
+					$anchor_open = sprintf('<a href="%s" class="%s">', $href, $classname );
+				}
+				$anchor_close = '</a>';
 			}
-			else
-			{
-				$crumb = sprintf('<a href="%s" class="%s">%s</a>', $href, $classname, $title);
-			}
+
+			$crumb = $anchor_open . $title . $anchor_close;
 			
-			$crumb = apply_filters('bu_navigation_filter_crumb_html', $crumb, $p, $r);
+			$crumb = apply_filters('bu_navigation_filter_crumb_html', $crumb, $current, $r);
 			
 			/* only crumb if not current page or if we're crumbing the current page */
-			if (($p->ID != $post->ID) || ($r['crumb_current']))
+			if (($current->ID != $p->ID) || ($r['crumb_current']))
 				array_push($crumbs, $crumb);
 		}
 		

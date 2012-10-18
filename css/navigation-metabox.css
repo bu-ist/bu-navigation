@@ -1,8 +1,5 @@
 #edit_page_tree {
-	border-radius: 6px;
-	background-color: #F7F7F7;
-	border: 1px solid #E5E5E5;
-	padding: 1.2em;
+	padding-right: 2em;
 	margin-top: 90px;
 }
 
@@ -10,10 +7,20 @@
 	width: inherit;
 	background-color: white;
 	position: fixed;
+	margin-top: -2px;
 }
 
 .page_location_toolbar .edit_buttons {
 	float: right;
 	margin-top: 45px;
 	margin-bottom: 1em;
+}
+
+/* Thickbox overrides */
+#TB_window .jstree-bu a {
+ color: black;   
+}
+
+#TB_window .jstree-bu .jstree-clicked {
+ color: white;
 }

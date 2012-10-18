@@ -4,7 +4,6 @@ if((typeof bu === 'undefined') ||
 	(typeof bu.plugins.navigation.tree === 'undefined'))
 		throw new TypeError('BU Navigation Manager script dependencies have not been met!');
 
-// @todo only run Navman.init on DOM ready
 (function($){
 
 	// If we are the first view object, set up our namespace
@@ -91,15 +90,11 @@ if((typeof bu === 'undefined') ||
 		},
 
 		save: function(e) {
-			console.log('Attempting to save!');
-
 			var posts = Navtree.getPosts();
 
 			$(this.ui.dataField).attr("value", JSON.stringify(posts));
 			$(this.ui.deletionsField).attr("value", JSON.stringify(this.data.deletions));
 			$(this.ui.editsField).attr("value", JSON.stringify(Linkman.data.edits));
-
-			console.log($(this.ui.editsField).attr('value'));
 
 			this.data.dirty = false;
 
@@ -168,9 +163,6 @@ if((typeof bu === 'undefined') ||
 			}
 
 			this.data.currentLink = link;
-
-			console.log('Editing link:');
-			console.log(this.data.currentLink);
 
 			this.$el.dialog('open');
 		},

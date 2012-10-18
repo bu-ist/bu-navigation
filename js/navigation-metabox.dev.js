@@ -48,7 +48,7 @@ if((typeof bu === 'undefined' ) ||
 			config = config || {};
 			this.settings = $.extend({}, bu.plugins.navigation.settings, config );
 
-			if( typeof this.settings.isNewPost === 'undefined' );
+			if( typeof this.settings.isNewPost === 'undefined' )
 				this.settings.isNewPost = $('#auto_draft').val() == 1 ? true : false;
 
 			if( this.settings.isNewPost )

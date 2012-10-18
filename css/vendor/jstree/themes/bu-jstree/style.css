@@ -146,18 +146,129 @@ html[xmlns] .jstree-bu li {
 	margin: 0 4px 0 8px;
 }
 
+.jstree-bu li[rel="section"] > a > .jstree-icon {
+	background-image: url("sprite.png");
+	background-repeat: no-repeat;
+	background-color: transparent;
+	background-position: 0 0;
+}
+
+.jstree-bu li[rel="page"] > a > .jstree-icon {
+	background-image: url("sprite.png");
+	background-repeat: no-repeat;
+	background-color: transparent;
+	background-position: -32px 0;
+}
+
+.jstree-bu li[rel="link"] > a > .jstree-icon {
+	background-image: url("sprite.png");
+	background-repeat: no-repeat;
+	background-color: transparent;
+	background-position: -48px 0;
+}
+
+.jstree-bu .post-statuses {
+	float: right;
+	margin-right: 8px;
+}
+
+@-moz-document url-prefix() {
+    .jstree-bu .post-statuses {
+        margin-top: -16px;
+    }
+}
+
+.jstree-bu .post-statuses .post_status {
+	margin-left: 1px;
+	padding: 3px 4px;
+	border-radius: 2px;
+	font-weight: 100;
+	font-size: 80%;
+}
+
+.jstree-bu .post-statuses .post_status.draft, .jstree-bu .post-statuses .post_status.restricted, .jstree-bu .post-statuses .post_status.excluded {
+	background: #464646;
+	color: #aaa;
+}
+
+.jstree-bu .post-statuses .post_status.new {
+	background: #a4cd43;
+	color: #deeedf;
+}
+
+.jstree-bu .edit-options {
+	visibility: hidden;
+	border: 0;
+	background: transparent;
+	color: #888;
+	font-weight: 100;
+	float: right;
+	padding: 9px 5px 11px 10px;
+	margin: -9px 0px 0 8px;
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+	cursor: pointer;
+}
+
+@-moz-document url-prefix() {
+    .jstree-bu .edit-options {
+	    margin-top: -25px;
+    }
+}
+
+.jstree-bu .jstree-hovered .edit-options {
+	visibility: visible;
+}
+
+.jstree-bu .jstree-clicked .edit-options {
+	visibility: visible;
+	color: #ccc;
+	border-left: 1px solid transparent;
+}
+
+.jstree-bu .jstree-clicked:hover:hover {
+	cursor: move;
+}
+
+.jstree-bu .edit-options.clicked {
+	visibility: visible;
+	background: white;
+	color: black;
+/* 	box-shadow: 1px 2px 4px #ccc; */
+	padding-top: 8px;
+	border-top: 1px solid #ccc;
+	border-left: 1px solid #646464;
+}
+
+.jstree-bu .edit-options .jstree-icon {
+	float: right;
+	background-position: -32px -16px !important;
+	margin: 0 0 0 4px;
+}
+
 #vakata-contextmenu {
-	margin-top: 13px;
+	margin-top: 11px;
 	margin-left: -105px;
+}
+
+@-moz-document url-prefix() {
+    #vakata-contextmenu {
+	    margin-left: -99px;
+	    margin-top: 10px;
+    }
 }
 
 #vakata-contextmenu.jstree-bu-context, 
 #vakata-contextmenu.jstree-bu-context li ul {
 	background: white;
 	border: none;
-	-moz-box-shadow: 1px 3px 5px #ccc;
+	border-right: 1px solid #666;
+	border-bottom: 1px solid #666;
+	/*
+-moz-box-shadow: 1px 3px 5px #ccc;
 	-webkit-box-shadow: 1px 3px 5px #ccc;
 	box-shadow: 1px 3px 5px #ccc;
+*/
 }
 
 #vakata-contextmenu.jstree-bu-context li {
@@ -189,94 +300,6 @@ html[xmlns] .jstree-bu li {
 
 #vakata-contextmenu.jstree-bu-context li ul {
 	margin-left: -4px;
-}
-
-.jstree-bu li[rel="section"] > a > .jstree-icon {
-	background-image: url("sprite.png");
-	background-repeat: no-repeat;
-	background-color: transparent;
-	background-position: 0 0;
-}
-
-.jstree-bu li[rel="page"] > a > .jstree-icon {
-	background-image: url("sprite.png");
-	background-repeat: no-repeat;
-	background-color: transparent;
-	background-position: -32px 0;
-}
-
-.jstree-bu li[rel="link"] > a > .jstree-icon {
-	background-image: url("sprite.png");
-	background-repeat: no-repeat;
-	background-color: transparent;
-	background-position: -48px 0;
-}
-
-.jstree-bu .post-statuses {
-	float: right;
-	margin-right: 8px;
-}
-
-.jstree-bu .post-statuses .post_status {
-	margin-left: 1px;
-	padding: 3px 4px;
-	border-radius: 2px;
-	font-weight: 100;
-	font-size: 80%;
-}
-
-.jstree-bu .post-statuses .post_status.draft, .jstree-bu .post-statuses .post_status.restricted, .jstree-bu .post-statuses .post_status.excluded {
-	background: #464646;
-	color: #aaa;
-}
-
-.jstree-bu .post-statuses .post_status.new {
-	background: #a4cd43;
-	color: #deeedf;
-}
-
-.jstree-bu .edit-options {
-	visibility: hidden;
-	border: 0;
-	background: transparent;
-	color: #888;
-	font-weight: 100;
-	float: right;
-	padding: 9px 5px 10px 10px;
-	margin: -9px -1px 0 8px;
-	border-top-right-radius: 3px;
-	border-bottom-right-radius: 3px;
-	cursor: pointer;
-}
-
-.jstree-bu .jstree-hovered .edit-options {
-	visibility: visible;
-}
-
-.jstree-bu .jstree-clicked .edit-options {
-	visibility: visible;
-	color: #ccc;
-	border-left: 1px solid transparent;
-}
-
-.jstree-bu .jstree-clicked:hover:hover {
-	cursor: move;
-}
-
-.jstree-bu .edit-options.clicked {
-	visibility: visible;
-	background: white;
-	color: black;
-	box-shadow: 1px 2px 4px #ccc;
-	padding-top: 8px;
-	border-top: 1px solid #ccc;
-	border-left: 1px solid #646464;
-}
-
-.jstree-bu .edit-options .jstree-icon {
-	float: right;
-	background-position: -32px -16px !important;
-	margin: 0 0 0 4px;
 }
 
 .jstree-bu a.jstree-loading .jstree-icon {

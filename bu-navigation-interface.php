@@ -64,9 +64,8 @@ class BU_Navman_Interface {
 		wp_enqueue_script( 'json2' );
 
 		// Main configuration file
-		// @todo jstree actually loads this as well ... need to determine best way to handle loading this stylesheet
-		wp_enqueue_style( 'bu-navigation', $styles_path . '/vendor/jstree/themes/bu-jstree/style.css', array(), '0.9' );
 		wp_enqueue_script( 'bu-navigation', $scripts_path . '/bu-navigation' . $suffix . '.js', array( 'jquery', 'bu-jquery-tree', 'bu-jquery-cookie', 'json2' ), '0.9', true );
+		wp_enqueue_style( 'bu-navigation', $styles_path . '/vendor/jstree/themes/bu-jstree/style.css', array(), '0.9' );
 
 		do_action( 'bu_navigation_interface_scripts' );
 
@@ -413,8 +412,8 @@ class BU_Navman_Interface {
 
 	public function convert_smart_chars( $input ) {
 
-		$search = array("&#8216;", "&#8217;", "&#8220;", "&#8221;", "&#8211;", "&#8212;");
-		$replace = array("'", "'", '"', '"', '-', '--');
+		$search = array("&#8216;", "&#8217;", "&#8220;", "&#8221;", "&#8211;", "&#8212;", "&#8230;");
+		$replace = array("'", "'", '"', '"', '-', '--', '...');
 		return str_replace($search, $replace, $input);
 
 	}

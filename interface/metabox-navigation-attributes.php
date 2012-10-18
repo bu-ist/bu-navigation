@@ -28,7 +28,7 @@
 		<p>Drag the current <?php _e($lc_label); ?> to the desired location.</p>
 	</div>
 
-	<div id="edit_page_tree" class="bu_nav_tree"></div>
+	<div id="edit_page_tree" class="jstree-bu"></div>
 </div>
 
 <h4><?php _e('Label & Visibility'); ?></h4>

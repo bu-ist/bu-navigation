@@ -2569,15 +2569,12 @@
 				else { o = ["after","inside","before"]; }
 				$.each(o, $.proxy(function (i, val) { 
 					if(this.data.dnd[val]) {
-						// TEMPORARY HACK -- put in place on 10/17 by mgburns
-						$.vakata.dnd.helper.attr("class","jstree-ok").children("ins").attr("class","jstree-ok");
+						$.vakata.dnd.helper.children("ins").attr("class","jstree-ok");
 						r = val;
 						return false;
 					}
 				}, this));
-				
-				// TEMPORARY HACK -- put in place on 10/17 by mgburns
-				if(r === false) { $.vakata.dnd.helper.attr("class","jstree-invalid").children("ins").attr("class","jstree-invalid"); }
+				if(r === false) { $.vakata.dnd.helper.children("ins").attr("class","jstree-invalid"); }
 				
 				pos = rtl ? (this.data.dnd.off.right - 18) : (this.data.dnd.off.left + 10);
 				switch(r) {
@@ -2599,9 +2596,6 @@
 						break;
 				}
 				last_pos = r;
-
-				// added by mgburns, 10/17/2012
-				// this.__callback({"pos": last_pos});
 				return r;
 			},
 			dnd_open : function () {

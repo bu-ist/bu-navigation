@@ -17,7 +17,7 @@
 				<?php endif; ?>
 			</div>
 			<div class="navman-body">
-					<div id="nav-tree-container"></div>
+					<div id="nav-tree-container" class="jstree-bu"></div>
 			</div>
 			<div class="navman-actions">
 				<div class="postbox metabox-holder">

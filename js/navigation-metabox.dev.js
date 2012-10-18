@@ -58,8 +58,8 @@ if((typeof bu === 'undefined' ) ||
 			this.$el = $(this.el);
 
 			// Load navigation tree
-			// @todo we should consider only loading nav tree on "Move page" button click
-			this.loadNavTree();
+			// @todo decide whether to do this on page load or when move page is requested
+			// this.loadNavTree();
 
 			// Bind event handlers
 			this.attachHandlers();
@@ -87,8 +87,8 @@ if((typeof bu === 'undefined' ) ||
 
 		attachHandlers: function() {
 
-			// should we load tree only when "Move page" button is clicked?
-			// this.$el.delegate(this.ui.moveBtn, 'click', $.proxy( this.loadNavTree, this ) );
+			// Load page tree when "Move page" button is clicked the first time
+			this.$el.delegate(this.ui.moveBtn, 'click', $.proxy( this.loadNavTree, this ) );
 
 			// Metabox actions
 			this.$el.delegate(this.inputs.label, 'blur', $.proxy(this.onLabelChange,this));

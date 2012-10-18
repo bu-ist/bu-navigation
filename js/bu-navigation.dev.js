@@ -71,6 +71,160 @@ var bu = bu || {};
 })(jQuery);
 
 // =============================================//
+// BU jsTree plugin
+//
+// This is really just a slightly less hackish way to cope with shortcomings in the
+// dnd plugin then modifying jstree source directly.
+//
+// These shortcomings were discovered when revamping the UI in 10/2012.
+//
+// The biggest problems:
+//	- does not provide callbacks when switching "drop" target states (before, inside, after)
+//	- does not keep reference to source or target nodes during dragging actions
+//	- helper element ONLY gets the ok/invalid move states for the ins icon:
+//		<div id="vakata-dragged"> <ins class="jstree-ok"></ins> </div>
+//		-- this makes it impossible to change the color of the entire item being dragged
+//		-- when it switched between ok and invalid
+//
+// Other bugs that should get attention
+//	- it's picky about dropping between nodes when the cursor is released directly on the marker line
+//	- scrolling while dragging items takes an eternity
+//
+// =============================================//
+(function($){
+
+	$.jstree.plugin( "bu", {
+		defaults : {
+			drop_target: null,
+			placeholder_class: 'bu-dnd-placeholder',
+			target_class: 'bu-dnd-target'
+		},
+		__init : function () {
+
+			if(!this.data.dnd) { throw "BU jstree plugin is dependent on the dnd plugin."; }
+
+			// Cached drop target
+			this.data.bu.drop_target = null;
+
+			// Aliases
+			var s = this._get_settings().bu;
+
+			// Drag and drop event bindings
+			this.get_container()
+
+				// Call custom dnd state change method
+				.bind('mouseenter.jstree', $.proxy(function(event) {
+					if($.vakata.dnd.is_drag && $.vakata.dnd.user_data.jstree) {
+						this._bu_dnd_update_state();
+					}
+				}, this ))
+
+				// Call custom dnd state change method
+				.bind('mouseleave.jstree', $.proxy(function(event) {
+					if($.vakata.dnd.is_drag && $.vakata.dnd.user_data.jstree) {
+						this._bu_dnd_update_state();
+					}
+				}, this ))
+
+				// Clear cached drop target when mouse leaves node (covers certain cases that are missed by dnd_leave)
+				.delegate('a', 'mouseleave.jstree', $.proxy(function(event) {
+					if($.vakata.dnd.is_drag && $.vakata.dnd.user_data.jstree) {
+						if( this.data.bu.drop_target ) {
+							this.data.bu.drop_target.removeClass(s.target_class);
+							this.data.bu.drop_target = null;
+						}
+					}
+				}, this ));
+
+			// Add and remove placeholder classes to element being dragged on start/stop dnd
+			$(document)
+				.bind('drag_start.vakata', $.proxy(function(event, data) {
+					var $drag_src = data.data.obj;
+					$drag_src.addClass(s.placeholder_class);
+					$.vakata.dnd.helper.width( $drag_src.width() );
+				}, this ))
+				.bind('drag_stop.vakata', $.proxy(function(event, data) {
+					var $drag_src = data.data.obj;
+					$drag_src.removeClass(s.placeholder_class);
+				}, this ));
+
+			// Prevent jstree from adding ANY stylesheets
+			// @todo investigate if this is the appropriate solution
+			// $.vakata.css.add_sheet = function() { return false; };
+				
+		},
+		_fn : {
+
+			// Overwriting to cache drop target
+			dnd_enter : function (obj) {
+				this.__call_old();
+
+				var $node = this._get_node(obj);
+				if( $node ) {
+					this.data.bu.drop_target = $node.children('a');
+				}
+
+				this.__callback({'target': $node});
+			},
+
+			// Overwriting to add toggle classes for drop target when move is inside, and
+			// promote ok/invalid move classes to root helper element
+			dnd_show : function () {
+				var pos = this.__call_old(),
+					s = this._get_settings().bu;
+
+				if( this.data.bu.drop_target ) {
+					if( 'inside' === pos ) {
+						this.data.bu.drop_target.addClass(s.target_class);
+					} else {
+						this.data.bu.drop_target.removeClass(s.target_class);
+					}
+				}
+
+				this._bu_dnd_update_state();
+				this.__callback({'position':pos});
+				return pos;
+			},
+
+			// Overwriting to promote ok/invalid move classes to root helper element
+			dnd_leave : function(e) {
+				this.__call_old();
+
+				// i would remove classes and nullify bu.drop_target here, but this method does not cover
+				// every case where a drag leaves a potential drop target (such as when it moves over marker line)
+
+				this._bu_dnd_update_state();
+				this.__callback({'leaving': $(e.target.parentNode) });
+			},
+
+			// Overwiting to remove classes and nullify cached drop target on drag complete
+			dnd_finish : function(e) {
+				this.__call_old();
+
+				var s = this._get_settings().bu;
+
+				if( this.data.bu.drop_target ) {
+					this.data.bu.drop_target.removeClass(s.target_class);
+					this.data.bu.drop_target = null;
+				}
+
+				this.__callback();
+			},
+
+			// Run whenever the dnd state may be changed in the $.vakata.helper class
+			_bu_dnd_update_state : function() {
+				if( $.vakata.dnd.helper ) {
+					// Promotes classes on #vakata-dragged > ins element to #vakata-dragged
+					$.vakata.dnd.helper.removeClass('jstree-ok jstree-invalid');
+					$.vakata.dnd.helper.addClass($.vakata.dnd.helper.children('ins').attr('class'));
+				}
+			}
+		}
+	});
+
+})(jQuery);
+
+// =============================================//
 // BU Navigation plugin settings & tree objects //
 // =============================================//
 (function($){
@@ -143,7 +297,7 @@ var bu = bu || {};
 
 			// jsTree Settings object
 			d.treeConfig = {
-				"plugins" : ["themes", "types", "json_data", "ui", "dnd", "crrm"],
+				"plugins" : ["themes", "types", "json_data", "ui", "dnd", "crrm", "bu"],
 				"core" : {
 					"animation" : 0,
 					"html_titles": false
@@ -556,8 +710,6 @@ var bu = bu || {};
 
 			// Tree instance is loaded (before initial opens/selections are made)
 			$tree.bind('loaded.jstree', function( event, data ) {
-				// @todo remove once best approach to loading theme stylesheet is in place
-				$tree.jstree('data').data.core.li_height = 36;	// hackety hack ... investigate cause of issue
 				that.broadcast( 'postsLoaded' );
 			});
 
@@ -646,29 +798,6 @@ var bu = bu || {};
 
 				that.updatePost(post);
 				that.broadcast( 'postMoved', [post, parent_id, menu_order]);
-			});
-
-			// Drag & Drop Mods
-
-			$(document).bind('drag_start.vakata', function(event, data) {
-				var $drag_src = data.data.obj;
-				$drag_src.addClass('bu-dnd-placeholder');
-			});
-
-			$(document).bind('drag.vakata', function(event, data) {
-				var $drag_src = data.data.obj;
-				$drag = $.vakata.dnd.helper;
-
-				if( $drag.children('ins').hasClass('jstree-ok') ) {
-					$drag_src.removeClass('jstree-invalid').addClass('jstree-ok');
-				} else {
-					$drag_src.removeClass('jstree-ok').addClass('jstree-invalid');
-				}
-			});
-
-			$(document).bind('drag_stop.vakata', function(event, data) {
-				var $drag_src = data.data.obj;
-				$drag_src.removeClass('bu-dnd-placeholder jstree-invalid jstree-ok');
 			});
 
 			return that;

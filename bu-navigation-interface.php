@@ -285,8 +285,7 @@ class BU_Navman_Interface {
 				'post_status' => $page->post_status,
 				'post_type' => $page->post_type,
 				'excluded' => isset($page->excluded) ? $page->excluded : null,
-				'restricted' => isset($page->restricted) ? $page->restricted : null,
-				'denied' => isset($page->perm) ? $page->perm : null
+				'restricted' => isset($page->restricted) ? $page->restricted : null
 				)
 			);
 

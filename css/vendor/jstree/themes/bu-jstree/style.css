@@ -106,13 +106,7 @@ html[xmlns] .jstree-bu li {
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7f7f7f', endColorstr='#6e6e6e',GradientType=0 );
 }
 
-.jstree-bu .jstree-denied {
-	width: 768px;
-	display: block;
-	float: left;
-	padding: 8px 8px 8px 24px;
-	border: 1px solid #f2d6d6;
-	border-radius: 4px;
+.jstree-bu .denied > a {
 	background: #f7e3e3;
 	color: #af5d5d;
 	cursor: not-allowed;
@@ -122,7 +116,7 @@ html[xmlns] .jstree-bu li {
 	color: #ccc;
 }
 
-.jstree-bu .jstree-denied .count {
+.jstree-bu .denied .count {
 	color: #ccb3b3;
 }
 
@@ -165,6 +159,13 @@ html[xmlns] .jstree-bu li {
 	background-repeat: no-repeat;
 	background-color: transparent;
 	background-position: -48px 0;
+}
+
+.jstree-bu li[rel="denied"] > a > .jstree-icon {
+	background-image: url("sprite.png");
+	background-repeat: no-repeat;
+	background-color: transparent;
+	background-position: -16px 0;
 }
 
 .jstree-bu .post-statuses {

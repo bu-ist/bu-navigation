@@ -283,6 +283,8 @@ var bu = bu || {};
 			if( $tree.length === 0 )
 				throw new TypeError('Invalid DOM selector, can\'t create BU Navigation Tree');
 
+			// Allow clients to stop certain actions and UI interactions via filters
+			
 			var checkMove = function( m ) {
 				var attempted_parent_id = m.np.attr('id');
 				var allowed = true;
@@ -295,6 +297,18 @@ var bu = bu || {};
 				}
 
 				return bu.hooks.applyFilters( 'moveAllowed', allowed, m );
+			};
+
+			var canSelectNode = function( node ) {
+				return bu.hooks.applyFilters( 'canSelectNode', node );
+			};
+
+			var canHoverNode = function( node ) {
+				return bu.hooks.applyFilters( 'canHoverNode', node );
+			};
+
+			var canDragNode = function( node ) {
+				return bu.hooks.applyFilters( 'canDragNode', node );
 			};
 
 			// jsTree Settings object
@@ -313,22 +327,39 @@ var bu = bu || {};
 						"default" : {
 							"max_children"		: -1,
 							"max_depth"			: -1,
-							"valid_children"	: "all"
+							"valid_children"	: "all",
+							"select_node"		: canSelectNode,
+							"hover_node"		: canHoverNode,
+							"start_drag"		: canDragNode
 						},
 						"page": {
 							"max_children"		: -1,
 							"max_depth"			: -1,
-							"valid_children"	: "all"
+							"valid_children"	: "all",
+							"select_node"		: canSelectNode,
+							"hover_node"		: canHoverNode,
+							"start_drag"		: canDragNode
 						},
 						"section": {
 							"max_children"		: -1,
 							"max_depth"			: -1,
-							"valid_children"	: "all"
+							"valid_children"	: "all",
+							"select_node"		: canSelectNode,
+							"hover_node"		: canHoverNode,
+							"start_drag"		: canDragNode
 						},
 						"link": {
 							"max_children"		: 0,
 							"max_depth"			: 0,
-							"valid_children"	: "none"
+							"valid_children"	: "none",
+							"select_node"		: canSelectNode,
+							"hover_node"		: canHoverNode,
+							"start_drag"		: canDragNode
+						},
+						"denied": {
+							"select_node"	: false,
+							"hover_node"	: false,
+							"start_drag"	: false
 						}
 					}
 				},
@@ -362,6 +393,9 @@ var bu = bu || {};
 			if( s.initialTreeData ) {
 				d.treeConfig['json_data']['data'] = s.initialTreeData;
 			}
+
+			// For meddlers
+			d.treeConfig = bu.hooks.applyFilters( 'buNavTreeSettings', d.treeConfig, $tree );
 
 			// ======= Public API ======= //
 
@@ -972,24 +1006,18 @@ var bu = bu || {};
 				};
 			}
 
-			// Extend config object to restrict selection, hover and dragging to current post
-			var assertCurrentPost = function( node ) {
-				var post = my.nodeToPost(node);
-				return post.ID == currentPost;
-			};
-
-			var typeChecks = {
-				"select_node"		: assertCurrentPost,
-				"hover_node"		: assertCurrentPost,
-				"start_drag"		: assertCurrentPost
-			};
-
-			$.each( d.treeConfig['types']['types'], function( type, typeConfig ){
-				extraTreeConfig['types']['types'][type] = $.extend(typeConfig,typeChecks);
-			});
-
 			// Merge base tree config with extras
 			$.extend( true, d.treeConfig, extraTreeConfig );
+
+			// Assert current post for select, hover and drag operations
+			var assertCurrentPost = function( node ) {
+				var postId = my.stripNodePrefix(node.attr('id'));
+				return postId == currentPost;
+			};
+			
+			bu.hooks.addFilter( 'canSelectNode', assertCurrentPost );
+			bu.hooks.addFilter( 'canHoverNode', assertCurrentPost );
+			bu.hooks.addFilter( 'canDragNode', assertCurrentPost );
 
 			// Public
 			that.getCurrentPost = function() {

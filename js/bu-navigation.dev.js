@@ -828,6 +828,12 @@ var bu = bu || {};
 					parent_id = parseInt(my.stripNodePrefix($parent.attr('id') ),10);
 				}
 
+				// Maybe update rel attribute
+				if( $oldparent.attr('rel') === 'section' && $oldparent.children('ul').length === 0 )
+					$oldparent.attr('rel', 'page' );
+				if( $parent.attr('rel') === 'page' )
+					$parent.attr('rel', 'section' );
+
 				// Recalculate counts
 				if( s.showCounts ) {
 					$newsection = $parent.parentsUntil( '#' + $tree.attr('id'),'li');

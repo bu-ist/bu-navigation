@@ -187,7 +187,7 @@ html[xmlns] .jstree-bu li {
 	font-size: 80%;
 }
 
-.jstree-bu .post-statuses .post_status.draft, .jstree-bu .post-statuses .post_status.restricted, .jstree-bu .post-statuses .post_status.excluded {
+.jstree-bu .post-statuses .post_status.draft, .jstree-bu .post-statuses .post_status.restricted, .jstree-bu .post-statuses .post_status.excluded, .jstree-bu .post-statuses .post_status.pending {
 	background: #464646;
 	color: #aaa;
 }

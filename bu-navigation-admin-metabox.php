@@ -53,6 +53,7 @@ class BU_Navigation_Admin_Metabox {
 			'ancestors' => $ancestors,
 			'isNewPost' => $is_new,
 			'format' => 'nav-metabox',
+			'lazyLoad' => false,
 			'postStatuses' => array( 'draft', 'pending', 'publish' ),
 			'nodePrefix' => 'na'
 			);

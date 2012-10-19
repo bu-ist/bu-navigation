@@ -284,7 +284,6 @@ var bu = bu || {};
 				throw new TypeError('Invalid DOM selector, can\'t create BU Navigation Tree');
 
 			// Allow clients to stop certain actions and UI interactions via filters
-			
 			var checkMove = function( m ) {
 				var attempted_parent_id = m.np.attr('id');
 				var allowed = true;
@@ -820,16 +819,18 @@ var bu = bu || {};
 				}
 
 				// Recalculate counts
-				$newsection = $parent.parentsUntil( '#' + $tree.attr('id'),'li');
-				$oldsection = $oldparent.parentsUntil( '#' + $tree.attr('id'),'li');
-				$newsection = $newsection.length ? $newsection.last() : $parent;
-				$oldsection = $oldsection.length ? $oldsection.last() : $oldparent;
+				if( s.showCounts ) {
+					$newsection = $parent.parentsUntil( '#' + $tree.attr('id'),'li');
+					$oldsection = $oldparent.parentsUntil( '#' + $tree.attr('id'),'li');
+					$newsection = $newsection.length ? $newsection.last() : $parent;
+					$oldsection = $oldsection.length ? $oldsection.last() : $oldparent;
 
-				if( $oldsection.is( '#' + $newsection.attr('id') ) ) {
-					calculateCounts($newsection);
-				} else {
-					calculateCounts($oldsection);
-					calculateCounts($newsection);
+					if( $oldsection.is( '#' + $newsection.attr('id') ) ) {
+						calculateCounts($newsection);
+					} else {
+						calculateCounts($oldsection);
+						calculateCounts($newsection);
+					}
 				}
 
 				// Extra post parameters that may be helpful to consumers
@@ -975,11 +976,7 @@ var bu = bu || {};
 			var currentNodeId = c.nodePrefix + currentPost;
 
 			// Extra configuration
-			var extraTreeConfig = {
-				"types": {
-					"types": {}
-				}
-			};
+			var extraTreeConfig = {};
 
 			// Build initial open and selection arrays from current post / ancestors
 			var toSelect = [],

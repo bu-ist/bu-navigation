@@ -46,7 +46,9 @@ class BU_Navigation_Admin_Navman {
 		$settings = array(
 			'format' => 'navman',
 			'postStatuses' => array( 'draft', 'pending', 'publish' ),
-			'nodePrefix' => 'nm'
+			'nodePrefix' => 'nm',
+			'lazyLoad' => true,
+			'showCounts' => true
 			);
 
 		self::$interface = new BU_Navman_Interface( $post_types, $settings );

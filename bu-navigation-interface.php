@@ -284,8 +284,12 @@ class BU_Navman_Interface {
 			'metadata' => array(
 				'post_status' => $page->post_status,
 				'post_type' => $page->post_type,
-				'excluded' => isset($page->excluded) ? $page->excluded : null,
-				'restricted' => isset($page->restricted) ? $page->restricted : null
+				'post_parent' => $page->post_parent,
+				'menu_order' => $page->menu_order,
+				'post_meta' => array(
+					'excluded' => isset($page->excluded) ? $page->excluded : false,
+					'restricted' => isset($page->restricted) ? $page->restricted : false
+					)
 				)
 			);
 

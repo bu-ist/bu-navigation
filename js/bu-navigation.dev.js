@@ -239,7 +239,7 @@ var bu = bu || {};
 	Nav.tree = function( type, config ) {
 		if( typeof type === 'undefined')
 			type = 'base';
-
+		
 		return Nav.trees[type](config).initialize();
 	};
 
@@ -285,11 +285,11 @@ var bu = bu || {};
 
 			// Allow clients to stop certain actions and UI interactions via filters
 			var checkMove = function( m ) {
-				var attempted_parent_id = m.np.attr('id');
+				var post = my.nodeToPost( m.o );
 				var allowed = true;
-
+				
 				// Don't allow top level posts if global option prohibits it
-				if(m.cr === -1 && ! Nav.settings.allowTop ) {
+				if(m.cr === -1 && post.meta['excluded'] === false && ! Nav.settings.allowTop ) {
 					// console.log('Move denied, top level posts cannot be created!');
 					// @todo pop up a friendlier notice explaining this
 					allowed = false;
@@ -413,6 +413,11 @@ var bu = bu || {};
 				return my.nodeToPost( node );
 			};
 
+			that.getPost = function( id ) {
+				var $node = my.getNodeForPost( id );
+				return my.nodeToPost( $node );
+			};
+
 			that.getPosts = function() {
 				return $tree.jstree( 'get_json', -1 );
 			};
@@ -480,12 +485,15 @@ var bu = bu || {};
 					$node.data('post_title', updated.title);
 					$node.data('post_status', updated.status);
 					$node.data('post_type', updated.type);
-					$node.data('post_parent', updated.parent);
-					$node.data('menu_order', updated.menu_order);
+					$node.data('post_parent', parseInt( updated.parent ) );
+					$node.data('menu_order', parseInt( updated.menu_order) );
 					$node.data('post_meta', updated.meta);
 
 				}
 
+				// Refresh post status badges
+				appendPostStatus( $node );
+				
 				that.broadcast('updatePost', [ updated ]);
 
 				return updated;
@@ -562,8 +570,8 @@ var bu = bu || {};
 					content: node.data('post_content'),
 					status: node.data('post_status'),
 					type: node.data('post_type'),
-					parent: node.data('post_parent'),
-					menu_order: node.data('menu_order'),
+					parent: parseInt( node.data('post_parent') ),
+					menu_order: parseInt( node.data('menu_order') ),
 					meta: node.data('post_meta') || {}
 				};
 				return bu.hooks.applyFilters('nodeToPost',post);
@@ -573,12 +581,6 @@ var bu = bu || {};
 			my.postToNode = function( post, args ) {
 				if( typeof post === 'undefined' )
 					throw new TypeError('Invalid post!');
-
-				var default_args = {
-					'hasChildren': false,
-					'parentId': 0
-				};
-				var a = $.extend({}, default_args, args || {});
 
 				var default_post = {
 					ID: my.getNextPostID(),
@@ -611,6 +613,8 @@ var bu = bu || {};
 						"post_status": p.status,
 						"post_type": p.type,
 						"post_content": p.content,
+						"post_parent": p.parent,
+						"menu_order": p.menu_order,
 						'post_meta': p.meta
 					}
 				};
@@ -717,24 +721,25 @@ var bu = bu || {};
 
 			var appendPostStatus = function( $node ) {
 				var $a = $node.children('a');
-				if( $a.children('post-statuses').length === 0 ) {
+				if( $a.children('.post-statuses').length === 0 ) {
 					$a.append(' <span class="post-statuses">');
 				}
+				
+				var post = my.nodeToPost( $node );
+				
+				// Default metadata badges
+				var excluded = post.meta['excluded'] || false;
+				var restricted = post.meta['restricted'] || false;
 
-				// Setup default statuses
-				var post_status = $node.data('post_status') || 'publish';
-				var excluded = $node.data('excluded') || null;
-				var restricted = $node.data('restricted') || null;
-
-				var $statuses = $a.children('.post-statuses');
+				var $statuses = $a.children('.post-statuses').empty();
 				var statuses = [];
 
-				if(post_status != 'publish')
-					statuses.push({ "class": post_status, "label": post_status });
-				if(restricted)
-					statuses.push({ "class": 'restricted', "label": 'restricted' });
+				if(post.status != 'publish')
+					statuses.push({ "class": post.status, "label": post.status });
 				if(excluded)
 					statuses.push({ "class": 'excluded', "label": 'not in nav' });
+				if(restricted)
+					statuses.push({ "class": 'restricted', "label": 'restricted' });
 
 				// Allow customization
 				statuses = bu.hooks.applyFilters( 'navPostStatuses', statuses );
@@ -750,6 +755,11 @@ var bu = bu || {};
 
 			// Tree instance is loaded (before initial opens/selections are made)
 			$tree.bind('loaded.jstree', function( event, data ) {
+				
+				// jstree breaks spectacularly if the stylesheet hasn't set an li height
+				// when the tree is created -- this is what they call a hack...
+				$tree.jstree('data').data.core.li_height = 37;
+				
 				that.broadcast( 'postsLoaded' );
 			});
 

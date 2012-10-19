@@ -58,8 +58,7 @@ if((typeof bu === 'undefined' ) ||
 			this.$el = $(this.el);
 
 			// Load navigation tree
-			// @todo decide whether to do this on page load or when move page is requested
-			// this.loadNavTree();
+			this.loadNavTree();
 
 			// Bind event handlers
 			this.attachHandlers();
@@ -88,7 +87,8 @@ if((typeof bu === 'undefined' ) ||
 		attachHandlers: function() {
 
 			// Load page tree when "Move page" button is clicked the first time
-			this.$el.delegate(this.ui.moveBtn, 'click', $.proxy( this.loadNavTree, this ) );
+			// REMOVED!  we need the navtree loaded in order to handle updates to label/visibility
+			// this.$el.delegate(this.ui.moveBtn, 'click', $.proxy( this.loadNavTree, this ) );
 
 			// Metabox actions
 			this.$el.delegate(this.inputs.label, 'blur', $.proxy(this.onLabelChange,this));
@@ -102,7 +102,7 @@ if((typeof bu === 'undefined' ) ||
 			var label = $(this.inputs.label).attr('value');
 			var post = { ID: this.settings.currentPost, title: label };
 
-			// Label update should be reflected in tree view
+			// Label updates should be reflected in tree view
 			Navtree.updatePost( post );
 			Navtree.save();
 
@@ -111,8 +111,19 @@ if((typeof bu === 'undefined' ) ||
 		},
 
 		onToggleVisibility: function(e) {
-			//@todo implement
-			//@todo check top-level settings, prevent toggle if needed
+			var visible = $(e.target).attr('checked');
+			var post = Navtree.getPost( this.settings.currentPost ); 
+			
+			if ( visible && ! this.isAllowedInNavigationLists( post ) ) {
+				e.preventDefault();
+				this.notify("Displaying top-level pages in the navigation is disabled. To change this behavior, go to Site Design > Primary Navigation and enable \"Allow Top-Level Pages.\"");
+			}
+			
+			post.meta['excluded'] = ! visible;
+			
+			// Nav visibility updates should be reflected in tree view
+			Navtree.updatePost( post );
+			Navtree.save();
 		},
 
 		// Methods
@@ -138,6 +149,19 @@ if((typeof bu === 'undefined' ) ||
 			} else {
 				$(this.ui.breadcrumbs).html('<p>Top level page</p>');
 			}
+		},
+
+		isAllowedInNavigationLists: function( post ) {
+
+			if( post.parent === 0  ) {
+				return this.settings.allowTop;
+			}
+			
+			return true;
+		},
+
+		notify: function( msg ) {
+			alert(msg);
 		}
 
 	};
@@ -184,7 +208,7 @@ if((typeof bu === 'undefined' ) ||
 		var initialize = function(config) {
 
 			// Create post navigation tree, pass in initial posts from server
-			Navtree = bu.plugins.navigation.tree('edit_post', { el: c.treeContainer});
+			Navtree = bu.plugins.navigation.tree('edit_post', { el: c.treeContainer });
 
 			// Subscribe to relevant navtree signals
 			Navtree.listenFor('postsSelected', that.onPostsSelected);

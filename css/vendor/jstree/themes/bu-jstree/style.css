@@ -93,6 +93,15 @@ html[xmlns] .jstree-bu li {
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eeeeee',GradientType=0 );
 }
 
+.jstree-bu li a .title {
+	float: left;
+	padding-right: 3px;
+	max-width:45%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
 .jstree-bu .jstree-clicked {
 	color: white;
 	border: 1px solid #666;

@@ -211,6 +211,179 @@ var bu = bu || {};
 				this.__callback();
 			},
 
+			// Basic operations: create
+			create_node	: function (obj, position, js, callback, is_loaded) {
+				obj = this._get_node(obj);
+				position = typeof position === "undefined" ? "last" : position;
+				var d = $("<li />"),
+					s = this._get_settings().core,
+					tmp;
+
+				if(obj !== -1 && !obj.length) { return false; }
+				if(!is_loaded && !this._is_loaded(obj)) { this.load_node(obj, function () { this.create_node(obj, position, js, callback, true); }); return false; }
+				this.__rollback();
+
+				if(typeof js === "string") { js = { "data" : js }; }
+				if(!js) { js = {}; }
+				if(js.attr) { d.attr(js.attr); }
+				if(js.metadata) { d.data(js.metadata); }
+				if(js.state) { d.addClass("jstree-" + js.state); }
+				if(!js.data) { js.data = this._get_string("new_node"); }
+				if(!$.isArray(js.data)) { tmp = js.data; js.data = []; js.data.push(tmp); }
+				$.each(js.data, function (i, m) {
+					tmp = $("<a />");
+					if($.isFunction(m)) { m = m.call(this, js); }
+					if(typeof m == "string") { tmp.attr('href','#').wrapInner($('<span class="title">')[ s.html_titles ? "html" : "text" ](m)); }
+					else {
+						if(!m.attr) { m.attr = {}; }
+						if(!m.attr.href) { m.attr.href = '#'; }
+						tmp.attr(m.attr).wrapInner($('<span class="title">')[ s.html_titles ? "html" : "text" ](m.title));
+						if(m.language) { tmp.addClass(m.language); }
+					}
+					tmp.prepend("<ins class='jstree-icon'>&#160;</ins>");
+					if(m.icon) { 
+						if(m.icon.indexOf("/") === -1) { tmp.children("ins").addClass(m.icon); }
+						else { tmp.children("ins").css("background","url('" + m.icon + "') center center no-repeat"); }
+					}
+					d.append(tmp);
+				});
+				d.prepend("<ins class='jstree-icon'>&#160;</ins>");
+				if(obj === -1) {
+					obj = this.get_container();
+					if(position === "before") { position = "first"; }
+					if(position === "after") { position = "last"; }
+				}
+				switch(position) {
+					case "before": obj.before(d); tmp = this._get_parent(obj); break;
+					case "after" : obj.after(d);  tmp = this._get_parent(obj); break;
+					case "inside":
+					case "first" :
+						if(!obj.children("ul").length) { obj.append("<ul />"); }
+						obj.children("ul").prepend(d);
+						tmp = obj;
+						break;
+					case "last":
+						if(!obj.children("ul").length) { obj.append("<ul />"); }
+						obj.children("ul").append(d);
+						tmp = obj;
+						break;
+					default:
+						if(!obj.children("ul").length) { obj.append("<ul />"); }
+						if(!position) { position = 0; }
+						tmp = obj.children("ul").children("li").eq(position);
+						if(tmp.length) { tmp.before(d); }
+						else { obj.children("ul").append(d); }
+						tmp = obj;
+						break;
+				}
+				if(tmp === -1 || tmp.get(0) === this.get_container().get(0)) { tmp = -1; }
+				this.clean_node(tmp);
+				this.__callback({ "obj" : d, "parent" : tmp });
+				if(callback) { callback.call(this, d); }
+				return d;
+			},
+			
+			get_text : function( obj ) {
+				obj = this._get_node(obj);
+				if(!obj.length) { return false; }
+				obj = obj.find("> a .title");
+				if(this._get_settings().core.html_titles) {
+					return obj.html();
+				}
+				else {
+					obj = obj.contents().filter(function() { return this.nodeType == 3; })[0];
+					return obj.nodeValue;
+				}
+			},
+
+			set_text : function( obj, val ) {
+				obj = this._get_node(obj);
+				if(!obj.length) { return false; }
+				obj = obj.find('> a .title');
+				if(this._get_settings().core.html_titles) {
+					obj.html(val);
+					this.__callback({ "obj" : obj, "name" : val });
+					return true;
+				}
+				else {
+					obj = obj.contents().filter(function() { return this.nodeType == 3; })[0];
+					this.__callback({ "obj" : obj, "name" : val });
+					return (obj.nodeValue = val);
+				}
+
+			},
+
+			_parse_json : function( js, obj, is_callback ) {
+				var d = false,
+					p = this._get_settings(),
+					s = p.json_data,
+					t = p.core.html_titles,
+					tmp, i, j, ul1, ul2;
+
+				if(!js) { return d; }
+				if(s.progressive_unload && obj && obj !== -1) {
+					obj.data("jstree-children", d);
+				}
+				if($.isArray(js)) {
+					d = $();
+					if(!js.length) { return false; }
+					for(i = 0, j = js.length; i < j; i++) {
+						tmp = this._parse_json(js[i], obj, true);
+						if(tmp.length) { d = d.add(tmp); }
+					}
+				}
+				else {
+					if(typeof js == "string") { js = { data : js }; }
+					if(!js.data && js.data !== "") { return d; }
+					d = $("<li />");
+					if(js.attr) { d.attr(js.attr); }
+					if(js.metadata) { d.data(js.metadata); }
+					if(js.state) { d.addClass("jstree-" + js.state); }
+					if(!$.isArray(js.data)) { tmp = js.data; js.data = []; js.data.push(tmp); }
+					$.each(js.data, function (i, m) {
+						tmp = $("<a />");
+						if($.isFunction(m)) { m = m.call(this, js); }
+						if(typeof m == "string") { tmp.attr('href','#').wrapInner($('<span class="title"></span>')[ t ? "html" : "text" ](m)); }
+						else {
+							if(!m.attr) { m.attr = {}; }
+							if(!m.attr.href) { m.attr.href = '#'; }
+							tmp.attr(m.attr).wrapInner($('<span class="title"></span>')[ t ? "html" : "text" ](m.title));
+							if(m.language) { tmp.addClass(m.language); }
+						}
+						tmp.prepend("<ins class='jstree-icon'>&#160;</ins>");
+						if(!m.icon && js.icon) { m.icon = js.icon; }
+						if(m.icon) {
+							if(m.icon.indexOf("/") === -1) { tmp.children("ins").addClass(m.icon); }
+							else { tmp.children("ins").css("background","url('" + m.icon + "') center center no-repeat"); }
+						}
+						d.append(tmp);
+					});
+					d.prepend("<ins class='jstree-icon'>&#160;</ins>");
+					if(js.children) {
+						if(s.progressive_render && js.state !== "open") {
+							d.addClass("jstree-closed").data("jstree-children", js.children);
+						}
+						else {
+							if(s.progressive_unload) { d.data("jstree-children", js.children); }
+							if($.isArray(js.children) && js.children.length) {
+								tmp = this._parse_json(js.children, obj, true);
+								if(tmp.length) {
+									ul2 = $("<ul />");
+									ul2.append(tmp);
+									d.append(ul2);
+								}
+							}
+						}
+					}
+				}
+				if(!is_callback) {
+					ul1 = $("<ul />");
+					ul1.append(d);
+					d = ul1;
+				}
+				return d;
+			},
+
 			// Run whenever the dnd state may be changed in the $.vakata.helper class
 			_bu_dnd_update_state : function() {
 				if( $.vakata.dnd.helper ) {
@@ -234,7 +407,7 @@ var bu = bu || {};
 
 	// Global plugin settings
 	Nav.settings = buNavSettings || {};
-	
+
 	// Tree constructor
 	Nav.tree = function( type, config ) {
 		if( typeof type === 'undefined')
@@ -315,7 +488,7 @@ var bu = bu || {};
 				"plugins" : ["themes", "types", "json_data", "ui", "dnd", "crrm", "bu"],
 				"core" : {
 					"animation" : 0,
-					"html_titles": false
+					"html_titles": true
 				},
 				"themes" : {
 					"theme": "bu",
@@ -691,7 +864,7 @@ var bu = bu || {};
 					if($count.length === 0) {
 
 						var $options = $a.children('.edit-options');
-						$count = $(' <span class="count">');
+						$count = $('<span class="count"></span>');
 
 						// Count should appear before statuses
 						if( $options.length ) {
@@ -722,7 +895,7 @@ var bu = bu || {};
 			var appendPostStatus = function( $node ) {
 				var $a = $node.children('a');
 				if( $a.children('.post-statuses').length === 0 ) {
-					$a.append(' <span class="post-statuses">');
+					$a.append('<span class="post-statuses"></span>');
 				}
 				
 				var post = my.nodeToPost( $node );
@@ -819,7 +992,8 @@ var bu = bu || {};
 				var $parent = data.rslt.np,
 					$oldparent = data.rslt.op,
 					menu_order = data.rslt.o.index() + 1,
-					parent_id;
+					parent_id,
+					$newsection, $oldsection;
 
 				// Set new parent ID
 				if( $tree.attr('id') == $parent.attr('id')) {

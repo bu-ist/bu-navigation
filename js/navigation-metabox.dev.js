@@ -86,9 +86,8 @@ if((typeof bu === 'undefined' ) ||
 
 		attachHandlers: function() {
 
-			// Load page tree when "Move page" button is clicked the first time
-			// REMOVED!  we need the navtree loaded in order to handle updates to label/visibility
-			// this.$el.delegate(this.ui.moveBtn, 'click', $.proxy( this.loadNavTree, this ) );
+			// Modal creation on click
+			this.$el.delegate(this.ui.moveBtn, 'click', this.data.modalTree.open );
 
 			// Metabox actions
 			this.$el.delegate(this.inputs.label, 'blur', $.proxy(this.onLabelChange,this));
@@ -112,7 +111,7 @@ if((typeof bu === 'undefined' ) ||
 
 		onToggleVisibility: function(e) {
 			var visible = $(e.target).attr('checked');
-			var post = Navtree.getPost( this.settings.currentPost ); 
+			var post = Navtree.getPost( this.settings.currentPost );
 			
 			if ( visible && ! this.isAllowedInNavigationLists( post ) ) {
 				e.preventDefault();
@@ -219,26 +218,34 @@ if((typeof bu === 'undefined' ) ||
 			$toolbar.delegate(c.navSaveBtn, 'click', that.onUpdateLocation);
 			$toolbar.delegate(c.navCancelBtn, 'click', that.onCancelMove);
 
-			// Thickbox monkey patching
-			setupThickbox();
-
 			return that;
 
 		};
 
-		var setupThickbox = function() {
+		that.open = function(e) {
 
-			tb_position();
+			// See media-upload.dev.js
+			// This code was adapted from the above code that modifies the size of the thickbox.
+			var width = $(window).width(), H = $(window).height(), W = ( 720 < width ) ? 720 : width;
 
-			var original_tb_remove = window.tb_remove;
+			var title = e.target.title || e.target.name || null;
+			var href = e.target.href || e.target.alt;
+			var g = e.target.rel || false;
 
-			window.tb_remove = function() {
+			href = href.replace(/&width=[0-9]+/g, '');
+			href = href.replace(/&height=[0-9]+/g, '');
+			href = href + '&width=' + ( W - 80 ) + '&height=' + ( H - 85 );
 
-				original_tb_remove();
+			tb_show(title,href,g);
 
+			Navtree.scrollToSelection();
+
+			// Restore navtree state on close (cancel)
+			$('#TB_window').bind('tb_unload', function(e){
 				Navtree.restore();
+			});
 
-			};
+			return false;
 
 		};
 

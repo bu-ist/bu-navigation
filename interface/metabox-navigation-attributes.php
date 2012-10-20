@@ -10,7 +10,7 @@
 </div>
 
 <p>
-	<a id="select-parent" href="#TB_inline?width=640&inlineId=edit_page_location" class="thickbox button" >
+	<a id="select-parent" href="#TB_inline?width=640&inlineId=edit_page_location" class="button" >
 		<?php echo $move_post_btn_txt; ?>
 	</a>
 </p>

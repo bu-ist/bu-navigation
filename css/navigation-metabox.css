@@ -1,6 +1,9 @@
 #edit_page_tree {
+	position: relative;
 	padding-right: 2em;
 	margin-top: 90px;
+	height: 83%;
+	overflow: scroll;
 }
 
 .page_location_toolbar {

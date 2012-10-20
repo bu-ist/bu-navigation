@@ -3,6 +3,8 @@
  * BU Navigation plugin - main script
  * ========================================================================
  */
+ /*global buNavSettings, jQuery*/
+
 var bu = bu || {};
 	bu.plugins = bu.plugins || {};
 	bu.plugins.navigation = {};
@@ -147,6 +149,8 @@ var bu = bu || {};
 					var $drag_src = data.data.obj;
 					$drag_src.removeClass(s.placeholder_class);
 				}, this ));
+
+			$.vakata.dnd.scroll_spd = 30;
 
 			// Prevent jstree from adding ANY stylesheets
 			// @todo investigate if this is the appropriate solution
@@ -408,6 +412,17 @@ var bu = bu || {};
 	// Global plugin settings
 	Nav.settings = buNavSettings || {};
 
+	// DOM ready -- browser classes
+	$(document).ready(function(){
+		
+		if( $.browser.msie === true && parseInt($.browser.version, 10) == 7 )
+			$(document.body).addClass('ie7');
+		if( $.browser.msie === true && parseInt($.browser.version, 10) == 8 )
+			$(document.body).addClass('ie8');
+		
+	});
+	
+	
 	// Tree constructor
 	Nav.tree = function( type, config ) {
 		if( typeof type === 'undefined')
@@ -658,8 +673,8 @@ var bu = bu || {};
 					$node.data('post_title', updated.title);
 					$node.data('post_status', updated.status);
 					$node.data('post_type', updated.type);
-					$node.data('post_parent', parseInt( updated.parent ) );
-					$node.data('menu_order', parseInt( updated.menu_order) );
+					$node.data('post_parent', parseInt( updated.parent, 10 ) );
+					$node.data('menu_order', parseInt( updated.menu_order, 10 ) );
 					$node.data('post_meta', updated.meta);
 
 				}
@@ -743,8 +758,8 @@ var bu = bu || {};
 					content: node.data('post_content'),
 					status: node.data('post_status'),
 					type: node.data('post_type'),
-					parent: parseInt( node.data('post_parent') ),
-					menu_order: parseInt( node.data('menu_order') ),
+					parent: parseInt( node.data('post_parent'), 10 ),
+					menu_order: parseInt( node.data('menu_order'), 10 ),
 					meta: node.data('post_meta') || {}
 				};
 				return bu.hooks.applyFilters('nodeToPost',post);
@@ -931,8 +946,10 @@ var bu = bu || {};
 				
 				// jstree breaks spectacularly if the stylesheet hasn't set an li height
 				// when the tree is created -- this is what they call a hack...
-				$tree.jstree('data').data.core.li_height = 37;
-				
+				var $li = $tree.find("> ul > li:first-child");
+				var nodeHeight = $li.height() >= 18 ? $li.height() : 37;
+				$tree.jstree('data').data.core.li_height = nodeHeight;
+
 				that.broadcast( 'postsLoaded' );
 			});
 
@@ -1226,6 +1243,28 @@ var bu = bu || {};
 
 				// Select and update tree state
 				that.selectPost( post );
+			};
+
+			// @todo consider moving to ModalTree
+			that.scrollToSelection = function() {
+
+				var $node = $tree.jstree('get_selected');
+				if( $node ) {
+					
+					var $container = $(document);
+
+					if( $tree.css('overflow') === 'scroll' )
+						$container = $tree;
+
+					var treeHeight = $tree.innerHeight();
+					var nodeOffset = $node.position().top + ( $node.height() / 2 ) - ( treeHeight / 2 );
+
+					if( nodeOffset > 0 ) {
+						// $tree.animate({ scrollTop: nodeOffset }, 350 );
+						$tree.scrollTop( nodeOffset );
+					}
+				}
+
 			};
 
 			return that;

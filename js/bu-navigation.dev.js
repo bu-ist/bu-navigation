@@ -3,74 +3,80 @@
  * BU Navigation plugin - main script
  * ========================================================================
  */
- /*global buNavSettings, jQuery*/
+
+/*jslint browser: true, todo: true */
+/*global bu: true, buNavSettings: false, jQuery: false, console: false, window: false, document: false */
 
 var bu = bu || {};
-	bu.plugins = bu.plugins || {};
-	bu.plugins.navigation = {};
 
-(function($){
+bu.plugins = bu.plugins || {};
+bu.plugins.navigation = {};
+
+(function ($) {
+	'use strict';
 
 	// Simple pub/sub pattern
-	bu.signals = (function() {
-		var listeners = {};
-		var that = this;
+	bu.signals = (function () {
+		var listeners = {}, that = this;
 
 		return {
-			listenFor: function( event, callback ) {
+			listenFor: function (event, callback) {
 
-				if( typeof listeners[event] === 'undefined')
+				if (listeners[event] === undefined) {
 					listeners[event] = [];
+				}
 
-				listeners[event].push( callback );
+				listeners[event].push(callback);
 				return that;
 
 			},
-			broadcast: function( event, data ) {
-
-				if( listeners[event] ) {
-					for( var i = 0; i < listeners[event].length; i++) {
-						listeners[event][i].apply( this, data || [] );
+			broadcast: function (event, data) {
+				var i = 0;
+				if (listeners[event]) {
+					for (i; i < listeners[event].length; i = i + 1) {
+						listeners[event][i].apply(this, data || []);
 					}
 				}
 				return that;
 			}
 		};
-	})();
+	}());
 
 	// Simple filter mechanism, modeled after Plugins API
 	// @todo partially implemented
-	bu.hooks = (function(){
-		var filters = {};
-		var that = this;
+	bu.hooks = (function () {
+		var filters = {},
+			that = this;
 
 		return {
-			addFilter: function( name, func ) {
-				if( typeof filters[name] === 'undefined' )
+			addFilter: function (name, func) {
+				if (filters[name] === undefined) {
 					filters[name] = [];
+				}
 
 				filters[name].push(func);
 				return that;
 
 			},
-			applyFilters: function( name, obj ) {
-				if( typeof filters[name] === 'undefined' )
+			applyFilters: function (name, obj) {
+				if (filters[name] === undefined) {
 					return obj;
-
-				var args = Array.prototype.slice.apply(arguments);
-				extra = args.slice(1);
-
-				var i = 0;
-				for( i = 0; i < filters[name].length; i++ ) {
-					obj = filters[name][i].apply( this, extra );
 				}
 
-				return obj;
+				var args = Array.prototype.slice.apply(arguments),
+					extra = args.slice(1),
+					i = 0,
+					rslt = obj;
+
+				for (i = 0; i < filters[name].length; i = i + 1) {
+					rslt = filters[name][i].apply(this, extra);
+				}
+
+				return rslt;
 			}
 		};
-	})();
-
-})(jQuery);
+	}());
+}(jQuery));
 
 // =============================================//
 // BU jsTree plugin
@@ -245,7 +251,7 @@ var bu = bu || {};
 						if(m.language) { tmp.addClass(m.language); }
 					}
 					tmp.prepend("<ins class='jstree-icon'>&#160;</ins>");
-					if(m.icon) { 
+					if(m.icon) {
 						if(m.icon.indexOf("/") === -1) { tmp.children("ins").addClass(m.icon); }
 						else { tmp.children("ins").css("background","url('" + m.icon + "') center center no-repeat"); }
 					}
@@ -404,7 +410,8 @@ var bu = bu || {};
 // =============================================//
 // BU Navigation plugin settings & tree objects //
 // =============================================//
-(function($){
+(function ($) {
+	'use strict';
 
 	// Plugin alias
 	var Nav = bu.plugins.navigation;
@@ -413,7 +420,7 @@ var bu = bu || {};
 	Nav.settings = buNavSettings || {};
 
 	// DOM ready -- browser classes
-	$(document).ready(function(){
+	$(document).ready(function () {
 		
 		if( $.browser.msie === true && parseInt($.browser.version, 10) == 7 )
 			$(document.body).addClass('ie7');
@@ -656,7 +663,8 @@ var bu = bu || {};
 			};
 
 			that.updatePost = function( post ) {
-				var $node = my.getNodeForPost( post );
+				var $node = my.getNodeForPost( post ),
+					origPost, updated;
 
 				if( $node ) {
 

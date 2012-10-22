@@ -109,7 +109,7 @@ bu.plugins.navigation = {};
 		},
 		__init : function () {
 
-			if(!this.data.dnd) { throw "BU jstree plugin is dependent on the dnd plugin."; }
+			if (!this.data.dnd) { throw "BU jstree plugin is dependent on the dnd plugin."; }
 
 			// Cached drop target
 			this.data.bu.drop_target = null;
@@ -156,12 +156,9 @@ bu.plugins.navigation = {};
 					$drag_src.removeClass(s.placeholder_class);
 				}, this ));
 
+			// Increase default scroll speed during drag n' drop
 			$.vakata.dnd.scroll_spd = 30;
 
-			// Prevent jstree from adding ANY stylesheets
-			// @todo investigate if this is the appropriate solution
-			// $.vakata.css.add_sheet = function() { return false; };
-				
 		},
 		_fn : {
 
@@ -429,11 +426,11 @@ bu.plugins.navigation = {};
 		
 	});
 	
-	
 	// Tree constructor
 	Nav.tree = function( type, config ) {
-		if( typeof type === 'undefined')
+		if (typeof type === 'undefined') {
 			type = 'base';
+		}
 		
 		return Nav.trees[type](config).initialize();
 	};
@@ -721,13 +718,18 @@ bu.plugins.navigation = {};
 			};
 
 			// Save tree state
+			// @todo maybe optimize to not use rollback, use cookie plugin approach
 			that.save = function() {
+
+				// Cache current rollback object
 				d.rollback = $tree.jstree( 'get_rollback' );
 			};
 
 			// Restore tree state
+			// @todo maybe optimize to not use rollback, use cookie plugin approach
+			// @todo find a better way to get around reselect/duplicate issue
 			that.restore = function() {
-				if( typeof d.rollback === 'undefined' )
+				if (typeof d.rollback === 'undefined')
 					return;
 
 				/*
@@ -746,6 +748,9 @@ bu.plugins.navigation = {};
 
 				// Run rollback
 				$.jstree.rollback(d.rollback);
+
+				// Reset cached rollback
+				d.rollback = $tree.jstree('get_rollback');
 
 			};
 
@@ -860,17 +865,42 @@ bu.plugins.navigation = {};
 			var lazyLoad = function() {
 
 				// Lazy loading causes huge performance issues in IE < 8
-				if( $.browser.msie === true &&  parseInt($.browser.version, 10) < 8 )
+				if ($.browser.msie === true && parseInt($.browser.version, 10) < 8) {
+					s.lazyLoad = false;
 					return;
+				}
+
+				var $node, $unloaded, countRemaining;
 
 				// Start lazy loading once tree is fully loaded
-				$tree.find('ul > .jstree-closed').each( function(){
-					var $node = $(this);
-					// Load using API -- they require callback functions, but we're
-					// handling actions in the load_node.jstree even handler below
-					// so we just pass empty functions
-					$tree.jstree('load_node', $node, function(){}, function(){} );
-				});
+				if (!$tree.data('lazy-loaded')) {
+					$tree.data('lazy-loading', true );
+
+					$unloaded = $tree.find('ul > .jstree-closed');
+					countRemaining = $unloaded.length;
+
+					$unloaded.each( function(){
+						$node = $(this);
+
+						// Double check they aren't loaded first
+						if (!$.jstree._reference($tree)._is_loaded($node)) {
+
+							$tree.jstree('load_node', $node, function() {
+								countRemaining = countRemaining - 1;
+
+								// Update rollback
+								that.save();
+
+								if (!countRemaining) {
+									$tree.removeData('lazy-loading');
+									$tree.data('lazy-loaded',true);
+									that.broadcast('lazyLoaded');
+								}
+							});
+						}
+					});
+
+				}
 			};
 
 			var calculateCounts = function($node, includeDescendents) {
@@ -951,7 +981,7 @@ bu.plugins.navigation = {};
 
 			// Tree instance is loaded (before initial opens/selections are made)
 			$tree.bind('loaded.jstree', function( event, data ) {
-				
+
 				// jstree breaks spectacularly if the stylesheet hasn't set an li height
 				// when the tree is created -- this is what they call a hack...
 				var $li = $tree.find("> ul > li:first-child");
@@ -963,9 +993,16 @@ bu.plugins.navigation = {};
 
 			// Post initial opens/selections are made
 			$tree.bind('reselect.jstree', function( event, data ) {
-				if(s.lazyLoad) {
+				if (s.lazyLoad) {
 					lazyLoad();
 				}
+
+				// Store rollback state after initial open/selection is run
+				if (!$tree.data('initial-save')) {
+					$tree.data('initial-save',true);
+					that.save();
+				}
+
 				that.broadcast( 'postsSelected' );
 			});
 
@@ -974,8 +1011,8 @@ bu.plugins.navigation = {};
 				if( data.rslt.obj !== -1 ) {
 					var $node = data.rslt.obj;
 
-					if( s.showCounts ) {
-						calculateCounts( $node );
+					if (s.showCounts) {
+						calculateCounts($node);
 					}
 				}
 			});
@@ -1024,7 +1061,7 @@ bu.plugins.navigation = {};
 				if( $tree.attr('id') == $parent.attr('id')) {
 					parent_id = 0;
 				} else {
-					parent_id = parseInt(my.stripNodePrefix($parent.attr('id') ),10);
+					parent_id = parseInt(my.stripNodePrefix($parent.attr('id')),10);
 				}
 
 				// Maybe update rel attribute
@@ -1255,9 +1292,9 @@ bu.plugins.navigation = {};
 
 			// @todo consider moving to ModalTree
 			that.scrollToSelection = function() {
-
 				var $node = $tree.jstree('get_selected');
-				if( $node ) {
+
+				if ($node.length) {
 					
 					var $container = $(document);
 
@@ -1267,7 +1304,7 @@ bu.plugins.navigation = {};
 					var treeHeight = $tree.innerHeight();
 					var nodeOffset = $node.position().top + ( $node.height() / 2 ) - ( treeHeight / 2 );
 
-					if( nodeOffset > 0 ) {
+					if (nodeOffset > 0) {
 						// $tree.animate({ scrollTop: nodeOffset }, 350 );
 						$tree.scrollTop( nodeOffset );
 					}

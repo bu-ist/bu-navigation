@@ -29,8 +29,8 @@ if((typeof bu === 'undefined' ) ||
 
 		// Form fields
 		inputs: {
-			label: '#bu-page-navigation-label',
-			visible: '#bu-page-navigation-display',
+			label: '[name="nav_label"]',
+			visible: '[name="nav_display"]',
 			parent: '[name="parent_id"]',
 			order: '[name="menu_order"]'
 		},
@@ -242,7 +242,12 @@ if((typeof bu === 'undefined' ) ||
 
 			// Restore navtree state on close (cancel)
 			$('#TB_window').bind('tb_unload', function(e){
-				Navtree.restore();
+
+				if(!that.saving) {
+					Navtree.restore();
+				} else {
+					that.saving = false;
+				}
 			});
 
 			return false;
@@ -260,6 +265,8 @@ if((typeof bu === 'undefined' ) ||
 			// Update rollback object
 			Navtree.save();
 
+			that.saving = true;
+
 			tb_remove();
 
 		};
@@ -275,14 +282,19 @@ if((typeof bu === 'undefined' ) ||
 		// Navtree Actions
 
 		that.onPostsSelected = function() {
+			var post, navLabel, navDisplay;
 
 			// Current node will be undefined if we are editing a new post
 			if( c.isNewPost && ! Navtree.getCurrentPost() ) {
 
+				navLabel = $(Metabox.inputs['label']).val() || 'Untitled post';
+				navDisplay = $(Metabox.inputs['visible']).attr('checked') || false;
+
 				// Setup attributes for new page
-				var post = {
+				post = {
 					ID: c.currentPost,
-					title: $('input[name="nav_label"]').val() || 'Untitled post',
+					title: navLabel,
+					meta: { excluded: !navDisplay },
 					parent: 0,
 					menu_order: 0
 				};
@@ -290,11 +302,9 @@ if((typeof bu === 'undefined' ) ||
 				// Insert new post placeholder and designate it as current post
 				Navtree.insertPost( post, { position: 'before' } );
 				Navtree.setCurrentPost( post );
+				Navtree.save();
 
 			}
-
-			// Store tree state after all posts are loaded/opened/selected
-			Navtree.save();
 
 		};
 

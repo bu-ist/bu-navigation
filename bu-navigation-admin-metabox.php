@@ -53,7 +53,7 @@ class BU_Navigation_Admin_Metabox {
 			'ancestors' => $ancestors,
 			'isNewPost' => $is_new,
 			'format' => 'nav-metabox',
-			'lazyLoad' => false,
+			'lazyLoad' => true,
 			'postStatuses' => array( 'draft', 'pending', 'publish' ),
 			'nodePrefix' => 'na'
 			);
@@ -174,7 +174,7 @@ class BU_Navigation_Admin_Metabox {
 		$output = '';
 
 		if( $post->post_parent ) {
-			$output = bu_navigation_breadcrumbs(array('show_links' => false, 'include_hidden' => true, 'post_status' => array('draft','pending','publish')));
+			$output = bu_navigation_breadcrumbs(array('show_links' => false, 'include_hidden' => true, 'include_statuses' => array('draft','pending','publish')));
 		} else {
 			$output = __('Top level page');
 		}

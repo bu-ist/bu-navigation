@@ -1,22 +1,29 @@
 #edit_page_tree {
 	position: relative;
 	padding-right: 2em;
-	margin-top: 90px;
 	height: 83%;
 	overflow: scroll;
 }
 
 .page_location_toolbar {
-	width: inherit;
-	background-color: white;
-	position: fixed;
-	margin-top: -2px;
+	padding: 1em 0.5em;
+	*zoom: 1;
 }
 
 .page_location_toolbar .edit_buttons {
 	float: right;
 	margin-top: 45px;
 	margin-bottom: 1em;
+}
+
+.page_location_toolbar:before,
+.page_location_toolbar:after {
+	content: " "; /* 1 */
+	display: table; /* 2 */
+}
+
+.page_location_toolbar:after {
+	clear: both;
 }
 
 /* Thickbox overrides */

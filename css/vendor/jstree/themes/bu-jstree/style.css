@@ -35,16 +35,12 @@ html[xmlns] .jstree-bu li {
 	margin: 8px 4px 0 0;
 }
 
-.jstree-bu ul {
+.jstree.jstree-bu ul {
 	padding-left: 18px;
 }
 
-.jstree-bu ul ul {
+.jstree.jstree-bu ul ul {
 	padding-left: 0;	
-}
-
-.jstree-bu ul ul ul {
-	padding-left: 0;
 }
 
 .jstree-bu ul li {
@@ -256,7 +252,7 @@ html[xmlns] .jstree-bu li {
 	margin: 0 0 0 4px;
 }
 
-#vakata-contextmenu {
+#vakata-contextmenu.jstree-bu-context {
 	margin-top: 11px;
 	margin-left: -105px;
 }
@@ -310,6 +306,11 @@ html[xmlns] .jstree-bu li {
 
 #vakata-contextmenu.jstree-bu-context li ul {
 	margin-left: -4px;
+}
+
+.jstree-bu a.jstree-loading {
+	background: none;
+	border: none;
 }
 
 .jstree-bu a.jstree-loading .jstree-icon {
@@ -369,7 +370,7 @@ html[xmlns] .jstree-bu li {
 	box-shadow: 0 0 4px #de8585;
 }
 
-#vakata-dragged {
+#vakata-dragged.jstree-bu {
 	width: 768px;
 	display: block;
 	float: left;
@@ -388,12 +389,12 @@ html[xmlns] .jstree-bu li {
 	cursor: move;
 }
 
-#vakata-dragged .count {
+#vakata-dragged.jstree-bu .count {
 	color: #b3ce9d;
 	font-weight: 100;
 }
 
-#vakata-dragged.jstree-ok {
+#vakata-dragged.jstree-bu.jstree-ok {
 	width: 768px;
 	display: block;
 	float: left;
@@ -412,12 +413,12 @@ html[xmlns] .jstree-bu li {
 	cursor: move;
 }
 
-#vakata-dragged.jstree-ok .count {
+#vakata-dragged.jstree-bu.jstree-ok .count {
 	color: #b3ce9d;
 	font-weight: 100;
 }
 
-#vakata-dragged.jstree-invalid {
+#vakata-dragged.jstree-bu.jstree-invalid {
 	width: 768px;
 	display: block;
 	float: left;
@@ -436,18 +437,18 @@ html[xmlns] .jstree-bu li {
 	cursor: not-allowed;
 }
 
-#vakata-dragged.jstree-invalid .count {
+#vakata-dragged.jstree-bu.jstree-invalid .count {
 	color: #e3a0a0;
 	font-weight: 100;
 }
 
-#vakata-dragged .jstree-ok {
+#vakata-dragged.jstree-bu .jstree-ok {
 	float: left;
 	margin: 4px 22220px 0 0;
 	background: url("sprite.png") 0px -32px no-repeat;
 }
 
-#vakata-dragged .jstree-invalid {
+#vakata-dragged.jstree-bu .jstree-invalid {
 	float: left;
 	margin: 5px 1123123px 0 0;
 	background: url("sprite.png") -16px -32px no-repeat;

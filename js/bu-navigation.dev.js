@@ -396,6 +396,7 @@ bu.plugins.navigation = {};
 
 			// Save tree state
 			// @todo maybe optimize to not use rollback, use cookie plugin approach
+			// @todo should not save during lazy load
 			that.save = function() {
 
 				// Cache current rollback object
@@ -405,6 +406,7 @@ bu.plugins.navigation = {};
 			// Restore tree state
 			// @todo maybe optimize to not use rollback, use cookie plugin approach
 			// @todo find a better way to get around reselect/duplicate issue
+			// @todo should not restore during lazy load
 			that.restore = function() {
 				if (typeof d.rollback === 'undefined')
 					return;

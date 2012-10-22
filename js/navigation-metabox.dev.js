@@ -241,7 +241,7 @@ if((typeof bu === 'undefined' ) ||
 			Navtree.scrollToSelection();
 
 			// Restore navtree state on close (cancel)
-			$('#TB_window').bind('tb_unload', function(e){
+			$('#TB_window').bind('unload tb_unload', function(e){
 
 				if(!that.saving) {
 					Navtree.restore();

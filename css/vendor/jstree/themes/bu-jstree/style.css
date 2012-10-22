@@ -63,6 +63,8 @@ html[xmlns] .jstree-bu li {
 
 .jstree-bu li .count {
 	color: #999;
+	position: absolute;
+	margin-left: 10px;
 }
 
 .jstree-bu li ins {
@@ -90,12 +92,10 @@ html[xmlns] .jstree-bu li {
 }
 
 .jstree-bu li a .title {
-	float: left;
-	padding-right: 3px;
-	max-width:45%;
-	white-space: nowrap;
+	max-width: 65%;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	display: inline-block;
 }
 
 .jstree-bu .jstree-clicked {
@@ -258,10 +258,22 @@ html[xmlns] .jstree-bu li {
 }
 
 @-moz-document url-prefix() {
-    #vakata-contextmenu {
+    #vakata-contextmenu.jstree-bu-context {
 	    margin-left: -99px;
 	    margin-top: 10px;
     }
+}
+
+.ie9 #vakata-contextmenu.jstree-bu-context {
+	margin-left: -102px;
+}
+
+.ie8 #vakata-contextmenu.jstree-bu-context {
+	margin-left: -103px;
+}
+
+.ie7 #vakata-contextmenu.jstree-bu-context {
+	margin-left: -103px;
 }
 
 #vakata-contextmenu.jstree-bu-context, 

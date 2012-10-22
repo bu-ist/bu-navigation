@@ -82,7 +82,6 @@ bu.plugins.navigation = {};
 // BU Navigation plugin settings & tree objects //
 // =============================================//
 (function ($) {
-	'use strict';
 
 	// Plugin alias
 	var Nav = bu.plugins.navigation;
@@ -92,12 +91,12 @@ bu.plugins.navigation = {};
 
 	// DOM ready -- browser classes
 	$(document).ready(function () {
-		
 		if( $.browser.msie === true && parseInt($.browser.version, 10) == 7 )
 			$(document.body).addClass('ie7');
 		if( $.browser.msie === true && parseInt($.browser.version, 10) == 8 )
 			$(document.body).addClass('ie8');
-		
+		if( $.browser.msie === true && parseInt($.browser.version, 10) == 9 )
+			$(document.body).addClass('ie9');
 	});
 	
 	// Tree constructor

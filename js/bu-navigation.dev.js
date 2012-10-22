@@ -148,6 +148,14 @@ bu.plugins.navigation = {};
 			if( $tree.length === 0 )
 				throw new TypeError('Invalid DOM selector, can\'t create BU Navigation Tree');
 
+			// Prefetch tree assets
+			if (s.themePath && document.images) {
+				var themeSprite = new Image();
+				var themeLoader = new Image();
+				themeSprite.src = s.themePath + "/sprite.png";
+				themeLoader.src = s.themePath + "/throbber.gif";
+			}
+			
 			// Allow clients to stop certain actions and UI interactions via filters
 			var checkMove = function( m ) {
 				var post = my.nodeToPost( m.o );
@@ -248,7 +256,7 @@ bu.plugins.navigation = {};
 					}
 				},
 				"bu": {
-					"lazy_load": true
+					"lazy_load": s.lazyLoad
 				}
 			};
 

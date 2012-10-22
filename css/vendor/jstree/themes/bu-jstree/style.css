@@ -321,7 +321,7 @@ html[xmlns] .jstree-bu li {
 }
 
 .jstree-bu a.jstree-loading .jstree-icon {
-	background: url("throbber.gif") center center no-repeat;
+	background: url("throbber.gif") center center no-repeat !important;
 }
 
 .jstree-bu .bu-dnd-placeholder {

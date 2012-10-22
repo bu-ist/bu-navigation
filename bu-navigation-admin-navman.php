@@ -82,12 +82,27 @@ class BU_Navigation_Admin_Navman {
 		foreach( $post_types as $pt ) {
 
 			$parent_slug = 'edit.php?post_type=' . $pt;
+			$post_type = get_post_type_object( $pt );
+
+			if ( $post_type->map_meta_cap ) {
+				if ( current_user_can( $post_type->cap->edit_published_posts ) ) {
+					$cap = $post_type->cap->edit_published_posts;
+				} else {
+					$cap = 'edit_' . $pt . '_in_section';
+				}
+			} else {
+				if ( current_user_can( $post_type->cap->edit_others_posts ) ) {
+					$cap = $post_type->cap->edit_others_posts;
+				} else {
+					$cap = 'edit_' . $pt . '_in_section';
+				}
+			}
 
 			$page = add_submenu_page(
 				$parent_slug,
-				null,
 				__('Edit Order'),
-				'edit_pages',
+				__('Edit Order'),
+				$cap,
 				'bu-navigation-manager',
 				array( $this, 'render' )
 				);

@@ -308,11 +308,6 @@ html[xmlns] .jstree-bu li {
 	margin-left: -4px;
 }
 
-.jstree-bu a.jstree-loading {
-	background: none;
-	border: none;
-}
-
 .jstree-bu a.jstree-loading .jstree-icon {
 	background: url("throbber.gif") center center no-repeat;
 }

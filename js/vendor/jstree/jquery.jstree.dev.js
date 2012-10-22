@@ -1,5 +1,5 @@
 /*
- * jsTree 1.0-rc3
+ * jsTree 1.0-rc3-BU
  * http://jstree.com/
  *
  * Copyright (c) 2010 Ivan Bozhanov (vakata.com)
@@ -7,6 +7,10 @@
  * Licensed same as jquery - under the terms of either the MIT License or the GPL Version 2 License
  *   http://www.opensource.org/licenses/mit-license.php
  *   http://www.gnu.org/licenses/gpl.html
+ *
+ * BU fork started on 10/21/2012 by mgburns
+ *	- added "load_css" option to themes plugin to allow optional prevention of dynamic theme stylesheet loading
+ *	- added "BU" plugin -- enhancements to dnd which allow for certain behaviors need by bu jstree theme
  *
  * $Date: 2011-02-09 01:17:14 +0200 (ср, 09 февр 2011) $
  * $Revision: 236 $
@@ -1408,6 +1412,10 @@
 /* 
  * jsTree themes plugin
  * Handles loading and setting themes, as well as detecting path to themes, etc.
+ *
+ * Contains BU modifications (mgburns, 10/21)
+ *	- added a "load_css" configuiration option, which takes a boolean value and dicates whether
+ *		jstree loads theme stylesheet dynamically or not
  */
 (function ($) {
 	var themes_loaded = [];
@@ -1419,7 +1427,8 @@
 				.bind("init.jstree", $.proxy(function () {
 						var s = this._get_settings().themes;
 						this.data.themes.dots = s.dots; 
-						this.data.themes.icons = s.icons; 
+						this.data.themes.icons = s.icons;
+						this.data.themes.load_css = s.load_css;
 						this.set_theme(s.theme, s.url);
 					}, this))
 				.bind("loaded.jstree", $.proxy(function () {
@@ -1434,13 +1443,15 @@
 			theme : "default", 
 			url : false,
 			dots : true,
-			icons : true
+			icons : true,
+			load_css : true // BU core mod -- loading of theme CSS should be optional
 		},
 		_fn : {
 			set_theme : function (theme_name, theme_url) {
 				if(!theme_name) { return false; }
 				if(!theme_url) { theme_url = $.jstree._themes + theme_name + '/style.css'; }
-				if($.inArray(theme_url, themes_loaded) == -1) {
+				// BU core mod -- made dynamic loading of theme stylesheet optional
+				if(this.data.themes.load_css && $.inArray(theme_url, themes_loaded) == -1) {
 					$.vakata.css.add_sheet({ "url" : theme_url });
 					themes_loaded.push(theme_url);
 				}
@@ -4541,5 +4552,379 @@
 	});
 })(jQuery);
 //*/
+
+/*
+* jsTree BU plugin
+* This is really just a slightly less hackish way to cope with shortcomings in the
+* dnd plugin then modifying jstree source directly.
+*
+* These shortcomings were discovered when revamping the UI in 10/2012.
+*
+* The biggest problems:
+*	- does not provide callbacks when switching "drop" target states (before, inside, after)
+*	- does not keep reference to source or target nodes during dragging actions
+*	- helper element ONLY gets the ok/invalid move states for the ins icon:
+*		<div id="vakata-dragged"> <ins class="jstree-ok"></ins> </div>
+*		-- this makes it impossible to change the color of the entire item being dragged
+*		-- when it switched between ok and invalid
+*
+* Other bugs that should get attention
+*	- it's picky about dropping between nodes when the cursor is released directly on the marker line
+*/
+(function ($) {
+
+	$.jstree.plugin("bu", {
+		defaults : {
+			lazy_load: false,
+			drop_target: null,
+			placeholder_class: 'bu-dnd-placeholder',
+			target_class: 'bu-dnd-target'
+		},
+		__init : function () {
+
+			// Drag and drop extensions
+			if (this.data.dnd) { 
+
+				// Cached drop target
+				this.data.bu.drop_target = null;
+
+				// Aliases
+				var s = this._get_settings().bu;
+
+				// Drag and drop event bindings
+				this.get_container()
+
+					// Call custom dnd state change method
+					.bind('mouseenter.jstree', $.proxy(function (event) {
+						if ($.vakata.dnd.is_drag && $.vakata.dnd.user_data.jstree) {
+							this._bu_dnd_update_state();
+						}
+					}, this))
+
+					// Call custom dnd state change method
+					.bind('mouseleave.jstree', $.proxy(function (event) {
+						if ($.vakata.dnd.is_drag && $.vakata.dnd.user_data.jstree) {
+							this._bu_dnd_update_state();
+						}
+					}, this))
+
+					// Clear cached drop target when mouse leaves node (covers certain cases that are missed by dnd_leave)
+					.delegate('a', 'mouseleave.jstree', $.proxy(function (event) {
+						if ($.vakata.dnd.is_drag && $.vakata.dnd.user_data.jstree) {
+							if (this.data.bu.drop_target) {
+								this.data.bu.drop_target.removeClass(s.target_class);
+								this.data.bu.drop_target = null;
+							}
+						}
+					}, this));
+
+				// Add and remove placeholder classes to element being dragged on start/stop dnd
+				$(document)
+					.bind('drag_start.vakata', $.proxy(function (event, data) {
+						var $drag_src = data.data.obj;
+						$drag_src.addClass(s.placeholder_class);
+						$.vakata.dnd.helper.width($drag_src.width());
+					}, this))
+					.bind('drag_stop.vakata', $.proxy(function (event, data) {
+						var $drag_src = data.data.obj;
+						$drag_src.removeClass(s.placeholder_class);
+					}, this));
+
+				// Increase default scroll speed during drag n' drop
+				$.vakata.dnd.scroll_spd = 30;
+			}
+
+			if( s.lazy_load ) {
+
+				// Lazy load begins after reselect
+				this.get_container()
+					.bind('reselect.jstree', $.proxy(function( event, data ) {
+						if (s.lazy_load) {
+							this.lazy_load();
+						}
+					}, this));
+			}
+
+		},
+		_fn : {
+
+			// Overwriting to cache drop target
+			dnd_enter : function (obj) {
+				this.__call_old();
+
+				var $node = this._get_node(obj);
+				if ($node) {
+					this.data.bu.drop_target = $node.children('a');
+				}
+
+				this.__callback({'target': $node});
+			},
+
+			// Overwriting to add toggle classes for drop target when move is inside, and
+			// promote ok/invalid move classes to root helper element
+			dnd_show : function () {
+				var pos = this.__call_old(),
+					s = this._get_settings().bu;
+
+				if (this.data.bu.drop_target) {
+					if ('inside' === pos) {
+						this.data.bu.drop_target.addClass(s.target_class);
+					} else {
+						this.data.bu.drop_target.removeClass(s.target_class);
+					}
+				}
+
+				this._bu_dnd_update_state();
+				this.__callback({'position': pos});
+				return pos;
+			},
+
+			// Overwriting to promote ok/invalid move classes to root helper element
+			dnd_leave : function (e) {
+				this.__call_old();
+
+				// i would remove classes and nullify bu.drop_target here, but this method does not cover
+				// every case where a drag leaves a potential drop target (such as when it moves over marker line)
+
+				this._bu_dnd_update_state();
+				this.__callback({'leaving': $(e.target.parentNode) });
+			},
+
+			// Overwiting to remove classes and nullify cached drop target on drag complete
+			dnd_finish : function (e) {
+				this.__call_old();
+
+				var s = this._get_settings().bu;
+
+				if (this.data.bu.drop_target) {
+					this.data.bu.drop_target.removeClass(s.target_class);
+					this.data.bu.drop_target = null;
+				}
+
+				this.__callback();
+			},
+
+			// Basic operations: create
+			create_node	: function (obj, position, js, callback, is_loaded) {
+				obj = this._get_node(obj);
+				position = typeof position === "undefined" ? "last" : position;
+				var d = $("<li />"),
+					s = this._get_settings().core,
+					tmp;
+
+				if(obj !== -1 && !obj.length) { return false; }
+				if(!is_loaded && !this._is_loaded(obj)) { this.load_node(obj, function () { this.create_node(obj, position, js, callback, true); }); return false; }
+				this.__rollback();
+
+				if(typeof js === "string") { js = { "data" : js }; }
+				if(!js) { js = {}; }
+				if(js.attr) { d.attr(js.attr); }
+				if(js.metadata) { d.data(js.metadata); }
+				if(js.state) { d.addClass("jstree-" + js.state); }
+				if(!js.data) { js.data = this._get_string("new_node"); }
+				if(!$.isArray(js.data)) { tmp = js.data; js.data = []; js.data.push(tmp); }
+				$.each(js.data, function (i, m) {
+					tmp = $("<a />");
+					if($.isFunction(m)) { m = m.call(this, js); }
+					if(typeof m == "string") { tmp.attr('href','#').wrapInner($('<span class="title">')[ s.html_titles ? "html" : "text" ](m)); }
+					else {
+						if(!m.attr) { m.attr = {}; }
+						if(!m.attr.href) { m.attr.href = '#'; }
+						tmp.attr(m.attr).wrapInner($('<span class="title">')[ s.html_titles ? "html" : "text" ](m.title));
+						if(m.language) { tmp.addClass(m.language); }
+					}
+					tmp.prepend("<ins class='jstree-icon'>&#160;</ins>");
+					if(m.icon) {
+						if(m.icon.indexOf("/") === -1) { tmp.children("ins").addClass(m.icon); }
+						else { tmp.children("ins").css("background","url('" + m.icon + "') center center no-repeat"); }
+					}
+					d.append(tmp);
+				});
+				d.prepend("<ins class='jstree-icon'>&#160;</ins>");
+				if(obj === -1) {
+					obj = this.get_container();
+					if(position === "before") { position = "first"; }
+					if(position === "after") { position = "last"; }
+				}
+				switch(position) {
+					case "before": obj.before(d); tmp = this._get_parent(obj); break;
+					case "after" : obj.after(d);  tmp = this._get_parent(obj); break;
+					case "inside":
+					case "first" :
+						if(!obj.children("ul").length) { obj.append("<ul />"); }
+						obj.children("ul").prepend(d);
+						tmp = obj;
+						break;
+					case "last":
+						if(!obj.children("ul").length) { obj.append("<ul />"); }
+						obj.children("ul").append(d);
+						tmp = obj;
+						break;
+					default:
+						if(!obj.children("ul").length) { obj.append("<ul />"); }
+						if(!position) { position = 0; }
+						tmp = obj.children("ul").children("li").eq(position);
+						if(tmp.length) { tmp.before(d); }
+						else { obj.children("ul").append(d); }
+						tmp = obj;
+						break;
+				}
+				if(tmp === -1 || tmp.get(0) === this.get_container().get(0)) { tmp = -1; }
+				this.clean_node(tmp);
+				this.__callback({ "obj" : d, "parent" : tmp });
+				if(callback) { callback.call(this, d); }
+				return d;
+			},
+			
+			get_text : function( obj ) {
+				obj = this._get_node(obj);
+				if(!obj.length) { return false; }
+				obj = obj.find("> a .title");
+				if(this._get_settings().core.html_titles) {
+					return obj.html();
+				}
+				else {
+					obj = obj.contents().filter(function() { return this.nodeType == 3; })[0];
+					return obj.nodeValue;
+				}
+			},
+
+			set_text : function( obj, val ) {
+				obj = this._get_node(obj);
+				if(!obj.length) { return false; }
+				obj = obj.find('> a .title');
+				if(this._get_settings().core.html_titles) {
+					obj.html(val);
+					this.__callback({ "obj" : obj, "name" : val });
+					return true;
+				}
+				else {
+					obj = obj.contents().filter(function() { return this.nodeType == 3; })[0];
+					this.__callback({ "obj" : obj, "name" : val });
+					return (obj.nodeValue = val);
+				}
+
+			},
+
+			_parse_json : function( js, obj, is_callback ) {
+				var d = false,
+					p = this._get_settings(),
+					s = p.json_data,
+					t = p.core.html_titles,
+					tmp, i, j, ul1, ul2;
+
+				if(!js) { return d; }
+				if(s.progressive_unload && obj && obj !== -1) {
+					obj.data("jstree-children", d);
+				}
+				if($.isArray(js)) {
+					d = $();
+					if(!js.length) { return false; }
+					for(i = 0, j = js.length; i < j; i++) {
+						tmp = this._parse_json(js[i], obj, true);
+						if(tmp.length) { d = d.add(tmp); }
+					}
+				}
+				else {
+					if(typeof js == "string") { js = { data : js }; }
+					if(!js.data && js.data !== "") { return d; }
+					d = $("<li />");
+					if(js.attr) { d.attr(js.attr); }
+					if(js.metadata) { d.data(js.metadata); }
+					if(js.state) { d.addClass("jstree-" + js.state); }
+					if(!$.isArray(js.data)) { tmp = js.data; js.data = []; js.data.push(tmp); }
+					$.each(js.data, function (i, m) {
+						tmp = $("<a />");
+						if($.isFunction(m)) { m = m.call(this, js); }
+						if(typeof m == "string") { tmp.attr('href','#').wrapInner($('<span class="title"></span>')[ t ? "html" : "text" ](m)); }
+						else {
+							if(!m.attr) { m.attr = {}; }
+							if(!m.attr.href) { m.attr.href = '#'; }
+							tmp.attr(m.attr).wrapInner($('<span class="title"></span>')[ t ? "html" : "text" ](m.title));
+							if(m.language) { tmp.addClass(m.language); }
+						}
+						tmp.prepend("<ins class='jstree-icon'>&#160;</ins>");
+						if(!m.icon && js.icon) { m.icon = js.icon; }
+						if(m.icon) {
+							if(m.icon.indexOf("/") === -1) { tmp.children("ins").addClass(m.icon); }
+							else { tmp.children("ins").css("background","url('" + m.icon + "') center center no-repeat"); }
+						}
+						d.append(tmp);
+					});
+					d.prepend("<ins class='jstree-icon'>&#160;</ins>");
+					if(js.children) {
+						if(s.progressive_render && js.state !== "open") {
+							d.addClass("jstree-closed").data("jstree-children", js.children);
+						}
+						else {
+							if(s.progressive_unload) { d.data("jstree-children", js.children); }
+							if($.isArray(js.children) && js.children.length) {
+								tmp = this._parse_json(js.children, obj, true);
+								if(tmp.length) {
+									ul2 = $("<ul />");
+									ul2.append(tmp);
+									d.append(ul2);
+								}
+							}
+						}
+					}
+				}
+				if(!is_callback) {
+					ul1 = $("<ul />");
+					ul1.append(d);
+					d = ul1;
+				}
+				return d;
+			},
+
+			lazy_load : function () {
+				var s = this.get_settings().bu,
+					t = this,
+					tree = t.get_container(),
+					sections, remaining;
+
+				// Lazy loading causes huge performance issues in IE < 8
+				if ($.browser.msie === true && parseInt($.browser.version, 10) < 8) {
+					s.lazy_load = false;
+					return;
+				}
+
+				if (!tree.data('lazy-loaded')) {
+					tree.data('lazy-loading', true );
+					sections = tree.find('ul > .jstree-closed');
+					remaining = sections.length;
+
+					sections.each( function(index, obj){
+						if (!t._is_loaded(obj)) {
+							t.load_node( obj, function() {
+								remaining = remaining - 1;
+								if (!remaining) {
+									t.lazy_loaded();
+								}
+							}, $.noop);
+						} else {
+							remaining = remaining - 1;
+						}
+					});
+				}
+			},
+
+			lazy_loaded : function() {
+				this.get_container().removeData('lazy-loading').data('lazy-loaded',true);
+				this.__callback();
+			},
+
+			// Run whenever the dnd state may be changed in the $.vakata.helper class
+			_bu_dnd_update_state : function () {
+				if ($.vakata.dnd.helper) {
+					// Promotes classes on #vakata-dragged > ins element to #vakata-dragged
+					$.vakata.dnd.helper.removeClass('jstree-ok jstree-invalid');
+					$.vakata.dnd.helper.addClass($.vakata.dnd.helper.children('ins').attr('class'));
+				}
+			}
+		}
+	});
+
+}(jQuery));
 
 })();

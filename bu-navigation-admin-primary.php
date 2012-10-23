@@ -34,7 +34,7 @@ class BU_Navigation_Admin_Primary {
 			'themes.php',
 			__('Primary Navigation'),
 			__('Primary Navigation'),
-			'edit_pages',
+			'bu_edit_options',
 			'bu-navigation-settings',
 			array( $this, 'render' )
 			);

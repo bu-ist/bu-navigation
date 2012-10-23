@@ -130,7 +130,15 @@ class BU_Navigation_Admin_Navman {
 			wp_register_script('bu-jquery-validate', plugins_url('js/vendor/jquery.validate' . $suffix . '.js', __FILE__), array('jquery'), '1.8.1', true);
 			wp_register_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-navigation','jquery-ui-dialog','bu-jquery-validate'), '0.3.1', true);
 
-			wp_enqueue_style('bu-jquery-ui-navman', plugins_url('css/vendor/jquery-ui/jquery-ui-1.8.13.custom.css', __FILE__), array(), '1.8.13');
+
+			if ( 'classic' == get_user_option( 'admin_color') ) {
+				wp_enqueue_style ( 'bu-jquery-ui-css',  plugins_url( '/css/jquery-ui-classic.css', __FILE__ ), array(), '0.3' );
+			} else {
+				wp_enqueue_style ( 'bu-jquery-ui-css',  plugins_url( '/css/jquery-ui-fresh.css', __FILE__ ), array(), '0.3' );
+			}
+
+			// Scripts and styles for this page
+			wp_enqueue_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-navigation'), '0.3.1', true);
 			wp_enqueue_style('bu-navman', plugins_url('css/manage.css', __FILE__), array(), '0.3');
 
 			// Let nav interface class handle enqueue

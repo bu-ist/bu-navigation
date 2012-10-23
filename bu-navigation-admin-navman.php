@@ -299,6 +299,9 @@ class BU_Navigation_Admin_Navman {
 		$saved = NULL;
 
 		if (array_key_exists('bu_navman_save', $_POST)) {
+//			error_log('Starting navman save:');
+//			$time_start = microtime(true);
+			
 			$saved = $problems = false;
 
 			// Process removals
@@ -320,7 +323,7 @@ class BU_Navigation_Admin_Navman {
 			// Process moves
 			$nodes = json_decode(stripslashes($_POST['navman_data']));
 
-			// @todo move to another method
+//			error_log('Finished navman json_decoding in' . sprintf('%f',(microtime(true) - $time_start)) . ' seconds');
 
 			$updates = array();
 
@@ -330,12 +333,16 @@ class BU_Navigation_Admin_Navman {
 			}
 
 			$success = $this->process_moves( $updates );
+			
+//			error_log('Finished processing nodes in ' . sprintf('%f',(microtime(true) - $time_start)) . ' seconds');
 
 			if (!$success)
 				$problems = true;
 
 			// @todo remove for new environment
 			if (function_exists('invalidate_blog_cache')) invalidate_blog_cache();
+
+//			error_log('Finished navman save in ' . sprintf('%f',(microtime(true) - $time_start)) . ' seconds');
 
 			if (!$problems) $saved = true;
 		}
@@ -420,49 +427,34 @@ class BU_Navigation_Admin_Navman {
 		$updates[$parent_id] = array();
 
 		foreach ($nodes as $node) {
+			$id = $node->ID;
 
-			// Translate jstree json data to post array for insertion
-			$id = $node->attr->id;
-			$post_type = $node->metadata->post_type;
-			$post_status = $node->metadata->post_status;
+			// Special handling for new links -- need to get a valid post ID 
+			if ( 'link' == $node->type && 'new' == $node->status ) {
 
-			// Existing post
-			if( strpos( $id, 'post-new' ) === false )
-				$id = self::$interface->strip_node_prefix( $id );
+				$data = array(
+					'post_title' => $node->title,
+					'post_content' => $node->content,
+					'post_excerpt' => '',
+					'post_status' => 'publish',
+					'post_type' => 'link',
+					'post_parent' => $parent_id,
+					'menu_order' => 0	// will be updated
+					);
 
-			// New link (only "new" case at this time)
-			if( 'link' == $post_type ) {
-
-				if( 'new' == $post_status ) {
-
-					$target = 'same';
-
-					$data = array(
-						'post_title' => $node->data,
-						'post_content' => $node->metadata->post_content,
-						'post_excerpt' => '',
-						'post_status' => 'publish',
-						'post_type' => 'link',
-						'post_parent' => $parent_id,
-						'menu_order' => 0	// will be updated
-						);
-
-
-					$id = wp_insert_post($data);
+				$id = wp_insert_post($data);
 
 					// error_log('Insert ID: ' . $id );
 
-					if ($id === 0) {
-						error_log(sprintf('bu_navman_process_nodes could not create link: %s', print_r($node, true)));
-						continue;
-					}
-
-					$target = ($node->metadata->post_meta->bu_link_target === 'new') ? 'new' : 'same';
-
-					update_post_meta($id, 'bu_link_target', $target );
-					// error_log("Inserting new link - ID: $id, Label: {$data['post_title']}, URL: {$data['post_content']}, Target: $target, Parent: $parent_id");
-
+				if ($id === 0) {
+					error_log(sprintf('bu_navman_process_nodes could not create link: %s', print_r($node, true)));
+					continue;
 				}
+
+				$target = ($node->meta->bu_link_target === 'new') ? 'new' : 'same';
+
+				update_post_meta($id, 'bu_link_target', $target );
+					// error_log("Inserting new link - ID: $id, Label: {$data['post_title']}, URL: {$data['post_content']}, Target: $target, Parent: $parent_id");
 
 			}
 
@@ -476,7 +468,6 @@ class BU_Navigation_Admin_Navman {
 					$updates[$page_id] = $children;
 				}
 			}
-
 		}
 
 		// error_log('Finished processessing nodes, updates made: ' . count($updates) );
@@ -510,7 +501,6 @@ class BU_Navigation_Admin_Navman {
 
 					foreach ($pages as $page) {
 
-						// @todo this will cause caching issues in new environment
 						$stmt = $wpdb->prepare('UPDATE ' . $wpdb->posts . ' SET post_parent = %d, menu_order = %d WHERE ID = %d', $parent_id, $position, $page);
 						$rc = $wpdb->query($stmt);
 						// error_log("Updating post $page - Parent: $parent_id, Order: $position");
@@ -530,6 +520,7 @@ class BU_Navigation_Admin_Navman {
 				}
 			}
 
+			// @todo $pages_moved is not used by link-rebuilder or any other filters, remove?
 			do_action('bu_navman_pages_moved', $pages_moved);
 		}
 

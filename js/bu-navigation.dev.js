@@ -294,8 +294,47 @@ bu.plugins.navigation = {};
 				return my.nodeToPost( $node );
 			};
 
-			that.getPosts = function() {
-				return $tree.jstree( 'get_json', -1 );
+			// Custom version of jstree.get_json, optimized for our needs
+			that.getPosts = function( child_of ) {
+				var result = [], current_post = {}, parent, post_id, post_type;
+				
+				if (child_of) {
+					parent = $.jstree._reference($tree)._get_node('#' + child_of);
+				} else {
+					parent = $tree;
+				}
+					
+				// Iterate over children of current node
+				parent.find('> ul > li').each(function (i, child) {
+					child = $(child);
+					
+					post_id = child.attr('id');
+					post_type = child.data('post_type');
+					if (post_type != 'new') {
+						post_id = my.stripNodePrefix(post_id);
+					}
+					
+					// Convert to post data
+					current_post = {
+						ID: post_id,
+						type: post_type,
+						status: child.data('post_status'),
+						title: $tree.jstree('get_text',child),
+						content: child.data('post_content'),
+						meta: child.data('post_meta')
+					};
+					
+					// Recurse through children if this post has any
+					if( child.find('> ul > li').length ) {
+						current_post.children = that.getPosts(child.attr('id'));
+					}
+
+					// Store post + descendents
+					result.push(current_post);
+				});
+				
+				// Result = post tree starting with child_of
+				return result;
 			};
 			
 			that.showAll = function() {

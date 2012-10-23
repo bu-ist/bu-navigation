@@ -86,8 +86,11 @@ bu.plugins.navigation = {};
 	// Plugin alias
 	var Nav = bu.plugins.navigation;
 
-	// Global plugin settings
-	Nav.settings = buNavSettings || {};
+	// Default global settings
+	Nav.settings = {
+		'lazyLoad': false,
+		'showCounts': false
+	};
 
 	// DOM ready -- browser classes
 	$(document).ready(function () {
@@ -121,15 +124,8 @@ bu.plugins.navigation = {};
 			// "Implement" the signals interface
 			$.extend( true, that, bu.signals );
 
-			// Configuration defaults
-			var default_config = {
-				el : '#nav-tree-container',
-				format : Nav.settings.format,
-				postStatuses: Nav.settings.postStatuses,
-				nodePrefix : Nav.settings.nodePrefix
-			};
-
-			that.config = $.extend({}, default_config, config || {} );
+			// Instance settings
+			that.config = $.extend({}, Nav.settings, config || {} );
 
 			// Public data
 			that.data = {
@@ -138,7 +134,6 @@ bu.plugins.navigation = {};
 			};
 
 			// Aliases
-			var s = Nav.settings;
 			var c = that.config;
 			var d = that.data;
 
@@ -149,11 +144,11 @@ bu.plugins.navigation = {};
 				throw new TypeError('Invalid DOM selector, can\'t create BU Navigation Tree');
 
 			// Prefetch tree assets
-			if (s.themePath && document.images) {
+			if (c.themePath && document.images) {
 				var themeSprite = new Image();
 				var themeLoader = new Image();
-				themeSprite.src = s.themePath + "/sprite.png";
-				themeLoader.src = s.themePath + "/throbber.gif";
+				themeSprite.src = c.themePath + "/sprite.png";
+				themeLoader.src = c.themePath + "/throbber.gif";
 			}
 			
 			// Allow clients to stop certain actions and UI interactions via filters
@@ -162,13 +157,13 @@ bu.plugins.navigation = {};
 				var allowed = true;
 				
 				// Don't allow top level posts if global option prohibits it
-				if(m.cr === -1 && post.meta['excluded'] === false && ! Nav.settings.allowTop ) {
+				if(m.cr === -1 && post.meta['excluded'] === false && ! c.allowTop ) {
 					// console.log('Move denied, top level posts cannot be created!');
 					// @todo pop up a friendlier notice explaining this
 					allowed = false;
 				}
 
-				return bu.hooks.applyFilters( 'moveAllowed', allowed, m );
+				return bu.hooks.applyFilters( 'moveAllowed', allowed, m, that );
 			};
 
 			var canSelectNode = function( node ) {
@@ -237,12 +232,12 @@ bu.plugins.navigation = {};
 				},
 				"json_data": {
 					"ajax" : {
-						"url" : s.rpcUrl,
+						"url" : c.rpcUrl,
 						"type" : "POST",
 						"data" : function (n) {
 							return {
 								id : n.attr ? my.stripNodePrefix(n.attr("id")) : 0,
-								format : c.format,
+								instance : c.instance,
 								prefix : c.nodePrefix,
 								post_status : c.postStatuses
 							};
@@ -256,17 +251,17 @@ bu.plugins.navigation = {};
 					}
 				},
 				"bu": {
-					"lazy_load": s.lazyLoad
+					"lazy_load": c.lazyLoad
 				}
 			};
 
-			if( s.showCounts ) {
+			if( c.showCounts ) {
 				// counting needs a fully loaded DOM
 				d.treeConfig['json_data']['progressive_render'] = false;
 			}
 
-			if( s.initialTreeData ) {
-				d.treeConfig['json_data']['data'] = s.initialTreeData;
+			if( c.initialTreeData ) {
+				d.treeConfig['json_data']['data'] = c.initialTreeData;
 			}
 
 			// For meddlers
@@ -692,7 +687,7 @@ bu.plugins.navigation = {};
 				if( data.rslt.obj !== -1 ) {
 					var $node = data.rslt.obj;
 
-					if (s.showCounts) {
+					if (c.showCounts) {
 						calculateCounts($node);
 					}
 				}
@@ -752,7 +747,7 @@ bu.plugins.navigation = {};
 					$parent.attr('rel', 'section' );
 
 				// Recalculate counts
-				if( s.showCounts ) {
+				if( c.showCounts ) {
 					$newsection = $parent.parentsUntil( '#' + $tree.attr('id'),'li');
 					$oldsection = $oldparent.parentsUntil( '#' + $tree.attr('id'),'li');
 					$newsection = $newsection.length ? $newsection.last() : $parent;
@@ -902,10 +897,9 @@ bu.plugins.navigation = {};
 			// Aliases
 			var d = that.data;
 			var c = $.extend(that.config, config || {});	// instance configuration
-			var s = Nav.settings;	// global plugin settings
 
 			var $tree = that.$el;
-			var currentPost = s.currentPost;
+			var currentPost = c.currentPost;
 			var currentNodeId = c.nodePrefix + currentPost;
 
 			// Extra configuration
@@ -917,11 +911,11 @@ bu.plugins.navigation = {};
 				i;
 			if ( currentPost ) {
 				toSelect.push( '#' + currentNodeId );
-				if ( s.ancestors && s.ancestors.length ) {
+				if ( c.ancestors && c.ancestors.length ) {
 					// We want old -> young, which is not how they're passed
-					var ancestors = s.ancestors.reverse();
+					var ancestors = c.ancestors.reverse();
 					for (i = 0; i < ancestors.length; i++ ) {
-						toOpen.push( '#' + c.nodePrefix + s.ancestors[i] );
+						toOpen.push( '#' + c.nodePrefix + c.ancestors[i] );
 					}
 				}
 			}

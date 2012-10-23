@@ -8,40 +8,47 @@
  */ 
 class BU_Navman_Interface {
 
-	private $config;
-	private $post_types;
+	private $instance;
+	private $settings;
 	private $plugin;
 
 	/**
 	 * Setup an object capable of creating the navigation management interface
 	 * 
-	 * @todo clean this up
-	 * 
-	 * @param $post_types an array or comma-separated string of post types
-	 * @param $config an array of extra optional configuration items
+	 * @param $instance unique instance name for this interface 
+	 * @param $settings an array of extra optional configuration items
 	 */
-	public function __construct( $post_types = 'post', $config = array() ) {
+	public function __construct( $instance = 'legacy', $settings = array() ) {
 
 		$this->plugin = $GLOBALS['bu_navigation_plugin'];
+		$this->instance = $instance;
 
-		if( is_array( $post_types ) )
-			$post_types = implode(',', $post_types );
+		// Need to build post type string for RPC setting
+		$rpc_post_types = 'page,link';
+		if( isset( $settings['post_types'] ) ) {
+			if( is_array( $settings['post_types'] ) ) {
+				$rpc_post_types = implode(',',$settings['post_types']);
+			} else {
+				$rpc_post_types = $settings['post_types'];
+			}
+		}
 
 		$defaults = array(
-			'format' => 'legacy',	// until plugins are migrated to new interface...
+			'postTypes' => array('page','link'),
 			'postStatuses' => array('publish','draft'),
 			'themePath' => plugins_url('css/vendor/jstree/themes/bu-jstree', __FILE__ ), 
-			'rpcUrl' => admin_url('admin-ajax.php?action=bu_getpages&post_type=' . $post_types ),
+			'rpcUrl' => admin_url('admin-ajax.php?action=bu_getpages&post_type=' . $rpc_post_types ),
 			'allowTop' => $this->plugin->get_setting('allow_top'),
 			'lazyLoad' => true,
 			'showCounts' => true,
 			'nodePrefix' => 'p'
 			);
 
-		$this->config = wp_parse_args( $config, $defaults );
+		$this->settings = wp_parse_args( $settings, $defaults );
 
-		$this->post_types = explode(',', $post_types );
-
+		if( ! defined('DOING_AJAX') || ! DOING_AJAX ) {
+			$this->register_scripts();
+		}
 	}
 
 	/**
@@ -49,7 +56,7 @@ class BU_Navman_Interface {
 	 * 
 	 * Must be called before scripts are printed
 	 */ 
-	public function enqueue_scripts() {
+	public function register_scripts() {
 		global $wp_version;
 
 		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
@@ -61,38 +68,37 @@ class BU_Navman_Interface {
 		// Vendor scripts
 		wp_register_script( 'bu-jquery-cookie', $vendor_path . '/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '00168770', true);
 		wp_register_script( 'bu-jquery-tree', $vendor_path . '/jstree/jquery.jstree' . $suffix . '.js', array( 'jquery', 'bu-jquery-cookie' ), '1.0-rc3', true );
-		
-		//switched from jquery-json to json2 @see http://ejohn.org/blog/ecmascript-5-strict-mode-json-and-more/
-		wp_enqueue_script( 'json2' );
 
-		// Main configuration file
-		wp_enqueue_script( 'bu-navigation', $scripts_path . '/bu-navigation' . $suffix . '.js', array( 'jquery', 'bu-jquery-tree', 'bu-jquery-cookie', 'json2' ), '0.9', true );
-		wp_enqueue_style( 'bu-navigation', $styles_path . '/vendor/jstree/themes/bu-jstree/style.css', array(), '0.9' );
+		// Main navigation scripts & styles
+		wp_register_script( 'bu-navigation', $scripts_path . '/bu-navigation' . $suffix . '.js', array( 'jquery', 'bu-jquery-tree', 'bu-jquery-cookie', 'json2' ), '0.9', true );
+		wp_register_style( 'bu-navigation', $styles_path . '/vendor/jstree/themes/bu-jstree/style.css', array(), '0.9' );
 
+	}
+
+	public function enqueue_script( $name ) {
+		global $wp_version;
+
+		// Queue up dependencies
+		wp_enqueue_style( 'bu-navigation' );
+		wp_enqueue_script( 'bu-navigation' );
+
+		// Queue up instance script
+		wp_enqueue_script( $name );
+
+		// Allow for filtering
 		do_action( 'bu_navigation_interface_scripts' );
+
+		// Load initial tree data and allow plugins to enhance instance settings object
+		$this->settings['instance'] = $this->instance;
+		$this->settings['initialTreeData'] = $this->get_pages( 0, array( 'depth' => 1 ) );
+		$this->settings = apply_filters( 'bu_navigation_script_context', $this->settings, $instance );
 
 		// Hack due to lack of support for array data to wp_localize_script in WP < 3.3
 		if( version_compare( $wp_version, '3.3', '<' ) ) {
 			add_action( 'admin_print_footer_scripts', array( $this, 'print_footer_scripts' ) );
 		} else {
-			wp_localize_script( 'bu-navigation', 'buNavSettings', $this->get_script_context() );
+			wp_localize_script( 'bu-navigation', 'bu_nav_settings_' . $this->instance, $this->settings );
 		}
-
-	}
-
-	/**
-	 * Global settings object that our Javascript files depend on
-	 */ 
-	public function get_script_context() {
-
-		$settings = $this->config;
-
-		// We handle loading of top level pages (only) on page load
-		$pages = $this->get_pages( 0, array( 'depth' => 1 ) );
-
-		$settings['initialTreeData'] = $pages;
-
-		return apply_filters( 'bu_navigation_script_context', $settings );
 
 	}
 
@@ -104,10 +110,7 @@ class BU_Navman_Interface {
 
 		// Check if bu-navigation script is queued
 		if( in_array( 'bu-navigation', array_keys( $wp_scripts->registered ) ) ) {
-
-			$data = $this->get_script_context();
-			$this->localize( 'buNavSettings', $data );
-
+			$this->localize(  'bu_nav_settings_' . $this->instance, $this->settings );
 		}
 	}
 
@@ -142,9 +145,6 @@ class BU_Navman_Interface {
 	/**
 	 * Fetches top level pages, formatting for jstree consumption
 	 * 
-	 * @todo
-	 *  - make this extendable, so that plugins can tie in to the formatting portion to add their own attributes
-	 * 
 	 * @param int $parent_id post ID to start loading pages from
 	 * @param array $args option configuration
 	 * 	- depth = how many levels to traverse of page hierarchy (0 = all)
@@ -166,8 +166,11 @@ class BU_Navman_Interface {
 		add_filter('bu_navigation_filter_pages', array( __CLASS__, 'filter_pages' ) );
 		add_filter('bu_navigation_filter_fields', array( __CLASS__, 'filter_fields' ) );
 
+		$post_types = $this->settings['postTypes'];
+		$post_statuses = $this->settings['postStatuses'];
+
 		// Gather sections
-		$section_args = array('direction' => 'down', 'depth' => $depth, 'post_types' => $this->post_types);
+		$section_args = array('direction' => 'down', 'depth' => $depth, 'post_types' => $post_types);
 
 		// error_log('Getting pages for parent: ' . $parent_id );
 		// error_log('Section args: ' . print_r( $section_args,true ) );
@@ -179,8 +182,8 @@ class BU_Navman_Interface {
 		// Load pages in sections
 		$root_pages = bu_navigation_get_pages( array(
 			'sections' => $sections,
-			'post_types' => $this->post_types,
-			'post_status' => $this->config['postStatuses']
+			'post_types' => $post_types,
+			'post_status' => $post_statuses
 			)
 		);
 
@@ -307,10 +310,8 @@ class BU_Navman_Interface {
 		// Apply general format page filters first
 		$p = apply_filters( 'bu_navigation_interface_format_page', $p, $page, $has_children );
 
-		$format = $this->config['format'];
-
 		// But give priority to more specific format filters
-		return apply_filters( 'bu_navigation_interface_format_page_' . $format, $p, $page, $has_children );
+		return apply_filters( 'bu_navigation_interface_format_page_' . $this->instance, $p, $page, $has_children );
 
 	}
 
@@ -433,13 +434,13 @@ class BU_Navman_Interface {
 
 	public function strip_node_prefix( $id ) {
 
-		return intval(str_replace( $this->config['nodePrefix'], '', $id ));
+		return intval(str_replace( $this->settings['nodePrefix'], '', $id ));
 
 	}
 
 	public function add_node_prefix( $id ) {
 
-		return sprintf('%s%d', $this->config['nodePrefix'], $id );
+		return sprintf('%s%d', $this->settings['nodePrefix'], $id );
 
 	}
 

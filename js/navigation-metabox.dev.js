@@ -42,11 +42,11 @@ if((typeof bu === 'undefined' ) ||
 			label: ''
 		},
 
-		initialize: function(config) {
+		initialize: function() {
 
-			// Merge config argument with global plugin settings object
-			config = config || {};
-			this.settings = $.extend({}, bu.plugins.navigation.settings, config );
+			// Create post navigation tree from server-provided instance settings object
+			this.settings = bu_nav_settings_nav_metabox;
+			this.settings.el = this.ui.treeContainer;
 
 			if( typeof this.settings.isNewPost === 'undefined' )
 				this.settings.isNewPost = $('#auto_draft').val() == 1 ? true : false;
@@ -70,12 +70,7 @@ if((typeof bu === 'undefined' ) ||
 			if( typeof this.data.modalTree === 'undefined' ) {
 
 				// Instantiate navtree object
-				this.data.modalTree = ModalPostTree({
-					treeContainer: this.ui.treeContainer,
-					currentPost: this.settings.currentPost,
-					ancestors: this.settings.ancestors,
-					isNewPost: this.settings.isNewPost
-				});
+				this.data.modalTree = ModalPostTree(this.settings);
 
 				// Subscribe to relevant signals to trigger UI updates
 				this.data.modalTree.listenFor( 'update', $.proxy(this.updateLocation,this) );
@@ -186,11 +181,7 @@ if((typeof bu === 'undefined' ) ||
 			// save button
 			navSaveBtn: '#bu_page_parent_save',
 			// cancel button
-			navCancelBtn: '#bu_page_parent_cancel',
-			// Current post ID
-			currentPost: undefined,
-			// Flag to trigger new post behaviors
-			isNewPost: false
+			navCancelBtn: '#bu_page_parent_cancel'
 		};
 
 		c = $.extend(c, config);
@@ -206,8 +197,8 @@ if((typeof bu === 'undefined' ) ||
 		 */
 		var initialize = function(config) {
 
-			// Create post navigation tree, pass in initial posts from server
-			Navtree = bu.plugins.navigation.tree('edit_post', { el: c.treeContainer });
+			// Create post navigation tree,
+			Navtree = bu.plugins.navigation.tree( 'edit_post', c );
 
 			// Subscribe to relevant navtree signals
 			Navtree.listenFor('postsSelected', that.onPostsSelected);

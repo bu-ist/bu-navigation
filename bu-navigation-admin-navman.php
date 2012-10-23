@@ -44,14 +44,14 @@ class BU_Navigation_Admin_Navman {
 		$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
 
 		$settings = array(
-			'format' => 'navman',
+			'postTypes' => $post_types,
 			'postStatuses' => array( 'draft', 'pending', 'publish' ),
 			'nodePrefix' => 'nm',
 			'lazyLoad' => true,
 			'showCounts' => true
 			);
 
-		self::$interface = new BU_Navman_Interface( $post_types, $settings );
+		self::$interface = new BU_Navman_Interface( 'bu_navman', $settings );
 
 		// Attach WP actions/filters
 		$this->register_hooks();
@@ -64,7 +64,7 @@ class BU_Navigation_Admin_Navman {
 	public function register_hooks() {
 
 		add_action('admin_menu', array( $this, 'register_menu' ) );
-		add_action('admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		add_action('admin_enqueue_scripts', array( $this, 'add_scripts' ) );
 
 	}
 
@@ -119,27 +119,22 @@ class BU_Navigation_Admin_Navman {
 	}
 
 	/**
-	 * Enqueue dependent Javscript and CSS files
+	 * Register dependent Javscript and CSS files
 	 */ 
-	public function enqueue_scripts( $page ) {
+	public function add_scripts( $page ) {
 
-		// Enqueue navman styles and scripts
 		if( is_array( $this->pages ) && in_array( $page, $this->pages ) ) {
 			
 			$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
 
-			// Load default navigation manager scripts & styles
-			self::$interface->enqueue_scripts();
+			wp_register_script('bu-jquery-validate', plugins_url('js/vendor/jquery.validate' . $suffix . '.js', __FILE__), array('jquery'), '1.8.1', true);
+			wp_register_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-navigation','jquery-ui-dialog','bu-jquery-validate'), '0.3.1', true);
 
-			// Vendor scripts & styles
-			wp_enqueue_script('jquery-ui-dialog');
-			wp_enqueue_script('bu-jquery-validate', plugins_url('js/vendor/jquery.validate' . $suffix . '.js', __FILE__), array('jquery'), '1.8.1', true);
 			wp_enqueue_style('bu-jquery-ui-navman', plugins_url('css/vendor/jquery-ui/jquery-ui-1.8.13.custom.css', __FILE__), array(), '1.8.13');
-
-			// Scripts and styles for this page
-			wp_enqueue_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-navigation'), '0.3.1', true);
 			wp_enqueue_style('bu-navman', plugins_url('css/manage.css', __FILE__), array(), '0.3');
 
+			// Let nav interface class handle enqueue
+			self::$interface->enqueue_script('bu-navman');
 		}
 		
 	}

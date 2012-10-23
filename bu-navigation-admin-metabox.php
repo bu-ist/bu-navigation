@@ -49,16 +49,17 @@ class BU_Navigation_Admin_Metabox {
 			$ancestors = $post->ancestors;
 
 		$settings = array(
+			'postTypes' => $post_types,
+			'postStatuses' => array( 'draft', 'pending', 'publish' ),
 			'currentPost' => $post_id,
 			'ancestors' => $ancestors,
 			'isNewPost' => $is_new,
-			'format' => 'nav-metabox',
 			'lazyLoad' => true,
-			'postStatuses' => array( 'draft', 'pending', 'publish' ),
 			'nodePrefix' => 'na'
 			);
 
-		self::$interface = new BU_Navman_Interface( $post_types, $settings );
+		// Instantiate post tree interface
+		self::$interface = new BU_Navman_Interface( 'nav_metabox', $settings );
 
 		// Attach WP actions/filters
 		$this->register_hooks();
@@ -70,8 +71,7 @@ class BU_Navigation_Admin_Metabox {
 	 */ 
 	public function register_hooks() {
 
-		add_action('admin_enqueue_scripts', array($this, 'admin_page_scripts'));
-		add_action('admin_enqueue_scripts', array($this, 'admin_page_styles'));
+		add_action('admin_enqueue_scripts', array($this, 'add_scripts'));
 		add_action('add_meta_boxes', array($this, 'register_metaboxes'), 10, 2);
 
 		add_action('save_post', array($this, 'save_nav_meta_data'), 10, 2);
@@ -81,30 +81,21 @@ class BU_Navigation_Admin_Metabox {
 	/**
 	 * Load metabox scripts
 	 */ 
-	public function admin_page_scripts($hook_suffix) {
+	public function add_scripts($page) {
 		
 		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
 		$scripts_path = plugins_url('js',__FILE__);
-		$vendor_path = plugins_url('js/vendor',__FILE__);
-
-		// Load default navigation manager scripts & styles
-		self::$interface->enqueue_scripts();
-
-		wp_enqueue_script('bu-navigation-metabox', $scripts_path . '/navigation-metabox' . $suffix . '.js', array('bu-navigation'), '0.3', true );
-
-	}
-
-	/**
-	 * Load metabox styles
-	 */ 
-	public function admin_page_styles($hook_suffix) {
-
 		$styles_path = plugins_url('css',__FILE__);
 
+		wp_register_script('bu-navigation-metabox', $scripts_path . '/navigation-metabox' . $suffix . '.js', array('bu-navigation'), '0.3', true );
+		
 		wp_enqueue_style( 'bu-navigation-metabox', $styles_path . '/navigation-metabox.css' );
 
+		// Let nav interface class handle enqueue
+		self::$interface->enqueue_script('bu-navigation-metabox');
+
 	}
-	
+
 	/**
 	 * Register navigation metaboxes for supported post types
 	 * 

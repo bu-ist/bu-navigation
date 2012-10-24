@@ -77,6 +77,7 @@ html[xmlns] .jstree-bu li {
 
 .jstree-bu li a {
 	display: block;
+	cursor:	move;
 	padding: 8px 0 8px 0;
 	margin-bottom: 3px;
 	border: 1px solid #dfdfdf;
@@ -232,7 +233,7 @@ html[xmlns] .jstree-bu li {
 	border-left: 1px solid transparent;
 }
 
-.jstree-bu .jstree-clicked:hover:hover {
+.jstree-bu .jstree-clicked:hover {
 	cursor: move;
 }
 

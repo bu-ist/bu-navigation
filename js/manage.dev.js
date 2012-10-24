@@ -141,6 +141,9 @@ if((typeof bu === 'undefined') ||
 				resizable: false
 			});
 
+			// Prevent clicks in dialog/overlay from removing tree selections
+			$(document.body).delegate('.ui-widget-overlay, .ui-widget', 'click', this.stopPropagation );
+
 			// Add link event
 			$(this.ui.addBtn).bind('click', $.proxy(this.add, this ));
 
@@ -148,10 +151,11 @@ if((typeof bu === 'undefined') ||
 
 		},
 
-		add: function() {
+		add: function(e) {
+			e.preventDefault();
+			e.stopPropagation();
 
 			this.$el.dialog('open');
-
 		},
 
 		edit: function( link ) {
@@ -170,7 +174,9 @@ if((typeof bu === 'undefined') ||
 			this.$el.dialog('open');
 		},
 
-		save: function() {
+		save: function(e) {
+			e.preventDefault();
+			e.stopPropagation();
 
 			if (this.$form.valid()) {
 
@@ -196,34 +202,39 @@ if((typeof bu === 'undefined') ||
 
 				}
 
-				this.$el.dialog('close');
+				Navman.data.dirty = true;
 
 				this.clear();
 
-				Navman.data.dirty = true;
+				this.$el.dialog('close');
 
 			}
 
 		},
 
-		cancel: function() {
+		cancel: function (e) {
+			e.preventDefault();
+			e.stopPropagation();
 
 			this.$el.dialog('close');
 
 			this.clear();
-
 		},
 
-		clear: function() {
+		clear: function () {
 
 			// Clear dialog
 			$(this.ui.urlField).attr("value", "");
 			$(this.ui.labelField).attr("value", "");
 			$(this.ui.targetSameField).attr("checked", "checked");
-			$(this.ui.targetNewField).attr("checked", "");
+			$(this.ui.targetNewField).removeAttr("checked");
 
 			this.data.currentLink = null;
 
+		},
+
+		stopPropagation: function (e) {
+			e.stopPropagation();
 		}
 
 	};

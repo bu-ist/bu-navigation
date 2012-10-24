@@ -247,6 +247,7 @@ bu.plugins.navigation = {};
 				},
 				"crrm": {
 					"move": {
+						"default_position" : "first",
 						"check_move": checkMove
 					}
 				},
@@ -274,8 +275,14 @@ bu.plugins.navigation = {};
 				return that;
 			};
 
-			that.selectPost = function( post ) {
+			that.selectPost = function( post, deselect_all ) {
+				deselect_all = deselect_all || true;
 				var node = my.getNodeForPost( post );
+
+				if (deselect_all) {
+					$tree.jstree( 'deselect_all');
+				}
+
 				$tree.jstree( 'select_node', node );
 			};
 
@@ -340,7 +347,6 @@ bu.plugins.navigation = {};
 				$tree.jstree('close_all');
 			};
 
-			// @todo test
 			that.getPostLabel = function( post ) {
 
 				var $node = my.getNodeForPost( post );
@@ -348,7 +354,6 @@ bu.plugins.navigation = {};
 
 			};
 
-			// @todo test
 			that.setPostLabel = function( post, label ) {
 
 				var $node = my.getNodeForPost( post );
@@ -357,18 +362,21 @@ bu.plugins.navigation = {};
 			};
 
 			that.insertPost = function( post, args ) {
+				var selection = $tree.jstree('get_selected');
+				var postSelected = selection.length > 0;
+				
 				var defaults = {
-					position: 'after',
-					which: null,
+					which: postSelected ? selection : null,
+					position: postSelected ? 'after' : 'before',
 					skip_rename: true,
-					callback: null
+					callback: function($node) { $tree.jstree('deselect_all'); $tree.jstree('select_node', $node); }
 				};
 
 				var a = $.extend( defaults, args );
 				var node = my.postToNode( post );
 
 				$tree.jstree( 'create', a.which, a.position, node, a.callback, a.skip_rename );
-
+				
 				// Grab insert ID
 				post.ID = my.stripNodePrefix( node['attr']['id'] );
 
@@ -847,35 +855,47 @@ bu.plugins.navigation = {};
 				}
 			});
 
-			$tree.delegate(".edit-options", "click", function(e){
+			// @todo move all of this custom contextmenu behavior to our fork of the
+			// jstree contextmenu plugin
+			var currentMenuTarget = null;
+
+			$tree.delegate(".edit-options", "click", function (e) {
 				e.preventDefault();
 				e.stopPropagation();
-
-				$tree.jstree('deselect_all');
 
 				var pos = $(this).offset();
 				var yOffset = $(this).height() + 5;
 				var obj = $(this).parent('a').parent('li');
 
+				$tree.jstree('deselect_all');
 				$(this).addClass('clicked');
 				$tree.jstree('select_node', obj );
 				$tree.jstree('show_contextmenu', obj, pos.left, pos.top + yOffset );
-			});
 
-			$tree.bind('deselect_all.jstree', function(e, data){
-				var $node = data.rslt.obj;
-
-				if( $node.attr('id') !== $tree.attr('id') ) {
-					$node.find('> a > .edit-options').removeClass('clicked');
+				if (currentMenuTarget && currentMenuTarget.attr('id') != obj.attr('id')) {
+					removeMenu( currentMenuTarget );
 				}
+				currentMenuTarget = obj;
 			});
 
-			// If the event doesn't contain the current selection, deselect all
-			$(document).bind("mousedown", function (e) {
-				var $selected = $tree.jstree('get_selected', $tree);
-				var $match = $selected.filter( e.target );
+			// Remove active state on edit options button when the menu is removed
+			$(document).bind('context_hide.vakata', function(e, data){
+				removeMenu( currentMenuTarget );
+			});
+
+			var removeMenu = function ( target ) {
+				if (target) {
+					target.find('> a > .edit-options').removeClass('clicked');
+				}
+			};
+
+			// Deselect all nodes on document clicks outside of a tree element or
+			// context menu item
+			$(document).bind( "click", function (e) {
+				var clickedTree = $.contains( $tree[0], e.target );
+				var clickedMenuItem = $.contains( $('#vakata-contextmenu')[0], e.target );
 				
-				if($match.length === 0) {
+				if (!clickedTree && !clickedMenuItem) {
 					$tree.jstree('deselect_all');
 				}
 			});
@@ -885,8 +905,6 @@ bu.plugins.navigation = {};
 
 		// ----------------------------
 		// Edit post tree
-		// @todo
-		//	- prevent deseleciton of current post (lost it when we triggered deselect_all on document.body click)
 		// ----------------------------
 		edit_post: function( config, my ) {
 			my = my || {};

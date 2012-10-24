@@ -91,7 +91,7 @@ class BU_Navman_Interface {
 		// Load initial tree data and allow plugins to enhance instance settings object
 		$this->settings['instance'] = $this->instance;
 		$this->settings['initialTreeData'] = $this->get_pages( 0, array( 'depth' => 1 ) );
-		$this->settings = apply_filters( 'bu_navigation_script_context', $this->settings, $instance );
+		$this->settings = apply_filters( 'bu_navigation_script_context', $this->settings, $this->instance );
 
 		// Hack due to lack of support for array data to wp_localize_script in WP < 3.3
 		if( version_compare( $wp_version, '3.3', '<' ) ) {

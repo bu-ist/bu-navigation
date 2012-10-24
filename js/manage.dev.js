@@ -22,7 +22,7 @@ if((typeof bu === 'undefined') ||
 			editsField: '#navman_edits',
 			expandAllBtn: '#navman_expand_all',
 			collapseAllBtn: '#navman_collapse_all',
-			saveBtn: ''
+			container: '#navman-body'
 		},
 
 		data: {
@@ -31,11 +31,10 @@ if((typeof bu === 'undefined') ||
 		},
 
 		initialize: function( config ) {
-
 			// Create post navigation tree from server-provided instance settings object
 			var settings = bu_nav_settings_bu_navman;
 			settings.el = this.el;
-			
+
 			Navtree = bu.plugins.navigation.tree('navman', settings );
 
 			// Initialize link manager
@@ -49,7 +48,6 @@ if((typeof bu === 'undefined') ||
 			$(this.ui.form).bind('submit', $.proxy( this.save, this ));
 			$(this.ui.expandAllBtn).bind('click', this.expandAll );
 			$(this.ui.collapseAllBtn).bind('click', this.collapseAll );
-
 		},
 
 		expandAll: function(e) {
@@ -65,31 +63,21 @@ if((typeof bu === 'undefined') ||
 		},
 
 		editPost: function( post ) {
-
 			if( post.type == 'link' ) {
-
 				Linkman.edit( post );
-
 			} else {
-
 				var url = "post.php?action=edit&post=" + post.ID;
 				window.location = url;
-
 			}
-
 		},
 
 		removePost: function( post ) {
-
 			var id = post.ID;
 
 			if (id) {
-
 				this.data.deletions.push(id);
 				this.data.dirty = true;
-
 			}
-
 		},
 
 		save: function(e) {
@@ -100,14 +88,13 @@ if((typeof bu === 'undefined') ||
 			$(this.ui.editsField).attr("value", JSON.stringify(Linkman.data.edits));
 
 			this.data.dirty = false;
-
 		}
 
 	};
 
 	Linkman = bu.plugins.navigation.views.Linkman = {
 
-		el: '#navman_editlink',
+		el: '#navman-link-editor',
 
 		ui: {
 			form: '#navman_editlink_form',
@@ -154,8 +141,7 @@ if((typeof bu === 'undefined') ||
 		add: function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-
-			this.$el.dialog('open');
+			this.$el.dialog('option', 'title', 'Add a Link').dialog('open');
 		},
 
 		edit: function( link ) {
@@ -171,7 +157,7 @@ if((typeof bu === 'undefined') ||
 
 			this.data.currentLink = link;
 
-			this.$el.dialog('open');
+			this.$el.dialog('option', 'title', 'Edit a Link').dialog('open');
 		},
 
 		save: function(e) {
@@ -188,16 +174,14 @@ if((typeof bu === 'undefined') ||
 				link.title = $(this.ui.labelField).attr("value");
 				link.meta.bu_link_target = $("input[name='editlink_target']:checked").attr("value");
 
-				var result = null;
-
 				// Insert or update link
 				if (link.status === 'new' && !link.ID) {
 
-					result = Navtree.insertPost( link );
+					Navtree.insertPost( link );
 
 				} else {
 
-					result = Navtree.updatePost( link );
+					Navtree.updatePost( link );
 					this.data.edits[link.ID] = link;
 
 				}
@@ -243,7 +227,7 @@ if((typeof bu === 'undefined') ||
 		if ( Navman.data.dirty ) {
 			return 'You have made changes to your navigation that have not yet been saved.';
 		}
-
+		
 		return;
 	};
 

@@ -32,9 +32,8 @@
 			</div>
 		</form>
 	</div>
-
 	<?php if( $post_type === 'page' ): ?>
-	<div id="navman_editlink" title="Edit a Link">
+	<div id="navman-link-editor">
 		<div class="submitbox navform navformwide">
 			<form id="navman_editlink_form">
 				<input type="hidden" name="editlink_id" id="editlink_id" value="" />

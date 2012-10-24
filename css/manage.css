@@ -1,4 +1,8 @@
 /* Edit link form */
+#navman-link-editor {
+	display: none;
+}
+
 .navform div label {
 	padding-bottom: 4px;
 }

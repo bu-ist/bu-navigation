@@ -376,11 +376,6 @@ bu.plugins.navigation = {};
 				var node = my.postToNode( post );
 
 				$tree.jstree( 'create', a.which, a.position, node, a.callback, a.skip_rename );
-				
-				// Grab insert ID
-				post.ID = my.stripNodePrefix( node['attr']['id'] );
-
-				that.broadcast('insertPost', [post]);
 
 				return post;
 			};
@@ -429,11 +424,8 @@ bu.plugins.navigation = {};
 					node = my.getNodeForPost( post );
 				}
 
-				// @todo protect against empty node
-
 				$tree.jstree('remove', node );
 
-				that.broadcast('removePost', [post]);
 			};
 
 			// Get post ancestors (by title)
@@ -485,13 +477,14 @@ bu.plugins.navigation = {};
 			// ======= Protected ======= //
 
 			my.nodeToPost = function( node ) {
-				if( typeof node === 'undefined' )
+				if (typeof node === 'undefined')
 					throw new TypeError('Invalid node!');
 
 				var id = node.attr('id');
 
-				if( id.indexOf('post-new') === -1 )
-					id = my.stripNodePrefix( id );
+				if (id.indexOf('post-new') === -1) {
+					id = parseInt(my.stripNodePrefix(id),10);
+				}
 
 				var post = {
 					ID: id,
@@ -499,12 +492,12 @@ bu.plugins.navigation = {};
 					content: node.data('post_content'),
 					status: node.data('post_status'),
 					type: node.data('post_type'),
-					parent: parseInt( node.data('post_parent'), 10 ),
-					menu_order: parseInt( node.data('menu_order'), 10 ),
+					parent: parseInt(node.data('post_parent'), 10),
+					menu_order: parseInt(node.data('menu_order'), 10),
 					meta: node.data('post_meta') || {}
 				};
-				return bu.hooks.applyFilters('nodeToPost',post);
 
+				return bu.hooks.applyFilters('nodeToPost',post);
 			};
 
 			my.postToNode = function( post, args ) {
@@ -558,14 +551,13 @@ bu.plugins.navigation = {};
 
 				var node_id;
 
-				// @todo clean up type coercion
 				if( post && typeof post === 'object' ) {
-					node_id = post.ID;
+					node_id = post.ID.toString();
 					if( node_id.indexOf('post-new') === -1 ) {
 						node_id = c.nodePrefix + node_id;
 					}
 				} else {
-					node_id = post;
+					node_id = post.toString();
 					if( node_id.indexOf('post-new') === -1 ) {
 						node_id = c.nodePrefix + node_id;
 					}
@@ -661,7 +653,27 @@ bu.plugins.navigation = {};
 				for( var i = 0; i < statuses.length; i++ ) {
 					$statuses.append('<span class="post_status ' + statuses[i]['class'] + '">' + statuses[i]['label'] + '</span>');
 				}
+			};
 
+			var updateBranch = function ( $post ) {
+				var $section;
+
+				// Maybe update rel attribute
+				if ($post.children('ul').length === 0) {
+					$post.attr('rel', 'page');
+				} else {
+					$post.attr('rel', 'section');
+				}
+
+				// Recalculate counts
+				if (c.showCounts) {
+
+					// Start from root
+					$section = $post.parentsUntil( '#' + $tree.attr('id'),'li');
+					$section = $section.length ? $section.last() : $post;
+					
+					calculateCounts($section);
+				}
 			};
 
 			// ======= jsTree Event Handlers ======= //
@@ -729,52 +741,69 @@ bu.plugins.navigation = {};
 				that.broadcast( 'selectPost', [ post, that ]);
 			});
 
+			$tree.bind('create.jstree', function (event, data) {
+				var	$node = data.rslt.obj,
+					$parent = data.rslt.parent,
+					position = data.rslt.position;
+					post = my.nodeToPost($node),
+					postParent = null;
+
+				// Notify ancestors of our existence
+				if( $parent !== -1 ) {
+					postParent = my.nodeToPost($parent);
+					updateBranch($parent);
+				}
+				
+				// Set parent and menu order
+				post['parent'] = postParent ? postParent.ID : 0;
+				post['menu_order'] = position + 1;
+
+				that.broadcast( 'insertPost', [post]);
+			});
+
+			$tree.bind('remove.jstree', function (event, data) {
+				var	post = my.nodeToPost(data.rslt.obj),
+					$oldParent = data.rslt.parent;
+
+				if( $oldParent !== -1 ) {
+					// Notify former ancestors of our removal
+					updateBranch($oldParent);
+				}
+
+				that.broadcast( 'removePost', [post]);
+			});
+
 			$tree.bind('deselect_node.jstree', function(event, data ) {
 				var post = my.nodeToPost( data.rslt.obj );
 				that.broadcast( 'deselectPost', [ post, that ]);
 			});
 
 			$tree.bind('move_node.jstree', function(event, data ) {
-				var $parent = data.rslt.np,
-					$oldparent = data.rslt.op,
+				var post = my.nodeToPost( data.rslt.o ),
+					$newParent = data.rslt.np,
+					$oldParent = data.rslt.op,
 					menu_order = data.rslt.o.index() + 1,
-					parent_id,
-					$newsection, $oldsection;
+					parent_id = 0;
 
 				// Set new parent ID
-				if( $tree.attr('id') == $parent.attr('id')) {
-					parent_id = 0;
-				} else {
-					parent_id = parseInt(my.stripNodePrefix($parent.attr('id')),10);
+				if( $tree.attr('id') !== $newParent.attr('id')) {
+					// Notify new ancestors of changes
+					updateBranch($newParent);
+					parent_id = parseInt(my.stripNodePrefix($newParent.attr('id')),10);
 				}
 
-				// Maybe update rel attribute
-				if( $oldparent.attr('rel') === 'section' && $oldparent.children('ul').length === 0 )
-					$oldparent.attr('rel', 'page' );
-				if( $parent.attr('rel') === 'page' )
-					$parent.attr('rel', 'section' );
-
-				// Recalculate counts
-				if( c.showCounts ) {
-					$newsection = $parent.parentsUntil( '#' + $tree.attr('id'),'li');
-					$oldsection = $oldparent.parentsUntil( '#' + $tree.attr('id'),'li');
-					$newsection = $newsection.length ? $newsection.last() : $parent;
-					$oldsection = $oldsection.length ? $oldsection.last() : $oldparent;
-
-					if( $oldsection.is( '#' + $newsection.attr('id') ) ) {
-						calculateCounts($newsection);
-					} else {
-						calculateCounts($oldsection);
-						calculateCounts($newsection);
-					}
+				// If we've changed sections, notify former ancestors as well
+				if ($tree.attr('id') !== $oldParent.attr('id') &&
+					!$newParent.is('#' + $oldParent.attr('id')) ) {
+					updateBranch($oldParent);
 				}
 
 				// Extra post parameters that may be helpful to consumers
-				var post = my.nodeToPost( data.rslt.o );
 				post['parent'] = parent_id;
 				post['menu_order'] = menu_order;
 
 				that.updatePost(post);
+
 				that.broadcast( 'postMoved', [post, parent_id, menu_order]);
 			});
 

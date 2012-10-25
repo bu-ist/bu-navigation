@@ -68,11 +68,14 @@ html[xmlns] .jstree-bu li {
 	margin-bottom: 0;
 }
 
-.jstree-bu ul li[rel="section"] a {
+/* .jstree-bu ul li[rel="section"] a { */
+.jstree-bu > ul > li[rel="section"] {
+/* .jstree-bu ul li[rel="section"]:first-child { */
+/* .jstree-bu ul li[rel="section"] a:first-child { */
 	font-weight: 700;
 }
 
-.jstree-bu ul li[rel="page"] a, .jstree-bu ul li[rel="link"] a {
+.jstree-bu ul li[rel="page"] a, .jstree-bu ul li[rel="link"] a, .jstree-bu > ul > li > ul > li[rel="section"] {
 	font-weight: 100;
 }
 
@@ -122,13 +125,13 @@ html[xmlns] .jstree-bu li {
 	color: white;
 	border: 1px solid #666;
 	background: #7f7f7f;
-	background: -moz-linear-gradient(top, #7f7f7f 0%, #6e6e6e 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #7f7f7f), color-stop(100%, #6e6e6e));
-	background: -webkit-linear-gradient(top, #7f7f7f 0%,#6e6e6e 100%);
-	background: -o-linear-gradient(top, #7f7f7f 0%,#6e6e6e 100%);
-	background: -ms-linear-gradient(top, #7f7f7f 0%,#6e6e6e 100%);
-	background: linear-gradient(to bottom, #7f7f7f 0%,#6e6e6e 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7f7f7f', endColorstr='#6e6e6e',GradientType=0 );
+	background: -moz-linear-gradient(top, #3084b3 0%, #2a729a 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #3084b3), color-stop(100%, #2a729a));
+	background: -webkit-linear-gradient(top, #3084b3 0%,#2a729a 100%);
+	background: -o-linear-gradient(top, #3084b3 0%,#2a729a 100%);
+	background: -ms-linear-gradient(top, #3084b3 0%,#2a729a 100%);
+	background: linear-gradient(to bottom, #3084b3 0%,#2a729a 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3084b3', endColorstr='#2a729a',GradientType=0 );
 }
 
 .jstree-bu .denied > a {
@@ -239,8 +242,8 @@ html[xmlns] .jstree-bu li {
 }
 
 .jstree-bu .jstree-clicked .post_status {
-	background: #474840 !important;
-	color: #777 !important;
+	background: #246082 !important;
+	color: #87bedd !important;
 }
 
 .jstree-bu .edit-options {
@@ -271,7 +274,7 @@ html[xmlns] .jstree-bu li {
 
 .jstree-bu .jstree-clicked .edit-options {
 	visibility: visible;
-	color: #ccc;
+	color: #87bedd;
 	border-left: 1px solid transparent;
 }
 

@@ -10,7 +10,7 @@
 </div>
 
 <p>
-	<a id="select-parent" href="#TB_inline?width=640&inlineId=edit_page_location" class="button" >
+<a id="select-parent" href="#TB_inline?width=640&inlineId=edit_page_location" title="<?php echo esc_attr($dialog_title); ?>" class="button" >
 		<?php echo $move_post_btn_txt; ?>
 	</a>
 </p>
@@ -25,10 +25,8 @@
 			<a href="#" id="bu_page_parent_cancel" class="button">Cancel</a>
 			<input id="bu_page_parent_save" class="button-primary" type="submit" value="Update Location">
 		</div>
-		<h2>Set <?php _e($lc_label); ?> location</h2>
-		<p>Drag the current <?php _e($lc_label); ?> to the desired location.</p>
+		<p class="hint">Drag <?php echo $lc_label; ?> to change the <?php echo $lc_label; ?>'s location in the hierarchy.</p>
 	</div>
-
 	<div id="edit_page_tree" class="jstree-bu"></div>
 </div>
 

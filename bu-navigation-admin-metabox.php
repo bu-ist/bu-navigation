@@ -146,6 +146,8 @@ class BU_Navigation_Admin_Metabox {
 		$breadcrumbs = $this->get_post_breadcrumbs_label( $post );
 		$pt_labels = $this->post_type_labels;
 		$lc_label = strtolower( $pt_labels['singular'] );
+		$dialog_title = ucfirst($pt_labels['singular']) . ' location';	
+		
 		$move_post_btn_txt = "Move $lc_label";
 
 		$pages = self::$interface->get_pages( 0, array( 'depth' => 1 ) );

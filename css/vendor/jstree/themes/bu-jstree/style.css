@@ -22,6 +22,9 @@
  
 html[xmlns] .jstree-bu li {
 	display: block;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
 }
  
 * html .jstree-bu li {
@@ -33,6 +36,37 @@ html[xmlns] .jstree-bu li {
 	background-repeat: no-repeat;
 	background-color: transparent;
 	margin: 8px 4px 0 0;
+}
+
+/*
+.jstree.jstree-bu ul, .jstree.jstree-bu li {
+	margin-top: 0;
+	margin-bottom: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+}*/
+
+.jstree.jstree-bu ul {
+	margin-top: 2px;
+}
+
+.jstree.jstree-bu li {
+	margin-bottom: 1px;
+	border: 1px solid transparent;
+}
+
+.jstree.jstree-bu li.jstree-last {
+	margin-bottom: 0;
+}
+
+.jstree.jstree-bu ul ul {
+	margin-top: 2px;
+	margin-bottom: -1px;
+}
+
+.jstree.jstree-bu li li, .jstree.jstree-bu li li li {
+	margin-top: 1px;
+	margin-bottom: 0;
 }
 
 .jstree.jstree-bu ul {
@@ -79,7 +113,6 @@ html[xmlns] .jstree-bu li {
 	display: block;
 	cursor:	move;
 	padding: 8px 0 8px 0;
-	margin-bottom: 3px;
 	border: 1px solid #dfdfdf;
 	border-radius: 3px;
 	background: #eee;
@@ -90,10 +123,12 @@ html[xmlns] .jstree-bu li {
 	background: -ms-linear-gradient(top, #ffffff 0%,#eeeeee 100%);
 	background: linear-gradient(to bottom, #ffffff 0%,#eeeeee 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eeeeee',GradientType=0 );
+	
+	overflow: hidden; /* This takes care of some of the spacing in between */
 }
 
 .jstree-bu li a .title {
-	max-width: 65%;
+	max-width: 50%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	display: inline-block;
@@ -335,10 +370,13 @@ html[xmlns] .jstree-bu li {
 	background: -ms-linear-gradient(top, #d0d0d0 0%,#dbdbdb 100%) !important;
 	background: linear-gradient(to bottom, #d0d0d0 0%,#dbdbdb 100%) !important;
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0d0d0', endColorstr='#dbdbdb',GradientType=0 ) !important;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
 	border: 1px dashed #9c9c9c !important;
 	border-radius: 4px;
 	box-shadow: inset 3px 3px 3px #bbb;
-	margin-bottom: 4px;
+/* 	margin-bottom: 2px; */
 }
 
 .jstree-bu .bu-dnd-placeholder a {
@@ -463,28 +501,49 @@ html[xmlns] .jstree-bu li {
 }
 
 
+/*
+	Responsive
+*/
+
+@media screen and (max-width: 1024px) {
+	
+	.jstree-bu li a .title {
+		max-width: 35%;
+	}
+	
+}
+
+@media screen and (max-width: 850px) {
+	
+	.jstree-bu li a .title {
+		max-width: 25%;
+	}
+	
+}
+
+
 
 
 /* Seemingly unused, but keeping here just in case */
-.jstree-bu li.jstree-last { background:transparent; }
-.jstree-bu .jstree-open > ins { background-position:-72px 0; }
-.jstree-bu .jstree-closed > ins { background-position:-54px 0; }
-.jstree-bu a .jstree-icon { background-position:-56px -19px; }
-.jstree-bu .jstree-open > a .jstree-icon { background-position:-56px -36px; }
-.jstree-bu.jstree-focused { background:white; }
+.jstree-bu li.jstree-last { background: transparent; }
+.jstree-bu .jstree-open > ins { background-position: -72px 0; }
+.jstree-bu .jstree-closed > ins { background-position: -54px 0; }
+.jstree-bu a .jstree-icon { background-position: -56px -19px; }
+.jstree-bu .jstree-open > a .jstree-icon { background-position: -56px -36px; }
+.jstree-bu.jstree-focused { background: white; }
 .jstree-bu .jstree-no-dots li, 
-.jstree-bu .jstree-no-dots .jstree-leaf > ins { background:transparent; }
-.jstree-bu .jstree-no-dots .jstree-open > ins { background-position:-18px 0; }
-.jstree-bu .jstree-no-dots .jstree-closed > ins { background-position:0 0; }
-.jstree-bu .jstree-no-icons a .jstree-icon { display:none; }
-.jstree-bu .jstree-search { font-style:italic; }
-.jstree-bu .jstree-no-icons .jstree-checkbox { display:inline-block; }
-.jstree-bu .jstree-no-checkboxes .jstree-checkbox { display:none !important; }
-.jstree-bu .jstree-checked > a > .jstree-checkbox { background-position:-38px -19px; }
-.jstree-bu .jstree-unchecked > a > .jstree-checkbox { background-position:-2px -19px; }
-.jstree-bu .jstree-undetermined > a > .jstree-checkbox { background-position:-20px -19px; }
-.jstree-bu .jstree-checked > a > .jstree-checkbox:hover { background-position:-38px -37px; }
-.jstree-bu .jstree-unchecked > a > .jstree-checkbox:hover { background-position:-2px -37px; }
-.jstree-bu .jstree-undetermined > a > .jstree-checkbox:hover { background-position:-20px -37px; }
-.jstree-bu a.jstree-search { color:aqua; }
-.jstree-bu .jstree-locked a { color:silver; cursor:default; }
+.jstree-bu .jstree-no-dots .jstree-leaf > ins { background: transparent; }
+.jstree-bu .jstree-no-dots .jstree-open > ins { background-position: -18px 0; }
+.jstree-bu .jstree-no-dots .jstree-closed > ins { background-position: 0 0; }
+.jstree-bu .jstree-no-icons a .jstree-icon { display: none; }
+.jstree-bu .jstree-search { font-style: italic; }
+.jstree-bu .jstree-no-icons .jstree-checkbox { display: inline-block; }
+.jstree-bu .jstree-no-checkboxes .jstree-checkbox { display: none !important; }
+.jstree-bu .jstree-checked > a > .jstree-checkbox { background-position: -38px -19px; }
+.jstree-bu .jstree-unchecked > a > .jstree-checkbox { background-position: -2px -19px; }
+.jstree-bu .jstree-undetermined > a > .jstree-checkbox { background-position: -20px -19px; }
+.jstree-bu .jstree-checked > a > .jstree-checkbox:hover { background-position: -38px -37px; }
+.jstree-bu .jstree-unchecked > a > .jstree-checkbox:hover { background-position: -2px -37px; }
+.jstree-bu .jstree-undetermined > a > .jstree-checkbox:hover { background-position: -20px -37px; }
+.jstree-bu a.jstree-search { color: aqua; }
+.jstree-bu .jstree-locked a { color: silver; cursor: default; }

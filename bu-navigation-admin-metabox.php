@@ -115,7 +115,7 @@ class BU_Navigation_Admin_Metabox {
 		if( in_array( $post_type, bu_navigation_supported_post_types() ) ) {
 
 			$pt_labels = $this->post_type_labels;
-			add_meta_box('bupageparentdiv', __('Navigation Attributes'), array($this, 'navigation_attributes_metabox'), $post_type, 'side', 'core');
+			add_meta_box('bupageparentdiv', __('Placement in Navigation'), array($this, 'navigation_attributes_metabox'), $post_type, 'side', 'core');
 
 		}
 

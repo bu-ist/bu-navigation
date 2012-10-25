@@ -38,14 +38,6 @@ html[xmlns] .jstree-bu li {
 	margin: 8px 4px 0 0;
 }
 
-/*
-.jstree.jstree-bu ul, .jstree.jstree-bu li {
-	margin-top: 0;
-	margin-bottom: 0;
-	padding-top: 0;
-	padding-bottom: 0;
-}*/
-
 .jstree.jstree-bu ul {
 	margin-top: 2px;
 }
@@ -123,8 +115,6 @@ html[xmlns] .jstree-bu li {
 	background: -ms-linear-gradient(top, #ffffff 0%,#eeeeee 100%);
 	background: linear-gradient(to bottom, #ffffff 0%,#eeeeee 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eeeeee',GradientType=0 );
-	
-	overflow: hidden; /* This takes care of some of the spacing in between */
 }
 
 .jstree-bu li a .title {
@@ -245,11 +235,13 @@ html[xmlns] .jstree-bu li {
 	color: #888;
 	font-weight: 100;
 	float: right;
-	padding: 9px 5px 11px 10px;
-	margin: -9px 0px 0 8px;
+	padding: 9px 5px 9px 10px;
+	margin: -9px 0 0 9px;
 	border-top-right-radius: 3px;
 	border-bottom-right-radius: 3px;
 	cursor: pointer;
+	position: relative;
+	right: 0;
 }
 
 @-moz-document url-prefix() {
@@ -276,10 +268,14 @@ html[xmlns] .jstree-bu li {
 	visibility: visible;
 	background: white;
 	color: black;
-/* 	box-shadow: 1px 2px 4px #ccc; */
 	padding-top: 8px;
 	border-top: 1px solid #ccc;
-	border-left: 1px solid #646464;
+	border-bottom-right-radius: 0;
+	border-bottom-left-radius: 0;
+	
+	-moz-box-shadow: 1px 3px 9px #aaa;
+	-webkit-box-shadow: 1px 9px 5px #aaa;
+	box-shadow: 1px 3px 9px #aaa;
 }
 
 .jstree-bu .edit-options .jstree-icon {
@@ -289,7 +285,7 @@ html[xmlns] .jstree-bu li {
 }
 
 #vakata-contextmenu.jstree-bu-context {
-	margin-top: 11px;
+	margin-top: 10px;
 	margin-left: -105px;
 }
 
@@ -316,13 +312,10 @@ html[xmlns] .jstree-bu li {
 #vakata-contextmenu.jstree-bu-context li ul {
 	background: white;
 	border: none;
-	border-right: 1px solid #666;
-	border-bottom: 1px solid #666;
-	/*
--moz-box-shadow: 1px 3px 5px #ccc;
-	-webkit-box-shadow: 1px 3px 5px #ccc;
-	box-shadow: 1px 3px 5px #ccc;
-*/
+	border-right: 1px solid #888;
+	-webkit-box-shadow: 1px 5px 5px #bbb;
+	-moz-box-shadow: 1px 5px 5px #bbb;
+	box-shadow: 1px 5px 5px #bbb;
 }
 
 #vakata-contextmenu.jstree-bu-context li {
@@ -376,12 +369,10 @@ html[xmlns] .jstree-bu li {
 	border: 1px dashed #9c9c9c !important;
 	border-radius: 4px;
 	box-shadow: inset 3px 3px 3px #bbb;
-/* 	margin-bottom: 2px; */
 }
 
 .jstree-bu .bu-dnd-placeholder a {
 	background: transparent;
-	border: 1px dashed #ddd !important;
 }
 
 .jstree-bu .bu-dnd-placeholder ins, .jstree-bu .bu-dnd-placeholder .edit-options {

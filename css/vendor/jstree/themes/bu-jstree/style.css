@@ -143,7 +143,7 @@ html[xmlns] .jstree-bu li {
 }
 
 .jstree-bu .jstree-clicked .count {
-	color: #ccc;
+	color: #8dc0df;
 }
 
 .jstree-bu .denied .count {
@@ -338,7 +338,6 @@ html[xmlns] .jstree-bu li {
 #vakata-contextmenu.jstree-bu-context li ul {
 	background: white;
 	border: none;
-/* 	border-right: 1px solid #888; */
 	-webkit-box-shadow: 2px 5px 5px #bbb;
 	-moz-box-shadow: 2px 5px 5px #bbb;
 	box-shadow: 2px 5px 5px #bbb;
@@ -381,14 +380,7 @@ html[xmlns] .jstree-bu li {
 
 .jstree-bu .bu-dnd-placeholder {
 	text-indent: -9999em;
-	background: #d0d0d0 !important;
-	background: -moz-linear-gradient(top, #d0d0d0 0%, #dbdbdb 100%) !important;
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #d0d0d0), color-stop(100%, #dbdbdb)) !important;
-	background: -webkit-linear-gradient(top, #d0d0d0 0%,#dbdbdb 100%) !important;
-	background: -o-linear-gradient(top, #d0d0d0 0%,#dbdbdb 100%) !important;
-	background: -ms-linear-gradient(top, #d0d0d0 0%,#dbdbdb 100%) !important;
-	background: linear-gradient(to bottom, #d0d0d0 0%,#dbdbdb 100%) !important;
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0d0d0', endColorstr='#dbdbdb',GradientType=0 ) !important;
+	background: #d0d0d0;
 	box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -582,6 +574,7 @@ html[xmlns] .jstree-bu li {
 
 
 /* Seemingly unused, but keeping here just in case */
+/*
 .jstree-bu li.jstree-last { background: transparent; }
 .jstree-bu .jstree-open > ins { background-position: -72px 0; }
 .jstree-bu .jstree-closed > ins { background-position: -54px 0; }
@@ -602,5 +595,6 @@ html[xmlns] .jstree-bu li {
 .jstree-bu .jstree-checked > a > .jstree-checkbox:hover { background-position: -38px -37px; }
 .jstree-bu .jstree-unchecked > a > .jstree-checkbox:hover { background-position: -2px -37px; }
 .jstree-bu .jstree-undetermined > a > .jstree-checkbox:hover { background-position: -20px -37px; }
+*/
 .jstree-bu a.jstree-search { color: aqua; }
 .jstree-bu .jstree-locked a { color: silver; cursor: default; }

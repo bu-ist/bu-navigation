@@ -38,7 +38,6 @@ class BU_Navigation_Admin_Metabox {
 		$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
 
 		$post_id = is_object( $this->post ) ? $this->post->ID : null;
-		$is_new = is_null( $post_id ) ? true : false;
 		$ancestors = null;
 
 		// @todo setup an else clause here that fetches ancestors if they aren't set on the
@@ -53,8 +52,8 @@ class BU_Navigation_Admin_Metabox {
 			'postStatuses' => array( 'draft', 'pending', 'publish' ),
 			'currentPost' => $post_id,
 			'ancestors' => $ancestors,
-			'isNewPost' => $is_new,
 			'lazyLoad' => true,
+			'showCounts' => true,
 			'nodePrefix' => 'na'
 			);
 

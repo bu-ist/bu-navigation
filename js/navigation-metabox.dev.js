@@ -31,8 +31,11 @@ if((typeof bu === 'undefined' ) ||
 		inputs: {
 			label: '[name="nav_label"]',
 			visible: '[name="nav_display"]',
+			postID: '[name="post_ID"]',
+			originalStatus: '[name="original_post_status"]',
 			parent: '[name="parent_id"]',
-			order: '[name="menu_order"]'
+			order: '[name="menu_order"]',
+			autoDraft: '[name="auto_draft"]'
 		},
 
 		// Metabox instance data
@@ -43,17 +46,30 @@ if((typeof bu === 'undefined' ) ||
 		},
 
 		initialize: function() {
-
+			var currentStatus, currentParent, currentOrder, navLabel, navDisplay;
+			
 			// Create post navigation tree from server-provided instance settings object
 			this.settings = bu_nav_settings_nav_metabox;
 			this.settings.el = this.ui.treeContainer;
 
-			if( typeof this.settings.isNewPost === 'undefined' )
-				this.settings.isNewPost = $('#auto_draft').val() == 1 ? true : false;
+			// Populate current post object with initial form input data 
+			this.settings.isNewPost = $(this.inputs['autoDraft']).val() == 1 ? true : false;
+			currentStatus = $(this.inputs['originalStatus']).val();
+			currentParent = parseInt($(this.inputs['parent']).val(),10);
+			currentOrder = parseInt($(this.inputs['order']).val(),10);
+			navLabel = $(this.inputs['label']).val() || '(no title)';
+			navDisplay = $(this.inputs['visible']).attr('checked') || false;
 
-			if( this.settings.isNewPost )
-				this.settings.currentPost = $('#post_ID').val();
-
+			// Create current post object
+			this.settings.currentPost = {
+				ID: parseInt($(this.inputs['postID']).val(),10),
+				title: navLabel,
+				meta: { excluded: !navDisplay },
+				parent: currentParent,
+				menu_order: currentOrder,
+				status: currentStatus == 'auto-draft' ? 'new' : currentStatus
+			};
+			
 			// References to key elements
 			this.$el = $(this.el);
 
@@ -73,7 +89,7 @@ if((typeof bu === 'undefined' ) ||
 				this.data.modalTree = ModalPostTree(this.settings);
 
 				// Subscribe to relevant signals to trigger UI updates
-				this.data.modalTree.listenFor( 'update', $.proxy(this.updateLocation,this) );
+				this.data.modalTree.listenFor( 'locationUpdated', $.proxy(this.onLocationUpdated,this) );
 
 			}
 
@@ -94,46 +110,44 @@ if((typeof bu === 'undefined' ) ||
 
 		onLabelChange: function(e) {
 			var label = $(this.inputs.label).attr('value');
-			var post = { ID: this.settings.currentPost, title: label };
+			this.settings.currentPost.title = label;
 
 			// Label updates should be reflected in tree view
-			Navtree.updatePost( post );
+			Navtree.updatePost( this.settings.currentPost );
 			Navtree.save();
 
-			this.updateBreadcrumbs( post );
+			this.updateBreadcrumbs( this.settings.currentPost );
 
 		},
 
 		onToggleVisibility: function(e) {
 			var visible = $(e.target).attr('checked');
-			var post = Navtree.getPost( this.settings.currentPost );
-			
-			if ( visible && ! this.isAllowedInNavigationLists( post ) ) {
+				
+			if (visible && !this.isAllowedInNavigationLists(this.settings.currentPost)) {
 				e.preventDefault();
 				this.notify("Displaying top-level pages in the navigation is disabled. To change this behavior, go to Site Design > Primary Navigation and enable \"Allow Top-Level Pages.\"");
 			}
 			
-			post.meta['excluded'] = ! visible;
+			this.settings.currentPost.meta['excluded'] = ! visible;
 			
 			// Nav visibility updates should be reflected in tree view
-			Navtree.updatePost( post );
+			Navtree.updatePost( this.settings.currentPost );
 			Navtree.save();
 		},
 
-		// Methods
-
-		updateLocation: function( post ) {
-
-			this.updateBreadcrumbs( post );
-
+		onLocationUpdated: function( post ) {
+			
 			// Set form field values
 			$(this.inputs.parent).val(post.parent);
 			$(this.inputs.order).val(post.menu_order);
 
+			this.updateBreadcrumbs( post );
+
+			this.settings.currentPost = post;
 		},
 
+		//Methods
 		updateBreadcrumbs: function( post ) {
-
 			var ancestors = Navtree.getAncestors( post.ID );
 			var breadcrumbs = ancestors.join("&nbsp;&raquo;&nbsp;");
 
@@ -200,9 +214,6 @@ if((typeof bu === 'undefined' ) ||
 			// Create post navigation tree,
 			Navtree = bu.plugins.navigation.tree( 'edit_post', c );
 
-			// Subscribe to relevant navtree signals
-			Navtree.listenFor('postsSelected', that.onPostsSelected);
-
 			$toolbar = $(c.toolbarContainer);
 
 			// Modal toolbar actions
@@ -251,7 +262,7 @@ if((typeof bu === 'undefined' ) ||
 
 			e.preventDefault();
 
-			that.broadcast( 'update', [ Navtree.getCurrentPost() ]);
+			that.broadcast( 'locationUpdated', [ Navtree.getCurrentPost() ]);
 
 			// Update rollback object
 			Navtree.save();
@@ -267,35 +278,6 @@ if((typeof bu === 'undefined' ) ||
 			e.preventDefault();
 
 			tb_remove();
-
-		};
-
-		// Navtree Actions
-
-		that.onPostsSelected = function() {
-			var post, navLabel, navDisplay;
-
-			// Current node will be undefined if we are editing a new post
-			if( c.isNewPost && ! Navtree.getCurrentPost() ) {
-
-				navLabel = $(Metabox.inputs['label']).val() || 'Untitled post';
-				navDisplay = $(Metabox.inputs['visible']).attr('checked') || false;
-
-				// Setup attributes for new page
-				post = {
-					ID: c.currentPost,
-					title: navLabel,
-					meta: { excluded: !navDisplay },
-					parent: 0,
-					menu_order: 0
-				};
-
-				// Insert new post placeholder and designate it as current post
-				Navtree.insertPost( post, { position: 'before' } );
-				Navtree.setCurrentPost( post );
-				Navtree.save();
-
-			}
 
 		};
 

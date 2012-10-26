@@ -31,9 +31,9 @@ bu.plugins.navigation = {};
 
 			},
 			broadcast: function (event, data) {
-				var i = 0;
+				var i;
 				if (listeners[event]) {
-					for (i; i < listeners[event].length; i = i + 1) {
+					for (i = 0; i < listeners[event].length; i = i + 1) {
 						listeners[event][i].apply(this, data || []);
 					}
 				}
@@ -65,8 +65,8 @@ bu.plugins.navigation = {};
 
 				var args = Array.prototype.slice.apply(arguments),
 					extra = args.slice(1),
-					i = 0,
-					rslt = obj;
+					rslt = obj,
+					i;
 
 				for (i = 0; i < filters[name].length; i = i + 1) {
 					rslt = filters[name][i].apply(this, extra);
@@ -452,20 +452,6 @@ bu.plugins.navigation = {};
 				if (typeof d.rollback === 'undefined')
 					return;
 
-				/*
-				HUGE hack alert...
-				Using the rollback object to store a snapshot and restore is not
-				exactly the intended use case.  One thing that was broken was that
-				passing the config for initially_select was resulting in the selected
-				page being created twice.  As part of the rollback method, it selects whatever
-				was passed to initially_select, then it selects any objects that were selected
-				when the rollback was stored -- including the one it just selected.  This is a
-				bug that I work around by clearing the selected object (which is an empty array
-				in a jQuery object) and allowing it to rely on the argument passed to
-				initially_select instead.
-				*/
-				d.rollback.d.ui.selected = $([]);
-
 				// Run rollback
 				$.jstree.rollback(d.rollback);
 
@@ -744,7 +730,7 @@ bu.plugins.navigation = {};
 			$tree.bind('create.jstree', function (event, data) {
 				var	$node = data.rslt.obj,
 					$parent = data.rslt.parent,
-					position = data.rslt.position;
+					position = data.rslt.position,
 					post = my.nodeToPost($node),
 					postParent = null;
 
@@ -947,31 +933,21 @@ bu.plugins.navigation = {};
 
 			var $tree = that.$el;
 			var currentPost = c.currentPost;
-			var currentNodeId = c.nodePrefix + currentPost;
-
+			
 			// Extra configuration
 			var extraTreeConfig = {};
 
 			// Build initial open and selection arrays from current post / ancestors
-			var toSelect = [],
-				toOpen = [],
-				i;
-			if ( currentPost ) {
-				toSelect.push( '#' + currentNodeId );
-				if ( c.ancestors && c.ancestors.length ) {
-					// We want old -> young, which is not how they're passed
-					var ancestors = c.ancestors.reverse();
-					for (i = 0; i < ancestors.length; i++ ) {
-						toOpen.push( '#' + c.nodePrefix + c.ancestors[i] );
-					}
+			var toOpen = [], i;
+			
+			if (c.ancestors && c.ancestors.length) {
+				// We want old -> young, which is not how they're passed
+				var ancestors = c.ancestors.reverse();
+				for (i = 0; i < ancestors.length; i = i + 1) {
+					toOpen.push( '#' + c.nodePrefix + c.ancestors[i] );
 				}
 			}
-			if ( toSelect.length ) {
-				extraTreeConfig['ui'] = {
-					"initially_select": toSelect
-				};
-			}
-			if ( toOpen.length ) {
+			if (toOpen.length) {
 				extraTreeConfig['core'] = {
 					"initially_open": toOpen
 				};
@@ -979,16 +955,30 @@ bu.plugins.navigation = {};
 
 			// Merge base tree config with extras
 			$.extend( true, d.treeConfig, extraTreeConfig );
-
+			
 			// Assert current post for select, hover and drag operations
 			var assertCurrentPost = function( node ) {
 				var postId = my.stripNodePrefix(node.attr('id'));
-				return postId == currentPost;
+				return postId == currentPost.ID;
 			};
 			
 			bu.hooks.addFilter( 'canSelectNode', assertCurrentPost );
 			bu.hooks.addFilter( 'canHoverNode', assertCurrentPost );
 			bu.hooks.addFilter( 'canDragNode', assertCurrentPost );
+
+			$tree.bind('reselect.jstree', function (e, data) {
+				var $current = my.getNodeForPost(currentPost);
+				
+				// Insert new post if it isn't already represented in the tree
+				if (!$current) {
+					if ('new' === currentPost.status) {
+						that.insertPost( currentPost, { pos: 'before' });
+					}
+				}
+
+				that.selectPost( currentPost );
+				that.save();
+			});
 
 			// Public
 			that.getCurrentPost = function() {
@@ -997,19 +987,17 @@ bu.plugins.navigation = {};
 					return false;
 
 				var $node = my.getNodeForPost( currentPost );
-				var post = my.nodeToPost( $node );
-				return post;
+
+				if ($node) {
+					var post = my.nodeToPost( $node );
+					return post;
+				}
+				
+				return false;
 			};
 
 			that.setCurrentPost = function( post ) {
-				var $node = my.getNodeForPost( post );
-
-				// Update all state vars relevant to current post
-				currentPost = post.ID;
-				currentNodeId = $node.attr('id');
-
-				// Select and update tree state
-				that.selectPost( post );
+				currentPost = post;
 			};
 
 			// @todo consider moving to ModalTree

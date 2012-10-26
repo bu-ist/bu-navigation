@@ -297,8 +297,16 @@ html[xmlns] .jstree-bu li {
 
 .jstree-bu .edit-options .jstree-icon {
 	float: right;
-	background-position: -32px -16px !important;
+	background-position: -32px -16px;
 	margin: 0 0 0 4px;
+}
+
+.jstree-bu .jstree-clicked .edit-options .jstree-icon {
+	background-position: -48px -16px;
+}
+
+.jstree-bu .jstree-clicked .edit-options.clicked .jstree-icon {
+	background-position: -32px -16px;
 }
 
 #vakata-contextmenu.jstree-bu-context {

@@ -5,6 +5,11 @@
 */
  
 
+.navman-toolbar {
+	font-size: 90%;
+	margin-bottom: 12px;
+	margin-top: 30px;
+}
 
 .jstree-bu li:after {
 	content: ".";
@@ -40,13 +45,13 @@ html[xmlns] .jstree-bu li {
 
 .jstree.jstree-bu ul {
 	margin-top: 2px;
-	padding-left: 18px;
+	padding-left: 14px;
 }
 
 .jstree.jstree-bu ul ul {
 	margin-top: 2px;
 	margin-bottom: -1px;
-	padding-left: 0;
+	padding-left: 14px;
 }
 
 .jstree.jstree-bu li {
@@ -517,9 +522,7 @@ html[xmlns] .jstree-bu li {
 }
 
 
-/*
-	Responsive
-*/
+/* Responsive */
 
 @media screen and (max-width: 1024px) {
 	
@@ -528,7 +531,7 @@ html[xmlns] .jstree-bu li {
 	}
 	
 	.ie7 .jstree-bu li a .title, .ie8 .jstree-bu li a .title {
-		max-width: 35% !important;
+		max-width: 35%;
 	}
 	
 }
@@ -536,11 +539,11 @@ html[xmlns] .jstree-bu li {
 @media screen and (max-width: 850px) {
 	
 	.jstree-bu li a .title {
-		max-width: 25%;
+		max-width: 30%;
 	}
 	
 	.ie7 .jstree-bu li a .title, .ie8 .jstree-bu li a .title {
-		max-width: 25% !important;
+		max-width: 30%;
 	}
 	
 }

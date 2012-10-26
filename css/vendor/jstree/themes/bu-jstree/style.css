@@ -73,14 +73,11 @@ html[xmlns] .jstree-bu li {
 	margin-bottom: 0;
 }
 
-/* .jstree-bu ul li[rel="section"] a { */
-.jstree-bu > ul > li[rel="section"] {
-/* .jstree-bu ul li[rel="section"]:first-child { */
-/* .jstree-bu ul li[rel="section"] a:first-child { */
+.jstree-bu > ul > li[rel="section"] { /* Sets the to level section bold */
 	font-weight: 700;
 }
 
-.jstree-bu ul li[rel="page"] a, .jstree-bu ul li[rel="link"] a, .jstree-bu > ul > li > ul > li[rel="section"] {
+.jstree-bu ul li[rel="page"] a, .jstree-bu ul li[rel="link"] a, .jstree-bu > ul > li > ul > li[rel="section"] { /* Sets all subsequent child sections not bold */
 	font-weight: 100;
 }
 
@@ -106,7 +103,7 @@ html[xmlns] .jstree-bu li {
 .jstree-bu li a {
 	display: block;
 	cursor:	move;
-	padding: 8px 0 8px 0;
+	padding: 6px 0 6px 0;
 	border: 1px solid #dfdfdf;
 	border-radius: 3px;
 	background: #eee;
@@ -177,7 +174,6 @@ html[xmlns] .jstree-bu li {
 	background-image: url("sprite.png");
 	background-repeat: no-repeat;
 	background-color: transparent;
-/* 	background-position: 0 0; */
 	background-position: -32px 0;
 }
 
@@ -258,8 +254,8 @@ html[xmlns] .jstree-bu li {
 	color: #888;
 	font-weight: 100;
 	float: right;
-	padding: 9px 5px 9px 10px;
-	margin: -9px -1px 0 9px;
+	padding: 7px 5px 7px 10px;
+	margin: -7px -1px 0 9px;
 	border-top-right-radius: 3px;
 	border-bottom-right-radius: 3px;
 	cursor: pointer;
@@ -291,7 +287,7 @@ html[xmlns] .jstree-bu li {
 	visibility: visible;
 	background: white;
 	color: black;
-	padding-top: 8px;
+	padding-top: 6px;
 	border-top: 1px solid #ccc;
 	border-bottom-right-radius: 0;
 	border-bottom-left-radius: 0;
@@ -315,14 +311,14 @@ html[xmlns] .jstree-bu li {
 }
 
 #vakata-contextmenu.jstree-bu-context {
-	margin-top: 10px;
+	margin-top: 9px;
 	margin-left: -105px;
 }
 
 @-moz-document url-prefix() {
     #vakata-contextmenu.jstree-bu-context {
 	    margin-left: -99px;
-	    margin-top: 10px;
+	    margin-top: 9px;
     }
 }
 

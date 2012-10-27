@@ -1,38 +1,24 @@
-#edit_page_tree {
-	position: relative;
-	padding-right: 2em;
-	height: 83%;
-	overflow: scroll;
-}
-
-.page_location_toolbar {
-	padding: 1em 0.5em;
-	*zoom: 1;
-}
-
 .page_location_toolbar .edit_buttons {
-	float: right;
-	margin-top: 45px;
-	margin-bottom: 1em;
+	margin: 20px 0 0 auto;
+	width: 176px;
 }
 
-.page_location_toolbar:before,
-.page_location_toolbar:after {
-	content: " "; /* 1 */
-	display: table; /* 2 */
-}
-
-.page_location_toolbar:after {
-	clear: both;
+#TB_window .page_location_toolbar p.hint {
+	margin-left: 20px;
+	color: #777;
+	font-style: italic;
+	padding: 0;
 }
 
 /* Thickbox overrides */
 #TB_window .jstree-bu a {
- color: black;   
+	color: black;
+	cursor: default;
 }
 
 #TB_window .jstree-bu .jstree-clicked {
- color: white;
+	color: white;
+	cursor: default;
 }
 
 

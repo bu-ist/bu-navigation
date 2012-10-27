@@ -22,6 +22,7 @@ class BU_Navman_Interface {
 
 		$this->plugin = $GLOBALS['bu_navigation_plugin'];
 		$this->instance = $instance;
+		$this->no_title_text = __('(no title)');
 
 		// Need to build post type string for RPC setting
 		$rpc_post_types = 'page,link';
@@ -276,6 +277,10 @@ class BU_Navman_Interface {
 		// wptexturize converts quotes to smart quotes, need to reverse that for display here
 		$page->navigation_label = wp_specialchars_decode( $page->navigation_label, ENT_QUOTES );
 		$page->navigation_label = $this->convert_smart_chars( $page->navigation_label );
+
+		if ( empty( $page->navigation_label ) ) {
+			$page->navigation_label = $this->no_title_text;
+		}
 
 		// Base format
 		$p = array(

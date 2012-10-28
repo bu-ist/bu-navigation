@@ -171,26 +171,27 @@ class BU_Navigation_Plugin {
 
 		foreach( $updates as $key => $val ) {
 
-			if( ! array_key_exists( $key, $settings ) )
-				continue;
+			if( array_key_exists( $key, $settings ) ) {
 
-			// Prevent depth setting from exceeding theme limit (BU_NAVIGATION_SUPPORTED_DEPTH)
-			if( $key == 'depth' )
-				$val = $this->depth_fix( $val );
+				// Prevent depth setting from exceeding theme limit (BU_NAVIGATION_SUPPORTED_DEPTH)
+				if( $key == 'depth' )
+					$val = $this->depth_fix( $val );
 
-			// Cooerce booleans into ints for update_option
-			if( is_bool( $val ) ) $val = intval( $val );
+				// Cooerce booleans into ints for update_option
+				if( is_bool( $val ) ) $val = intval( $val );
 
-			// Commit to db
-			$option = constant( 'self::OPTION_' . strtoupper( $key ) );
-			$result = update_option( $option, $val );
+				// Commit to db
+				$option = constant( 'self::OPTION_' . strtoupper( $key ) );
+				$result = update_option( $option, $val );
 
-			// Update internal settings on successful commit
-			if( $result ) {
+				// Update internal settings on successful commit
+				if( $result ) {
 
-				// Update internal settings property
-				$this->settings[$key] = $val;
+					// Update internal settings property
+					$this->settings[$key] = $val;
 
+				}
+				
 			}
 
 		}

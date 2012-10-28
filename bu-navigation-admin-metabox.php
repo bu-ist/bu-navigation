@@ -266,7 +266,7 @@ class BU_Navigation_Admin_Metabox {
 			'sections' => array($post->post_parent),
 			'post_status' => array('publish','pending','draft'),	// ignore post statuses that are not being displayed
 			'suppress_filter_pages' => true,	// suppress is spelled with two p's...
-			'post_type' => $post_types,	// handle custom post types support
+			'post_types' => $post_types,	// handle custom post types support
 		));
 		
 		$i = 1;
@@ -298,7 +298,7 @@ class BU_Navigation_Admin_Metabox {
 
 		} else {
 
-			// error_log("No siblings found for post {$post->ID}, done!");
+			 // error_log("No siblings found for post {$post->ID}, done!");
 
 		}
 

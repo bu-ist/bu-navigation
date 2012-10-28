@@ -26,17 +26,17 @@ class BU_Navman_Interface {
 
 		// Need to build post type string for RPC setting
 		$rpc_post_types = 'page,link';
-		if( isset( $settings['post_types'] ) ) {
-			if( is_array( $settings['post_types'] ) ) {
-				$rpc_post_types = implode(',',$settings['post_types']);
+		if( isset( $settings['postTypes'] ) ) {
+			if( is_array( $settings['postTypes'] ) ) {
+				$rpc_post_types = implode(',',$settings['postTypes']);
 			} else {
-				$rpc_post_types = $settings['post_types'];
+				$rpc_post_types = $settings['postTypes'];
 			}
 		}
 
 		$defaults = array(
 			'postTypes' => array('page','link'),
-			'postStatuses' => array('publish','draft'),
+			'postStatuses' => array('draft','pending','publish'),
 			'themePath' => plugins_url('css/vendor/jstree/themes/bu-jstree', __FILE__ ), 
 			'rpcUrl' => admin_url('admin-ajax.php?action=bu_getpages&post_type=' . $rpc_post_types ),
 			'allowTop' => $this->plugin->get_setting('allow_top'),
@@ -494,4 +494,3 @@ function bu_navigation_format_page_legacy( $p, $page, $has_children) {
 }
 
 add_filter('bu_navigation_interface_format_page_legacy', 'bu_navigation_format_page_legacy', 10, 3 );
-

@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__FILE__) . '/bu-navigation-interface.php' );
+require_once(dirname(__FILE__) . '/classes.nav-tree.php' );
 
 /**
  * BU Navigation Admin Metabox controller
@@ -15,7 +15,6 @@ require_once(dirname(__FILE__) . '/bu-navigation-interface.php' );
  */ 
 class BU_Navigation_Admin_Metabox {
 
-	static $interface;
 	public $plugin;
 
 	public $post;
@@ -33,32 +32,6 @@ class BU_Navigation_Admin_Metabox {
 		$this->post = $post;
 		$this->post_type = $post_type;
 		$this->post_type_labels = BU_Navigation_Plugin::$admin->get_post_type_labels( $this->post_type );
-
-		// Instantiate navman tree interface object
-		$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
-
-		$post_id = is_object( $this->post ) ? $this->post->ID : null;
-		$ancestors = null;
-
-		// @todo setup an else clause here that fetches ancestors if they aren't set on the
-		// post object.  Something in our environment seems to be removing them randomly,
-		// and with memcache that can stick around for a while in the cache.
-
-		if( is_object( $post ) && isset( $post->ancestors ) && ! empty( $post->ancestors ))
-			$ancestors = $post->ancestors;
-
-		$settings = array(
-			'postTypes' => $post_types,
-			'postStatuses' => array( 'draft', 'pending', 'publish' ),
-			'currentPost' => $post_id,
-			'ancestors' => $ancestors,
-			'lazyLoad' => true,
-			'showCounts' => true,
-			'nodePrefix' => 'na'
-			);
-
-		// Instantiate post tree interface
-		self::$interface = new BU_Navman_Interface( 'nav_metabox', $settings );
 
 		// Attach WP actions/filters
 		$this->register_hooks();
@@ -80,19 +53,44 @@ class BU_Navigation_Admin_Metabox {
 	/**
 	 * Load metabox scripts
 	 */ 
-	public function add_scripts($page) {
+	public function add_scripts( $page ) {
 		
 		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
 		$scripts_path = plugins_url('js',__FILE__);
 		$styles_path = plugins_url('css',__FILE__);
 
+		// Scripts
 		wp_register_script('bu-navigation-metabox', $scripts_path . '/navigation-metabox' . $suffix . '.js', array('bu-navigation'), '0.3', true );
 		
+		// Setup dynamic script context for navigation-metabox.js 
+		$post_id = is_object( $this->post ) ? $this->post->ID : null;
+		$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
+		$ancestors = null;
+
+		// @todo setup an else clause here that fetches ancestors if they aren't set on the
+		// post object.  Something in our environment seems to be removing them randomly,
+		// and with memcache that can stick around for a while in the cache.
+
+		if( is_object( $this->post ) && isset( $this->post->ancestors ) && ! empty( $this->post->ancestors ))
+			$ancestors = $this->post->ancestors;
+
+		$script_context = array(
+			'postTypes' => $post_types,
+			'postStatuses' => array('draft','pending','publish'),
+			'currentPost' => $post_id,
+			'ancestors' => $ancestors,
+			'lazyLoad' => true,
+			'showCounts' => true,
+			'nodePrefix' => 'na',
+			'deselectOnDocumentClick' => false
+			);
+		// Navigation tree view will handle actual enqueuing of our script
+		$treeview = new BU_Navigation_Tree_View( 'nav_metabox', $script_context );
+		$treeview->enqueue_script('bu-navigation-metabox');
+		
+		// Styles
 		wp_enqueue_style( 'bu-navigation-metabox', $styles_path . '/navigation-metabox.css' );
-
-		// Let nav interface class handle enqueue
-		self::$interface->enqueue_script('bu-navigation-metabox');
-
+		
 	}
 
 	/**
@@ -149,8 +147,6 @@ class BU_Navigation_Admin_Metabox {
 		
 		$move_post_btn_txt = "Move $lc_label";
 
-		$pages = self::$interface->get_pages( 0, array( 'depth' => 1 ) );
-		
 		include('interface/metabox-navigation-attributes.php');
 
 	}

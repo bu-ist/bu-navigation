@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__FILE__) . '/bu-navigation-interface.php' );
+require_once(dirname(__FILE__) . '/classes.nav-tree.php' );
 
 /*
 @todo
@@ -19,7 +19,6 @@ require_once(dirname(__FILE__) . '/bu-navigation-interface.php' );
  */ 
 class BU_Navigation_Admin_Navman {
 
-	static $interface;
 	public $page;
 
 	private $plugin;
@@ -39,20 +38,7 @@ class BU_Navigation_Admin_Navman {
 
 		// @todo test with multiple supported custom post types
 		$this->post_type = $post_type;
-
-		// Instantiate navman tree interface object
-		$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
-
-		$settings = array(
-			'postTypes' => $post_types,
-			'postStatuses' => array( 'draft', 'pending', 'publish' ),
-			'nodePrefix' => 'nm',
-			'lazyLoad' => true,
-			'showCounts' => true
-			);
-
-		self::$interface = new BU_Navman_Interface( 'bu_navman', $settings );
-
+		
 		// Attach WP actions/filters
 		$this->register_hooks();
 
@@ -127,22 +113,33 @@ class BU_Navigation_Admin_Navman {
 			
 			$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
 
+			// Scripts
 			wp_register_script('bu-jquery-validate', plugins_url('js/vendor/jquery.validate' . $suffix . '.js', __FILE__), array('jquery'), '1.8.1', true);
 			wp_register_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-navigation','jquery-ui-dialog','bu-jquery-validate'), '0.3.1', true);
 
+			// Setup dynamic script context for manage.js
+			$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
 
+			$script_context = array(
+				'postTypes' => $post_types,
+				'postStatuses' => array('draft','pending','publish'),
+				'nodePrefix' => 'nm',
+				'lazyLoad' => true,
+				'showCounts' => true
+				);
+			// Navigation tree view will handle actual enqueuing of our script
+			$treeview = new BU_Navigation_Tree_View( 'bu_navman', $script_context );
+			$treeview->enqueue_script('bu-navman');
+
+			// Styles
 			if ( 'classic' == get_user_option( 'admin_color') ) {
 				wp_enqueue_style ( 'bu-jquery-ui-css',  plugins_url( '/css/jquery-ui-classic.css', __FILE__ ), array(), '0.3' );
 			} else {
 				wp_enqueue_style ( 'bu-jquery-ui-css',  plugins_url( '/css/jquery-ui-fresh.css', __FILE__ ), array(), '0.3' );
 			}
 
-			// Scripts and styles for this page
-			wp_enqueue_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-navigation'), '0.3.1', true);
 			wp_enqueue_style('bu-navman', plugins_url('css/manage.css', __FILE__), array(), '0.3');
-
-			// Let nav interface class handle enqueue
-			self::$interface->enqueue_script('bu-navman');
+			
 		}
 		
 	}

@@ -88,8 +88,10 @@ bu.plugins.navigation = {};
 
 	// Default global settings
 	Nav.settings = {
-		'lazyLoad': false,
-		'showCounts': false
+		'lazyLoad': true,
+		'showCounts': true,
+		'showStatuses': true,
+		'deselectOnDocumentClick': true
 	};
 
 	// DOM ready -- browser classes
@@ -107,7 +109,7 @@ bu.plugins.navigation = {};
 		if (typeof type === 'undefined') {
 			type = 'base';
 		}
-		
+
 		return Nav.trees[type](config).initialize();
 	};
 
@@ -236,10 +238,11 @@ bu.plugins.navigation = {};
 						"type" : "POST",
 						"data" : function (n) {
 							return {
-								id : n.attr ? my.stripNodePrefix(n.attr("id")) : 0,
+								child_of : n.attr ? my.stripNodePrefix(n.attr("id")) : 0,
+								post_types : c.postTypes,
+								post_statuses : c.postStatuses,
 								instance : c.instance,
-								prefix : c.nodePrefix,
-								post_status : c.postStatuses
+								prefix : c.nodePrefix
 							};
 						}
 					},
@@ -406,7 +409,9 @@ bu.plugins.navigation = {};
 				}
 
 				// Refresh post status badges
-				appendPostStatus( $node );
+				if (c.showStatuses) {
+					appendPostStatus( $node );
+				}
 				
 				that.broadcast('updatePost', [ updated ]);
 
@@ -600,7 +605,7 @@ bu.plugins.navigation = {};
 
 			var appendPostStatus = function( $node ) {
 				var $a = $node.children('a');
-				if( $a.children('.post-statuses').length === 0 ) {
+				if ($a.children('.post-statuses').length === 0) {
 					$a.append('<span class="post-statuses"></span>');
 				}
 				
@@ -688,21 +693,23 @@ bu.plugins.navigation = {};
 			});
 
 			// Append extra markup to each tree node
-			$tree.bind('clean_node.jstree', function( event, data ) {
-				var $nodes = data.rslt.obj;
+			if (c.showStatuses ) {
+				$tree.bind('clean_node.jstree', function( event, data ) {
+					var $nodes = data.rslt.obj;
 
-				// skip root node
-				if ($nodes && $nodes !== -1) {
-					$nodes.each(function(i, node) {
-						var $node = $(node);
+					// skip root node
+					if ($nodes && $nodes !== -1) {
+						$nodes.each(function(i, node) {
+							var $node = $(node);
 
-						// Append post statuses inside node anchor
-						if( $node.find('> a > .post-statuses').length === 0 ) {
-							appendPostStatus($node);
-						}
-					});
-				}
-			});
+							// Append post statuses inside node anchor
+							if( $node.find('> a > .post-statuses').length === 0 ) {
+								appendPostStatus($node);
+							}
+						});
+					}
+				});
+			}
 
 			$tree.bind('create_node.jstree', function(event, data ) {
 				var $node = data.rslt.obj;
@@ -780,6 +787,22 @@ bu.plugins.navigation = {};
 
 				that.broadcast( 'postMoved', [post, parent_id, menu_order]);
 			});
+			
+			// Deselect all nodes on document clicks outside of a tree element or
+			// context menu item
+			var deselectOnDocumentClick = function (e) {
+				var clickedTree = $.contains( $tree[0], e.target );
+				var clickedMenuItem = $.contains( $('#vakata-contextmenu')[0], e.target );
+				
+				if (!clickedTree && !clickedMenuItem) {
+					$tree.jstree('deselect_all');
+				}		
+			};
+
+
+			if (c.deselectOnDocumentClick ) {
+				$(document).bind( "click", deselectOnDocumentClick );
+			}
 
 			return that;
 		},
@@ -891,17 +914,6 @@ bu.plugins.navigation = {};
 					target.find('> a > .edit-options').removeClass('clicked');
 				}
 			};
-
-			// Deselect all nodes on document clicks outside of a tree element or
-			// context menu item
-			$(document).bind( "click", function (e) {
-				var clickedTree = $.contains( $tree[0], e.target );
-				var clickedMenuItem = $.contains( $('#vakata-contextmenu')[0], e.target );
-				
-				if (!clickedTree && !clickedMenuItem) {
-					$tree.jstree('deselect_all');
-				}
-			});
 
 			return that;
 		},

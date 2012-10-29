@@ -32,7 +32,7 @@ if((typeof bu === 'undefined') ||
 
 		initialize: function( config ) {
 			// Create post navigation tree from server-provided instance settings object
-			var settings = bu_nav_settings_bu_navman;
+			var settings = bu_navman_settings;
 			settings.el = this.el;
 
 			Navtree = bu.plugins.navigation.tree('navman', settings );

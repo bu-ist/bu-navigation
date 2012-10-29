@@ -49,7 +49,7 @@ if((typeof bu === 'undefined' ) ||
 			var currentStatus, currentParent, currentOrder, navLabel, navDisplay;
 			
 			// Create post navigation tree from server-provided instance settings object
-			this.settings = bu_nav_settings_nav_metabox;
+			this.settings = nav_metabox_settings;
 			this.settings.el = this.ui.treeContainer;
 
 			// Populate current post object with initial form input data 

@@ -4726,11 +4726,15 @@
 				$.each(js.data, function (i, m) {
 					tmp = $("<a />");
 					if($.isFunction(m)) { m = m.call(this, js); }
-					if(typeof m == "string") { tmp.attr('href','#').wrapInner($('<span class="title">')[ s.html_titles ? "html" : "text" ](m)); }
+					if(typeof m == "string") { 
+						tmp.attr('href','#').append('<span class="title-count"></span>');
+						tmp.children('.title-count').wrapInner($('<span class="title" ></span>')[ s.html_titles ? "html" : "text" ](m));
+					}
 					else {
 						if(!m.attr) { m.attr = {}; }
 						if(!m.attr.href) { m.attr.href = '#'; }
-						tmp.attr(m.attr).wrapInner($('<span class="title">')[ s.html_titles ? "html" : "text" ](m.title));
+						tmp.attr(m.attr).append('<span class="title-count"></span>');
+						tmp.children('.title-count').wrapInner($('<span class="title"></span>')[ s.html_titles ? "html" : "text" ](m.title));
 						if(m.language) { tmp.addClass(m.language); }
 					}
 					tmp.prepend("<ins class='jstree-icon'>&#160;</ins>");
@@ -4836,11 +4840,15 @@
 					$.each(js.data, function (i, m) {
 						tmp = $("<a />");
 						if($.isFunction(m)) { m = m.call(this, js); }
-						if(typeof m == "string") { tmp.attr('href','#').wrapInner($('<span class="title"></span>')[ t ? "html" : "text" ](m)); }
+						if(typeof m == "string") { 
+							tmp.attr('href','#').append('<span class="title-count"></span>');
+							tmp.children('.title-count').wrapInner($('<span class="title"></span>')[ s.html_titles ? "html" : "text" ](m));
+						}
 						else {
 							if(!m.attr) { m.attr = {}; }
 							if(!m.attr.href) { m.attr.href = '#'; }
-							tmp.attr(m.attr).wrapInner($('<span class="title"></span>')[ t ? "html" : "text" ](m.title));
+							tmp.attr(m.attr).append('<span class="title-count"></span>');
+							tmp.children('.title-count').wrapInner($('<span class="title"></span>')[ t ? "html" : "text" ](m.title));
 							if(m.language) { tmp.addClass(m.language); }
 						}
 						tmp.prepend("<ins class='jstree-icon'>&#160;</ins>");

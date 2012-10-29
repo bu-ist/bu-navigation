@@ -569,42 +569,30 @@ bu.plugins.navigation = {};
 			// ======= Private ======= //
 
 			var calculateCounts = function($node, includeDescendents) {
-				if( typeof includeDescendents === 'undefined' )
-					includeDescendents = true;
+				var count, $count, $a;
+				includeDescendents = includeDescendents || true;
+				
+				// Tally up descendent li's to determine count
+				count = $node.find('li').length;
+				$a = $node.children('a');
 
-				var count = $node.find('li').length;
-				var $a = $node.children('a');
-
-				if(count) {
-
-					var $count = $a.children('.count');
-
-					if($count.length === 0) {
-
-						var $options = $a.children('.edit-options');
+				if (count) {
+					$count = $a.find('> .title-count > .count');
+					// Append count node if it isn't already there'
+					if ($count.length === 0) {
 						$count = $('<span class="count"></span>');
-
-						// Count should appear before statuses
-						if( $options.length ) {
-							$options.before($count);
-						} else {
-							$a.append($count);
-						}
-
+						$a.children('.title-count').append($count);
 					}
-
+					// Set current count
 					$count.text('(' + count + ')');
-
 				} else {
-
 					// Remove count if empty
-					$a.children('.count').remove();
-
+					$a.find('> .title-count > .count').remove();
 				}
 
 				// Recurse to all descendents
-				if(includeDescendents) {
-					$node.find('> ul > li').each(function(){
+				if (includeDescendents) {
+					$node.find('> ul > li').each(function (){
 						calculateCounts($(this));
 					});
 				}

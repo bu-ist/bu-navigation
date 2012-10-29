@@ -670,7 +670,7 @@ bu.plugins.navigation = {};
 				// jstree breaks spectacularly if the stylesheet hasn't set an li height
 				// when the tree is created -- this is what they call a hack...
 				var $li = $tree.find("> ul > li:first-child");
-				var nodeHeight = $li.height() >= 18 ? $li.height() : 37;
+				var nodeHeight = $li.height() >= 18 ? $li.height() : 32;
 				$tree.jstree('data').data.core.li_height = nodeHeight;
 
 				that.broadcast( 'postsLoaded' );

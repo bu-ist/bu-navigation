@@ -265,7 +265,7 @@ html[xmlns] .jstree-bu li {
 
 @-moz-document url-prefix() {
     .jstree-bu .edit-options {
-	    margin-top: -25px;
+	    margin-top: -24px;
     }
 }
 

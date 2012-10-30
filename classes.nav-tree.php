@@ -232,12 +232,8 @@ class BU_Navigation_Tree_View {
 	public function format_post( $post, $has_children = false ) {
 		// Label
 		if( !isset( $post->navigation_label ) ) {
-			$post->navigation_label = apply_filters('the_title', $post->post_title);
+			$post->navigation_label = apply_filters( 'the_title', $post->post_title );
 		}
-
-		// wptexturize converts quotes to smart quotes, need to reverse that for display here
-		$post->navigation_label = wp_specialchars_decode( $post->navigation_label, ENT_QUOTES );
-		$post->navigation_label = $this->convert_smart_chars( $post->navigation_label );
 		
 		if ( empty( $post->navigation_label ) ) {
 			$post->navigation_label = $this->no_title_text;
@@ -247,7 +243,7 @@ class BU_Navigation_Tree_View {
 		$p = array(
 			'attr' => array(
 				'id' => $this->add_node_prefix( $post->ID ),
-				'rel' => ($post->post_type == 'link' ? $post->post_type : 'page' ),
+				'rel' => ( $post->post_type == 'link' ? $post->post_type : 'page' ),
 				),
 			'data' => $post->navigation_label,
 			'metadata' => array(
@@ -256,8 +252,8 @@ class BU_Navigation_Tree_View {
 				'post_parent' => $post->post_parent,
 				'menu_order' => $post->menu_order,
 				'post_meta' => array(
-					'excluded' => (isset($post->excluded) ? $post->excluded : false),
-					'restricted' => (isset($post->restricted) ? $post->restricted : false)
+					'excluded' => ( isset($post->excluded) ? $post->excluded : false ),
+					'restricted' => ( isset($post->restricted) ? $post->restricted : false )
 					)
 				)
 			);
@@ -278,14 +274,6 @@ class BU_Navigation_Tree_View {
 
 		// But give priority to more specific format filters
 		return apply_filters( 'bu_nav_tree_view_format_post_' . $this->instance, $p, $post, $has_children );
-
-	}
-
-	public function convert_smart_chars( $input ) {
-
-		$search = array("&#8216;", "&#8217;", "&#8220;", "&#8221;", "&#8211;", "&#8212;", "&#8230;");
-		$replace = array("'", "'", '"', '"', '-', '--', '...');
-		return str_replace($search, $replace, $input);
 
 	}
 

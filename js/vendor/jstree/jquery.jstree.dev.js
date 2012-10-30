@@ -4842,7 +4842,7 @@
 						if($.isFunction(m)) { m = m.call(this, js); }
 						if(typeof m == "string") { 
 							tmp.attr('href','#').append('<span class="title-count"></span>');
-							tmp.children('.title-count').wrapInner($('<span class="title"></span>')[ s.html_titles ? "html" : "text" ](m));
+							tmp.children('.title-count').wrapInner($('<span class="title"></span>')[ t ? "html" : "text" ](m));
 						}
 						else {
 							if(!m.attr) { m.attr = {}; }

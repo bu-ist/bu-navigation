@@ -824,8 +824,9 @@ bu.plugins.navigation = {};
 
 			d.treeConfig["contextmenu"] = {
 				'show_at_node': false,
-				"items": function() {
-					return {
+				"items": function (node) {
+
+					var options = {
 						"edit" : {
 							"label" : "Edit",
 							"action" : editPost,
@@ -836,6 +837,8 @@ bu.plugins.navigation = {};
 							"action" : removePost
 						}
 					};
+
+					return bu.hooks.applyFilters('navmanContextItems', options, node );
 				}
 			};
 

@@ -1,9 +1,15 @@
 <!-- @todo rewrite helper text -->
 <h4><?php _e('Current Location'); ?></h4>
 
-<!-- @todo investigate if these fields are present outside of metabox pre-3.5 -->
-<input type="hidden" name="menu_order" value="<?php echo $post->menu_order; ?>">
+<?php 
+// For WP < 3.2, there is a hidden input name="parent_id" that exists outside of the default "Page Attributes" metabox.
+// In more recent versions, this has been removed in favor of the "Page Attributes" select box which has a name of "parent_id".
+// We are looking at the current version here to decide whether or not it is needed.
+global $wp_version;
+if( version_compare( $wp_version, '3.2', '>=' ) ): ?>
 <input type="hidden" name="parent_id" value="<?php echo $post->post_parent; ?>">
+<?php endif; ?>
+<input type="hidden" name="menu_order" value="<?php echo $post->menu_order; ?>">
 
 <div id="bu_nav_attributes_location_breadcrumbs">
 	<p><?php echo $breadcrumbs; ?></p>
@@ -17,10 +23,6 @@
 
 <div id="edit_page_location" style="display:none;">
 	<div class="page_location_toolbar">
-		<input type="hidden" name="tmp_parent_id" value="">
-		<input type="hidden" name="tmp_parent_label" value="">
-		<input type="hidden" name="tmp_menu_order" value="">
-
 		<div class="edit_buttons">
 			<a href="#" id="bu_page_parent_cancel" class="button">Cancel</a>
 			<input id="bu_page_parent_save" class="button-primary" type="submit" value="Update Location">

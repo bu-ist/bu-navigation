@@ -124,15 +124,20 @@ if((typeof bu === 'undefined' ) ||
 			var visible = $(e.target).attr('checked');
 				
 			if (visible && !this.isAllowedInNavigationLists(this.settings.currentPost)) {
+				
 				e.preventDefault();
 				this.notify("Displaying top-level pages in the navigation is disabled. To change this behavior, go to Site Design > Primary Navigation and enable \"Allow Top-Level Pages.\"");
+
+			} else {
+
+				this.settings.currentPost.meta['excluded'] = ! visible;
+				
+				// Nav visibility updates should be reflected in tree view
+				Navtree.updatePost( this.settings.currentPost );
+				Navtree.save();
+
 			}
 			
-			this.settings.currentPost.meta['excluded'] = ! visible;
-			
-			// Nav visibility updates should be reflected in tree view
-			Navtree.updatePost( this.settings.currentPost );
-			Navtree.save();
 		},
 
 		onLocationUpdated: function( post ) {

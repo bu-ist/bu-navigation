@@ -5,9 +5,10 @@
 
 	<div id="navman-container">
 		<form method="post" id="navman_form" action="">
-			<input type="hidden" id="navman_data" name="navman_data" value="" />
-			<input type="hidden" id="navman_delete" name="navman_delete" value="" />
-			<input type="hidden" id="navman_edits" name="navman_edits" value="" />
+			<input type="hidden" id="navman-moves" name="navman-moves" value="" />
+			<input type="hidden" id="navman-inserts" name="navman-inserts" value="" />
+			<input type="hidden" id="navman-updates" name="navman-updates" value="" />
+			<input type="hidden" id="navman-deletions" name="navman-deletions" value="" />
 
 			<div class="navman-toolbar">
 				<a href="#nav-tree-container" id="navman_expand_all">Expand All</a> |

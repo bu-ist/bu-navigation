@@ -69,7 +69,7 @@ if((typeof bu === 'undefined' ) ||
 				menu_order: currentOrder,
 				status: currentStatus == 'auto-draft' ? 'new' : currentStatus
 			};
-			
+
 			// References to key elements
 			this.$el = $(this.el);
 

@@ -387,6 +387,8 @@ class BU_Navigation_Tree_Query {
 			// Bulk fetch ACL restriction data for passed posts
 			// @todo move this query to the access control plugin
 			// look at bu-section-editing/plugin-support/bu-navigation
+			$restricted = array();
+			
 			if (class_exists('BuAccessControlPlugin')) {
 
 				$acl_option = defined( 'BuAccessControlList::PAGE_ACL_OPTION' ) ? BuAccessControlList::PAGE_ACL_OPTION : BU_ACL_PAGE_OPTION;

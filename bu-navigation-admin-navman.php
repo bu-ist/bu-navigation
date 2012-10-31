@@ -35,10 +35,8 @@ class BU_Navigation_Admin_Navman {
 	public function __construct( $post_type ) {
 
 		$this->plugin = $GLOBALS['bu_navigation_plugin'];
-
-		// @todo test with multiple supported custom post types
 		$this->post_type = $post_type;
-		
+
 		// Attach WP actions/filters
 		$this->register_hooks();
 
@@ -52,12 +50,12 @@ class BU_Navigation_Admin_Navman {
 		add_action('admin_menu', array( $this, 'register_menu' ) );
 		add_action('admin_enqueue_scripts', array( $this, 'add_scripts' ) );
 
+		add_filter('bu_nav_tree_view_format_post_bu_navman', array( $this, 'format_post'), 10, 2 );
+
 	}
 
 	/**
 	 * Add "Edit Order" submenu pages to allow editing the navigation of the supported post types
-	 * 
-	 * @return void
 	 */
 	public function register_menu() {
 		global $pagenow;
@@ -294,238 +292,361 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Handle $_POST submissions for navigation management page
+	 * 
+	 * @todo decide how best to handle failures
 	 */ 
 	public function save() {
 		$saved = NULL;
+		$errors = array();
 
-		if (array_key_exists('bu_navman_save', $_POST)) {
-//			error_log('Starting navman save:');
-//			$time_start = microtime(true);
-			
-			$saved = $problems = false;
+		if( array_key_exists( 'bu_navman_save', $_POST ) ) {
 
-			// Process removals
-			$pages_to_delete = json_decode(stripslashes($_POST['navman_delete']));
+			// error_log('===== Starting navman save =====');
+			// $time_start = microtime(true);
 
-			$success = $this->process_deletions( $pages_to_delete );
+			$saved = false;
+			$reorder_map = array();
 
-			if (!$success)
-				$problems = true;
+			// Process post removals
+			$deletions = json_decode(stripslashes($_POST['navman-deletions']));
+			$result = $this->process_deletions( $deletions );
 
-			// Process link updates
-			$pages_to_edit = (array)json_decode(stripslashes($_POST['navman_edits']));
-
-			$success = $this->process_edits( $pages_to_edit );
-
-			if (!$success)
-				$problems = true;
-
-			// Process moves
-			$nodes = json_decode(stripslashes($_POST['navman_data']));
-
-//			error_log('Finished navman json_decoding in' . sprintf('%f',(microtime(true) - $time_start)) . ' seconds');
-
-			$updates = array();
-
-			if ((is_array($nodes)) && (count($nodes) > 0)) {
-				$parent_id = 0;
-				$updates = $this->process_nodes($parent_id, $nodes);
+			if( is_wp_error( $result ) ) {
+				array_push( $errors, $result );
 			}
 
-			$success = $this->process_moves( $updates );
-			
-//			error_log('Finished processing nodes in ' . sprintf('%f',(microtime(true) - $time_start)) . ' seconds');
+			// Process link updates
+			$updates = (array)json_decode(stripslashes($_POST['navman-updates']));
+			$result = $this->process_updates( $updates );
 
-			if (!$success)
-				$problems = true;
+			if( is_wp_error( $result ) ) {
+				array_push( $errors, $result );
+			}
 
-			// @todo remove for new environment
+			// Process link insertions
+			$inserts = (array)json_decode(stripslashes($_POST['navman-inserts']));
+			$result = $this->process_insertions( $inserts, $reorder_map );
+
+			if( is_wp_error( $result ) ) {
+				array_push( $errors, $result );
+			}
+
+			// Process moves
+			$moves = (array)json_decode(stripslashes($_POST['navman-moves']));
+			$result = $this->process_moves( $moves, $reorder_map );
+
+			if( is_wp_error( $result ) ) {
+				array_push( $errors, $result );
+			}
+
+			// Update menu order for affected children
+			$this->reorder_affected_sections( $reorder_map );
+
+			// error_log('Finished navman save in ' . sprintf('%f',(microtime(true) - $time_start)) . ' seconds');
+
 			if (function_exists('invalidate_blog_cache')) invalidate_blog_cache();
 
-//			error_log('Finished navman save in ' . sprintf('%f',(microtime(true) - $time_start)) . ' seconds');
+			if( count( $errors ) == 0 ) {
+				$saved = true;
+			} else {
+				// @todo do something with all the WP_Error objects
+			}
 
-			if (!$problems) $saved = true;
 		}
 
 		return $saved;
 	}
 
 	/**
-	 * @todo implement
+	 * Trashes posts that have been removed using the navman interface
+	 * 
 	 * @todo write unit tests
+	 * 
+	 * @param array $post_ids an array of post ID's for trashing
+	 * @return bool|WP_Error $result the result of the post deletions
 	 */ 
-	public function process_deletions( $pages_to_delete ) {
-		// error_log('=== Processing post removals ===');
-		$success = true;
+	public function process_deletions( $post_ids ) {
+		// error_log('===== Processing deletions =====');
+		// error_log('To delete: ' . print_r($post_ids,true ) );
 
-		if ((is_array($pages_to_delete)) && (count($pages_to_delete) > 0)) {
+		$result = null;
+		$failures = array();
 
-			foreach ($pages_to_delete as $id) {
-				if (!wp_delete_post($id)) {
-					error_log(sprintf('navman: Unable to delete post %d', $id));
-					$success = false;
+		if ( ( is_array( $post_ids ) ) && ( count( $post_ids ) > 0 ) ) {
+
+			foreach( $post_ids as $id ) {
+
+				// @todo current_user_can(...) check
+
+				$deleted = wp_delete_post( (int) $id );
+
+				if( ! $deleted ) {
+					error_log(sprintf('[BU Navigation Navman] Unable to delete post %d', $id));
+					array_push( $failures, $id );
 				} else {
-					// error_log('Post deleted: ' . $id );
+					// Temporary logging
+					// error_log('[+] Post deleted: ' . $id );
 				}
+
 			}
+
 		}
 
-		return $success;
+		if( count( $failures ) ) {
+			$result = new WP_Error('Error deleting posts: ' . implode(', ', $failures ) );
+		} else {
+			$result = true;
+		}
+
+		return $result;
 	}
 
 	/**
-	 * @todo implement
+	 * Updates posts (really just links at this time) that have been modified using the navman interface
+	 * 
 	 * @todo write unit tests
+	 * 
+	 * @param array $posts an array of posts which have been modified
+	 * @return bool|WP_Error $result the result of the post updates
 	 */ 
-	public function process_edits( $pages_to_edit ) {
-		// error_log('=== Processing link updates ===');
-		$success = true;
+	public function process_updates( $posts ) {
+		// error_log('===== Processing updates =====');
+		// error_log('To update: ' . print_r($posts,true ) );
 
-		if ((is_array($pages_to_edit)) && (count($pages_to_edit) > 0)) {
-			foreach ($pages_to_edit as $p) {
+		$result = null;
+		$failures = array();
 
-				if( ! is_object( $p ) ) {
-					error_log('Bad value for post: ');
-					error_log(print_r($p,true));
-					continue;
-				}
+		if( ( is_array( $posts ) ) && ( count( $posts ) > 0 ) ) {
+
+			foreach( $posts as $post_id => $post ) {
+
+				// @todo current_user_can(...) check
 
 				$data = array(
-					'ID' => $p->ID,
-					'post_title' => $p->title,
-					'post_content' => $p->content
+					'ID' => (int) $post_id,
+					'post_title' => $post->title,	// sanitize?
+					'post_content' => $post->content // sanitize?
 					);
 
-				$id = wp_update_post($data);
+				$id = wp_update_post( $data );
 
-				if (!$id) {
-					$success = false;
-					continue;
+				if( $id ) {
+
+					$target = ($post->meta->bu_link_target === 'new') ? 'new' : 'same';
+					update_post_meta( $id, 'bu_link_target', $target );
+
+					// Temporary logging
+					// error_log('Link updated: ' . $post->title );
+
+				} else {
+
+					error_log(sprintf('[BU Navigation Navman] Could not update link: %s', print_r($post, true)));
+					array_push( $failures, $post->title );				
+
 				}
 
-				$target = ($p->meta->bu_link_target === 'new') ? 'new' : 'same';
-
-				update_post_meta($id, 'bu_link_target', $target);
-
-				// error_log("Link $id updated!");
-				// error_log("Label: {$data['post_title']}, URL: {$data['post_content']}, Target: $target");
 			}
+
 		}
 
-		// error_log('Finished processessing edits, return status: ' . $success );
-		return $success;	
+		if( count( $failures ) ) {
+			$result = new WP_Error('Error updating posts: ' . implode(', ', $failures ) );
+		} else {
+			$result = true;
+		}
+
+		return $result;
 	}
 
 	/**
+	 * Insert posts (really just links at this time) that have been added using the navman interface
+	 * 
 	 * @todo write unit tests
+	 * 
+	 * @param array $posts an array of posts which have been added
+	 * @param array $reorder_map a map of data used to keep track of parents that will require reordering
+	 * @return bool|WP_Error $result the result of the post insertions
 	 */ 
-	public function process_nodes( $parent_id, $nodes ) {
+	public function process_insertions( $posts, & $reorder_map ) {
+		// error_log('===== Processing insertions =====');
+		// error_log('To insert: ' . print_r($posts,true ) );
 
-		// error_log("=== Processing nodes for post parent $parent_id ===");
+		$result = null;
+		$failures = array();
 
-		$updates = array();
-		$updates[$parent_id] = array();
+		if( ( is_array( $posts ) ) && ( count( $posts ) > 0 ) ) {
 
-		foreach ($nodes as $node) {
-			$id = $node->ID;
+			foreach( $posts as $post ) {
 
-			// Special handling for new links -- need to get a valid post ID 
-			if ( 'link' == $node->type && 'new' == $node->status ) {
+				$id = $post->ID;
 
-				$data = array(
-					'post_title' => $node->title,
-					'post_content' => $node->content,
-					'post_excerpt' => '',
-					'post_status' => 'publish',
-					'post_type' => 'link',
-					'post_parent' => $parent_id,
-					'menu_order' => 0	// will be updated
-					);
+				// @todo current_user_can(...) check
 
-				$id = wp_insert_post($data);
+				// Special handling for new links -- need to get a valid post ID 
+				if ( 'link' == $post->type ) {
+					$data = array(
+						'post_title' => $post->title,
+						'post_content' => $post->content,
+						'post_excerpt' => '',
+						'post_status' => 'publish',
+						'post_type' => 'link',
+						'post_parent' => (int) $post->parent,
+						'menu_order' => (int) $post->menu_order
+						);
 
-					// error_log('Insert ID: ' . $id );
+					$id = wp_insert_post($data);
 
-				if ($id === 0) {
-					error_log(sprintf('bu_navman_process_nodes could not create link: %s', print_r($node, true)));
-					continue;
+					if( $id ) {
+
+						$target = ($post->meta->bu_link_target === 'new') ? 'new' : 'same';
+						update_post_meta($id, 'bu_link_target', $target );
+
+						// Push update to the map that triggers parent reordering
+						if( ! array_key_exists( $post->parent, $reorder_map ) ) {
+							$reorder_map[$post->parent] = array( 'ids' => array(), 'positions' => array() );
+						}
+
+						$reorder_map[$post->parent]['ids'][] = $id;
+						$reorder_map[$post->parent]['positions'][] = $post->menu_order;
+
+						// Temporary logging
+						// error_log('Link inserted: ' . $post->title . ' (' . $id . ')' );
+
+					} else {
+
+						error_log(sprintf('[BU Navigation Navman] Could not create link: %s', print_r($post, true)));
+						array_push( $failures, $post->title );
+
+					}
+
 				}
-
-				$target = ($node->meta->bu_link_target === 'new') ? 'new' : 'same';
-
-				update_post_meta($id, 'bu_link_target', $target );
-					// error_log("Inserting new link - ID: $id, Label: {$data['post_title']}, URL: {$data['post_content']}, Target: $target, Parent: $parent_id");
 
 			}
 
-			array_push($updates[$parent_id], $id);
-
-			// Recurse through descendents
-			if ((isset($node->children)) && (is_array($node->children)) && (count($node->children) > 0)) {
-				$child_updates = $this->process_nodes( $id, $node->children );
-
-				foreach ($child_updates as $page_id => $children) {
-					$updates[$page_id] = $children;
-				}
-			}
 		}
 
-		// error_log('Finished processessing nodes, updates made: ' . count($updates) );
-		return $updates;
+		if( count( $failures ) ) {
+			$result = new WP_Error('Error inserting posts: ' . implode(', ', $failures ) );
+		} else {
+			$result = true;
+		}
 
+		return $result;
 	}
 
 	/**
-	 * @todo implement
+	 * Updates posts that have been moved using the navman interface
+	 * 
 	 * @todo write unit tests
+	 * 
+	 * @param array $posts an array of posts which have new menu_order or post_parent fields
+	 * @param array $reorder_map a map of data used to keep track of parents that will require reordering
+	 * @return bool|WP_Error $result the result of the post movements
 	 */ 
-	public function process_moves( $pages_to_move ) {
-		// error_log("=== Processing moves ===");
+	public function process_moves( $posts, & $reorder_map  ) {
+		// error_log('===== Processing moves =====');
+		// error_log('To move: ' . print_r($posts,true ) );
+
 		global $wpdb;
-		$success = true;
-		
-		if ((is_array($pages_to_move)) && (count($pages_to_move) > 0)) {
 
-			// get a complete navigation tree before we make changes
-			remove_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
-			$all_pages = bu_navigation_get_pages();
-			$pages_moved = array();
+		$result = null;
+		$failures = array();
+		
+		if( ( is_array( $posts ) ) && ( count( $posts ) > 0 ) ) {
 
 			do_action('bu_navman_pages_pre_move');
 
-			foreach ($pages_to_move as $parent_id => $pages) {
+			foreach( $posts as $post_id => $post ) {
 
-				if ((is_array($pages)) && (count($pages) > 0)) {
+				// @todo current_user_can(...) check
 
-					$position = 1;
+				// Update post parent and menu order
+				$id = wp_update_post(array('ID'=>$post->ID,'post_parent'=>$post->parent,'menu_order'=>$post->menu_order));
 
-					foreach ($pages as $page) {
+				if( $id ) {
 
-						$stmt = $wpdb->prepare('UPDATE ' . $wpdb->posts . ' SET post_parent = %d, menu_order = %d WHERE ID = %d', $parent_id, $position, $page);
-						$rc = $wpdb->query($stmt);
-						// error_log("Updating post $page - Parent: $parent_id, Order: $position");
-
-						if ($rc === false) $success = false;
-
-						$position++;
-
-						if (array_key_exists($page, $all_pages)) {
-							if ($all_pages[$page]->post_parent != $parent_id)
-								array_push($pages_moved, $page);
-						} else {
-							/* it appears we don't know about this page, let's report it as moved */
-							array_push($pages_moved, $page);
-						}
+					// Push update to the map that triggers parent reordering
+					if( ! array_key_exists( $post->parent, $reorder_map ) ) {
+						$reorder_map[$post->parent] = array( 'ids' => array(), 'positions' => array() );
 					}
+
+					$reorder_map[$post->parent]['ids'][] = $id;
+					$reorder_map[$post->parent]['positions'][] = $post->menu_order;
+
+					// Temporary logging
+					// error_log('Post moved: ' . $post->ID );
+
+				} else {
+
+					error_log(sprintf('[BU Navigation Navman] Could not move post: %s', print_r($post, true)));
+					array_push( $failures, $post->ID );
+
 				}
+
 			}
 
-			// @todo $pages_moved is not used by link-rebuilder or any other filters, remove?
-			do_action('bu_navman_pages_moved', $pages_moved);
+			do_action('bu_navman_pages_moved');
+
 		}
 
-		// error_log('Finished processessing edits, pages moved: ' . count($pages_moved) . ', return status: ' . $success );
-		return $success;
+		if( count( $failures ) ) {
+			$result = new WP_Error('Error moving posts: ' . implode(', ', $failures ) );
+		} else {
+			$result = true;
+		}
+
+		return $result;
+
+	}
+
+	/**
+	 * Handles reordering for sections that contain children that have updated post_parent or menu_order fields
+	 * 
+	 * @todo write unit tests
+	 * 
+	 * @param array $reorder_map a map of data needed to calculate reorders, keyed on parent ID's
+	 */ 
+	public function reorder_affected_sections( $reorder_map ) {
+		global $wpdb;
+
+		foreach( $reorder_map as $parent_id => $already_set ) {
+
+			// Fetch children of affected sections for reordering 
+			$post_types = ($this->post_type == 'page') ? array('page','link') : $this->post_type;
+			$children = bu_navigation_get_pages( array( 
+				'sections' => array($parent_id),
+				'suppress_filter_pages' => true,
+				'post_status' => array('draft','pending','publish'),
+				'post_types' => $post_types
+				)
+			);
+
+			$position = 1;
+
+			foreach( $children as $child_id => $child ) {
+
+				// Skip update for any children that were already handled in process_insertions and process_moves 
+				if( in_array( $child_id, $already_set['ids'] ) ) {
+					// error_log('Child already has correct menu order, skipping myself (' . $child->post_title . ')');
+					continue;
+				}
+
+				// Skip over any positions that were set for previously updated children
+				while( in_array( $position, $already_set['positions'] ) ) {
+					// error_log('Position has already been set, skipping ' . $position );
+					$position++;
+				}
+
+				$stmt = $wpdb->prepare('UPDATE ' . $wpdb->posts . ' SET menu_order = %d WHERE ID = %d', $position, $child_id );
+				$rc = $wpdb->query($stmt);
+
+				// Temporary logging
+				// error_log('Setting menu order for post "' . $child->post_title . '": ' . $position );
+
+				$position++;
+			}
+
+		}
 
 	}
 
@@ -575,6 +696,22 @@ class BU_Navigation_Admin_Navman {
 			delete_option( self::OPTION_LOCK_USER );
 		}
 
+	}
+
+	/**
+	 * Extra data to pass to DOM nodes for more accurate tracking of moves
+	 * 
+	 * @param array $p DOM data for jstree parsing
+	 * @param array $post post object for page being formatted
+	 * @return array filtered DOM data for jstree parsing
+	 */
+	public function format_post( $p, $post ) {
+
+		// We want to store original page parent and menu order
+		$p['metadata']['originalParent'] = $post->post_parent;
+		$p['metadata']['originalOrder'] = $post->menu_order;
+
+		return $p;
 	}
 
 }

@@ -289,7 +289,7 @@ bu.plugins.navigation = {};
 				$tree.jstree('select_node', $node);
 			};
 
-			that.getSelected = function() {
+			that.getSelectedPost = function() {
 				var $node = $tree.jstree('get_selected');
 				if ($node.length) {
 					return my.nodeToPost($node);
@@ -370,58 +370,88 @@ bu.plugins.navigation = {};
 
 			};
 
-			that.insertPost = function( post, args ) {
-				var selection = $tree.jstree('get_selected');
-				var postSelected = selection.length > 0;
-				
-				var defaults = {
-					which: postSelected ? selection : null,
-					position: postSelected ? 'after' : 'before',
+			that.insertPost = function( post ) {
+				if (typeof post === 'undefined') {
+					throw new TypeError('Post argument for insertPost must be defined!');
+				}
+
+				var $inserted, $parent, $sibling, orderIndex, args, node;
+
+				// Assert parent and menu order values exist and are valid
+				post.parent = post.parent || 0;
+				post.menu_order = post.menu_order || 1;
+
+				// Translate post parent field to node
+				if (post.parent) {
+					$parent = my.getNodeForPost( post.parent );
+				} else {
+					$parent = $tree;
+				}
+
+				// Translate menu order to list item index of sibling to insert post after
+				orderIndex = post.menu_order - 2;
+				if (orderIndex >= 0) {
+					$sibling = $parent.find('> ul > li').get(orderIndex);
+				} else {
+					$sibling = null;
+				}
+
+				// Setup create args based on values translated from parent/menu_order
+				args = {
+					which: $sibling,
+					position: $sibling ? 'after' : 'before',
 					skip_rename: true,
 					callback: function($node) { $tree.jstree('deselect_all'); $tree.jstree('select_node', $node); }
 				};
 
-				var a = $.extend( defaults, args );
-				var node = my.postToNode( post );
+				// Translate post object to node format for jstree consumption
+				node = my.postToNode( post );
 
-				$tree.jstree( 'create', a.which, a.position, node, a.callback, a.skip_rename );
+				// Create tree node and update with insertion ID if post ID was not previously set
+				$inserted = $tree.jstree( 'create', args.which, args.position, node, args.callback, args.skip_rename );
+				if (!post.ID) {
+					post.ID = $inserted.attr('id');
+				}
 
 				return post;
 			};
 
 			that.updatePost = function( post ) {
 				var $node = my.getNodeForPost( post ),
-					origPost, updated;
+					original, updated;
 
-				if( $node ) {
+				if ($node) {
 
 					// Merge original values with updates
-					origPost = my.nodeToPost( $node );
-					updated = $.extend(true, {}, origPost, post);
+					original = my.nodeToPost($node);
+					updated = $.extend(true, {}, original, post);
 
 					// Set node text with navigation label
-					$tree.jstree('set_text', $node, updated.title );
+					$tree.jstree('set_text', $node, updated.title);
 
-					// Update metadata stored with node
+					// Update metadata cache with node
 					// @todo do this dynamically by looping through post props
 					$node.data('post_content', updated.content);
 					$node.data('post_title', updated.title);
 					$node.data('post_status', updated.status);
 					$node.data('post_type', updated.type);
-					$node.data('post_parent', parseInt( updated.parent, 10 ) );
-					$node.data('menu_order', parseInt( updated.menu_order, 10 ) );
+					$node.data('post_parent', parseInt(updated.parent, 10));
+					$node.data('menu_order', parseInt(updated.menu_order, 10));
 					$node.data('post_meta', updated.meta);
 
+					// Refresh post status badges
+					// @todo move to callback
+					if (c.showStatuses) {
+						appendPostStatus($node);
+					}
+					
+					that.broadcast('postUpdated', [updated]) ;
+
+					return updated;
+
 				}
 
-				// Refresh post status badges
-				if (c.showStatuses) {
-					appendPostStatus( $node );
-				}
-				
-				that.broadcast('updatePost', [ updated ]);
-
-				return updated;
+				return false;
 			};
 
 			// Remove post
@@ -490,18 +520,18 @@ bu.plugins.navigation = {};
 					status: node.data('post_status'),
 					type: node.data('post_type'),
 					parent: parseInt(node.data('post_parent'), 10),
-					menu_order: parseInt(node.data('menu_order'), 10),
+					menu_order: node.index() + 1, 
 					meta: node.data('post_meta') || {}
 				};
 
-				return bu.hooks.applyFilters('nodeToPost',post);
+				return bu.hooks.applyFilters('nodeToPost', post, node);
 			};
 
-			my.postToNode = function( post, args ) {
+			my.postToNode = function( post ) {
 				if (typeof post === 'undefined')
 					throw new TypeError('Invalid post!');
 
-				var default_post, p, node
+				var default_post, p, node, post_id;
 
 				default_post = {
 					title: '(no title)',
@@ -516,11 +546,11 @@ bu.plugins.navigation = {};
 				p = $.extend({}, default_post, post);
 
 				// Generate post ID if none previously existed
-				p.ID = p.ID ? c.nodePrefix + p.ID : 'post-new-' + my.getNextPostID();
+				post_id = p.ID ? c.nodePrefix + p.ID : 'post-new-' + my.getNextPostID();
 
 				node = {
 					"attr": {
-						"id": p.ID,
+						"id": post_id,
 						"rel" : p.type
 					},
 					"data": {
@@ -659,7 +689,7 @@ bu.plugins.navigation = {};
 					} else {
 						$section = $post;
 					}
-					
+
 					calculateCounts($section);
 				}
 			};
@@ -748,19 +778,29 @@ bu.plugins.navigation = {};
 				post['parent'] = postParent ? postParent.ID : 0;
 				post['menu_order'] = position + 1;
 
-				that.broadcast( 'insertPost', [post]);
+				that.broadcast('postInserted', [post]);
 			});
 
 			$tree.bind('remove.jstree', function (event, data) {
-				var	post = my.nodeToPost(data.rslt.obj),
-					$oldParent = data.rslt.parent;
-
+				var $node = data.rslt.obj,	
+					post = my.nodeToPost($node),
+					$oldParent = data.rslt.parent,
+					child;
+	
+				// Notify former ancestors of our removal
 				if( $oldParent !== -1 ) {
-					// Notify former ancestors of our removal
 					updateBranch($oldParent);
 				}
 
-				that.broadcast( 'removePost', [post]);
+				that.broadcast('postRemoved', [post]);
+
+				// Notify of descendent removals as well
+				$node.find('li').each(function () {
+					child = my.nodeToPost($(this));
+					if (child) {
+						that.broadcast('postRemoved', [child]);
+					}
+				});
 			});
 
 			$tree.bind('deselect_node.jstree', function(event, data ) {
@@ -768,35 +808,45 @@ bu.plugins.navigation = {};
 				that.broadcast( 'deselectPost', [ post, that ]);
 			});
 
-			$tree.bind('move_node.jstree', function(event, data ) {
-				var post = my.nodeToPost( data.rslt.o ),
-					$newParent = data.rslt.np,
-					$oldParent = data.rslt.op,
-					menu_order = data.rslt.o.index() + 1,
-					parent_id = 0;
+ 			$tree.bind('move_node.jstree', function(event, data ) {
+				var $moved = data.rslt.o;
+ 
+				// Repeat move behavior for each moved node (handles multi-select)
+				$moved.each(function (i, node) {
+					var $node = $(node), 
+						post = my.nodeToPost( $node ),
+						$newParent = data.rslt.np,
+						$oldParent = data.rslt.op,
+						menu_order = $node.index() + 1,
+						parent_id = 0, oldParent, oldParentID = 0, oldOrder = 1;
 
-				// Set new parent ID
-				if( $tree.attr('id') !== $newParent.attr('id')) {
-					// Notify new ancestors of changes
-					updateBranch($newParent);
-					parent_id = parseInt(my.stripNodePrefix($newParent.attr('id')),10);
-				}
+					// Set new parent ID
+					if( $tree.attr('id') !== $newParent.attr('id')) {
+						// Notify new ancestors of changes
+						updateBranch($newParent);
+						parent_id = parseInt(my.stripNodePrefix($newParent.attr('id')),10);
+					}
 
-				// If we've changed sections, notify former ancestors as well
-				if ($tree.attr('id') !== $oldParent.attr('id') &&
-					!$newParent.is('#' + $oldParent.attr('id')) ) {
-					updateBranch($oldParent);
-				}
+					// If we've changed sections, notify former ancestors as well
+					if ($tree.attr('id') !== $oldParent.attr('id') &&
+						!$newParent.is('#' + $oldParent.attr('id')) ) {
+						updateBranch($oldParent);
+						oldParent = my.nodeToPost( $oldParent );
+						oldParentID = oldParent.ID;
+					}
 
-				// Extra post parameters that may be helpful to consumers
-				post['parent'] = parent_id;
-				post['menu_order'] = menu_order;
+					oldOrder = post['menu_order'];
 
-				that.updatePost(post);
+					// Extra post parameters that may be helpful to consumers
+					post['parent'] = parent_id;
+					post['menu_order'] = menu_order;
 
-				that.broadcast( 'postMoved', [post, parent_id, menu_order]);
-			});
-			
+					that.updatePost(post);
+
+					that.broadcast( 'postMoved', [post, oldParentID, oldOrder]);
+				});
+ 			});
+ 
 			// Deselect all nodes on document clicks outside of a tree element or
 			// context menu item
 			var deselectOnDocumentClick = function (e) {
@@ -807,7 +857,6 @@ bu.plugins.navigation = {};
 					$tree.jstree('deselect_all');
 				}		
 			};
-
 
 			if (c.deselectOnDocumentClick ) {
 				$(document).bind( "click", deselectOnDocumentClick );
@@ -927,6 +976,18 @@ bu.plugins.navigation = {};
 				}
 			};
 
+			// Extra data required by navman interface
+			bu.hooks.addFilter('nodeToPost', function (post, node) {
+				post['originalParent'] = parseInt(node.data('originalParent'), 10);
+				post['originalOrder'] = parseInt(node.data('originalOrder'), 10);
+				return post;
+			});
+			bu.hooks.addFilter('postToNode', function (node, post) {
+				node['metadata']['originalParent'] = post['originalParent'];
+				node['metadata']['originalOrder'] = post['originalOrder'];
+				return node;
+			});
+
 			return that;
 		},
 
@@ -980,11 +1041,11 @@ bu.plugins.navigation = {};
 
 			$tree.bind('reselect.jstree', function (e, data) {
 				var $current = my.getNodeForPost(currentPost);
-				
+
 				// Insert new post if it isn't already represented in the tree
 				if (!$current) {
 					if ('new' === currentPost.status) {
-						that.insertPost( currentPost, { pos: 'before' });
+						that.insertPost(currentPost);
 					}
 				}
 
@@ -994,14 +1055,12 @@ bu.plugins.navigation = {};
 
 			// Public
 			that.getCurrentPost = function() {
-				if( currentPost === null ||
-					typeof currentPost === 'undefined' )
-					return false;
+				var $node, post;
 
-				var $node = my.getNodeForPost( currentPost );
+				$node = my.getNodeForPost(currentPost);
 
 				if ($node) {
-					var post = my.nodeToPost( $node );
+					post = my.nodeToPost( $node );
 					return post;
 				}
 				

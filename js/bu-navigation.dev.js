@@ -498,32 +498,30 @@ bu.plugins.navigation = {};
 			};
 
 			my.postToNode = function( post, args ) {
-				if( typeof post === 'undefined' )
+				if (typeof post === 'undefined')
 					throw new TypeError('Invalid post!');
 
-				var default_post = {
-					ID: my.getNextPostID(),
-					title: 'Untitled Post',
+				var default_post, p, node
+
+				default_post = {
+					title: '(no title)',
 					content: '',
 					status: 'new',
 					type: 'page',
 					parent: 0,
-					menu_order: 0,
+					menu_order: 1,
 					meta: {}
 				};
 
-				var p = $.extend({}, default_post, post);
+				p = $.extend({}, default_post, post);
 
-				// @todo real rel logic:
-				// - has children = section
-				// - post type is link = link
-				// - anything else = page
-				var rel = p.type;
+				// Generate post ID if none previously existed
+				p.ID = p.ID ? c.nodePrefix + p.ID : 'post-new-' + my.getNextPostID();
 
-				var data = {
+				node = {
 					"attr": {
-						"id": (p.ID) ? c.nodePrefix + p.ID : 'post-new-' + p.ID,
-						"rel" : rel
+						"id": p.ID,
+						"rel" : p.type
 					},
 					"data": {
 						"title": p.title
@@ -538,8 +536,7 @@ bu.plugins.navigation = {};
 					}
 				};
 
-				return bu.hooks.applyFilters('postToNode', data );
-
+				return bu.hooks.applyFilters('postToNode', node, p);
 			};
 
 			my.getNodeForPost = function( post ) {

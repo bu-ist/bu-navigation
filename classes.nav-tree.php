@@ -31,7 +31,7 @@ class BU_Navigation_Tree_View {
 			'postTypes' => array('page','link'),
 			'postStatuses' => array('draft','pending','publish'),
 			'themePath' => plugins_url('css/vendor/jstree/themes/bu-jstree', __FILE__ ), 
-			'rpcUrl' => admin_url('admin-ajax.php?action=bu_render_nav_tree' ),
+			'rpcUrl' => admin_url('admin-ajax.php?action=bu-get-navtree' ),
 			'allowTop' => $this->plugin->get_setting('allow_top'),
 			'loadInitialData' => false,
 			'lazyLoad' => true,
@@ -388,7 +388,7 @@ class BU_Navigation_Tree_Query {
 			// @todo move this query to the access control plugin
 			// look at bu-section-editing/plugin-support/bu-navigation
 			$restricted = array();
-			
+
 			if (class_exists('BuAccessControlPlugin')) {
 
 				$acl_option = defined( 'BuAccessControlList::PAGE_ACL_OPTION' ) ? BuAccessControlList::PAGE_ACL_OPTION : BU_ACL_PAGE_OPTION;
@@ -473,7 +473,7 @@ class BU_Navigation_Tree_Query {
 /**
  * RPC endpoint for rendering a list of posts in jstree format 
  */
-function bu_navigation_ajax_render_nav_tree() {
+function bu_navigation_ajax_get_navtree() {
 	if( defined('DOING_AJAX') && DOING_AJAX ) {
 
 		$child_of = isset($_POST['child_of']) ? $_POST['child_of'] : 0;
@@ -495,4 +495,4 @@ function bu_navigation_ajax_render_nav_tree() {
 	}
 }
 
-add_action('wp_ajax_bu_render_nav_tree', 'bu_navigation_ajax_render_nav_tree' );
+add_action('wp_ajax_bu-get-navtree', 'bu_navigation_ajax_get_navtree' );

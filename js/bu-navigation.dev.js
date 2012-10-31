@@ -280,23 +280,29 @@ bu.plugins.navigation = {};
 
 			that.selectPost = function( post, deselect_all ) {
 				deselect_all = deselect_all || true;
-				var node = my.getNodeForPost( post );
+				var $node = my.getNodeForPost(post);
 
 				if (deselect_all) {
-					$tree.jstree( 'deselect_all');
+					$tree.jstree('deselect_all');
 				}
 
-				$tree.jstree( 'select_node', node );
+				$tree.jstree('select_node', $node);
 			};
 
 			that.getSelected = function() {
-				var node = $tree.jstree('get_selected');
-				return my.nodeToPost( node );
+				var $node = $tree.jstree('get_selected');
+				if ($node.length) {
+					return my.nodeToPost($node);
+				}
+				return false;
 			};
 
 			that.getPost = function( id ) {
 				var $node = my.getNodeForPost( id );
-				return my.nodeToPost( $node );
+				if ($node) {
+					return my.nodeToPost($node);
+				}
+				return false;
 			};
 
 			// Custom version of jstree.get_json, optimized for our needs
@@ -537,26 +543,29 @@ bu.plugins.navigation = {};
 			};
 
 			my.getNodeForPost = function( post ) {
-				if( typeof post === 'undefined' )
+				if (typeof post === 'undefined')
 					throw new TypeError('Invalid post!');
 
-				var node_id;
+				var node_id, $node;
 
-				if( post && typeof post === 'object' ) {
+				// Allow post object or ID
+				if (post && typeof post === 'object') {
 					node_id = post.ID.toString();
-					if( node_id.indexOf('post-new') === -1 ) {
+					if (node_id.indexOf('post-new') === -1) {
 						node_id = c.nodePrefix + node_id;
 					}
 				} else {
 					node_id = post.toString();
-					if( node_id.indexOf('post-new') === -1 ) {
+					if (node_id.indexOf('post-new') === -1) {
 						node_id = c.nodePrefix + node_id;
 					}
 				}
 
-				var $node = $.jstree._reference($tree)._get_node( '#' + node_id );
-				if( $node.length )
+				$node = $.jstree._reference($tree)._get_node('#' + node_id);
+
+				if ($node.length) {
 					return $node;
+				}
 
 				return false;
 			};

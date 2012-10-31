@@ -654,8 +654,11 @@ bu.plugins.navigation = {};
 				if (c.showCounts) {
 
 					// Start from root
-					$section = $post.parentsUntil( '#' + $tree.attr('id'),'li');
-					$section = $section.length ? $section.last() : $post;
+					if ($post.parent('ul').parent('div').attr('id') != $tree.attr('id')) {
+						$section = $post.parents('li:last');
+					} else {
+						$section = $post;
+					}
 					
 					calculateCounts($section);
 				}

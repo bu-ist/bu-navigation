@@ -6,7 +6,7 @@ require_once 'page-objects/primary-navigation-settings.php';
  * @group bu
  * @group bu-navigation
  * @group bu-navigation-settings
- * 
+ *
  * @todo
  * 	- create a dummy theme that utilizes bu_navigation_display_primrary and verify
  * 		settings on the front end
@@ -17,7 +17,7 @@ require_once 'page-objects/primary-navigation-settings.php';
 
 	/**
 	* Primary navigation settings menu item is present and page loads correctly
-	*/ 
+	*/
 	public function test_load_page() {
 
 		$page = new BUN_Settings_Page( $this );
@@ -26,7 +26,7 @@ require_once 'page-objects/primary-navigation-settings.php';
 
 	/**
 	* Toggle "Display primary navigation bar" option
-	*/ 
+	*/
 	public function test_display_navbar_field() {
 
 		$page = new BUN_Settings_Page( $this );
@@ -50,7 +50,7 @@ require_once 'page-objects/primary-navigation-settings.php';
 
 	/**
 	* Set maximum items count
-	*/ 
+	*/
 	public function test_max_items_field() {
 
 		$page = new BUN_Settings_Page( $this );
@@ -84,7 +84,7 @@ require_once 'page-objects/primary-navigation-settings.php';
 
 	/**
 	* Toggle "Use drop-down menus" option
-	*/ 
+	*/
 	public function test_use_drop_downs_field() {
 
 		$page = new BUN_Settings_Page( $this );
@@ -108,7 +108,7 @@ require_once 'page-objects/primary-navigation-settings.php';
 
 	/**
 	* Toggle "Allow Top-Level Pages" option
-	*/ 
+	*/
 	public function test_allow_top_level_field() {
 
 		$page = new BUN_Settings_Page( $this );

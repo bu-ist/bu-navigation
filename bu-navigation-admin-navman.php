@@ -16,7 +16,7 @@ require_once(dirname(__FILE__) . '/classes.nav-tree.php' );
 
 /**
  * BU Navigation Admin Navigation Manager interface
- */ 
+ */
 class BU_Navigation_Admin_Navman {
 
 	public $page;
@@ -44,7 +44,7 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	* Attach WP actions and filters utilized by our meta boxes
-	*/ 
+	*/
 	public function register_hooks() {
 
 		add_action('admin_menu', array( $this, 'register_menu' ) );
@@ -104,11 +104,11 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Register dependent Javscript and CSS files
-	 */ 
+	 */
 	public function add_scripts( $page ) {
 
 		if( is_array( $this->pages ) && in_array( $page, $this->pages ) ) {
-			
+
 			$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
 
 			// Scripts
@@ -137,14 +137,14 @@ class BU_Navigation_Admin_Navman {
 			}
 
 			wp_enqueue_style('bu-navman', plugins_url('css/manage.css', __FILE__), array(), '0.3');
-			
+
 		}
-		
+
 	}
 
 	/**
 	 * Handle admin page setup
-	 */ 
+	 */
 	public function load() {
 
 		// Save if post data is present
@@ -175,7 +175,7 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Set and check user locks
-	 */ 
+	 */
 	public function setup_locks() {
 
 		// Attempt to set lock
@@ -195,7 +195,7 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Add notices if we have any in the queue
-	 */ 
+	 */
 	public function setup_notices() {
 
 		$message_code = isset($_GET['message']) ? intval($_GET['message']) : 0;
@@ -215,10 +215,10 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Retrieve notice message by type and numeric code:
-	 * 
+	 *
 	 * @param string $type the type of notice (either 'message' or 'notice')
 	 * @param int $code the notice code (see const NOTICE_* and const MESSAGE_*)
-	 */ 
+	 */
 	public function get_notice( $type, $code ) {
 
 		$notices = apply_filters( 'bu_navman_notices', array(
@@ -243,7 +243,7 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Prints any messages or notices that we have stored in the message queue
-	 */ 
+	 */
 	public function admin_notices() {
 
 		foreach( $this->message_queue as $type => $messages ) {
@@ -266,10 +266,10 @@ class BU_Navigation_Admin_Navman {
 		}
 
 	}
-	
+
 	/**
 	 * Display navigation manager page
-	 */ 
+	 */
 	public function render() {
 
 		if( ! current_user_can( 'edit_pages' ) ) {
@@ -292,9 +292,9 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Handle $_POST submissions for navigation management page
-	 * 
+	 *
 	 * @todo decide how best to handle failures
-	 */ 
+	 */
 	public function save() {
 		$saved = NULL;
 		$errors = array();
@@ -359,12 +359,12 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Trashes posts that have been removed using the navman interface
-	 * 
+	 *
 	 * @todo write unit tests
-	 * 
+	 *
 	 * @param array $post_ids an array of post ID's for trashing
 	 * @return bool|WP_Error $result the result of the post deletions
-	 */ 
+	 */
 	public function process_deletions( $post_ids ) {
 		// error_log('===== Processing deletions =====');
 		// error_log('To delete: ' . print_r($post_ids,true ) );
@@ -403,12 +403,12 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Updates posts (really just links at this time) that have been modified using the navman interface
-	 * 
+	 *
 	 * @todo write unit tests
-	 * 
+	 *
 	 * @param array $posts an array of posts which have been modified
 	 * @return bool|WP_Error $result the result of the post updates
-	 */ 
+	 */
 	public function process_updates( $posts ) {
 		// error_log('===== Processing updates =====');
 		// error_log('To update: ' . print_r($posts,true ) );
@@ -441,7 +441,7 @@ class BU_Navigation_Admin_Navman {
 				} else {
 
 					error_log(sprintf('[BU Navigation Navman] Could not update link: %s', print_r($post, true)));
-					array_push( $failures, $post->title );				
+					array_push( $failures, $post->title );
 
 				}
 
@@ -460,13 +460,13 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Insert posts (really just links at this time) that have been added using the navman interface
-	 * 
+	 *
 	 * @todo write unit tests
-	 * 
+	 *
 	 * @param array $posts an array of posts which have been added
 	 * @param array $reorder_map a map of data used to keep track of parents that will require reordering
 	 * @return bool|WP_Error $result the result of the post insertions
-	 */ 
+	 */
 	public function process_insertions( $posts, & $reorder_map ) {
 		// error_log('===== Processing insertions =====');
 		// error_log('To insert: ' . print_r($posts,true ) );
@@ -482,7 +482,7 @@ class BU_Navigation_Admin_Navman {
 
 				// @todo current_user_can(...) check
 
-				// Special handling for new links -- need to get a valid post ID 
+				// Special handling for new links -- need to get a valid post ID
 				if ( 'link' == $post->type ) {
 					$data = array(
 						'post_title' => $post->title,
@@ -536,13 +536,13 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Updates posts that have been moved using the navman interface
-	 * 
+	 *
 	 * @todo write unit tests
-	 * 
+	 *
 	 * @param array $posts an array of posts which have new menu_order or post_parent fields
 	 * @param array $reorder_map a map of data used to keep track of parents that will require reordering
 	 * @return bool|WP_Error $result the result of the post movements
-	 */ 
+	 */
 	public function process_moves( $posts, & $reorder_map  ) {
 		// error_log('===== Processing moves =====');
 		// error_log('To move: ' . print_r($posts,true ) );
@@ -551,7 +551,7 @@ class BU_Navigation_Admin_Navman {
 
 		$result = null;
 		$failures = array();
-		
+
 		if( ( is_array( $posts ) ) && ( count( $posts ) > 0 ) ) {
 
 			do_action('bu_navman_pages_pre_move');
@@ -601,19 +601,19 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Handles reordering for sections that contain children that have updated post_parent or menu_order fields
-	 * 
+	 *
 	 * @todo write unit tests
-	 * 
+	 *
 	 * @param array $reorder_map a map of data needed to calculate reorders, keyed on parent ID's
-	 */ 
+	 */
 	public function reorder_affected_sections( $reorder_map ) {
 		global $wpdb;
 
 		foreach( $reorder_map as $parent_id => $already_set ) {
 
-			// Fetch children of affected sections for reordering 
+			// Fetch children of affected sections for reordering
 			$post_types = ($this->post_type == 'page') ? array('page','link') : $this->post_type;
-			$children = bu_navigation_get_pages( array( 
+			$children = bu_navigation_get_pages( array(
 				'sections' => array($parent_id),
 				'suppress_filter_pages' => true,
 				'post_status' => array('draft','pending','publish'),
@@ -625,7 +625,7 @@ class BU_Navigation_Admin_Navman {
 
 			foreach( $children as $child_id => $child ) {
 
-				// Skip update for any children that were already handled in process_insertions and process_moves 
+				// Skip update for any children that were already handled in process_insertions and process_moves
 				if( in_array( $child_id, $already_set['ids'] ) ) {
 					// error_log('Child already has correct menu order, skipping myself (' . $child->post_title . ')');
 					continue;
@@ -700,7 +700,7 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Extra data to pass to DOM nodes for more accurate tracking of moves
-	 * 
+	 *
 	 * @param array $p DOM data for jstree parsing
 	 * @param array $post post object for page being formatted
 	 * @return array filtered DOM data for jstree parsing

@@ -1,7 +1,7 @@
 <!-- @todo rewrite helper text -->
 <h4><?php _e('Current Location'); ?></h4>
 
-<?php 
+<?php
 // For WP < 3.2, there is a hidden input name="parent_id" that exists outside of the default "Page Attributes" metabox.
 // In more recent versions, this has been removed in favor of the "Page Attributes" select box which has a name of "parent_id".
 // We are looking at the current version here to decide whether or not it is needed.

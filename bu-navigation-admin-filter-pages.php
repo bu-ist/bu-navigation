@@ -3,7 +3,7 @@
  @todo
  	- original file had "fix pagination" -- i'm not sure what's wrong with it
  */
- 
+
 class BU_Navigation_Admin_Filter_Pages {
 
 	public $post_type;
@@ -38,20 +38,20 @@ class BU_Navigation_Admin_Filter_Pages {
 
 			$section_args = array('direction' => 'down', 'depth' => 0, 'post_types' => array($this->post_type));
 			$sections = bu_navigation_gather_sections($this->post_parent, $section_args);
-			
+
 			if( (is_array($sections)) && (count($sections) > 0)) {
 
 				$filtered = array();
-				
+
 				foreach ($posts as $p) {
-					if ((in_array($p->post_parent, $sections)) || (in_array($p->ID, $sections))) 
+					if ((in_array($p->post_parent, $sections)) || (in_array($p->ID, $sections)))
 						array_push($filtered, $p);
 				}
-				
+
 				$posts = $filtered;
 			}
 		}
-	
+
 		return $posts;
 
 	}

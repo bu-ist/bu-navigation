@@ -2,9 +2,9 @@
 
 /**
  * Navigation tree view API
- * 
+ *
  * Used to build post tree interfaces client side
- */ 
+ */
 class BU_Navigation_Tree_View {
 
 	private $instance;
@@ -15,8 +15,8 @@ class BU_Navigation_Tree_View {
 
 	/**
 	 * Setup an object capable of creating the navigation management interface
-	 * 
-	 * @param $instance unique instance name for this interface 
+	 *
+	 * @param $instance unique instance name for this interface
 	 * @param $script_context an array of settings to be passed to client scripts
 	 */
 	public function __construct( $instance = 'legacy', $script_context = array() ) {
@@ -30,7 +30,7 @@ class BU_Navigation_Tree_View {
 			'childOf' => 0,
 			'postTypes' => array('page','link'),
 			'postStatuses' => array('draft','pending','publish'),
-			'themePath' => plugins_url('css/vendor/jstree/themes/bu-jstree', __FILE__ ), 
+			'themePath' => plugins_url('css/vendor/jstree/themes/bu-jstree', __FILE__ ),
 			'rpcUrl' => admin_url('admin-ajax.php?action=bu-get-navtree' ),
 			'allowTop' => $this->plugin->get_setting('allow_top'),
 			'loadInitialData' => false,
@@ -40,7 +40,7 @@ class BU_Navigation_Tree_View {
 			'nodePrefix' => 'p'
 			);
 		$this->settings = wp_parse_args( $script_context, $defaults );
-	
+
 		// Setup query args based on script context
 		$query_args = array(
 				'child_of' => $this->settings['childOf'],
@@ -57,9 +57,9 @@ class BU_Navigation_Tree_View {
 
 	/**
 	 * Enqueue all scripts and styles needed to create the navigation management interface
-	 * 
+	 *
 	 * Must be called before scripts are printed
-	 */ 
+	 */
 	public function register_scripts() {
 		global $wp_version;
 
@@ -98,7 +98,7 @@ class BU_Navigation_Tree_View {
 		if( $this->settings['loadInitialData'] ) {
 			$this->settings['initialTreeData'] = $this->render();
 		}
-		
+
 		$this->settings = apply_filters( 'bu_nav_tree_script_context', $this->settings, $this->instance );
 
 		// Hack due to lack of support for array data to wp_localize_script in WP < 3.3
@@ -112,7 +112,7 @@ class BU_Navigation_Tree_View {
 
 	/**
 	 * Print dynamic script context with plugin settings for JS
-	 */ 
+	 */
 	public function print_footer_scripts() {
 		global $wp_scripts;
 
@@ -124,9 +124,9 @@ class BU_Navigation_Tree_View {
 
 	/**
 	 * Custom version of WP_Scripts::localize to provide localization for array data
-	 * 
+	 *
 	 * @see WP_Scripts::localize in WP 3.3 on
-	 */ 
+	 */
 	public function localize( $object_name, $script_data, $echo = true ) {
 
 		foreach ( (array) $script_data as $key => $value ) {
@@ -151,32 +151,32 @@ class BU_Navigation_Tree_View {
 	}
 
 	public function render() {
-		
+
 		$child_of = $this->query->args['child_of'];
-		
+
 		// Structure in to parent/child sections keyed by parent ID
 		$posts_by_parent = bu_navigation_pages_by_parent($this->query->posts);
-		
+
 		// Display children only for non-top level page requests
 		if( $child_of == 0 ) {
 			$load_children = false;
 		} else {
 			$load_children = true;
 		}
-		
+
 		// Convert to jstree formatted posts
-		$formatted_posts = $this->get_formatted_posts( $child_of, $posts_by_parent, $load_children );	
-		
+		$formatted_posts = $this->get_formatted_posts( $child_of, $posts_by_parent, $load_children );
+
 		return $formatted_posts;
 	}
 
 	/**
 	 * Handles fetching child posts and formatting for jstree consumption
-	 * 
+	 *
 	 * @param int $child_of post ID to fetch children of
 	 * @param array $posts_by_parent array of all pages, keyed by post ID and grouped in to sections
 	 * @return array $children children of specified parent, formatted for jstree json_data consumption
-	 */ 
+	 */
 	public function get_formatted_posts( $child_of, $posts_by_parent, $load_children = true ) {
 
 		$children = array();
@@ -225,16 +225,16 @@ class BU_Navigation_Tree_View {
 
 	/**
 	 * Given a WP post object, return an array of data formated for consumption by jstree
-	 * 
+	 *
 	 * @param StdClass $post WP post object
 	 * @return array $p array of data with markup attributes for jstree json_data plugin
-	 */ 
+	 */
 	public function format_post( $post, $has_children = false ) {
 		// Label
 		if( !isset( $post->navigation_label ) ) {
 			$post->navigation_label = apply_filters( 'the_title', $post->post_title );
 		}
-		
+
 		if ( empty( $post->navigation_label ) ) {
 			$post->navigation_label = $this->no_title_text;
 		}
@@ -301,12 +301,12 @@ class BU_Navigation_Tree_Query {
 	public $args;
 
 	public function __construct( $query_args = array() ) {
-		$this->setup_query( $query_args );	
+		$this->setup_query( $query_args );
 		$this->query();
 	}
 
 	protected function setup_query( $query_args = array() ) {
-		
+
 		$defaults = array(
 				'child_of' => 0,
 				'post_types' => array('page', 'link'),
@@ -330,12 +330,12 @@ class BU_Navigation_Tree_Query {
 		if( $this->args['child_of'] == 0 ) {
 			$this->args['depth'] = 1;
 		}
-		
+
 	}
-	
+
 	/**
-	 * Execute query set up during construction 
-	 */ 
+	 * Execute query set up during construction
+	 */
 	protected function query() {
 
 		// Setup filters
@@ -352,11 +352,11 @@ class BU_Navigation_Tree_Query {
 			'sections' => $sections,
 			'post_types' => $this->args['post_types'],
 			'post_status' => $this->args['post_status']
-			) 
+			)
 		);
 
 		$this->post_count = count($this->posts);
-		
+
 		// Restore filters
 		remove_filter('bu_navigation_filter_fields', array( __CLASS__, 'filter_fields' ) );
 		remove_filter('bu_navigation_filter_pages', array( __CLASS__, 'filter_posts' ) );
@@ -366,9 +366,9 @@ class BU_Navigation_Tree_Query {
 
 	/**
 	 * Default navigation manager page filter
-	 * 
+	 *
 	 * Appends "excluded" and "restricted" properties to each post object
-	 */ 
+	 */
 	public function filter_posts( $posts ) {
 		global $wpdb;
 
@@ -395,7 +395,7 @@ class BU_Navigation_Tree_Query {
 				$query = sprintf("SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value != '0'", $wpdb->postmeta, $acl_option, implode(',', $ids));
 				$restricted = $wpdb->get_results($query, OBJECT_K); // get results as objects in an array keyed on post_id
 				if (!is_array($restricted)) $restricted = array();
-				
+
 			}
 
 			// Add 'excluded' and 'resticted' field to all posts
@@ -403,11 +403,11 @@ class BU_Navigation_Tree_Query {
 
 				// Post exclusions (hidden from navigation lists)
 				if( array_key_exists( $post->ID, $exclusions ) ) {
-				
+
 					$post->excluded = TRUE;
-				
+
 				} else {
-					
+
 					$parent_id = $post->post_parent;
 
 					while( $parent_id && array_key_exists( $parent_id, $posts ) ) {
@@ -431,7 +431,7 @@ class BU_Navigation_Tree_Query {
 					$post->restricted = TRUE;
 
 				} else {
-					
+
 					$parent_id = $post->post_parent;
 
 					while( $parent_id && ( array_key_exists( $parent_id, $posts ) ) ) {
@@ -471,7 +471,7 @@ class BU_Navigation_Tree_Query {
 }
 
 /**
- * RPC endpoint for rendering a list of posts in jstree format 
+ * RPC endpoint for rendering a list of posts in jstree format
  */
 function bu_navigation_ajax_get_navtree() {
 	if( defined('DOING_AJAX') && DOING_AJAX ) {
@@ -489,7 +489,7 @@ function bu_navigation_ajax_get_navtree() {
 			'nodePrefix' => $prefix
 			)
 		);
-		
+
 		echo json_encode( $tree_view->render() );
 		die();
 	}

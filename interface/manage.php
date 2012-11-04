@@ -12,9 +12,9 @@
 
 			<div class="navman-toolbar">
 				<a href="#nav-tree-container" id="navman_expand_all">Expand All</a> |
-				<a href="#nav-tree-container" id="navman_collapse_all">Collapse All</a> 
+				<a href="#nav-tree-container" id="navman_collapse_all">Collapse All</a>
 				<?php if( $post_type === 'page' ): ?>
-				| <a href="#" id="navman_add_link">Add a Link</a> 
+				| <a href="#" id="navman_add_link">Add a Link</a>
 				<?php endif; ?>
 			</div>
 			<div class="navman-body">

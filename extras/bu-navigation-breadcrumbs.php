@@ -44,24 +44,24 @@ function bu_navigation_breadcrumbs($args = '')
 			return false;
 		}
 	}
-	
+
 	$attrs = '';
-	
+
 	if ($r['container_id']) $attrs .= sprintf(' id="%s"', $r['container_id']);
 	if ($r['container_class']) $attrs .= sprintf(' class="%s"', $r['container_class']);
-	
+
 	$html = sprintf('<%s%s>%s', $r['container_tag'], $attrs, $r['prefix']);
-	
+
 	/* grab ancestors */
 	$post_types = ( $p->post_type == 'page' ? array('page', 'link') : array($p->post_type) );
 	$ancestors = bu_navigation_gather_sections($p->ID, array( 'post_types' => $post_types ));
 	if (!in_array($p->ID, $ancestors)) array_push($ancestors, $p->ID);
-	
+
 //	$front_page = get_option('page_on_front');
 //	if ($r['home'] && (!$ancestors[0])) {
 //		$ancestors[0] = $front_page;
 //	}
-	
+
 	// @todo suppress was misspelled here, which was consequently excluding navigation excluded pages
 	// while it looks like this was the intended behavior, it is NOT how it has been operating, so
 	// need to investigate the ramifications of this changes
@@ -93,7 +93,7 @@ function bu_navigation_breadcrumbs($args = '')
 				array_push($crumbs, $crumb);
 				continue;
 			} else if (!array_key_exists($page_id, $pages)) continue;
-			
+
 			$current = $pages[$page_id];
 
 			if (!isset($current->navigation_label))
@@ -105,15 +105,15 @@ function bu_navigation_breadcrumbs($args = '')
 			// if ($page_id == $front_page) {
 			// 	$title = str_replace('[label]', $title, $r['home_label']);
 			// }
-			
+
 			$href = $current->url;
 			$classname = $r['anchor_class'];
-			
+
 			$crumb = $anchor_open = $anchor_close = '';
 
-			
+
 			if ($current->ID == $p->ID) $classname .= ' active';
-			
+
 			if( $r['show_links'] ) {
 				if (($current->ID == $p->ID) && (!$r['anchor_current']))
 				{
@@ -128,21 +128,21 @@ function bu_navigation_breadcrumbs($args = '')
 			}
 
 			$crumb = $anchor_open . $title . $anchor_close;
-			
+
 			$crumb = apply_filters('bu_navigation_filter_crumb_html', $crumb, $current, $r);
-			
+
 			/* only crumb if not current page or if we're crumbing the current page */
 			if (($current->ID != $p->ID) || ($r['crumb_current']))
 				array_push($crumbs, $crumb);
 		}
-		
+
 		$html .= implode($r['glue'], $crumbs);
 	}
-	
+
 	$html .= sprintf('%s</%s>', $r['suffix'], $r['container_tag']);
-	
+
 	if ($r['echo']) echo $html;
-	
+
 	return $html;
 }
 
@@ -152,10 +152,10 @@ function bu_navigation_breadcrumbs($args = '')
  * @param $atts mixed Parameters
  * @return string HTML fragment
  */
-function bu_navigation_breadcrumbs_sc($atts) 
+function bu_navigation_breadcrumbs_sc($atts)
 {
 	global $post;
-	
+
 	$defaults = array(
 		'glue' => '&nbsp;&raquo;&nbsp;',
 		'container_tag' => 'div',
@@ -166,13 +166,13 @@ function bu_navigation_breadcrumbs_sc($atts)
 		'anchor_current' => 0,
 		'echo' => 0
 		);
-			
+
 	$r = shortcode_atts($defaults, $atts);
-	
+
 	$r['echo'] = 0; // never echo
-		
+
 	$crumbs = bu_navigation_breadcrumbs($r);
-	
+
 	return $crumbs;
 }
 add_shortcode('breadcrumbs', 'bu_navigation_breadcrumbs_sc');

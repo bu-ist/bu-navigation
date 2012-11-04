@@ -6,14 +6,14 @@ require_once 'page-objects/navman.php';
  * @group bu
  * @group bu-navigation
  * @group bu-navigation-navman
- * 
+ *
  * @todo
  * 	- custom post types
  *  - context menus (depend on right click)
  * 	- edit link (dependent on right click / context menu)
  * 	- section editing tests
  *  - fix move before/after
- * 
+ *
  *  AFTER REFACTORING:
  *  - post status labels (draft, pending, trash)
  *  - adjust test_save_with_deletions to pass (deleted post still shows up as it's in the trash)
@@ -62,31 +62,31 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-types
-	 */ 
+	 */
 	public function test_leaf() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
 		$page = $navman->getPage( $this->pages['last_page'] );
-		
+
 		$this->assertEquals( $page->getAttribute('rel'), BUN_Navman_Page::TYPES_PAGE );
 
 	}
 
 	/**
 	 * @group bu-navigation-types
-	 * 
+	 *
 	 * Post 3.3, _update_blog_date_on_post_publish in includes/ms-blogs.php throws an error that we need to supress here
 	 * Error occurs because it attempts to grab a post type object for 'link', which is not a registerd post type
-	 * 
+	 *
 	 * @expectedException PHPUnit_Framework_Error
-	 */ 
+	 */
 	public function test_link() {
 
 		$id = wp_insert_post(array('post_title' => 'Google', 'post_type' => 'link','post_content' => 'http://www.google.com', 'post_status' => 'publish' ));
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
 		$page = $navman->getPage( $id );
-		
+
 		$this->assertEquals( $page->getAttribute('rel'), BUN_Navman_Page::TYPES_LINK );
 
 		wp_delete_post( $id, true );
@@ -94,19 +94,19 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-types
-	 */ 
+	 */
 	public function test_section() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
 		$page = $navman->getPage( $this->pages['parent'] );
-		
+
 		$this->assertEquals( $page->getAttribute('rel'), BUN_Navman_Page::TYPES_SECTION );
 
 	}
 
 	/**
 	 * ACL - Restricted
-	 */ 
+	 */
 	// public function test_restricted_page() {
 
 	// }
@@ -116,15 +116,15 @@ require_once 'page-objects/navman.php';
 	 */
 	// public function test_denied_page() {
 
-	// } 
+	// }
 
 	/* Basic tree interactions */
 
 	/**
 	 * @group bu-navigation-actions
-	 * 
+	 *
 	 * @todo utilize page object for class attributes
-	 */ 
+	 */
 	public function test_hover() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
@@ -139,7 +139,7 @@ require_once 'page-objects/navman.php';
 	/**
 	 * @group bu-navigation-actions
 	 * @todo utilize page object for class attributes
-	 */ 
+	 */
 	public function test_select() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
@@ -153,11 +153,11 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-actions
-	 * 
+	 *
 	 * @todo utilize page object for class attributes
-	 */ 
+	 */
 	public function test_open() {
-		
+
 		$navman = new BUN_Navman_Page( $this, 'page' );
 		$page = $navman->getPage( $this->pages['parent'] );
 
@@ -172,9 +172,9 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-actions
-	 * 
+	 *
 	 * @todo utilize page object for class attributes
-	 */ 
+	 */
 	public function test_expand_all(){
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
@@ -196,9 +196,9 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-actions
-	 * 
+	 *
 	 * @todo utilize page object for class attributes
-	 */ 
+	 */
 	public function test_collapse_all() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
@@ -222,7 +222,7 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-moves
-	 */ 
+	 */
 	public function test_move_page_before() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
@@ -241,7 +241,7 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-moves
-	 */ 
+	 */
 	public function test_move_page_after() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
@@ -260,7 +260,7 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-moves
-	 */ 
+	 */
 	public function test_move_page_inside() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
@@ -295,7 +295,7 @@ require_once 'page-objects/navman.php';
 	}
 
 	/**
-	 * @group bu-navigation-actions 
+	 * @group bu-navigation-actions
 	 * @expectedException PHPUnit_Framework_AssertionFailedError
 	 */
 	public function test_delete_page() {
@@ -311,8 +311,8 @@ require_once 'page-objects/navman.php';
 	}
 
 	/**
-	 * @group bu-navigation-links 
-	 */ 
+	 * @group bu-navigation-links
+	 */
 	public function test_add_link() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
@@ -435,7 +435,7 @@ require_once 'page-objects/navman.php';
 	/**
 	 * @group bu-navigation-save
 	 * @group bu-navigation-links
-	 */ 
+	 */
 	public function test_save_with_links() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
@@ -470,7 +470,7 @@ require_once 'page-objects/navman.php';
 	}
 
 	/**
-	 * Contextual menu 
+	 * Contextual menu
 	 * @todo right clicking is not implemented in webdriver at the moment
 	 */
 

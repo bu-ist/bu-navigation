@@ -2,7 +2,7 @@
 
 /**
  * Traditional unit tests for BU Navigation plugin
- * 
+ *
  * @group bu
  * @group bu-navigation
  */
@@ -21,9 +21,9 @@ class BU_Navigation_Settings_Test extends WP_UnitTestCase {
 
 	/**
 	 * @group bu-navigation-settings
-	 */ 
+	 */
 	public function test_get_setting() {
-		
+
 		$this->assertTrue( $this->plugin->get_setting( 'display' ) );
 		$this->assertEquals( BU_NAVIGATION_PRIMARY_MAX, $this->plugin->get_setting( 'max_items' ) );
 		$this->assertTrue( $this->plugin->get_setting( 'dive' ) );
@@ -34,7 +34,7 @@ class BU_Navigation_Settings_Test extends WP_UnitTestCase {
 
 	/**
 	 * @group bu-navigation-settings
-	 */ 
+	 */
 	public function test_get_settings() {
 
 		$expected_settings = array(
@@ -51,7 +51,7 @@ class BU_Navigation_Settings_Test extends WP_UnitTestCase {
 
 	/**
 	 * @group bu-navigation-settings
-	 */ 
+	 */
 	public function test_update_settings() {
 
 		$updates = array(

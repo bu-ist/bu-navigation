@@ -3,16 +3,16 @@ require_once(dirname(__FILE__) . '/classes.nav-tree.php' );
 
 /**
  * BU Navigation Admin Metabox controller
- * 
+ *
  * Handles rendering and behavior of the navigation attributes metabox
  * 	-> Setting post parent and order
  *  -> Setting navigation label
  * 	-> Showing/hiding of post in navigation menus
- * 
+ *
  * @todo
  *	- Need to trigger sibling reorganization for restore from trash action
  *  - Add "Help" for navigation, label, visibilty
- */ 
+ */
 class BU_Navigation_Admin_Metabox {
 
 	public $plugin;
@@ -40,29 +40,29 @@ class BU_Navigation_Admin_Metabox {
 
 	/**
 	 * Attach WP actions and filters utilized by our meta boxes
-	 */ 
+	 */
 	public function register_hooks() {
 
 		add_action('admin_enqueue_scripts', array($this, 'add_scripts'));
 		add_action('add_meta_boxes', array($this, 'register_metaboxes'), 10, 2);
 
 		add_action('save_post', array($this, 'save_nav_meta_data'), 10, 2);
-		
+
 	}
-	
+
 	/**
 	 * Load metabox scripts
-	 */ 
+	 */
 	public function add_scripts( $page ) {
-		
+
 		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
 		$scripts_path = plugins_url('js',__FILE__);
 		$styles_path = plugins_url('css',__FILE__);
 
 		// Scripts
 		wp_register_script('bu-navigation-metabox', $scripts_path . '/navigation-metabox' . $suffix . '.js', array('bu-navigation'), '0.3', true );
-		
-		// Setup dynamic script context for navigation-metabox.js 
+
+		// Setup dynamic script context for navigation-metabox.js
 		$post_id = is_object( $this->post ) ? $this->post->ID : null;
 		$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
 		$ancestors = null;
@@ -87,17 +87,17 @@ class BU_Navigation_Admin_Metabox {
 		// Navigation tree view will handle actual enqueuing of our script
 		$treeview = new BU_Navigation_Tree_View( 'nav_metabox', $script_context );
 		$treeview->enqueue_script('bu-navigation-metabox');
-		
+
 		// Styles
 		wp_enqueue_style( 'bu-navigation-metabox', $styles_path . '/navigation-metabox.css' );
-		
+
 	}
 
 	/**
 	 * Register navigation metaboxes for supported post types
-	 * 
+	 *
 	 * @todo needs selenium tests
-	 */ 
+	 */
 	public function register_metaboxes( $post_type, $post ) {
 
 		// Remove built in page attributes meta box
@@ -117,18 +117,18 @@ class BU_Navigation_Admin_Metabox {
 		}
 
 	}
-	
+
 	/**
 	 * Render our replacement for the standard Page Attributes metabox
-	 * 
+	 *
 	 * Replaces the built-in "Parent" dropdown and "Order" text input with
 	 * a modal jstree interface for placing the current post among the
 	 * site hierarchy.
-	 * 
+	 *
 	 * Also adds a custom navigation label, and the ability to hide
 	 * this page from navigation lists (i.e. content nav widget) with
 	 * a checkbox.
-	 */ 
+	 */
 	public function navigation_attributes_metabox( $post ) {
 
 		// retrieve previously saved settings for this post (if any)
@@ -139,12 +139,12 @@ class BU_Navigation_Admin_Metabox {
 		// new pages are not in the nav already, so we need to fix this
 		$nav_display = $post->post_status == 'auto-draft' ? false : (bool) !$nav_exclude;
 
-		// Labels 
+		// Labels
 		$breadcrumbs = $this->get_post_breadcrumbs_label( $post );
 		$pt_labels = $this->post_type_labels;
 		$lc_label = strtolower( $pt_labels['singular'] );
-		$dialog_title = ucfirst($pt_labels['singular']) . ' location';	
-		
+		$dialog_title = ucfirst($pt_labels['singular']) . ' location';
+
 		$move_post_btn_txt = "Move $lc_label";
 
 		include('interface/metabox-navigation-attributes.php');
@@ -153,10 +153,10 @@ class BU_Navigation_Admin_Metabox {
 
 	/**
 	 * Generate breadcrumbs label for current post
-	 * 
+	 *
 	 * Will return full breadcrumbs if current post has ancestors, or
 	 * appropriate string if it does not.
-	 */ 
+	 */
 	public function get_post_breadcrumbs_label( $post ) {
 
 		$output = '';
@@ -169,25 +169,25 @@ class BU_Navigation_Admin_Metabox {
 
 		return $output;
 	}
-	
+
 	/**
 	 * Render custom "Page Template" metabox
-	 * 
+	 *
 	 * Since we replace the standard "Page Attributes" meta box with our own,
 	 * we relocate the "Template" dropdown that usually appears there to its
 	 * own custom meta box
-	 */ 
+	 */
 	public function custom_template_metabox($post) {
 
 		$current_template = isset( $post->page_template ) ? $post->page_template : 'default';
 
 		include('interface/metabox-custom-template.php');
-	
+
 	}
 
 	/**
 	 * retrieve and save navigation-related post meta data
-	 */ 
+	 */
 	public function get_nav_meta_data($post) {
 
 		$nav_label = get_post_meta($post->ID, '_bu_cms_navigation_page_label', true);
@@ -202,13 +202,13 @@ class BU_Navigation_Admin_Metabox {
 
 	/**
 	 * Update navigation related meta data on post save
-	 * 
+	 *
 	 * WordPress will handle updating of post_parent and menu_order prior to this callback
-	 * 
+	 *
 	 * @todo needs selenium test
-	 * 
+	 *
 	 * @hook save_post
-	 */ 
+	 */
 	public function save_nav_meta_data( $post_id, $post ) {
 
 		if( !in_array($post->post_type, bu_navigation_supported_post_types()) )
@@ -218,14 +218,14 @@ class BU_Navigation_Admin_Metabox {
 			return;
 
 		if(array_key_exists('nav_label', $_POST)) {
-		
+
 			// update the navigation meta data
 			$nav_label = $_POST['nav_label'];
 			$exclude = (array_key_exists('nav_display', $_POST) ? 0 : 1);
-			
+
 			update_post_meta($post_id, '_bu_cms_navigation_page_label', $nav_label);
 			update_post_meta($post_id, '_bu_cms_navigation_exclude', $exclude);
-			
+
 		}
 
 		// Reorder old siblings if my parent has changed
@@ -245,11 +245,11 @@ class BU_Navigation_Admin_Metabox {
 
 	/**
 	 * Account for a possible change in menu_order by reordering siblings of the saved post
-	 * 
+	 *
 	 * @todo review logic more closely, especially args to bu_navigation_get_pages
 	 * @todo perhaps move this to a more globally accessible location, could be useful outside of here
 	 * @todo needs unit test
-	 */ 
+	 */
 	public function reorder_siblings( $post ) {
 		global $wpdb;
 
@@ -264,7 +264,7 @@ class BU_Navigation_Admin_Metabox {
 			'suppress_filter_pages' => true,	// suppress is spelled with two p's...
 			'post_types' => $post_types,	// handle custom post types support
 		));
-		
+
 		$i = 1;
 
 		if ($siblings) {

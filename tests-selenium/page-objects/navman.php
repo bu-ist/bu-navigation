@@ -2,7 +2,7 @@
 
 /**
  * Edit Order page (Edit Order + Post Type)
- */ 
+ */
 class BUN_Navman_Page {
 
 	protected $webdriver = null;
@@ -56,7 +56,7 @@ class BUN_Navman_Page {
 
 	/**
 	 * Load the Navman page
-	 */ 
+	 */
 	function __construct( $webdriver, $post_type = 'page' ) {
 
 		$this->webdriver = $webdriver;
@@ -77,10 +77,10 @@ class BUN_Navman_Page {
 
 	/**
 	 * Return either the list item or clickable anchor for the given page ID
-	 * 
+	 *
 	 * @param $id int Post ID to look for
 	 * @param $el string which markup component to look for -- root 'li', or child 'a'
-	 */ 
+	 */
 	public function getPage( $id, $el = 'li' ) {
 
 		$id = self::LEAF_ID_PREFIX . $id;
@@ -101,9 +101,9 @@ class BUN_Navman_Page {
 
 	/**
 	 * Gets all non-leaf nodes (sections)
-	 */ 
+	 */
 	public function getSections( $expand_first = false ) {
- 		
+
  		if( $expand_first )
  			$this->expandAll();
 
@@ -173,7 +173,7 @@ class BUN_Navman_Page {
 	/**
 	 * Returns what will be the next new link ID -- the count of existing new link items,
 	 * or 0 if none currently exist.
-	 */ 
+	 */
 	protected function get_next_new_link_id() {
 
 		$xpath = '//li[@rel="link" and contains(@class,"newlink_")]';
@@ -203,14 +203,14 @@ class BUN_Navman_Page {
 
 	/**
 	 * Move a page using the jstree drag and drop interface
-	 * 
+	 *
 	 * @todo this isn't working correctly, perhaps due to issues with webdrivers moveto method
-	 */ 
+	 */
 	public function movePage( $src_id, $dest_id, $location = 'inside' ) {
 
  		$src_xpath = sprintf( self::GET_PAGE_ANCHOR_XPATH, self::LEAF_ID_PREFIX . $src_id );
  		$dest_xpath = sprintf( self::GET_PAGE_ANCHOR_XPATH, self::LEAF_ID_PREFIX . $dest_id );
- 		
+
  		// Find source and destination pages
 		$src = $this->webdriver->getElement( LocatorStrategy::xpath, $src_xpath );
 		// $dest = $this->webdriver->getElement( LocatorStrategy::id, self::LEAF_ID_PREFIX . $dest_id );
@@ -293,7 +293,7 @@ class BUN_Navman_Page {
 	}
 
 	public function assertMovedBefore( $src_id, $dest_id ) {
-		
+
 		$selector = sprintf("#p%s + #p%s", $src_id, $dest_id );
 		$this->webdriver->getElement( LocatorStrategy::cssSelector, $selector );
 

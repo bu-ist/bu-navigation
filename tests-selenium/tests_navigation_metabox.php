@@ -6,9 +6,9 @@ require_once 'page-objects/navigation-metabox.php';
  * @group bu
  * @group bu-navigation
  * @group bu-navigation-metabox
- */ 
+ */
 class BU_Navigation_Metabox extends WP_SeleniumTestCase {
-	
+
 	public function setUp() {
 
 		parent::setUp();
@@ -21,7 +21,7 @@ class BU_Navigation_Metabox extends WP_SeleniumTestCase {
 
 	/**
 	 * Edit new page
-	 */ 
+	 */
 	public function test_new_page() {
 
 		$page = new BUN_EditPage( $this, array( 'post_type' => 'page' ) );
@@ -29,7 +29,7 @@ class BU_Navigation_Metabox extends WP_SeleniumTestCase {
 
 	/**
 	 * Edit existing page
-	 */ 
+	 */
 	public function test_edit_page() {
 
 		$page = new BUN_EditPage( $this, array( 'post_id' => $this->pages[0] ) );
@@ -38,11 +38,11 @@ class BU_Navigation_Metabox extends WP_SeleniumTestCase {
 
 	/**
 	 * Test cases needed
-	 * 
+	 *
 	 * - metabox present
-	 * 
+	 *
 	 * Position
-	 * 
+	 *
 	 * - breadcrumbs / position label
 	 * 		- for new page
 	 * 		- for top level page
@@ -61,12 +61,12 @@ class BU_Navigation_Metabox extends WP_SeleniumTestCase {
 	 * 		- can't move denied post
 	 * 		- can't move allowed post to denied section
 	 * 		- can't ever move to top-level (unless already top-level)
-	 * 
+	 *
 	 * Labels
-	 * 
+	 *
 	 * - change label
 	 * - change display in navigation lists option
 	 * - prohibit navigation label display for top level pages
-	 */ 
+	 */
 
 }

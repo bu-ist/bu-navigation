@@ -2,7 +2,7 @@
 
 /**
  * Edit single post w/ navigation metabox object
- */ 
+ */
 class BUN_EditPage {
 
 	/* URL's */
@@ -13,7 +13,7 @@ class BUN_EditPage {
 
 	/**
 	 * Load the new or edit post page
-	 */ 
+	 */
 	function __construct( $webdriver, $args = array() ) {
 
 		$defaults = array(
@@ -29,7 +29,7 @@ class BUN_EditPage {
 		$test_xpath = '';
 
 		// Valid post ID = edit
-		if( $post_id ) $action = 'edit'; 
+		if( $post_id ) $action = 'edit';
 		// Otherwise, valid post type = new
 		else if( $post_type ) $action = 'new';
 		// Otherwise, fail

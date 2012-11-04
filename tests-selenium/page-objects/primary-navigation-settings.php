@@ -2,7 +2,7 @@
 
 /**
  * Edit Order page (Edit Order + Post Type)
- */ 
+ */
 class BUN_Settings_Page {
 
 	/* URL's */
@@ -25,7 +25,7 @@ class BUN_Settings_Page {
 
 	/**
 	 * Load the navigation settings page
-	 */ 
+	 */
 	function __construct( $webdriver ) {
 
 		$this->webdriver = $webdriver;
@@ -75,7 +75,7 @@ class BUN_Settings_Page {
 		// Reload settings page to make SURE form data has updated
 		$this->webdriver->open( self::URL );
 		$this->form = new SeleniumFormHelper( $this->webdriver, self::FORM_ID );
-	
+
 
 	}
 

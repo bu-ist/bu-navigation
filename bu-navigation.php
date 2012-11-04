@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Page Navigation 
+Plugin Name: Page Navigation
 Version: 0.2
 Author URI: http://www.bu.edu/tech/help/
 Description: Provides alternative navigation elements designed for blogs with large page counts
@@ -9,7 +9,7 @@ Author: Boston University (IS&T)
 
 /**
  * Components:
- * 
+ *
  * BU Page Parent Meta Box
  * Navigation Management Screens
  * Content navigation widget
@@ -20,7 +20,7 @@ Author: Boston University (IS&T)
 @todo
 	- multiple post types should be allowed to support links -- move array(page,link) code to isolated function
 
-*/ 
+*/
 
 /* BU Navigation constants */
 define('BU_NAV_PLUGIN_DIR', dirname(__FILE__));
@@ -57,7 +57,7 @@ class BU_Navigation_Plugin {
 
 	/**
 	 * Attach WordPress hook callbacks
-	 */ 
+	 */
 	public function register_hooks() {
 
 		add_action( 'init', array( $this, 'init' ), 1 );
@@ -69,9 +69,9 @@ class BU_Navigation_Plugin {
 
 	/**
 	 * Initialization function for navigation plugin
-	 * 
+	 *
 	 * @hook init
-	 * @return void 
+	 * @return void
 	 */
 	public function init() {
 
@@ -85,7 +85,7 @@ class BU_Navigation_Plugin {
 		$this->load_extras();
 
 		$this->load_widget();
-		
+
 		do_action('bu_navigation_init');
 
 	}
@@ -112,9 +112,9 @@ class BU_Navigation_Plugin {
 	public function load_extras() {
 
 		$pattern = sprintf('%s/extras/*.php', BU_NAV_PLUGIN_DIR);
-		
+
 		$files = glob($pattern);
-		
+
 		if ((is_array($files)) && (count($files) > 0)) {
 			foreach ($files as $filename) {
 				@include_once($filename);
@@ -127,7 +127,7 @@ class BU_Navigation_Plugin {
 
 	/**
 	 * Get a single plugin setting by slug
-	 */ 
+	 */
 	public function get_setting( $name ) {
 
 		$settings = $this->get_settings();
@@ -141,7 +141,7 @@ class BU_Navigation_Plugin {
 
 	/**
 	 * Get all plugin settings
-	 */ 
+	 */
 	public function get_settings() {
 
 		if( empty( $this->settings ) ) {
@@ -155,16 +155,16 @@ class BU_Navigation_Plugin {
 			$settings['allow_top'] = (bool) get_option( self::OPTION_ALLOW_TOP, false );
 
 			$this->settings = $settings;
-			
+
 		}
 
 		return $this->settings;
-		
+
 	}
 
 	/**
 	 * Update plugin settings
-	 */ 
+	 */
 	public function update_settings( $updates ) {
 
 		$settings = $this->get_settings();
@@ -191,7 +191,7 @@ class BU_Navigation_Plugin {
 					$this->settings[$key] = $val;
 
 				}
-				
+
 			}
 
 		}
@@ -200,9 +200,9 @@ class BU_Navigation_Plugin {
 
 	/**
 	 * Clear internal settings object
-	 * 
+	 *
 	 * Useful for unit tests that want to check actual DB values
-	 */ 
+	 */
 	public function clear_settings() {
 
 		$this->settings = array();
@@ -212,7 +212,7 @@ class BU_Navigation_Plugin {
 	/**
 	 * Filter the navigation settings used by bu_navigation_display_primary to
 	 * utilize plugin settings
-	 */ 
+	 */
 	public function filter_primary_nav_defaults( $defaults ) {
 
 		$defaults['echo'] = $this->get_setting('display');
@@ -226,15 +226,15 @@ class BU_Navigation_Plugin {
 
 	/**
 	 * Assure that current max depth is below the threshold set by the current themes BU_NAVIGATION_SUPPORTED_DEPTH constant
-	 */ 
+	 */
 	public function depth_fix( $curr_depth = 0 ) {
 
 		if ( defined('BU_NAVIGATION_SUPPORTED_DEPTH') && $curr_depth > BU_NAVIGATION_SUPPORTED_DEPTH ) {
 			return BU_NAVIGATION_SUPPORTED_DEPTH;
 		}
-		
+
 		if ( !$curr_depth ) $curr_depth = BU_NAVIGATION_PRIMARY_DEPTH;
-		
+
 		return $curr_depth;
 
 	}

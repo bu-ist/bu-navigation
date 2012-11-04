@@ -71,6 +71,10 @@ class BU_Navigation_Admin_Primary {
 
 		if( ( array_key_exists( 'bu_navigation_primary_save', $_POST ) ) && ( $_POST['bu_navigation_primary_save'] == 'save' ) ) {
 
+			if( ! current_user_can( 'bu_edit_options' ) ) {
+				return false;
+			}
+
 			$saved = TRUE; /* no useful return from update_option */
 
 			$primarynav_display = isset($_POST['bu_navigation_primarynav']) ? intval($_POST['bu_navigation_primarynav']) : 0;
@@ -111,7 +115,6 @@ class BU_Navigation_Admin_Primary {
 		return $saved;
 
 	}
-
 }
 
 ?>

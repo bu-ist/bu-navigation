@@ -78,7 +78,7 @@
 		<p>
 			<input type="checkbox" name="bu_allow_top_level_page" id="bu_allow_top_level_page" value="1" <?php checked( $bu_allow_top_level_page ); ?> />
 			<strong><label for="bu_allow_top_level_page">Allow Top-Level Pages</label></strong><br/>
-			If checked, users will be allowed to display top level pages to the navigation.
+			If checked, users will be allowed to add top-level pages to the navigation.
 		</p>
 		<p class="submit">
 			<input type="submit" name="Submit" value="Save Changes" />

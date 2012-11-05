@@ -50,8 +50,6 @@ class BU_Navigation_Admin_Navman {
 		add_action('admin_menu', array( $this, 'register_menu' ) );
 		add_action('admin_enqueue_scripts', array( $this, 'add_scripts' ) );
 
-		add_filter('bu_nav_tree_view_format_post_bu_navman', array( $this, 'format_post'), 10, 2 );
-
 	}
 
 	/**
@@ -696,22 +694,6 @@ class BU_Navigation_Admin_Navman {
 			delete_option( self::OPTION_LOCK_USER );
 		}
 
-	}
-
-	/**
-	 * Extra data to pass to DOM nodes for more accurate tracking of moves
-	 *
-	 * @param array $p DOM data for jstree parsing
-	 * @param array $post post object for page being formatted
-	 * @return array filtered DOM data for jstree parsing
-	 */
-	public function format_post( $p, $post ) {
-
-		// We want to store original page parent and menu order
-		$p['metadata']['originalParent'] = $post->post_parent;
-		$p['metadata']['originalOrder'] = $post->menu_order;
-
-		return $p;
 	}
 
 }

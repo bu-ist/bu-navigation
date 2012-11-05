@@ -47,12 +47,12 @@ if((typeof bu === 'undefined' ) ||
 
 		initialize: function() {
 			var currentStatus, currentParent, currentOrder, navLabel, navDisplay;
-			
+
 			// Create post navigation tree from server-provided instance settings object
 			this.settings = nav_metabox_settings;
 			this.settings.el = this.ui.treeContainer;
 
-			// Populate current post object with initial form input data 
+			// Populate current post object with initial form input data
 			this.settings.isNewPost = $(this.inputs['autoDraft']).val() == 1 ? true : false;
 			currentStatus = $(this.inputs['originalStatus']).val();
 			currentParent = parseInt($(this.inputs['parent']).val(),10);
@@ -64,10 +64,12 @@ if((typeof bu === 'undefined' ) ||
 			this.settings.currentPost = {
 				ID: parseInt($(this.inputs['postID']).val(),10),
 				title: navLabel,
-				meta: { excluded: !navDisplay },
+				status: currentStatus == 'auto-draft' ? 'new' : currentStatus,
 				parent: currentParent,
 				menu_order: currentOrder,
-				status: currentStatus == 'auto-draft' ? 'new' : currentStatus
+				meta: { excluded: !navDisplay },
+				originalParent: currentParent,
+				originalExclude: !navDisplay
 			};
 
 			// References to key elements
@@ -103,7 +105,7 @@ if((typeof bu === 'undefined' ) ||
 			// Metabox actions
 			this.$el.delegate(this.inputs.label, 'blur', $.proxy(this.onLabelChange,this));
 			this.$el.delegate(this.inputs.visible, 'click', $.proxy(this.onToggleVisibility,this));
-	
+
 		},
 
 		// Event handlers
@@ -122,26 +124,26 @@ if((typeof bu === 'undefined' ) ||
 
 		onToggleVisibility: function(e) {
 			var visible = $(e.target).attr('checked');
-				
+
 			if (visible && !this.isAllowedInNavigationLists(this.settings.currentPost)) {
-				
+
 				e.preventDefault();
 				this.notify("Displaying top-level pages in the navigation is disabled. To change this behavior, go to Site Design > Primary Navigation and enable \"Allow Top-Level Pages.\"");
 
 			} else {
 
 				this.settings.currentPost.meta['excluded'] = ! visible;
-				
+
 				// Nav visibility updates should be reflected in tree view
 				Navtree.updatePost( this.settings.currentPost );
 				Navtree.save();
 
 			}
-			
+
 		},
 
 		onLocationUpdated: function( post ) {
-			
+
 			// Set form field values
 			$(this.inputs.parent).val(post.parent);
 			$(this.inputs.order).val(post.menu_order);
@@ -165,11 +167,12 @@ if((typeof bu === 'undefined' ) ||
 		},
 
 		isAllowedInNavigationLists: function( post ) {
+			var alreadyInNav = post.originalExclude === false && post.originalParent === 0;
 
-			if( post.parent === 0  ) {
+			if (!alreadyInNav && post.parent === 0) {
 				return this.settings.allowTop;
 			}
-			
+
 			return true;
 		},
 

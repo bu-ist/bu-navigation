@@ -103,7 +103,7 @@ bu.plugins.navigation = {};
 		if( $.browser.msie === true && parseInt($.browser.version, 10) == 9 )
 			$(document.body).addClass('ie9');
 	});
-	
+
 	// Tree constructor
 	Nav.tree = function( type, config ) {
 		if (typeof type === 'undefined') {
@@ -152,14 +152,18 @@ bu.plugins.navigation = {};
 				themeSprite.src = c.themePath + "/sprite.png";
 				themeLoader.src = c.themePath + "/throbber.gif";
 			}
-			
+
 			// Allow clients to stop certain actions and UI interactions via filters
 			var checkMove = function( m ) {
 				var post = my.nodeToPost( m.o );
 				var allowed = true;
-				
+
+				var isTopLevelMove = m.cr === -1;
+				var isVisible = post.meta['excluded'] === false || post.type === 'link';
+				var wasTop = !post.originalExclude && (post.originalParent === 0 || post.status === 'new');
+
 				// Don't allow top level posts if global option prohibits it
-				if(m.cr === -1 && post.meta['excluded'] === false && ! c.allowTop ) {
+				if (isTopLevelMove && !wasTop && isVisible && !c.allowTop) {
 					// console.log('Move denied, top level posts cannot be created!');
 					// @todo pop up a friendlier notice explaining this
 					allowed = false;
@@ -308,23 +312,23 @@ bu.plugins.navigation = {};
 			// Custom version of jstree.get_json, optimized for our needs
 			that.getPosts = function( child_of ) {
 				var result = [], current_post = {}, parent, post_id, post_type;
-				
+
 				if (child_of) {
 					parent = $.jstree._reference($tree)._get_node('#' + child_of);
 				} else {
 					parent = $tree;
 				}
-					
+
 				// Iterate over children of current node
 				parent.find('> ul > li').each(function (i, child) {
 					child = $(child);
-					
+
 					post_id = child.attr('id');
 					post_type = child.data('post_type');
 					if (post_type != 'new') {
 						post_id = my.stripNodePrefix(post_id);
 					}
-					
+
 					// Convert to post data
 					current_post = {
 						ID: post_id,
@@ -334,7 +338,7 @@ bu.plugins.navigation = {};
 						content: child.data('post_content'),
 						meta: child.data('post_meta')
 					};
-					
+
 					// Recurse through children if this post has any
 					if( child.find('> ul > li').length ) {
 						current_post.children = that.getPosts(child.attr('id'));
@@ -343,11 +347,11 @@ bu.plugins.navigation = {};
 					// Store post + descendents
 					result.push(current_post);
 				});
-				
+
 				// Result = post tree starting with child_of
 				return result;
 			};
-			
+
 			that.showAll = function() {
 				$tree.jstree('open_all');
 			};
@@ -444,7 +448,7 @@ bu.plugins.navigation = {};
 					if (c.showStatuses) {
 						appendPostStatus($node);
 					}
-					
+
 					that.broadcast('postUpdated', [updated]) ;
 
 					return updated;
@@ -520,8 +524,11 @@ bu.plugins.navigation = {};
 					status: node.data('post_status'),
 					type: node.data('post_type'),
 					parent: parseInt(node.data('post_parent'), 10),
-					menu_order: node.index() + 1, 
-					meta: node.data('post_meta') || {}
+					menu_order: node.index() + 1,
+					meta: node.data('post_meta') || {},
+					originalParent: parseInt(node.data('originalParent'), 10),
+					originalOrder: parseInt(node.data('originalOrder'), 10),
+					originalExclude: node.data('originalExclude')
 				};
 
 				return bu.hooks.applyFilters('nodeToPost', post, node);
@@ -562,7 +569,10 @@ bu.plugins.navigation = {};
 						"post_content": p.content,
 						"post_parent": p.parent,
 						"menu_order": p.menu_order,
-						'post_meta': p.meta
+						"post_meta": p.meta,
+						"originalParent": p.originalParent,
+						"originalOrder": p.originalOrder,
+						"originalExclude": p.originalExclude
 					}
 				};
 
@@ -602,7 +612,7 @@ bu.plugins.navigation = {};
 				return newPosts.length;
 
 			};
-			
+
 			my.stripNodePrefix = function( str ) {
 				return str.replace( c.nodePrefix, '');
 			};
@@ -612,7 +622,7 @@ bu.plugins.navigation = {};
 			var calculateCounts = function($node, includeDescendents) {
 				var count, $count, $a;
 				includeDescendents = includeDescendents || true;
-				
+
 				// Tally up descendent li's to determine count
 				count = $node.find('li').length;
 				$a = $node.children('a');
@@ -644,9 +654,9 @@ bu.plugins.navigation = {};
 				if ($a.children('.post-statuses').length === 0) {
 					$a.append('<span class="post-statuses"></span>');
 				}
-				
+
 				var post = my.nodeToPost( $node );
-				
+
 				// Default metadata badges
 				var excluded = post.meta['excluded'] || false;
 				var restricted = post.meta['restricted'] || false;
@@ -773,7 +783,7 @@ bu.plugins.navigation = {};
 					postParent = my.nodeToPost($parent);
 					updateBranch($parent);
 				}
-				
+
 				// Set parent and menu order
 				post['parent'] = postParent ? postParent.ID : 0;
 				post['menu_order'] = position + 1;
@@ -782,11 +792,11 @@ bu.plugins.navigation = {};
 			});
 
 			$tree.bind('remove.jstree', function (event, data) {
-				var $node = data.rslt.obj,	
+				var $node = data.rslt.obj,
 					post = my.nodeToPost($node),
 					$oldParent = data.rslt.parent,
 					child;
-	
+
 				// Notify former ancestors of our removal
 				if( $oldParent !== -1 ) {
 					updateBranch($oldParent);
@@ -810,10 +820,10 @@ bu.plugins.navigation = {};
 
  			$tree.bind('move_node.jstree', function(event, data ) {
 				var $moved = data.rslt.o;
- 
+
 				// Repeat move behavior for each moved node (handles multi-select)
 				$moved.each(function (i, node) {
-					var $node = $(node), 
+					var $node = $(node),
 						post = my.nodeToPost( $node ),
 						$newParent = data.rslt.np,
 						$oldParent = data.rslt.op,
@@ -846,16 +856,16 @@ bu.plugins.navigation = {};
 					that.broadcast( 'postMoved', [post, oldParentID, oldOrder]);
 				});
  			});
- 
+
 			// Deselect all nodes on document clicks outside of a tree element or
 			// context menu item
 			var deselectOnDocumentClick = function (e) {
 				var clickedTree = $.contains( $tree[0], e.target );
 				var clickedMenuItem = $.contains( $('#vakata-contextmenu')[0], e.target );
-				
+
 				if (!clickedTree && !clickedMenuItem) {
 					$tree.jstree('deselect_all');
-				}		
+				}
 			};
 
 			if (c.deselectOnDocumentClick ) {
@@ -976,18 +986,6 @@ bu.plugins.navigation = {};
 				}
 			};
 
-			// Extra data required by navman interface
-			bu.hooks.addFilter('nodeToPost', function (post, node) {
-				post['originalParent'] = parseInt(node.data('originalParent'), 10);
-				post['originalOrder'] = parseInt(node.data('originalOrder'), 10);
-				return post;
-			});
-			bu.hooks.addFilter('postToNode', function (node, post) {
-				node['metadata']['originalParent'] = post['originalParent'];
-				node['metadata']['originalOrder'] = post['originalOrder'];
-				return node;
-			});
-
 			return that;
 		},
 
@@ -1006,13 +1004,13 @@ bu.plugins.navigation = {};
 
 			var $tree = that.$el;
 			var currentPost = c.currentPost;
-			
+
 			// Extra configuration
 			var extraTreeConfig = {};
 
 			// Build initial open and selection arrays from current post / ancestors
 			var toOpen = [], i;
-			
+
 			if (c.ancestors && c.ancestors.length) {
 				// We want old -> young, which is not how they're passed
 				var ancestors = c.ancestors.reverse();
@@ -1028,13 +1026,13 @@ bu.plugins.navigation = {};
 
 			// Merge base tree config with extras
 			$.extend( true, d.treeConfig, extraTreeConfig );
-			
+
 			// Assert current post for select, hover and drag operations
 			var assertCurrentPost = function( node ) {
 				var postId = my.stripNodePrefix(node.attr('id'));
 				return postId == currentPost.ID;
 			};
-			
+
 			bu.hooks.addFilter( 'canSelectNode', assertCurrentPost );
 			bu.hooks.addFilter( 'canHoverNode', assertCurrentPost );
 			bu.hooks.addFilter( 'canDragNode', assertCurrentPost );
@@ -1063,7 +1061,7 @@ bu.plugins.navigation = {};
 					post = my.nodeToPost( $node );
 					return post;
 				}
-				
+
 				return false;
 			};
 
@@ -1076,7 +1074,7 @@ bu.plugins.navigation = {};
 				var $node = $tree.jstree('get_selected');
 
 				if ($node.length) {
-					
+
 					var $container = $(document);
 
 					if( $tree.css('overflow') === 'scroll' )

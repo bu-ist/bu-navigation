@@ -4586,14 +4586,14 @@
 		},
 		__init : function () {
 
+			// Aliases
+			var s = this._get_settings().bu;
+
 			// Drag and drop extensions
 			if (this.data.dnd) {
 
 				// Cached drop target
 				this.data.bu.drop_target = null;
-
-				// Aliases
-				var s = this._get_settings().bu;
 
 				// Drag and drop event bindings
 				this.get_container()

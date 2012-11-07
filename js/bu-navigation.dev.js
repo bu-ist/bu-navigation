@@ -5,7 +5,7 @@
  */
 
 /*jslint browser: true, todo: true */
-/*global bu: true, buNavSettings: false, jQuery: false, console: false, window: false, document: false */
+/*global bu: true, jQuery: false, console: false, window: false, document: false */
 
 var bu = bu || {};
 
@@ -190,6 +190,9 @@ bu.plugins.navigation = {};
 				"core" : {
 					"animation" : 0,
 					"html_titles": true
+				},
+				"ui" : {
+					"selected_parent_close": false
 				},
 				"themes" : {
 					"theme": "bu",

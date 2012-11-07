@@ -12,12 +12,16 @@
 class BU_Navigation_Admin {
 
 	// Administrative component classes
-	static $settings_page;
-	static $navman;
-	static $metabox;
-	static $filter_pages;
+	public $settings_page;
+	public $navman;
+	public $metabox;
+	public $filter_pages;
 
-	public function __construct() {
+	private $plugin;
+
+	public function __construct( $plugin ) {
+
+		$this->plugin = $plugin;
 
 		// Attach all hooks
 		$this->register_hooks();
@@ -61,11 +65,11 @@ class BU_Navigation_Admin {
 			$scripts_path = plugins_url('js',__FILE__);
 			$vendor_path = plugins_url('js/vendor',__FILE__);
 
-			$post_type = $this->get_post_type( $screen->post_type );
+			$post_type = $this->plugin->get_post_type( $screen->post_type );
 
 			// Intended for edit.php, post.php and post-new.php
-			wp_enqueue_script( 'bu-page-parent-deletion', $scripts_path . '/deletion' . $suffix . '.js', array('jquery'));
-			wp_localize_script( 'bu-page-parent-deletion', 'bu_navigation_pt_labels', $this->get_post_type_labels( $post_type ) );
+			wp_enqueue_script( 'bu-page-parent-deletion', $scripts_path . '/deletion' . $suffix . '.js', array('jquery'), BU_Navigation_Plugin::VERSION );
+			wp_localize_script( 'bu-page-parent-deletion', 'bu_navigation_pt_labels', $this->plugin->get_post_type_labels( $post_type ) );
 
 		}
 
@@ -79,7 +83,7 @@ class BU_Navigation_Admin {
 	public function load_primary_settings_page() {
 
 		require_once(dirname(__FILE__) . '/bu-navigation-admin-primary.php');
-		self::$settings_page = new BU_Navigation_Admin_Primary();
+		$this->settings_page = new BU_Navigation_Admin_Primary( $this->plugin );
 
 	}
 
@@ -88,12 +92,14 @@ class BU_Navigation_Admin {
 	 *
 	 * Accessed via the "Edit Order" menu item under support post type menus
 	 */
-	public function load_navman_page() {
+	public function load_navman_page( $post_type = null ) {
 
-		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'post';
+		if( is_null( $post_type ) ) {
+			$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'page';
+		}
 
 		require_once(dirname(__FILE__) . '/bu-navigation-admin-navman.php');
-		self::$navman = new BU_Navigation_Admin_Navman( $post_type );
+		$this->navman = new BU_Navigation_Admin_Navman( $post_type, $this->plugin );
 
 	}
 
@@ -102,15 +108,20 @@ class BU_Navigation_Admin {
 	 *
 	 * Found on the manage posts page (edit.php) for supported post types
 	 */
-	public function load_filter_pages() {
+	public function load_filter_pages( $post_type = null, $post_parent = null ) {
 
-		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'post';
-		$post_parent = isset( $_GET['post_parent'] ) ? intval($_GET['post_parent']) : 0;
+		if( is_null( $post_type ) ) {
+			$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'page';
+		}
+
+		if( is_null( $post_parent ) ) {
+			$post_parent = isset( $_GET['post_parent'] ) ? intval($_GET['post_parent']) : 0;
+		}
 
 		if( in_array( $post_type, bu_navigation_supported_post_types() ) ) {
 
 			require_once(dirname(__FILE__) . '/bu-navigation-admin-filter-pages.php');
-			self::$filter_pages = new BU_Navigation_Admin_Filter_Pages( $post_type, $post_parent );
+			$this->filter_pages = new BU_Navigation_Admin_Filter_Pages( $post_type, $post_parent, $this->plugin );
 
 		}
 
@@ -154,7 +165,7 @@ class BU_Navigation_Admin {
 			}
 
 			// Get correct post type
-			$post_type = $this->get_post_type( $post_id );
+			$post_type = $this->plugin->get_post_type( $post_id );
 
 		}
 
@@ -166,9 +177,7 @@ class BU_Navigation_Admin {
 
 		// Load admin metabox class
 		require_once(dirname(__FILE__) . '/bu-navigation-admin-metabox.php'); // Position & Visibility
-
-		// Instantiate for current post
-		self::$metabox = new BU_Navigation_Admin_Metabox( $post_id, $post_type );
+		$this->metabox = new BU_Navigation_Admin_Metabox( $post_id, $post_type, $this->plugin );
 
 	}
 
@@ -223,7 +232,7 @@ class BU_Navigation_Admin {
 		}
 
 		// get post type labels
-		$pt_labels = $this->get_post_type_labels( $post->post_type );
+		$pt_labels = $this->plugin->get_post_type_labels( $post->post_type );
 
 		// get children pages/links
 		$page_children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='$post->post_type'", $post_id);
@@ -279,51 +288,6 @@ class BU_Navigation_Admin {
 
 		echo json_encode( $response );
 		die;
-
-	}
-
-	/**
-	 * Returns the original post type for an existing post
-	 *
-	 * @param mixed $post post ID, object, or post type string
-	 * @return string $post_type post type name
-	 */
-	public function get_post_type( $post ) {
-
-		// Default arg -- post type string
-		$post_type = $post;
-
-		if( is_numeric( $post ) ) {
-			$post = get_post( $post );
-			if( $post === false )
-				return false;
-
-			$post_type = $post->post_type;
-
-		} else if ( is_object( $post ) ) {
-
-			$post_type = $post->post_type;
-
-		}
-
-		// @todo add BU Versions logic here
-
-		return $post_type;
-
-	}
-
-	public function get_post_type_labels( $post_type ) {
-
-		$pt_obj = get_post_type_object($post_type);
-
-		if( ! is_object( $pt_obj ) )
-			return false;
-
-		return array(
-			'post_type' => $post_type,
-			'singular' => $pt_obj->labels->singular_name,
-			'plural' => $pt_obj->labels->name,
-		);
 
 	}
 

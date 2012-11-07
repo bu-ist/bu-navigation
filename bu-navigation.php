@@ -56,7 +56,7 @@ if (!defined('BU_INCLUDES_PATH')) {
 
 class BU_Navigation_Plugin {
 
-	static $admin;
+	public $admin;
 
 	// Plugin settings
 	private $settings = array();
@@ -97,10 +97,7 @@ class BU_Navigation_Plugin {
 	public function init() {
 
 		if( is_admin() ) {
-
-			require_once(dirname(__FILE__) . '/bu-navigation-admin.php');
-			self::$admin = new BU_Navigation_Admin();
-
+			$this->load_admin();
 		}
 
 		$this->load_extras();
@@ -108,6 +105,13 @@ class BU_Navigation_Plugin {
 		$this->load_widget();
 
 		do_action('bu_navigation_init');
+
+	}
+
+	public function load_admin() {
+
+		require_once(dirname(__FILE__) . '/bu-navigation-admin.php');
+		$this->admin = new BU_Navigation_Admin( $this );
 
 	}
 
@@ -257,6 +261,56 @@ class BU_Navigation_Plugin {
 		if ( !$curr_depth ) $curr_depth = BU_NAVIGATION_PRIMARY_DEPTH;
 
 		return $curr_depth;
+
+	}
+
+	/**
+	 * Returns the original post type for an existing post
+	 *
+	 * @param mixed $post post ID, object, or post type string
+	 * @return string $post_type post type name
+	 */
+	public function get_post_type( $post ) {
+
+		// Default arg -- post type string
+		$post_type = $post;
+
+		if( is_numeric( $post ) ) {
+			$post = get_post( $post );
+			if( $post === false )
+				return false;
+
+			$post_type = $post->post_type;
+
+		} else if ( is_object( $post ) ) {
+
+			$post_type = $post->post_type;
+
+		}
+
+		// @todo add BU Versions logic here
+
+		return $post_type;
+
+	}
+
+	/**
+	 * Helper for creating a post type labels arrays
+	 *
+	 * @param $post_type name of a registered post type to get labels for
+	 */
+	public function get_post_type_labels( $post_type ) {
+
+		$pt_obj = get_post_type_object($post_type);
+
+		if( ! is_object( $pt_obj ) )
+			return false;
+
+		return array(
+			'post_type' => $post_type,
+			'singular' => $pt_obj->labels->singular_name,
+			'plural' => $pt_obj->labels->name,
+		);
 
 	}
 

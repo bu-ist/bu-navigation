@@ -15,15 +15,15 @@ require_once(dirname(__FILE__) . '/classes.nav-tree.php' );
  */
 class BU_Navigation_Admin_Metabox {
 
-	public $plugin;
-
 	public $post;
 	public $post_type;
 	public $post_type_labels;
 
-	public function __construct( $post, $post_type ) {
+	private $plugin;
 
-		$this->plugin = $GLOBALS['bu_navigation_plugin'];
+	public function __construct( $post, $post_type, $plugin ) {
+
+		$this->plugin = $plugin;
 
 		// Set up properties
 		if( is_numeric( $post ) )
@@ -31,7 +31,7 @@ class BU_Navigation_Admin_Metabox {
 
 		$this->post = $post;
 		$this->post_type = $post_type;
-		$this->post_type_labels = BU_Navigation_Plugin::$admin->get_post_type_labels( $this->post_type );
+		$this->post_type_labels = $this->plugin->get_post_type_labels( $this->post_type );
 
 		// Attach WP actions/filters
 		$this->register_hooks();
@@ -60,7 +60,7 @@ class BU_Navigation_Admin_Metabox {
 		$styles_path = plugins_url('css',__FILE__);
 
 		// Scripts
-		wp_register_script('bu-navigation-metabox', $scripts_path . '/navigation-metabox' . $suffix . '.js', array('bu-navigation'), '0.3', true );
+		wp_register_script('bu-navigation-metabox', $scripts_path . '/navigation-metabox' . $suffix . '.js', array('bu-navigation'), BU_Navigation_Plugin::VERSION, true );
 
 		// Setup dynamic script context for navigation-metabox.js
 		$post_id = is_object( $this->post ) ? $this->post->ID : null;
@@ -89,7 +89,7 @@ class BU_Navigation_Admin_Metabox {
 		$treeview->enqueue_script('bu-navigation-metabox');
 
 		// Styles
-		wp_enqueue_style( 'bu-navigation-metabox', $styles_path . '/navigation-metabox.css' );
+		wp_enqueue_style( 'bu-navigation-metabox', $styles_path . '/navigation-metabox.css', array(), BU_Navigation_Plugin::VERSION );
 
 	}
 

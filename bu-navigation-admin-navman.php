@@ -20,8 +20,6 @@ require_once(dirname(__FILE__) . '/classes.reorder.php' );
 class BU_Navigation_Admin_Navman {
 
 	public $page;
-	private $plugin;
-
 	public $reorder_tracker;
 
 	const OPTION_LOCK_TIME = '_bu_navman_lock_time';
@@ -32,10 +30,11 @@ class BU_Navigation_Admin_Navman {
 	const NOTICE_LOCKED =2;
 
 	private $message_queue = array();
+	private $plugin;
 
-	public function __construct( $post_type ) {
+	public function __construct( $post_type, $plugin ) {
 
-		$this->plugin = $GLOBALS['bu_navigation_plugin'];
+		$this->plugin = $plugin;
 		$this->post_type = $post_type;
 
 		// Attach WP actions/filters
@@ -57,7 +56,6 @@ class BU_Navigation_Admin_Navman {
 	 * Add "Edit Order" submenu pages to allow editing the navigation of the supported post types
 	 */
 	public function register_menu() {
-		global $pagenow;
 
 		// Add "Edit Order" links to the submenu of each supported post type
 		$post_types = bu_navigation_supported_post_types();
@@ -111,8 +109,8 @@ class BU_Navigation_Admin_Navman {
 			$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
 
 			// Scripts
-			wp_register_script('bu-jquery-validate', plugins_url('js/vendor/jquery.validate' . $suffix . '.js', __FILE__), array('jquery'), '1.8.1', true);
-			wp_register_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-navigation','jquery-ui-dialog','bu-jquery-validate'), '0.3.1', true);
+			wp_register_script('bu-jquery-validate', plugins_url('js/vendor/jquery.validate' . $suffix . '.js', __FILE__), array('jquery'), '1.8.1', true );
+			wp_register_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-navigation','jquery-ui-dialog','bu-jquery-validate'), BU_Navigation_Plugin::VERSION, true );
 
 			// Setup dynamic script context for manage.js
 			$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
@@ -130,12 +128,12 @@ class BU_Navigation_Admin_Navman {
 
 			// Styles
 			if ( 'classic' == get_user_option( 'admin_color') ) {
-				wp_enqueue_style ( 'bu-jquery-ui-css',  plugins_url( '/css/jquery-ui-classic.css', __FILE__ ), array(), '0.3' );
+				wp_enqueue_style ( 'bu-jquery-ui-css',  plugins_url( '/css/jquery-ui-classic.css', __FILE__ ), array(), BU_Navigation_Plugin::VERSION );
 			} else {
-				wp_enqueue_style ( 'bu-jquery-ui-css',  plugins_url( '/css/jquery-ui-fresh.css', __FILE__ ), array(), '0.3' );
+				wp_enqueue_style ( 'bu-jquery-ui-css',  plugins_url( '/css/jquery-ui-fresh.css', __FILE__ ), array(), BU_Navigation_Plugin::VERSION );
 			}
 
-			wp_enqueue_style('bu-navman', plugins_url('css/manage.css', __FILE__), array(), '0.3');
+			wp_enqueue_style('bu-navman', plugins_url('css/manage.css', __FILE__), array(), BU_Navigation_Plugin::VERSION );
 
 		}
 

@@ -8,9 +8,9 @@ class BU_Navigation_Admin_Primary {
 	public $page;
 	private $plugin;
 
-	public function __construct() {
+	public function __construct( $plugin ) {
 
-		$this->plugin = $GLOBALS['bu_navigation_plugin'];
+		$this->plugin = $plugin;
 
 		// Attach WP actions/filters
 		$this->register_hooks();
@@ -43,8 +43,9 @@ class BU_Navigation_Admin_Primary {
 
 	public function enqueue_styles( $page ) {
 
-		if( $page == $this->page )
-			wp_enqueue_style( 'primary-navigation-admin', plugins_url( '/css/primary-navigation-admin.css', __FILE__ ) );
+		if( $page == $this->page ) {
+			wp_enqueue_style( 'primary-navigation-admin', plugins_url( '/css/primary-navigation-admin.css', __FILE__ ), array(), BU_Navigation_Plugin::VERSION );
+		}
 
 	}
 

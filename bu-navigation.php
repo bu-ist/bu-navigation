@@ -1,26 +1,45 @@
 <?php
 /*
 Plugin Name: Page Navigation
-Version: 0.2
+Version: 0.9
 Author URI: http://www.bu.edu/tech/help/
 Description: Provides alternative navigation elements designed for blogs with large page counts
 Author: Boston University (IS&T)
 */
 
 /**
+Copyright 2012 by Boston University
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+**/
+
+/*
+@author Niall Kavanagh <ntk@bu.edu>
+@author Gregory Cornelius <gcorne@bu.edu>
+@author Mike Burns <mgburns@bu.edu>
+*/
+
+/**
  * Components:
  *
- * BU Page Parent Meta Box
- * Navigation Management Screens
+ * Navigation Management Screens ("Edit Order" and "Primary Navigation")
+ * Navigation Attributes Meta Box
  * Content navigation widget
  * Filter for drilling into a particular section when view the edit pages screen
  */
-
-/*
-@todo
-	- multiple post types should be allowed to support links -- move array(page,link) code to isolated function
-
-*/
 
 /* BU Navigation constants */
 define('BU_NAV_PLUGIN_DIR', dirname(__FILE__));
@@ -39,6 +58,9 @@ class BU_Navigation_Plugin {
 
 	static $admin;
 
+	// Plugin settings
+	private $settings = array();
+
 	// Plugin settings option names
 	const OPTION_DISPLAY = 'bu_navigation_primarynav';
 	const OPTION_MAX_ITEMS = 'bu_navigation_primarynav_max';
@@ -46,8 +68,7 @@ class BU_Navigation_Plugin {
 	const OPTION_DEPTH = 'bu_navigation_primarynav_depth';
 	const OPTION_ALLOW_TOP = 'bu_allow_top_level_page';
 
-	// Plugin settings
-	private $settings = array();
+	const VERSION = '0.9';
 
 	public function __construct() {
 

@@ -1,16 +1,35 @@
-// Check prerequisites
-if((typeof bu === 'undefined') ||
-	(typeof bu.plugins.navigation === 'undefined') ||
-	(typeof bu.plugins.navigation.tree === 'undefined'))
-		throw new TypeError('BU Navigation Manager script dependencies have not been met!');
+/**
+ * BU Navigation "Edit Order" admin page
+ *
+ * Presents users with a full view of hierarchical content for supported post types
+ * Provides a drag and drop tree interfcace for moving posts, as well as shortcuts
+ * for editing and trashing posts.
+ *
+ * Pages also add custom "Link" behavior -- the ability to add and edit external
+ * links and place them in the navigation hierarchy.
+ */
 
-(function($){
+/*jslint browser: true, todo: true */
+/*global bu: true, bu_navman_settings: false, jQuery: false, console: false, window: false, document: false */
+
+// Check prerequisites
+if ((typeof bu === 'undefined') ||
+		(typeof bu.plugins.navigation === 'undefined') ||
+		(typeof bu.plugins.navigation.tree === 'undefined')) {
+	throw new TypeError('BU Navigation Manager script dependencies have not been met!');
+}
+
+(function ($) {
+	'use strict';
 
 	// If we are the first view object, set up our namespace
 	bu.plugins.navigation.views = bu.plugins.navigation.views || {};
 
 	var Navman, Linkman, Navtree;
 
+	/* =====================================================================
+	 * Navigation manager interface
+	 * ===================================================================== */
 	Navman = bu.plugins.navigation.views.Navman = {
 
 		el: '#nav-tree-container',
@@ -34,45 +53,45 @@ if((typeof bu === 'undefined') ||
 			moves: {}
 		},
 
-		initialize: function( config ) {
+		initialize: function (config) {
 			// Create post navigation tree from server-provided instance settings object
 			var settings = bu_navman_settings;
 			settings.el = this.el;
 
-			Navtree = bu.plugins.navigation.tree('navman', settings );
+			Navtree = bu.plugins.navigation.tree('navman', settings);
 
 			// Initialize link manager
 			Linkman.initialize();
 
 			// Subscribe to relevant tree signals
-			Navtree.listenFor('editPost', $.proxy( this.editPost, this ));
+			Navtree.listenFor('editPost', $.proxy(this.editPost, this));
 
-			Navtree.listenFor('postRemoved', $.proxy( this.postRemoved, this ));
-			Navtree.listenFor('postMoved', $.proxy( this.postMoved, this ));
+			Navtree.listenFor('postRemoved', $.proxy(this.postRemoved, this));
+			Navtree.listenFor('postMoved', $.proxy(this.postMoved, this));
 			Linkman.listenFor('linkInserted', $.proxy(this.linkInserted, this));
 			Linkman.listenFor('linkUpdated', $.proxy(this.linkUpdated, this));
 
 			// Form submission
-			$(this.ui.form).bind('submit', $.proxy( this.save, this ));
-			$(this.ui.expandAllBtn).bind('click', this.expandAll );
-			$(this.ui.collapseAllBtn).bind('click', this.collapseAll );
+			$(this.ui.form).bind('submit', $.proxy(this.save, this));
+			$(this.ui.expandAllBtn).bind('click', this.expandAll);
+			$(this.ui.collapseAllBtn).bind('click', this.collapseAll);
 		},
 
-		expandAll: function(e) {
+		expandAll: function (e) {
 			e.preventDefault();
 			e.stopImmediatePropagation();
 			Navtree.showAll();
 		},
 
-		collapseAll: function(e) {
+		collapseAll: function (e) {
 			e.preventDefault();
 			e.stopImmediatePropagation();
 			Navtree.hideAll();
 		},
 
-		editPost: function( post ) {
-			if( post.type == 'link' ) {
-				Linkman.edit( post );
+		editPost: function (post) {
+			if ('link' === post.type) {
+				Linkman.edit(post);
 			} else {
 				var url = "post.php?action=edit&post=" + post.ID;
 				window.location = url;
@@ -80,14 +99,11 @@ if((typeof bu === 'undefined') ||
 		},
 
 		linkInserted: function (link) {
-
 			this.data.insertions[link.ID] = link;
 			this.data.dirty = true;
-
 		},
 
 		linkUpdated: function (link) {
-
 			if ('new' === link.status) {
 				// Update to new link (not yet commited to DB)
 				this.data.insertions[link.ID] = link;
@@ -95,45 +111,43 @@ if((typeof bu === 'undefined') ||
 				// Update to previously existing link
 				this.data.updates[link.ID] = link;
 			}
-
 			this.data.dirty = true;
-
 		},
 
 		postRemoved: function (post) {
 			var id = post.ID;
 
 			if (id) {
-				
-				if (typeof this.data.insertions[id] !== 'undefined' ) {
-					
+
+				if (typeof this.data.insertions[id] !== 'undefined') {
+
 					// Newly inserted posts aren't yet commited to DB, so just
 					// remove it from the insertions cache and move on
 					delete this.data.insertions[id];
-					
-				} else if (typeof this.data.updates[id] !== 'undefined' ) {
+
+				} else if (typeof this.data.updates[id] !== 'undefined') {
 
 					// Post was marked to be updated -- remove from updates cache
 					// and push to deletions
 					delete this.data.updates[id];
 					this.data.deletions.push(id);
 					this.data.dirty = true;
-					
-				} else if (typeof this.data.moves[id] !== 'undefined' ) {
-					
+
+				} else if (typeof this.data.moves[id] !== 'undefined') {
+
 					// Post was marked to be moved -- remove from moves cache
 					// and push to deletions
 					delete this.data.moves[id];
 					this.data.deletions.push(id);
 					this.data.dirty = true;
-					
+
 				} else {
-					
+
 					// Deletion was not previously in any category, just add to deletions cache
 					// and mark page as dirty
 					this.data.deletions.push(id);
 					this.data.dirty = true;
-					
+
 				}
 			}
 		},
@@ -141,23 +155,23 @@ if((typeof bu === 'undefined') ||
 		postMoved : function (post) {
 
 			// New post moves are tracked via the insertions cache
-			if ('new' == post.status) {
+			if ('new' === post.status) {
 				return;
 			}
 
 			// If post parent or menu order has changed, track this as a move
-			if (post.parent != post.originalParent || post.menu_order != post.originalOrder) {
+			if (post.parent !== post.originalParent || post.menu_order !== post.originalOrder) {
 				this.data.moves[post.ID] = post;
-				this.data.dirty = true;		
+				this.data.dirty = true;
 			}
 
 		},
 
-		save: function(e) {
+		save: function (e) {
 			var deletions = this.data.deletions, moves = {}, updates = {}, insertions = {}, current;
 
 			// Process insertions
-			$.each( this.data.insertions, function (postID, post) {
+			$.each(this.data.insertions, function (postID, post) {
 				current = Navtree.getPost(postID);
 				if (current) {
 					insertions[current.ID] = current;
@@ -165,7 +179,7 @@ if((typeof bu === 'undefined') ||
 			});
 
 			// Process updates
-			$.each( this.data.updates, function (postID, post) {
+			$.each(this.data.updates, function (postID, post) {
 				current = Navtree.getPost(postID);
 				if (current) {
 					updates[current.ID] = current;
@@ -173,7 +187,7 @@ if((typeof bu === 'undefined') ||
 			});
 
 			// Process moves
-			$.each( this.data.moves, function (postID, post) {
+			$.each(this.data.moves, function (postID, post) {
 				current = Navtree.getPost(postID);
 				if (current) {
 					moves[current.ID] = current;
@@ -192,6 +206,9 @@ if((typeof bu === 'undefined') ||
 
 	};
 
+	/* =====================================================================
+	 * Link manager interface
+	 * ===================================================================== */
 	Linkman = bu.plugins.navigation.views.Linkman = {
 
 		el: '#navman-link-editor',
@@ -209,10 +226,10 @@ if((typeof bu === 'undefined') ||
 			currentLink: null
 		},
 
-		initialize: function() {
+		initialize: function () {
 
 			// Add signals
-			$.extend( true, this, bu.signals );
+			$.extend(true, this, bu.signals);
 
 			this.$el = $(this.el);
 
@@ -222,8 +239,8 @@ if((typeof bu === 'undefined') ||
 			this.$el.dialog({
 				autoOpen: false,
 				buttons: {
-					"Ok": $.proxy( this.save, this ),
-					"Cancel": $.proxy( this.cancel, this )
+					"Ok": $.proxy(this.save, this),
+					"Cancel": $.proxy(this.cancel, this)
 				},
 				minWidth: 400,
 				width: 500,
@@ -232,16 +249,14 @@ if((typeof bu === 'undefined') ||
 			});
 
 			// Prevent clicks in dialog/overlay from removing tree selections
-			$(document.body).delegate('.ui-widget-overlay, .ui-widget', 'click', this.stopPropagation );
+			$(document.body).delegate('.ui-widget-overlay, .ui-widget', 'click', this.stopPropagation);
 
 			// Add link event
-			$(this.ui.addBtn).bind('click', $.proxy(this.add, this ));
-
-			return this;
+			$(this.ui.addBtn).bind('click', $.proxy(this.add, this));
 
 		},
 
-		add: function(e) {
+		add: function (e) {
 			e.preventDefault();
 			e.stopPropagation();
 
@@ -250,12 +265,12 @@ if((typeof bu === 'undefined') ||
 			this.$el.dialog('option', 'title', 'Add a Link').dialog('open');
 		},
 
-		edit: function( link ) {
+		edit: function (link) {
 
 			$(this.ui.urlField).attr("value", link.content);
 			$(this.ui.labelField).attr("value", link.title);
 
-			if (link.meta.bu_link_target == "new") {
+			if ('new' === link.meta.bu_link_target) {
 				$(this.ui.targetNewField).attr("checked", "checked");
 			} else {
 				$(this.ui.targetSameField).attr("checked", "checked");
@@ -266,21 +281,21 @@ if((typeof bu === 'undefined') ||
 			this.$el.dialog('option', 'title', 'Edit a Link').dialog('open');
 		},
 
-		save: function(e) {
+		save: function (e) {
 			e.preventDefault();
 			e.stopPropagation();
 
 			if (this.$form.valid()) {
 
 				// Global link being edited
-				var link = this.data.currentLink, saved;
+				var link = this.data.currentLink, saved, selected;
 
 				// Extract updates from form
 				link.content = $(this.ui.urlField).attr("value");
 				link.title = $(this.ui.labelField).attr("value");
 				link.meta.bu_link_target = $("input[name='editlink_target']:checked").attr("value");
 
-				var selected = Navtree.getSelectedPost();
+				selected = Navtree.getSelectedPost();
 
 				if (selected) {
 					link.parent = selected.parent;
@@ -291,14 +306,14 @@ if((typeof bu === 'undefined') ||
 				}
 
 				// Insert or update link
-				if (link.status === 'new' && !link.ID ) {
+				if ('new' === link.status && !link.ID) {
 
-					saved = Navtree.insertPost( link );
+					saved = Navtree.insertPost(link);
 					this.broadcast('linkInserted', [saved]);
 
 				} else {
 
-					saved = Navtree.updatePost( link );
+					saved = Navtree.updatePost(link);
 					this.broadcast('linkUpdated', [saved]);
 
 				}
@@ -338,16 +353,17 @@ if((typeof bu === 'undefined') ||
 
 	};
 
-	window.onbeforeunload = function() {
-		if ( Navman.data.dirty ) {
+	window.onbeforeunload = function () {
+		if (Navman.data.dirty) {
 			return 'You have made changes to your navigation that have not yet been saved.';
 		}
-		
+
 		return;
 	};
 
-})(jQuery);
+}(jQuery));
 
-jQuery(document).ready( function($) {
+jQuery(document).ready(function ($) {
+	'use strict';
 	bu.plugins.navigation.views.Navman.initialize();
 });

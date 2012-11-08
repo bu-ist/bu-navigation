@@ -208,8 +208,8 @@ if((typeof bu === 'undefined' ) ||
 
 		c = $.extend(c, config);
 
-		// Signals
-		$.extend( true, that, bu.signals );
+		// Implement the signals interface
+		bu.signals.register(that);
 
 		// Alias
 		var $toolbar;

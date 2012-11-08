@@ -17,36 +17,42 @@ bu.plugins.navigation = {};
 
 	// Simple pub/sub pattern
 	bu.signals = (function () {
-		var listeners = {}, that = this;
+		var api = {};
 
+		// Attach a callback function to respond for the given event
+		api.listenFor = function (event, callback) {
+			var listeners = this._listeners;
+			if (listeners[event] === undefined) {
+				listeners[event] = [];
+			}
+
+			listeners[event].push(callback);
+		};
+
+		// Broadcast a specific event, optionally providing context data
+		api.broadcast = function (event, data) {
+			var i, listeners = this._listeners;
+			if (listeners[event]) {
+				for (i = 0; i < listeners[event].length; i = i + 1) {
+					listeners[event][i].apply(this, data || []);
+				}
+			}
+		}
+
+		// Objects that wish to broadcast signals must register themselves first
 		return {
-			listenFor: function (event, callback) {
-
-				if (listeners[event] === undefined) {
-					listeners[event] = [];
-				}
-
-				listeners[event].push(callback);
-				return that;
-
-			},
-			broadcast: function (event, data) {
-				var i;
-				if (listeners[event]) {
-					for (i = 0; i < listeners[event].length; i = i + 1) {
-						listeners[event][i].apply(this, data || []);
-					}
-				}
-				return that;
+			register: function (obj) {
+				obj._listeners = {};
+				$.extend(true, obj, api);
 			}
 		};
+
 	}());
 
 	// Simple filter mechanism, modeled after Plugins API
 	// @todo partially implemented
 	bu.hooks = (function () {
-		var filters = {},
-			that = this;
+		var filters = {};
 
 		return {
 			addFilter: function (name, func) {
@@ -55,7 +61,7 @@ bu.plugins.navigation = {};
 				}
 
 				filters[name].push(func);
-				return that;
+				return this;
 
 			},
 			applyFilters: function (name, obj) {
@@ -123,8 +129,8 @@ bu.plugins.navigation = {};
 			var that = {};
 			my = my || {};
 
-			// "Implement" the signals interface
-			$.extend( true, that, bu.signals );
+			// Implement the signals interface
+			bu.signals.register(that);
 
 			// Instance settings
 			that.config = $.extend({}, Nav.settings, config || {} );
@@ -173,15 +179,15 @@ bu.plugins.navigation = {};
 			};
 
 			var canSelectNode = function( node ) {
-				return bu.hooks.applyFilters( 'canSelectNode', node );
+				return bu.hooks.applyFilters( 'canSelectNode', node, that );
 			};
 
 			var canHoverNode = function( node ) {
-				return bu.hooks.applyFilters( 'canHoverNode', node );
+				return bu.hooks.applyFilters( 'canHoverNode', node, that );
 			};
 
 			var canDragNode = function( node ) {
-				return bu.hooks.applyFilters( 'canDragNode', node );
+				return bu.hooks.applyFilters( 'canDragNode', node, that );
 			};
 
 			// jsTree Settings object
@@ -302,6 +308,10 @@ bu.plugins.navigation = {};
 					return my.nodeToPost($node);
 				}
 				return false;
+			};
+
+			that.deselectAll = function () {
+				$tree.jstree('deselect_all');
 			};
 
 			that.getPost = function( id ) {
@@ -718,7 +728,7 @@ bu.plugins.navigation = {};
 				var nodeHeight = $li.height() >= 18 ? $li.height() : 32;
 				$tree.jstree('data').data.core.li_height = nodeHeight;
 
-				that.broadcast( 'postsLoaded' );
+				that.broadcast('postsLoaded');
 			});
 
 			// Post initial opens/selections are made
@@ -730,7 +740,7 @@ bu.plugins.navigation = {};
 					that.save();
 				}
 
-				that.broadcast( 'postsSelected' );
+				that.broadcast('postsSelected');
 			});
 
 			// After node is loaded from server using json_data
@@ -771,7 +781,7 @@ bu.plugins.navigation = {};
 
 			$tree.bind('select_node.jstree', function(event, data ) {
 				var post = my.nodeToPost(data.rslt.obj);
-				that.broadcast( 'selectPost', [ post, that ]);
+				that.broadcast('postSelected', [post]);
 			});
 
 			$tree.bind('create.jstree', function (event, data) {
@@ -818,7 +828,7 @@ bu.plugins.navigation = {};
 
 			$tree.bind('deselect_node.jstree', function(event, data ) {
 				var post = my.nodeToPost( data.rslt.obj );
-				that.broadcast( 'deselectPost', [ post, that ]);
+				that.broadcast('postDeselected', [post]);
 			});
 
  			$tree.bind('move_node.jstree', function(event, data ) {
@@ -1031,9 +1041,11 @@ bu.plugins.navigation = {};
 			$.extend( true, d.treeConfig, extraTreeConfig );
 
 			// Assert current post for select, hover and drag operations
-			var assertCurrentPost = function( node ) {
-				var postId = my.stripNodePrefix(node.attr('id'));
-				return postId == currentPost.ID;
+			var assertCurrentPost = function( node, inst ) {
+				if (inst.$el.is(that.$el.selector)) {
+					var postId = my.stripNodePrefix(node.attr('id'));
+					return postId == currentPost.ID;
+				}
 			};
 
 			bu.hooks.addFilter( 'canSelectNode', assertCurrentPost );

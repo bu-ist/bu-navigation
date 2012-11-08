@@ -228,8 +228,8 @@ if ((typeof bu === 'undefined') ||
 
 		initialize: function () {
 
-			// Add signals
-			$.extend(true, this, bu.signals);
+			// Implement the signals interface
+			bu.signals.register(this);
 
 			this.$el = $(this.el);
 

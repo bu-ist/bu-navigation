@@ -32,6 +32,7 @@ class BU_Navigation_Tree_View {
 			'postStatuses' => array('draft','pending','publish'),
 			'themePath' => plugins_url('css/vendor/jstree/themes/bu-jstree', __FILE__ ),
 			'rpcUrl' => admin_url('admin-ajax.php?action=bu-get-navtree' ),
+			'getPostRpcUrl' => admin_url('admin-ajax.php?action=bu-get-post'),
 			'allowTop' => $this->plugin->get_setting('allow_top'),
 			'loadInitialData' => false,
 			'lazyLoad' => true,
@@ -498,4 +499,35 @@ function bu_navigation_ajax_get_navtree() {
 	}
 }
 
-add_action('wp_ajax_bu-get-navtree', 'bu_navigation_ajax_get_navtree' );
+add_action( 'wp_ajax_bu-get-navtree', 'bu_navigation_ajax_get_navtree' );
+
+/**
+ * RPC endpoint for fetching a post object
+ *
+ * In addition to the standard post fields, this call will
+ * also return the post permalink in the "url" field.
+ *
+ * If the post is a custom BU link, it will also add a
+ * "target" field ("same" or "new")
+ */
+function bu_navigation_ajax_get_post() {
+	if( defined('DOING_AJAX') && DOING_AJAX ) {
+
+		$post_id = isset($_GET['post_id']) ? $_GET['post_id'] : 0;
+		$post = get_post($post_id);
+
+		// Add extra fields to response for links
+		if( $post->post_type == 'link' ){
+			$post->target = get_post_meta( $post_id, 'bu_link_target', TRUE );
+			$post->url = $post->post_content;
+		} else {
+			$post->url = get_permalink($post_id);
+		}
+
+		echo json_encode( $post );
+		die();
+
+	}
+}
+
+add_action( 'wp_ajax_bu-get-post', 'bu_navigation_ajax_get_post' );

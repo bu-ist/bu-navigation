@@ -904,7 +904,7 @@ bu.plugins.navigation = {};
 							"icon" : "remove"
 						},
 						"remove" : {
-							"label" : "Remove",
+							"label" : "Move to Trash",
 							"action" : removePost
 						}
 					};

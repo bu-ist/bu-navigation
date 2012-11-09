@@ -409,6 +409,11 @@ html[xmlns] .jstree-bu li {
     color: #cf5b5b;
 }
 
+.jstree-bu .perm-stats .jstree-icon {
+	background: none;
+	float: none;
+}
+
 #vakata-contextmenu.jstree-bu-context {
 	margin-top: 9px;
 	margin-left: -105px;

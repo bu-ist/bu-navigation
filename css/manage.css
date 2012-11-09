@@ -76,7 +76,9 @@
 }
 
 .navman-toolbar {
-	margin-bottom: 20px;
+	font-size: 90%;
+	margin-bottom: 12px;
+	margin-top: 30px;
 }
 
 .navman-toolbar a {

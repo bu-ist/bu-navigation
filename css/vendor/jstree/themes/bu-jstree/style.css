@@ -177,6 +177,18 @@ html[xmlns] .jstree-bu li {
 	background-color: transparent;
 }
 
+.jstree-bu li[rel="section"] > a > .jstree-icon {
+	background-position: -32px 0;
+}
+
+.jstree-bu li[rel="page"] > a > .jstree-icon {
+	background-position: -32px 0;
+}
+
+.jstree-bu li[rel="link"] > a > .jstree-icon {
+	background-position: -48px 0;
+}
+
 .jstree-bu li[rel="allowed"] > a > .jstree-icon,
 .jstree-bu li[rel="allowed-desc-denied"] > a > .jstree-icon,
 .jstree-bu li[rel="allowed-desc-unknown"] > a > .jstree-icon,
@@ -408,6 +420,21 @@ html[xmlns] .jstree-bu li {
 .jstree-bu .perm-stats.denied {
     color: #cf5b5b;
 }
+
+/* Page selector interface */
+.jstree-bu.bu-page-selector li a:hover {
+	cursor: pointer;
+}
+
+.jstree-bu.bu-page-selector .jstree-clicked:hover {
+	cursor: pointer;
+}
+
+/* Compact view */
+.jstree-compact .jstree-bu li a {padding: 3px 0;margin-bottom: 2px;}
+.jstree-compact .jstree-bu a ins {margin: 0 4px 0 5px;}
+.jstree-compact .jstree-bu .edit-options {padding: 4px 3px 4px 10px;}
+.jstree-compact .jstree-bu .edit-options .jstree-icon {margin: 0 0 0 2px;}
 
 .jstree-bu .perm-stats .jstree-icon {
 	background: none;

@@ -999,6 +999,8 @@ bu.plugins.navigation = {};
 				}
 			};
 
+			$tree.addClass('bu-navman');
+
 			return that;
 		},
 
@@ -1105,6 +1107,8 @@ bu.plugins.navigation = {};
 				}
 
 			};
+
+			$tree.addClass('bu-edit-post');
 
 			return that;
 		}

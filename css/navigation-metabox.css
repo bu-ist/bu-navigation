@@ -12,11 +12,12 @@
 
 #TB_window .jstree-bu a {
 	color: black;
-	cursor: default;
 }
 
 #TB_window .jstree-bu .jstree-clicked {
 	color: white;
-	cursor: move;
 }
 
+#TB_window .jstree-bu.bu-edit-post .jstree-clicked {
+	cursor: move;
+}

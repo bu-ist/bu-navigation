@@ -59,6 +59,10 @@ html[xmlns] .jstree-bu li {
 	border: 1px solid transparent;
 }
 
+#perm-editor-page .jstree-bu li {
+	margin-bottom: 0;
+}
+
 .jstree-bu ul li {
 	display: block;
 	height: 1%;
@@ -102,7 +106,7 @@ html[xmlns] .jstree-bu li {
 
 .jstree-bu li a {
 	display: block;
-	cursor:	move;
+	cursor:	default;
 	padding: 6px 0 6px 0;
 	border: 1px solid #dfdfdf;
 	border-radius: 3px;
@@ -114,6 +118,10 @@ html[xmlns] .jstree-bu li {
 	background: -ms-linear-gradient(top, #ffffff 0%,#eeeeee 100%);
 	background: linear-gradient(to bottom, #ffffff 0%,#eeeeee 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eeeeee',GradientType=0 );
+}
+
+.perm-editor.jstree a {
+	padding: 5px 0 1px 0 !important;
 }
 
 .jstree-bu li a .title {
@@ -134,6 +142,11 @@ html[xmlns] .jstree-bu li {
 	background: -ms-linear-gradient(top, #3084b3 0%,#2a729a 100%);
 	background: linear-gradient(to bottom, #3084b3 0%,#2a729a 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3084b3', endColorstr='#2a729a',GradientType=0 );
+}
+
+.perm-editor.jstree .jstree-clicked {
+	border: 1px solid #6d6d6d;
+	background: #888;
 }
 
 .jstree-bu .denied > a {
@@ -170,32 +183,88 @@ html[xmlns] .jstree-bu li {
 	margin: 0 4px 0 8px;
 }
 
-.jstree-bu li[rel="section"] > a > .jstree-icon {
+#perm-editor-page .jstree-bu a ins {
+	margin: 0 4px 0 -1px;
+}
+
+#perm-editor-page li[rel="section"] > a > .jstree-icon, 
+#perm-editor-page li[rel="page"] > a > .jstree-icon, 
+#perm-editor-page li[rel="link"] > a > .jstree-icon, 
+#perm-editor-page li[rel="allowed"] > a > .jstree-icon, 
+#perm-editor-page li[rel="allowed-desc-denied"] > a > .jstree-icon, 
+#perm-editor-page li[rel="denied"] > a > .jstree-icon, 
+#perm-editor-page li[rel="denied-desc-allowed"] > a > .jstree-icon {
 	background-image: url("sprite.png");
 	background-repeat: no-repeat;
 	background-color: transparent;
+}
+
+#perm-editor-page li[rel="section"] > a > .jstree-icon {
 	background-position: -32px 0;
 }
 
-.jstree-bu li[rel="page"] > a > .jstree-icon {
-	background-image: url("sprite.png");
-	background-repeat: no-repeat;
-	background-color: transparent;
+#perm-editor-page li[rel="page"] > a > .jstree-icon {
 	background-position: -32px 0;
 }
 
-.jstree-bu li[rel="link"] > a > .jstree-icon {
-	background-image: url("sprite.png");
-	background-repeat: no-repeat;
-	background-color: transparent;
+#perm-editor-page li[rel="link"] > a > .jstree-icon {
 	background-position: -48px 0;
 }
 
-.jstree-bu li[rel="denied"] > a > .jstree-icon {
-	background-image: url("sprite.png");
-	background-repeat: no-repeat;
-	background-color: transparent;
-	background-position: -16px 0;
+#perm-editor-page li[rel="allowed"] > a > .jstree-icon, 
+#perm-editor-page li[rel="allowed-desc-denied"] > a > .jstree-icon, 
+#perm-editor-page li[rel="denied"] > a > .jstree-icon, 
+#perm-editor-page li[rel="denied-desc-allowed"] > a > .jstree-icon {
+	margin-top: -6px;
+	margin-right: 5px;
+	margin-left: -2px;
+	border-radius: 3px 0 0 3px;
+	width: 14px;
+	height: 24px;
+}
+
+#perm-editor-page li[rel="allowed"] > a > .jstree-icon {
+	background-position: -16px -48px !important;
+	border-top: 1px solid #7d9a42;
+	border-left: 1px solid #7d9a42;
+	border-bottom: 1px solid #7d9a42;
+}
+
+#perm-editor-page li[rel="allowed-desc-denied"] > a > .jstree-icon {
+	background-position: -16px -48px !important;
+	border-top: 1px solid #7d9a42;
+	border-left: 1px solid #7d9a42;
+	border-bottom: 1px solid #7d9a42;
+}
+
+#perm-editor-page li[rel="allowed"] > a.jstree-clicked > .jstree-icon, 
+#perm-editor-page li[rel="allowed-desc-denied"] > a.jstree-clicked > .jstree-icon {
+	background-position: -16px -72px !important;
+	border-top: 1px solid #6d6d6d;
+	border-left: 1px solid #6d6d6d;
+	border-bottom: 1px solid #6d6d6d;
+}
+
+#perm-editor-page li[rel="denied"] > a > .jstree-icon {
+	background-position: 0 -48px !important;
+	border-top: 1px solid #9e5b5b;
+	border-left: 1px solid #9e5b5b;
+	border-bottom: 1px solid #9e5b5b;
+}
+
+#perm-editor-page li[rel="denied-desc-allowed"] > a > .jstree-icon {
+	background-position: 0 -48px !important;
+	border-top: 1px solid #9e5b5b;
+	border-left: 1px solid #9e5b5b;
+	border-bottom: 1px solid #9e5b5b;
+}
+
+#perm-editor-page li[rel="denied"] > a.jstree-clicked > .jstree-icon, 
+#perm-editor-page li[rel="denied-desc-allowed"] > a.jstree-clicked > .jstree-icon {
+	background-position: 0 -72px !important;
+	border-top: 1px solid #6d6d6d;
+	border-left: 1px solid #6d6d6d;
+	border-bottom: 1px solid #6d6d6d;
 }
 
 .jstree-bu .post-statuses {
@@ -283,6 +352,10 @@ html[xmlns] .jstree-bu li {
 	cursor: move;
 }
 
+.perm-editor .jstree-clicked:hover {
+	cursor: default;
+}
+
 .jstree-bu .edit-options.clicked {
 	visibility: visible;
 	background: white;
@@ -308,6 +381,44 @@ html[xmlns] .jstree-bu li {
 
 .jstree-bu .jstree-clicked .edit-options.clicked .jstree-icon {
 	background-position: -32px -16px;
+}
+
+.perm-editor.hierarchical .edit-perms {
+	margin: -6px -1px;
+	padding: 4px 0 5px 0;
+	color: white;
+	text-shadow: 0 0 3px rgba(0, 0, 0, .25);
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+	font-size: 100%;
+}
+
+.perm-editor.hierarchical .edit-perms.denied {
+	cursor:	pointer;
+	border: 1px solid #7b4949;
+	background: #cf5b5b;
+	background: -moz-linear-gradient(top, #cf5b5b 0%, #a24a4a 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #cf5b5b), color-stop(100%, #a24a4a));
+	background: -webkit-linear-gradient(top, #cf5b5b 0%,#a24a4a 100%);
+	background: -o-linear-gradient(top, #cf5b5b 0%,#a24a4a 100%);
+	background: -ms-linear-gradient(top, #cf5b5b 0%,#a24a4a 100%);
+	background: linear-gradient(to bottom, #cf5b5b 0%,#a24a4a 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cf5b5b', endColorstr='#a24a4a',GradientType=0 );
+	box-shadow: inset 3px 0 5px rgba(0, 0, 0, .20);
+}
+
+.perm-editor.hierarchical .edit-perms.allowed {
+	cursor:	pointer;
+	border: 1px solid #506527;
+	background: #6a9812;
+	background: -moz-linear-gradient(top, #6a9812 0%, #567812 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #6a9812), color-stop(100%, #567812));
+	background: -webkit-linear-gradient(top, #6a9812 0%,#567812 100%);
+	background: -o-linear-gradient(top, #6a9812 0%,#567812 100%);
+	background: -ms-linear-gradient(top, #6a9812 0%,#567812 100%);
+	background: linear-gradient(to bottom, #6a9812 0%,#567812 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6a9812', endColorstr='#567812',GradientType=0 );
+	box-shadow: inset 3px 0 5px rgba(0, 0, 0, .20);
 }
 
 #vakata-contextmenu.jstree-bu-context {
@@ -572,29 +683,5 @@ html[xmlns] .jstree-bu li {
 	margin-left: -103px !important;
 }
 
-
-/* Seemingly unused, but keeping here just in case */
-/*
-.jstree-bu li.jstree-last { background: transparent; }
-.jstree-bu .jstree-open > ins { background-position: -72px 0; }
-.jstree-bu .jstree-closed > ins { background-position: -54px 0; }
-.jstree-bu a .jstree-icon { background-position: -56px -19px; }
-.jstree-bu .jstree-open > a .jstree-icon { background-position: -56px -36px; }
-.jstree-bu.jstree-focused { background: white; }
-.jstree-bu .jstree-no-dots li, 
-.jstree-bu .jstree-no-dots .jstree-leaf > ins { background: transparent; }
-.jstree-bu .jstree-no-dots .jstree-open > ins { background-position: -18px 0; }
-.jstree-bu .jstree-no-dots .jstree-closed > ins { background-position: 0 0; }
-.jstree-bu .jstree-no-icons a .jstree-icon { display: none; }
-.jstree-bu .jstree-search { font-style: italic; }
-.jstree-bu .jstree-no-icons .jstree-checkbox { display: inline-block; }
-.jstree-bu .jstree-no-checkboxes .jstree-checkbox { display: none !important; }
-.jstree-bu .jstree-checked > a > .jstree-checkbox { background-position: -38px -19px; }
-.jstree-bu .jstree-unchecked > a > .jstree-checkbox { background-position: -2px -19px; }
-.jstree-bu .jstree-undetermined > a > .jstree-checkbox { background-position: -20px -19px; }
-.jstree-bu .jstree-checked > a > .jstree-checkbox:hover { background-position: -38px -37px; }
-.jstree-bu .jstree-unchecked > a > .jstree-checkbox:hover { background-position: -2px -37px; }
-.jstree-bu .jstree-undetermined > a > .jstree-checkbox:hover { background-position: -20px -37px; }
-*/
 .jstree-bu a.jstree-search { color: aqua; }
 .jstree-bu .jstree-locked a { color: silver; cursor: default; }

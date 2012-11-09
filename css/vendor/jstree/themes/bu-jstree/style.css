@@ -171,7 +171,8 @@ html[xmlns] .jstree-bu li {
 .jstree-bu li[rel="allowed-desc-unknown"] > a > .jstree-icon,
 .jstree-bu li[rel="denied"] > a > .jstree-icon,
 .jstree-bu li[rel="denied-desc-allowed"] > a > .jstree-icon,
-.jstree-bu li[rel="denied-desc-unknown"] > a > .jstree-icon {
+.jstree-bu li[rel="denied-desc-unknown"] > a > .jstree-icon,
+.jstree-icon {
 	background-image: url("sprite.png");
 	background-repeat: no-repeat;
 	background-color: transparent;
@@ -431,14 +432,59 @@ html[xmlns] .jstree-bu li {
 }
 
 /* Compact view */
-.jstree-compact .jstree-bu li a {padding: 3px 0;margin-bottom: 2px;}
-.jstree-compact .jstree-bu a ins {margin: 0 4px 0 5px;}
-.jstree-compact .jstree-bu .edit-options {padding: 4px 3px 4px 10px;}
-.jstree-compact .jstree-bu .edit-options .jstree-icon {margin: 0 0 0 2px;}
+.jstree-compact .jstree-bu li a { 
+	padding: 3px 0;
+	margin-bottom: 2px;
+}
+
+.jstree-compact .jstree-bu a ins {
+	margin: 0 4px 0 5px;
+}
+
+.jstree-compact .jstree-bu .edit-options {
+	padding: 4px 3px 4px 10px;
+}
+
+.jstree-compact .jstree-bu .edit-options .jstree-icon {
+	margin: 0 0 0 2px;
+}
 
 .jstree-bu .perm-stats .jstree-icon {
 	background: none;
 	float: none;
+	margin-left: 10px;
+}
+
+.jstree-bu .perm-stats.denied .jstree-icon {
+	background: url("sprite.png");
+	background-position: -16px -96px;
+	background-repeat: no-repeat;
+}
+
+.jstree-bu .perm-stats.allowed .jstree-icon {
+	background: url("sprite.png");
+	background-position: 0px -96px;
+	background-repeat: no-repeat;
+}
+
+.jstree-bu .jstree-clicked .perm-stats.denied .jstree-icon {
+	background: url("sprite.png");
+	background-position: -48px -96px;
+	background-repeat: no-repeat;
+}
+
+.jstree-bu .jstree-clicked .perm-stats.allowed .jstree-icon {
+	background: url("sprite.png");
+	background-position: -32px -96px;
+	background-repeat: no-repeat;
+}
+
+.jstree-bu .jstree-clicked .perm-stats .label {
+	color: #ccc;
+}
+
+.jstree-bu .perm-stats .label {
+	margin-left: -3px;
 }
 
 #vakata-contextmenu.jstree-bu-context {

@@ -10,13 +10,13 @@
 			<input type="hidden" id="navman-updates" name="navman-updates" value="" />
 			<input type="hidden" id="navman-deletions" name="navman-deletions" value="" />
 
-			<div class="navman-toolbar">
-				<a href="#nav-tree-container" id="navman_expand_all">Expand All</a> |
-				<a href="#nav-tree-container" id="navman_collapse_all">Collapse All</a>
+			<ul class="navman-toolbar">
+				<li><a href="#nav-tree-container" id="navman_expand_all">Expand All</a></li>
+				<li>| <a href="#nav-tree-container" id="navman_collapse_all">Collapse All</a></li>
 				<?php if( $post_type === 'page' ): ?>
-				| <a href="#" id="navman_add_link">Add a Link</a>
+				<li <?php if( $disable_add_link ) echo 'class="disabled"'; ?>>| <a href="#" id="navman_add_link">Add a Link</a></li>
 				<?php endif; ?>
-			</div>
+			</ul>
 			<div class="navman-body">
 					<div id="nav-tree-container" class="jstree-bu"></div>
 			</div>

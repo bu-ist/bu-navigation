@@ -61,7 +61,7 @@ if ((typeof bu === 'undefined') ||
 			Navtree = bu.plugins.navigation.tree('navman', settings);
 
 			// Initialize link manager
-			Linkman.initialize();
+			Linkman.initialize({allowTop: !!settings.allowTop, isSectionEditor: !!settings.isSectionEditor});
 
 			// Subscribe to relevant tree signals
 			Navtree.listenFor('editPost', $.proxy(this.editPost, this));
@@ -223,10 +223,14 @@ if ((typeof bu === 'undefined') ||
 		},
 
 		data: {
-			currentLink: null
+			currentLink: null,
+			allowTop: true,
+			isSectionEditor: false
 		},
 
-		initialize: function () {
+		initialize: function (config) {
+			config = config || {};
+			$.extend(true, this.data, config);
 
 			// Implement the signals interface
 			bu.signals.register(this);
@@ -253,6 +257,11 @@ if ((typeof bu === 'undefined') ||
 
 			// Add link event
 			$(this.ui.addBtn).bind('click', $.proxy(this.add, this));
+
+			// Enable/disable add link button with selection if allow top is false
+			Navtree.listenFor('postSelected', $.proxy(this.onPostSelected, this));
+			Navtree.listenFor('postDeselected', $.proxy(this.onPostDeselected, this));
+			Navtree.listenFor('postsDeselected', $.proxy(this.onPostDeselected, this));
 
 		},
 
@@ -345,6 +354,27 @@ if ((typeof bu === 'undefined') ||
 
 			this.data.currentLink = null;
 
+		},
+
+		onPostSelected: function (post) {
+			var parent = Navtree.getPost(post.parent);
+			var canAdd = this.data.allowTop || post.parent != 0;
+			
+			canAdd = bu.hooks.applyFilters('navmanCanAddLink', canAdd, post, parent);
+				
+			if (canAdd) {
+				$(this.ui.addBtn).parent('li').removeClass('disabled');
+			}
+		},
+
+		onPostDeselected: function () {
+			var canAdd = this.data.allowTop;
+			
+			canAdd = bu.hooks.applyFilters('navmanCanAddLink', canAdd);
+
+			if (!canAdd) {
+				$(this.ui.addBtn).parent('li').addClass('disabled');
+			}
 		},
 
 		stopPropagation: function (e) {

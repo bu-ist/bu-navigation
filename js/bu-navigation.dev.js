@@ -392,7 +392,7 @@ bu.plugins.navigation = {};
 					throw new TypeError('Post argument for insertPost must be defined!');
 				}
 
-				var $inserted, $parent, $sibling, orderIndex, args, node;
+				var $inserted, $parent, $sibling, parent, orderIndex, args, node;
 
 				// Assert parent and menu order values exist and are valid
 				post.parent = post.parent || 0;
@@ -401,6 +401,7 @@ bu.plugins.navigation = {};
 				// Translate post parent field to node
 				if (post.parent) {
 					$parent = my.getNodeForPost( post.parent );
+					parent = that.getPost( post.parent );
 				} else {
 					$parent = $tree;
 				}
@@ -420,6 +421,8 @@ bu.plugins.navigation = {};
 					skip_rename: true,
 					callback: function($node) { $tree.jstree('deselect_all'); $tree.jstree('select_node', $node); }
 				};
+
+				post = bu.hooks.applyFilters('preInsertPost', post, parent );
 
 				// Translate post object to node format for jstree consumption
 				node = my.postToNode( post );
@@ -829,6 +832,10 @@ bu.plugins.navigation = {};
 			$tree.bind('deselect_node.jstree', function(event, data ) {
 				var post = my.nodeToPost( data.rslt.obj );
 				that.broadcast('postDeselected', [post]);
+			});
+
+			$tree.bind('deselect_all.jstree', function (event, data) {
+				that.broadcast('postsDeselected');
 			});
 
  			$tree.bind('move_node.jstree', function(event, data ) {

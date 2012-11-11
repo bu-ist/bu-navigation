@@ -81,8 +81,18 @@
 	margin-top: 30px;
 }
 
+.navman-toolbar li {
+    display: inline-block;
+    zoom: 1;
+    *display: inline;   
+}
+
 .navman-toolbar a {
 	text-decoration: none;
+}
+
+.navman-toolbar li.disabled {
+	display: none;
 }
 
 .navman-body {

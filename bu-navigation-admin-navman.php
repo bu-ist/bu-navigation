@@ -281,6 +281,11 @@ class BU_Navigation_Admin_Navman {
 		// Actual post type and post types to fetch with get pages (remove that one after context is dealt with)
 		$post_type = $this->post_type;
 
+		// If link was a registered post type, we would use its publish meta cap here
+		$is_section_editor = !is_super_admin() && current_user_can('edit_in_section');
+		$allow_top = $this->plugin->get_setting('allow_top');
+		$disable_add_link = !$allow_top || $is_section_editor;
+		
 		// Render interface
 		include(BU_NAV_PLUGIN_DIR . '/interface/manage.php');
 

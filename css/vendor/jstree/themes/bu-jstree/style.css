@@ -190,54 +190,8 @@ html[xmlns] .jstree-bu li {
 	background-position: -48px 0;
 }
 
-.jstree-bu li[rel="allowed"] > a > .jstree-icon,
-.jstree-bu li[rel="allowed-desc-denied"] > a > .jstree-icon,
-.jstree-bu li[rel="allowed-desc-unknown"] > a > .jstree-icon,
-.jstree-bu li[rel="denied"] > a > .jstree-icon,
-.jstree-bu li[rel="denied-desc-allowed"] > a > .jstree-icon,
-.jstree-bu li[rel="denied-desc-unknown"] > a > .jstree-icon {
-	margin-top: -6px;
-	margin-right: 5px;
-	margin-left: -2px;
-	border-radius: 3px 0 0 3px;
-	width: 14px;
-	height: 24px;
-}
-
-.jstree-bu li[rel="allowed"] > a > .jstree-icon,
-.jstree-bu li[rel="allowed-desc-denied"] > a > .jstree-icon,
-.jstree-bu li[rel="allowed-desc-unknown"] > a > .jstree-icon {
-	background-position: -16px -48px !important;
-	border-top: 1px solid #7d9a42;
-	border-left: 1px solid #7d9a42;
-	border-bottom: 1px solid #7d9a42;
-}
-
-.jstree-bu li[rel="allowed"] > a.jstree-clicked > .jstree-icon,
-.jstree-bu li[rel="allowed-desc-denied"] > a.jstree-clicked > .jstree-icon,
-.jstree-bu li[rel="allowed-desc-unknown"] > a.jstree-clicked > .jstree-icon {
-	background-position: -16px -72px !important;
-	border-top: 1px solid #6d6d6d;
-	border-left: 1px solid #6d6d6d;
-	border-bottom: 1px solid #6d6d6d;
-}
-
-.jstree-bu li[rel="denied"] > a > .jstree-icon,
-.jstree-bu li[rel="denied-desc-allowed"] > a > .jstree-icon,
-.jstree-bu li[rel="denied-desc-unknown"] > a > .jstree-icon {
-	background-position: 0 -48px !important;
-	border-top: 1px solid #9e5b5b;
-	border-left: 1px solid #9e5b5b;
-	border-bottom: 1px solid #9e5b5b;
-}
-
-.jstree-bu li[rel="denied"] > a.jstree-clicked > .jstree-icon,
-.jstree-bu li[rel="denied-desc-allowed"] > a.jstree-clicked > .jstree-icon,
-.jstree-bu li[rel="denied-desc-unknown"] > a.jstree-clicked > .jstree-icon {
-	background-position: 0 -72px !important;
-	border-top: 1px solid #6d6d6d;
-	border-left: 1px solid #6d6d6d;
-	border-bottom: 1px solid #6d6d6d;
+.jstree-bu li[rel="denied"] > a > .jstree-icon {
+	background-position: -16px 0;
 }
 
 .jstree-bu .post-statuses {
@@ -353,6 +307,55 @@ html[xmlns] .jstree-bu li {
 }
 
 /* Permissions editor */
+.jstree-bu.buse-perm-editor li[rel="allowed"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="allowed-desc-denied"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="allowed-desc-unknown"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="denied"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="denied-desc-allowed"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="denied-desc-unknown"] > a > .jstree-icon {
+	margin-top: -6px;
+	margin-right: 5px;
+	margin-left: -2px;
+	border-radius: 3px 0 0 3px;
+	width: 14px;
+	height: 24px;
+}
+
+.jstree-bu.buse-perm-editor li[rel="allowed"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="allowed-desc-denied"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="allowed-desc-unknown"] > a > .jstree-icon {
+	background-position: -16px -48px !important;
+	border-top: 1px solid #7d9a42;
+	border-left: 1px solid #7d9a42;
+	border-bottom: 1px solid #7d9a42;
+}
+
+.jstree-bu.buse-perm-editor li[rel="allowed"] > a.jstree-clicked > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="allowed-desc-denied"] > a.jstree-clicked > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="allowed-desc-unknown"] > a.jstree-clicked > .jstree-icon {
+	background-position: -16px -72px !important;
+	border-top: 1px solid #6d6d6d;
+	border-left: 1px solid #6d6d6d;
+	border-bottom: 1px solid #6d6d6d;
+}
+
+.jstree-bu.buse-perm-editor li[rel="denied"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="denied-desc-allowed"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="denied-desc-unknown"] > a > .jstree-icon {
+	background-position: 0 -48px !important;
+	border-top: 1px solid #9e5b5b;
+	border-left: 1px solid #9e5b5b;
+	border-bottom: 1px solid #9e5b5b;
+}
+
+.jstree-bu.buse-perm-editor li[rel="denied"] > a.jstree-clicked > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="denied-desc-allowed"] > a.jstree-clicked > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="denied-desc-unknown"] > a.jstree-clicked > .jstree-icon {
+	background-position: 0 -72px !important;
+	border-top: 1px solid #6d6d6d;
+	border-left: 1px solid #6d6d6d;
+	border-bottom: 1px solid #6d6d6d;
+}
 
 .jstree-bu.buse-perm-editor a {
 	height: 18px;

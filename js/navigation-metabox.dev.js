@@ -228,6 +228,13 @@ if((typeof bu === 'undefined' ) ||
 			$toolbar.delegate(c.navSaveBtn, 'click', that.onUpdateLocation);
 			$toolbar.delegate(c.navCancelBtn, 'click', that.onCancelMove);
 
+			// Store initial tree state, either after lazy load is complete or inital selection is made
+			if (c.lazyLoad) {
+				Navtree.listenFor('lazyLoadComplete', Navtree.save );
+			} else {
+				Navtree.listenFor('postsSelected', Navtree.save );
+			}
+
 			return that;
 
 		};

@@ -10,6 +10,10 @@
 	padding: 0;
 }
 
+#edit_page_tree {
+	position: relative; /* anchors absolutely positioned counts */
+}
+
 #TB_window .jstree-bu a {
 	color: black;
 }

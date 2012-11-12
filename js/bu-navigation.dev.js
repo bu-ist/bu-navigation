@@ -503,6 +503,7 @@ bu.plugins.navigation = {};
 
 				// Cache current rollback object
 				d.rollback = $tree.jstree( 'get_rollback' );
+
 			};
 
 			// Restore tree state
@@ -742,16 +743,18 @@ bu.plugins.navigation = {};
 				that.broadcast('postsLoaded');
 			});
 
-			// Post initial opens/selections are made
+			// Run after initial node openings and selections have completed
 			$tree.bind('reselect.jstree', function( event, data ) {
 
-				// Store rollback state after initial open/selection is run
-				if (!$tree.data('initial-save')) {
-					$tree.data('initial-save',true);
-					that.save();
-				}
-
 				that.broadcast('postsSelected');
+
+			});
+
+			// Run after lazy load operation has completed
+			$tree.bind('lazy_loaded.jstree', function (event, data) {
+
+				that.broadcast('lazyLoadComplete');
+
 			});
 
 			// After node is loaded from server using json_data
@@ -1079,8 +1082,12 @@ bu.plugins.navigation = {};
 					}
 				}
 
-				that.selectPost( currentPost );
-				that.save();
+				// Select current post if it isn't already selected
+				if ($tree.jstree('get_selected').length === 0) {
+					that.selectPost( currentPost );
+					that.save();
+				}
+
 			});
 
 			// Public

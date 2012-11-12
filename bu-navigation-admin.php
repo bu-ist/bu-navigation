@@ -92,11 +92,9 @@ class BU_Navigation_Admin {
 	 *
 	 * Accessed via the "Edit Order" menu item under support post type menus
 	 */
-	public function load_navman_page( $post_type = null ) {
+	public function load_navman_page() {
 
-		if( is_null( $post_type ) ) {
-			$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'page';
-		}
+		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'page';
 
 		require_once(dirname(__FILE__) . '/bu-navigation-admin-navman.php');
 		$this->navman = new BU_Navigation_Admin_Navman( $post_type, $this->plugin );
@@ -108,15 +106,10 @@ class BU_Navigation_Admin {
 	 *
 	 * Found on the manage posts page (edit.php) for supported post types
 	 */
-	public function load_filter_pages( $post_type = null, $post_parent = null ) {
+	public function load_filter_pages() {
 
-		if( is_null( $post_type ) ) {
-			$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'page';
-		}
-
-		if( is_null( $post_parent ) ) {
-			$post_parent = isset( $_GET['post_parent'] ) ? intval($_GET['post_parent']) : 0;
-		}
+		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'page';
+		$post_parent = isset( $_GET['post_parent'] ) ? intval($_GET['post_parent']) : 0;
 
 		if( in_array( $post_type, bu_navigation_supported_post_types() ) ) {
 

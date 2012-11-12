@@ -7,11 +7,13 @@
 class BU_Navigation_Admin_Filter_Pages {
 
 	public $post_type;
+	private $plugin;
 
-	public function __construct( $post_type, $post_parent ) {
+	public function __construct( $post_type, $post_parent, $plugin ) {
 
 		$this->post_type = $post_type;
 		$this->post_parent = $post_parent;
+		$this->plugin = $plugin;
 
 		$this->register_hooks();
 
@@ -26,9 +28,7 @@ class BU_Navigation_Admin_Filter_Pages {
 
 	public function render_dropdown() {
 
-		$selected = $this->post_parent;
-
-		bu_navigation_page_parent_dropdown( $this->post_type, $selected );
+		bu_navigation_page_parent_dropdown( $this->post_type, $this->post_parent );
 
 	}
 

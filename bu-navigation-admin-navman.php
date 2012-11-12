@@ -285,7 +285,7 @@ class BU_Navigation_Admin_Navman {
 		$post_type = $this->post_type;
 
 		// If link was a registered post type, we would use its publish meta cap here instead
-		$disable_add_link = $this->can_publish_top_level();
+		$disable_add_link = ! $this->can_publish_top_level();
 
 		$notices = $this->get_notice_list();
 

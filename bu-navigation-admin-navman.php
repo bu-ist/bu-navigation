@@ -154,8 +154,8 @@ class BU_Navigation_Admin_Navman {
 			$url = remove_query_arg(array('message','notice'), wp_get_referer());
 
 			// Notifications
-			if( $saved === true ) $url = add_query_arg( 'message', 1 );
-			else $url = add_query_arg( 'notice', 1 );
+			if( $saved === true ) $url = add_query_arg( 'message', 1, $url );
+			else $url = add_query_arg( 'notice', 1, $url );
 
 			wp_redirect( $url );
 
@@ -281,11 +281,9 @@ class BU_Navigation_Admin_Navman {
 		// Actual post type and post types to fetch with get pages (remove that one after context is dealt with)
 		$post_type = $this->post_type;
 
-		// If link was a registered post type, we would use its publish meta cap here
-		$is_section_editor = !is_super_admin() && current_user_can('edit_in_section');
-		$allow_top = $this->plugin->get_setting('allow_top');
-		$disable_add_link = !$allow_top || $is_section_editor;
-		
+		// If link was a registered post type, we would use its publish meta cap here instead
+		$disable_add_link = $this->can_publish_top_level();
+
 		// Render interface
 		include(BU_NAV_PLUGIN_DIR . '/interface/manage.php');
 
@@ -382,9 +380,18 @@ class BU_Navigation_Admin_Navman {
 
 			foreach( $post_ids as $id ) {
 
-				// @todo current_user_can(...) check
+				$post = get_post( $id );
 
-				$deleted = wp_delete_post( (int) $id );
+				$deleted = $force_delete = false;
+
+				// Permanently delete links, as there is currently no way to recover them from trash
+				if( 'link' == $post->post_type ) {
+					$force_delete = true;
+				}
+
+				if( $this->can_delete( $post ) ) {
+					$deleted = wp_delete_post( (int) $id, $force_delete );
+				}
 
 				if( ! $deleted ) {
 					error_log(sprintf('[BU Navigation Navman] Unable to delete post %d', $id));
@@ -426,17 +433,23 @@ class BU_Navigation_Admin_Navman {
 
 			foreach( $posts as $post ) {
 
-				// @todo current_user_can(...) check
+				$updated = false;
 
-				$data = array(
-					'ID' => (int) $post->ID,
-					'post_title' => $post->title,	// sanitize?
-					'post_content' => $post->content // sanitize?
-					);
+				$post->ID = (int) $post->ID;
 
-				$updated = wp_update_post( $data, true );
+				if( $this->can_edit( $post ) ) {
 
-				if( is_wp_error( $updated ) ) {
+					$data = array(
+						'ID' => $post->ID,
+						'post_title' => $post->title,	// sanitize?
+						'post_content' => $post->content // sanitize?
+						);
+
+					$updated = wp_update_post( $data, true );
+
+				}
+
+				if( false == $updated || is_wp_error( $updated ) ) {
 
 					error_log(sprintf('[BU Navigation Navman] Could not update link: %s', print_r($post, true)));
 					error_log(print_r($updated,true));
@@ -483,23 +496,31 @@ class BU_Navigation_Admin_Navman {
 
 			foreach( $posts as $post ) {
 
-				// @todo current_user_can(...) check
-
 				// Special handling for new links -- need to get a valid post ID
 				if ( 'link' == $post->type ) {
-					$data = array(
-						'post_title' => $post->title,
-						'post_content' => $post->content,
-						'post_excerpt' => '',
-						'post_status' => 'publish',
-						'post_type' => 'link',
-						'post_parent' => (int) $post->parent,
-						'menu_order' => (int) $post->menu_order
-						);
 
-					$inserted = wp_insert_post( $data, true );
+					$inserted = false;
 
-					if( is_wp_error( $inserted ) ) {
+					$post->parent = (int) $post->parent;
+					$post->menu_order = (int) $post->menu_order;
+
+					if( $this->can_place_in_section( $post ) ) {
+
+						$data = array(
+							'post_title' => $post->title,
+							'post_content' => $post->content,
+							'post_excerpt' => '',
+							'post_status' => 'publish',
+							'post_type' => 'link',
+							'post_parent' => $post->parent,
+							'menu_order' => $post->menu_order
+							);
+
+						$inserted = wp_insert_post( $data, true );
+
+					}
+
+					if( false == $inserted || is_wp_error( $inserted ) ) {
 
 						error_log(sprintf('[BU Navigation Navman] Could not create link: %s', print_r($post, true)));
 						error_log(print_r($inserted,true));
@@ -556,13 +577,17 @@ class BU_Navigation_Admin_Navman {
 
 			foreach( $posts as $post ) {
 
-				// @todo current_user_can(...) check
+				$updated = false;
 
-				// Update post parent and menu order
-				$updated = wp_update_post(array('ID'=>$post->ID,'post_parent'=>$post->parent,'menu_order'=>$post->menu_order), true );
+				if( $this->can_move( $post ) ) {
+
+					// Update post parent and menu order
+					$updated = wp_update_post(array('ID'=>$post->ID,'post_parent'=>$post->parent,'menu_order'=>$post->menu_order), true );
+
+				}
 
 				// @todo handle ugly case where wp_update_post returns failure but has actually updated the post (i.e. invalid_page_template error)
-				if( is_wp_error( $updated ) ) {
+				if( false == $updated || is_wp_error( $updated ) ) {
 
 					error_log(sprintf('[BU Navigation Navman] Could not move post: %s', print_r($post, true)));
 					error_log(print_r($updated, true));
@@ -592,6 +617,102 @@ class BU_Navigation_Admin_Navman {
 
 		return $result;
 
+	}
+
+	/**
+	 * Whether or not the current user can publish top level content
+	 *
+	 * @todo decouple from section editing plugin
+	 */
+	public function can_publish_top_level() {
+
+		$allow_top = $this->plugin->get_setting('allow_top');
+		$is_section_editor = ! is_super_admin() && current_user_can( 'edit_in_section' );
+
+		return $allow_top && !$is_section_editor;
+
+	}
+
+	/**
+	 * Can the current user edit the supplied post
+	 *
+	 * Needed because links are not registered post types and therefore current_user_can checks are insufficient
+	 *
+	 * @param object $post post to check edit caps for
+	 */
+	public function can_edit( $post ) {
+		$allowed = false;
+
+		// @todo we can't respect section editing permissions for links via current_user_can
+		// until they are a registered post type
+		if( 'link' == $post->type ) {
+			$is_section_editor = ! is_super_admin() && current_user_can( 'edit_in_section' );
+
+			if( class_exists('BU_Group_Permissions') && $is_section_editor ) {
+				$allowed = BU_Group_Permissions::can_edit_section( wp_get_current_user(), $post->ID );
+			} else {
+				$allowed = true;
+			}
+		} else {
+			$allowed = current_user_can( 'edit_post', $post->ID );
+		}
+
+		return $allowed;
+	}
+
+	/**
+	 * Can the current user delete the supplied post
+	 *
+	 * Needed because links are not registered post types and therefore current_user_can checks are insufficient
+	 *
+	 * @param object $post post to check delete caps for
+	 */
+	public function can_delete( $post ) {
+		$allowed = false;
+
+		if( 'link' == $post->post_type ) {
+			$is_section_editor = ! is_super_admin() && current_user_can( 'edit_in_section' );
+
+			if( class_exists('BU_Group_Permissions') && $is_section_editor ) {
+				$allowed = BU_Group_Permissions::can_edit_section( wp_get_current_user(), $post->ID );
+			} else {
+				$allowed = true;
+			}
+		} else {
+			$allowed = current_user_can( 'delete_post', $post->ID );
+		}
+
+		return $allowed;
+	}
+
+	/**
+	 * Can the current user switch post parent for the supplied post
+	 *
+	 * @param object $post post to check move for
+	 */
+	public function can_place_in_section( $post ) {
+		$allowed = false;
+
+		if( 0 == $post->parent ) {
+			$allowed = $this->can_publish_top_level();
+		} else {
+			$allowed = current_user_can( 'edit_post', $post->parent );
+		}
+
+		return $allowed;
+	}
+
+	/**
+	 * Can the current user move the supplied post
+	 *
+	 * @param object $post post to check move for
+	 */
+	public function can_move( $post ) {
+
+		$can_edit_post = $this->can_edit( $post );
+		$can_edit_parent = $this->can_place_in_section( $post );
+
+		return $can_edit_post && $can_edit_parent;
 	}
 
 	/**

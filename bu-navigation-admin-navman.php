@@ -29,7 +29,7 @@ class BU_Navigation_Admin_Navman {
 	const NOTICE_ERRORS = 1;
 	const NOTICE_LOCKED =2;
 
-	private $message_queue = array();
+	private $messages = array();
 	private $plugin;
 
 	public function __construct( $post_type, $plugin ) {
@@ -109,8 +109,9 @@ class BU_Navigation_Admin_Navman {
 			$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
 
 			// Scripts
+			wp_register_script('bu-jquery-blockui', plugins_url('js/vendor/jquery.blockUI' . $suffix . '.js', __FILE__), array('jquery'), '1.8.1', true );
 			wp_register_script('bu-jquery-validate', plugins_url('js/vendor/jquery.validate' . $suffix . '.js', __FILE__), array('jquery'), '1.8.1', true );
-			wp_register_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-navigation','jquery-ui-dialog','bu-jquery-validate'), BU_Navigation_Plugin::VERSION, true );
+			wp_register_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-navigation','jquery-ui-dialog','bu-jquery-validate', 'bu-jquery-blockui'), BU_Navigation_Plugin::VERSION, true );
 
 			// Setup dynamic script context for manage.js
 			$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
@@ -161,12 +162,88 @@ class BU_Navigation_Admin_Navman {
 
 		}
 
-		// Clear message queue
-		$this->message_queue['message'] = array();
-		$this->message_queue['notice'] = array();
-
-		$this->setup_locks();
 		$this->setup_notices();
+		$this->setup_locks();
+
+	}
+
+	/**
+	 * Add notices if we have any in the queue
+	 */
+	public function setup_notices() {
+
+		// Setup initial empty data structure
+		$this->messages['message'] = array();
+		$this->messages['notice'] = array();
+
+		// Grab any notices from query string
+		$message_code = isset($_GET['message']) ? intval($_GET['message']) : 0;
+		$notice_code = isset($_GET['notice']) ? intval($_GET['notice']) : 0;
+
+		$message = $this->get_notice_by_code( 'message', $message_code );
+		$notice = $this->get_notice_by_code( 'notice', $notice_code );
+
+		// Append to member property for display during get_notice_list
+		if( $message ) $this->messages['message'][] = $message;
+		if( $notice ) $this->messages['notice'][] = $notice;
+
+	}
+
+	/**
+	 * Retrieve notice message by type and numeric code:
+	 *
+	 * @param string $type the type of notice (either 'message' or 'notice')
+	 * @param int $code the notice code (see const NOTICE_* and const MESSAGE_*)
+	 */
+	public function get_notice_by_code( $type, $code ) {
+
+		$notices = array(
+			'message' => array(
+				0 => '', // Unused. Messages start at index 1.
+				1 => __('Your navigation changes have been saved')
+			),
+			'notice' => array(
+				0 => '',
+				1 => __('Errors occurred while saving your navigation changes.'),
+				2 => __('Warning: <strong>%s</strong> is currently editing this site\'s navigation.')
+			)
+		);
+
+		if( array_key_exists( $type, $notices ) && array_key_exists( $code, $notices[$type] )) {
+			return $notices[$type][$code];
+		}
+
+		return '';
+
+	}
+
+	/**
+	 * Formats existing messages & notices for display
+	 */
+	public function get_notice_list() {
+
+		$output = '';
+
+		foreach( $this->messages as $type => $messages ) {
+
+			$i = 0;
+			$inner_content = '';
+
+			if( count( $messages ) > 0 ) {
+				$classes = 'message' == $type ? 'updated fade' : 'error';
+
+				while( $i < count( $messages ) ) {
+					$inner_content = sprintf( "<p>%s</p>\n", $messages[$i] );
+					$output .= sprintf( "<div class=\"%s below-h2\">%s</div>\n", $classes, $inner_content );
+
+					$i++;
+				}
+
+			}
+
+		}
+
+		return $output;
 
 	}
 
@@ -184,82 +261,8 @@ class BU_Navigation_Admin_Navman {
 		// Push locked notice to admin_notices
 		if( is_numeric( $editing_user ) ) {
 			$user_detail = get_userdata(intval($editing_user));
-			$notice = $this->get_notice( 'notice', self::NOTICE_LOCKED );
-			$this->message_queue['notice'][] = sprintf( $notice, $user_detail->display_name );
-		}
-
-	}
-
-	/**
-	 * Add notices if we have any in the queue
-	 */
-	public function setup_notices() {
-
-		$message_code = isset($_GET['message']) ? intval($_GET['message']) : 0;
-		$notice_code = isset($_GET['notice']) ? intval($_GET['notice']) : 0;
-
-		$message = $this->get_notice( 'message', $message_code );
-		$notice = $this->get_notice( 'notice', $notice_code );
-
-		if( $message ) $this->message_queue['message'][] = $message;
-		if( $notice ) $this->message_queue['notice'][] = $notice;
-
-		if( $this->message_queue['message'] || $this->message_queue['notice'] ) {
-			add_action('admin_notices', array( $this, 'admin_notices' ) );
-		}
-
-	}
-
-	/**
-	 * Retrieve notice message by type and numeric code:
-	 *
-	 * @param string $type the type of notice (either 'message' or 'notice')
-	 * @param int $code the notice code (see const NOTICE_* and const MESSAGE_*)
-	 */
-	public function get_notice( $type, $code ) {
-
-		$notices = array(
-			'message' => array(
-				0 => '', // Unused. Messages start at index 1.
-				1 => __('Your navigation changes have been saved')
-			),
-			'notice' => array(
-				0 => '',
-				1 => __('<strong>Error:</strong> Errors occurred while saving your navigation changes.'),
-				2 => __('Warning: <strong>%s</strong> is currently editing this site\'s navigation.')
-			)
-		);
-
-		if( array_key_exists( $type, $notices ) && array_key_exists( $code, $notices[$type] )) {
-			return $notices[$type][$code];
-		}
-
-		return '';
-
-	}
-
-	/**
-	 * Prints any messages or notices that we have stored in the message queue
-	 */
-	public function admin_notices() {
-
-		foreach( $this->message_queue as $type => $messages ) {
-
-			if( empty( $messages) )
-				continue;
-
-			if( $type == 'message' ) {
-				echo '<div id="message" class="updated fade">';
-			} else if( $type == 'notice' ) {
-				echo '<div class="error">';
-			}
-
-			foreach( $messages as $msg ) {
-				echo "<p>$msg</p>";
-			}
-
-			echo '</div>';
-
+			$notice = $this->get_notice_by_code( 'notice', self::NOTICE_LOCKED );
+			$this->messages['notice'][] = sprintf( $notice, $user_detail->display_name );
 		}
 
 	}
@@ -283,6 +286,8 @@ class BU_Navigation_Admin_Navman {
 
 		// If link was a registered post type, we would use its publish meta cap here instead
 		$disable_add_link = $this->can_publish_top_level();
+
+		$notices = $this->get_notice_list();
 
 		// Render interface
 		include(BU_NAV_PLUGIN_DIR . '/interface/manage.php');

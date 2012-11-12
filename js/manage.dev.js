@@ -36,13 +36,13 @@ if ((typeof bu === 'undefined') ||
 
 		ui: {
 			form: '#navman_form',
+			noticesContainer: '#navman-notices',
 			movesField: '#navman-moves',
 			insertsField: '#navman-inserts',
 			updatesField: '#navman-updates',
 			deletionsField: '#navman-deletions',
 			expandAllBtn: '#navman_expand_all',
-			collapseAllBtn: '#navman_collapse_all',
-			container: '#navman-body'
+			collapseAllBtn: '#navman_collapse_all'
 		},
 
 		data: {
@@ -55,7 +55,7 @@ if ((typeof bu === 'undefined') ||
 
 		initialize: function (config) {
 			// Create post navigation tree from server-provided instance settings object
-			var settings = bu_navman_settings;
+			var settings = this.settings = bu_navman_settings;
 			settings.el = this.el;
 
 			Navtree = bu.plugins.navigation.tree('navman', settings);
@@ -75,6 +75,12 @@ if ((typeof bu === 'undefined') ||
 			$(this.ui.form).bind('submit', $.proxy(this.save, this));
 			$(this.ui.expandAllBtn).bind('click', this.expandAll);
 			$(this.ui.collapseAllBtn).bind('click', this.collapseAll);
+
+			// Preload spinner
+			var spinner_src = this.settings.imagesUrl + '/progress.gif';
+			this.$spinner = $('<img alt="Processing..."/>');
+			this.$spinner[0].src = spinner_src;
+
 		},
 
 		expandAll: function (e) {
@@ -200,8 +206,31 @@ if ((typeof bu === 'undefined') ||
 			$(this.ui.updatesField).attr("value", JSON.stringify(updates));
 			$(this.ui.movesField).attr("value", JSON.stringify(moves));
 
+			// Notify user that save is in progress
+			var $msg = $('<span>Saving navigation changes...</span>').prepend(this.$spinner);
+			this.notice( $msg.html(), 'message');
+
+			// Lock tree interface while saving
+			Navtree.lock();
+
 			// Let us through the window.unload check now that all pending moves are ready to go
 			this.data.dirty = false;
+
+		},
+
+		notice: function (message, type, replace_existing) {
+			replace_existing = replace_existing || true;
+
+			var $container = $(this.ui.noticesContainer), classes = '';
+
+			if (replace_existing) {
+				$container.empty();
+			}
+
+			classes = ('message' === type) ? 'updated fade' : 'error';
+
+			$container.append('<div class="' + classes + ' below-h2"><p>' + message + '</p></div>');
+
 		}
 
 	};
@@ -359,9 +388,9 @@ if ((typeof bu === 'undefined') ||
 		onPostSelected: function (post) {
 			var parent = Navtree.getPost(post.parent);
 			var canAdd = this.data.allowTop || post.parent != 0;
-			
+
 			canAdd = bu.hooks.applyFilters('navmanCanAddLink', canAdd, post, parent);
-				
+
 			if (canAdd) {
 				$(this.ui.addBtn).parent('li').removeClass('disabled');
 			}
@@ -369,7 +398,7 @@ if ((typeof bu === 'undefined') ||
 
 		onPostDeselected: function () {
 			var canAdd = this.data.allowTop;
-			
+
 			canAdd = bu.hooks.applyFilters('navmanCanAddLink', canAdd);
 
 			if (!canAdd) {

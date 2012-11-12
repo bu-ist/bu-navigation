@@ -109,9 +109,8 @@ class BU_Navigation_Admin_Navman {
 			$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
 
 			// Scripts
-			wp_register_script('bu-jquery-blockui', plugins_url('js/vendor/jquery.blockUI' . $suffix . '.js', __FILE__), array('jquery'), '1.8.1', true );
 			wp_register_script('bu-jquery-validate', plugins_url('js/vendor/jquery.validate' . $suffix . '.js', __FILE__), array('jquery'), '1.8.1', true );
-			wp_register_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-navigation','jquery-ui-dialog','bu-jquery-validate', 'bu-jquery-blockui'), BU_Navigation_Plugin::VERSION, true );
+			wp_register_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-navigation','jquery-ui-dialog','bu-jquery-validate'), BU_Navigation_Plugin::VERSION, true );
 
 			// Setup dynamic script context for manage.js
 			$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
@@ -121,7 +120,8 @@ class BU_Navigation_Admin_Navman {
 				'postStatuses' => array('draft','pending','publish'),
 				'nodePrefix' => 'nm',
 				'lazyLoad' => true,
-				'showCounts' => true
+				'showCounts' => true,
+				'imagesUrl' => plugins_url( '/images', __FILE__)
 				);
 			// Navigation tree view will handle actual enqueuing of our script
 			$treeview = new BU_Navigation_Tree_View( 'bu_navman', $script_context );

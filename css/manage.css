@@ -70,6 +70,11 @@
 
 /* Start new styles */
 
+#navman-notices img {
+	vertical-align: middle;
+	margin-right: 5px;
+}
+
 #navman-container {
 	margin-top: 20px;
 	margin-right: 170px;
@@ -84,7 +89,7 @@
 .navman-toolbar li {
     display: inline-block;
     zoom: 1;
-    *display: inline;   
+    *display: inline;
 }
 
 .navman-toolbar a {

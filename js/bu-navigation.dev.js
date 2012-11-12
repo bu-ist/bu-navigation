@@ -521,6 +521,14 @@ bu.plugins.navigation = {};
 
 			};
 
+			that.lock = function() {
+				$tree.jstree('lock');
+			};
+
+			that.unlock = function() {
+				$tree.jstree('unlock');
+			};
+
 			// ======= Protected ======= //
 
 			my.nodeToPost = function( node ) {

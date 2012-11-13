@@ -702,6 +702,12 @@ class BU_Navigation_Admin_Navman {
 			$allowed = $this->can_publish_top_level();
 		} else {
 			$allowed = current_user_can( 'edit_post', $post->parent );
+			
+			// Don't allow movement of published posts under non-published posts
+			if( $post->status == 'publish') {
+				$parent = get_post($post->parent);
+				$allowed = $allowed && $parent->post_status == 'publish';
+			}
 		}
 
 		return $allowed;

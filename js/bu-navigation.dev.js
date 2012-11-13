@@ -161,7 +161,7 @@ bu.plugins.navigation = {};
 
 			// Allow clients to stop certain actions and UI interactions via filters
 			var checkMove = function( m ) {
-				var post = my.nodeToPost( m.o );
+				var post = my.nodeToPost( m.o ), parent;
 				var allowed = true;
 
 				var isTopLevelMove = m.cr === -1;
@@ -175,6 +175,14 @@ bu.plugins.navigation = {};
 					allowed = false;
 				}
 
+				// Don't allow published posts to be moved under unpublished posts
+				if (m.np.length && m.np.attr('id') !== $tree.attr('id'))  {
+					parent = my.nodeToPost( m.np );
+					if (post.status == 'publish' && parent.status != 'publish') {
+						allowed = false;
+					}
+				}
+				
 				return bu.hooks.applyFilters( 'moveAllowed', allowed, m, that );
 			};
 

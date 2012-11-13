@@ -698,7 +698,7 @@ class BU_Navigation_Admin_Navman {
 	public function can_place_in_section( $post ) {
 		$allowed = false;
 
-		if( 0 == $post->parent ) {
+		if( 0 == $post->parent && $post->originalParent != 0 ) {
 			$allowed = $this->can_publish_top_level();
 		} else {
 			$allowed = current_user_can( 'edit_post', $post->parent );

@@ -18,6 +18,10 @@
 	color: black;
 }
 
+#TB_window .jstree-bu .denied > a {
+    color: #AF5D5D;
+}
+
 #TB_window .jstree-bu .jstree-clicked {
 	color: white;
 }

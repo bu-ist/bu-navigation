@@ -18,13 +18,13 @@ if((typeof bu === 'undefined' ) ||
 	Metabox = bu.plugins.navigation.views.Metabox = {
 
 		// Metabox container
-		el: '#bupageparentdiv',
+		el: '#bunavattrsdiv',
 
 		// UI Elements
 		ui: {
-			treeContainer: '#edit_page_tree',
-			moveBtn: '#select-parent',
-			breadcrumbs: '#bu_nav_attributes_location_breadcrumbs'
+			treeContainer: '#edit-post-tree',
+			moveBtn: '#move-post-button',
+			breadcrumbs: '#bu-post-breadcrumbs'
 		},
 
 		// Form fields
@@ -80,6 +80,8 @@ if((typeof bu === 'undefined' ) ||
 
 			// Bind event handlers
 			this.attachHandlers();
+
+			return this;	
 
 		},
 
@@ -157,12 +159,12 @@ if((typeof bu === 'undefined' ) ||
 		updateBreadcrumbs: function( post ) {
 			var ancestors = Navtree.getAncestors( post.ID );
 			var breadcrumbs = ancestors.join("&nbsp;&raquo;&nbsp;");
-
+			
 			// Update breadcrumbs
 			if (ancestors.length > 1) {
-				$(this.ui.breadcrumbs).html('<p>' + breadcrumbs + '</p>');
+				$(this.ui.breadcrumbs).html(breadcrumbs);
 			} else {
-				$(this.ui.breadcrumbs).html('<p>Top level page</p>');
+				$(this.ui.breadcrumbs).html('Top level page');
 			}
 		},
 
@@ -197,13 +199,13 @@ if((typeof bu === 'undefined' ) ||
 		// Default configuration object
 		var c = that.conf = {
 			// jstree instance selector
-			treeContainer: '#edit_page_tree',
+			treeContainer: '#edit-post-tree',
 			// toolbar
-			toolbarContainer: '.page_location_toolbar',
+			toolbarContainer: '.post-placement-toolbar',
 			// save button
-			navSaveBtn: '#bu_page_parent_save',
+			navSaveBtn: '#bu-post-placement-save',
 			// cancel button
-			navCancelBtn: '#bu_page_parent_cancel'
+			navCancelBtn: '#bu-post-placement-cancel'
 		};
 
 		c = $.extend(c, config);
@@ -220,7 +222,7 @@ if((typeof bu === 'undefined' ) ||
 		var initialize = function(config) {
 
 			// Create post navigation tree,
-			Navtree = bu.plugins.navigation.tree( 'edit_post', c );
+			Navtree = that.tree = bu.plugins.navigation.tree( 'edit_post', c );
 
 			$toolbar = $(c.toolbarContainer);
 
@@ -345,4 +347,7 @@ var tb_position;
 })(jQuery);
 
 // Start the show
-jQuery(document).ready( function(){ bu.plugins.navigation.views.Metabox.initialize(); });
+jQuery(document).ready( function(){
+	// Store metabox to globally accessible location
+	bu.plugins.navigation.metabox = bu.plugins.navigation.views.Metabox.initialize();
+});

@@ -1,16 +1,16 @@
-.page_location_toolbar .edit_buttons {
+.post-placement-toolbar .edit-buttons {
 	margin: 20px 0 0 auto;
 	width: 180px;
 }
 
-#TB_window .page_location_toolbar p.hint {
+#TB_window .post-placement-toolbar p.hint {
 	margin-left: 20px;
 	color: #777;
 	font-style: italic;
 	padding: 0;
 }
 
-#edit_page_tree {
+#edit-post-tree {
 	position: relative; /* anchors absolutely positioned counts */
 }
 
@@ -28,4 +28,25 @@
 
 #TB_window .jstree-bu.bu-edit-post .jstree-clicked {
 	cursor: move;
+}
+
+#bunavattrsdiv .inside {
+	margin: 0;
+}
+
+#bunavattrsdiv .container {
+	padding: 12px 6px;
+	border-top: 1px solid #eee;
+}
+
+#bunavattrsdiv .label {
+	display: inline-block;
+	*display: inline;
+	width: 29%;
+	font-weight: bold;
+	height: 16px;
+}
+
+#bu-post-breadcrumbs {
+	margin-bottom: 15px;   
 }

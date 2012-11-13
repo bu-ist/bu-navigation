@@ -105,15 +105,13 @@ class BU_Navigation_Admin_Metabox {
 
 		// @todo use the appropriate post type label here
 		// Add in custom "Page templates" metabox if current theme has templates
-		if (is_array($tpls = get_page_templates()) && (count($tpls) > 0)) {
+		$tpls = get_page_templates();
+		if (is_array($tpls) && (count($tpls) > 0)) {
 			add_meta_box('bupagetemplatediv', __('Page Template'), array($this, 'custom_template_metabox'), 'page', 'side', 'core');
 		}
 
 		if( in_array( $post_type, bu_navigation_supported_post_types() ) ) {
-
-			$pt_labels = $this->post_type_labels;
-			add_meta_box('bupageparentdiv', __('Placement in Navigation'), array($this, 'navigation_attributes_metabox'), $post_type, 'side', 'core');
-
+			add_meta_box('bunavattrsdiv', __('Placement in Navigation'), array($this, 'navigation_attributes_metabox'), $post_type, 'side', 'core');
 		}
 
 	}

@@ -1,7 +1,7 @@
 <?php
 /*
-Plugin Name: Page Navigation 
-Version: 0.2
+Plugin Name: Page Navigation
+Version: 0.2.1
 Author URI: http://www.bu.edu/tech/help/
 Description: Provides alternative navigation elements designed for blogs with large page counts
 Author: Boston University (IS&T)
@@ -9,13 +9,13 @@ Author: Boston University (IS&T)
 
 /**
  * Components:
- * 
+ *
  * BU Page Parent Meta Box
  * Navigation Management Screens
  * Content navigation widget
  * Filter for drilling into a particular section when view the edit pages screen
- * 
- * @todo Include javascript and enqueue only if needed. 
+ *
+ * @todo Include javascript and enqueue only if needed.
  */
 
 /* BU Navigation constants */
@@ -38,13 +38,13 @@ if(is_admin()) {
 }
 /**
  * Initialization function for navigation plugin
- * @return void 
+ * @return void
  */
 function bu_navigation_init()
 {
 	bu_navigation_load_extras();
 	bu_navigation_widgets_init();
-	
+
 	do_action('bu_navigation_init');
 }
 add_action('init', 'bu_navigation_init', 1);
@@ -53,7 +53,7 @@ add_action('init', 'bu_navigation_init', 1);
  * Initializes navigation widgets
  * @return void
  */
-function bu_navigation_widgets_init() 
+function bu_navigation_widgets_init()
 {
 	if ( !is_blog_installed() )
 		return;
@@ -69,9 +69,9 @@ function bu_navigation_widgets_init()
 function bu_navigation_load_extras()
 {
 	$pattern = sprintf('%s/extras/*.php', BU_NAV_PLUGIN_DIR);
-	
+
 	$files = glob($pattern);
-	
+
 	if ((is_array($files)) && (count($files) > 0))
 	{
 		foreach ($files as $filename)

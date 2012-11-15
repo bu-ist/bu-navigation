@@ -15,14 +15,14 @@ define('BU_NAVMAN_LOCK_USER', '_bu_navman_lock_user');
 function bu_navman_admin_menu_init()
 {
 	$perm = 'edit_pages';
-	
+
 	// Add "Edit Order" links to the submenu of each supported post type
 	$post_types = bu_navigation_supported_post_types();
 	foreach( $post_types as $pt ) {
 		$parent_slug = 'edit.php?post_type=' . $pt;
 		add_submenu_page($parent_slug, null, 'Edit Order', $perm, __FILE__  , 'bu_navman_admin_menu_display');
 	}
-		
+
 	bu_navman_clear_lock();
 }
 add_action('admin_menu', 'bu_navman_admin_menu_init');
@@ -67,7 +67,7 @@ function bu_navman_admin_menu_display()
 {
 	$post_type = isset($_GET['post_type']) ? $_GET['post_type'] : 'page';
 	$post_types = ( $post_type == 'page' ? array('page', 'link') : array($post_type) );
-	
+
 	/* process any post */
 	$saved = bu_navman_admin_menu_post();
 
@@ -90,7 +90,7 @@ function bu_navman_admin_menu_display()
 
 	$section_args = array('direction' => 'down', 'depth' => 1, 'sections' => array(0), 'post_types' => $post_types);
 	$sections = bu_navigation_gather_sections(0, $section_args);
-	
+
 	$root_pages = bu_navigation_get_pages(array('sections' => $sections, 'post_types' => $post_types));
 
 	$pages_by_parent = bu_navigation_pages_by_parent($root_pages);
@@ -104,7 +104,7 @@ function bu_navman_admin_menu_display()
 			$title = $page->navigation_label;
 
 			$classes = array(); // css classes
-			
+
 			$p = array(
 				'attr' => array('id' => sprintf('p%d', $page->ID), 'class' => ''),
 				'data' => $title,
@@ -159,6 +159,10 @@ function bu_navman_page_restricted($page_id, $restricted_pages)
 
 	return $restricted;
 }
+
+// Function moved to bu-includes/bu-navigation.php to eliminate library dependency on this plugin
+// Used in RPC endpoint in bu-includes/bu-navigation/rpc/get-pages.php
+if( ! function_exists( 'bu_navman_filter_pages' ) ):
 
 function bu_navman_filter_pages($pages)
 {
@@ -242,6 +246,7 @@ function bu_navman_filter_pages($pages)
 	return $filtered;
 }
 
+endif;
 
 function bu_navman_process_nodes($parent_id, $nodes, $links)
 {
@@ -427,6 +432,10 @@ function bu_navman_admin_menu_post()
 	return $saved;
 }
 
+// Function moved to bu-includes/bu-navigation.php to eliminate library dependency on this plugin
+// Used in RPC endpoint in bu-includes/bu-navigation/rpc/get-pages.php
+if( ! function_exists( 'bu_navman_get_children' ) ):
+
 function bu_navman_get_children($parent_id, $pages_by_parent)
 {
 	$children = array();
@@ -486,6 +495,8 @@ function bu_navman_get_children($parent_id, $pages_by_parent)
 
 	return $children;
 }
+
+endif;
 
 
 function bu_navman_page_fields($fields)

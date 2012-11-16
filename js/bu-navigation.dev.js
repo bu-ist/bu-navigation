@@ -182,7 +182,7 @@ bu.plugins.navigation = {};
 						allowed = false;
 					}
 				}
-				
+
 				return bu.hooks.applyFilters( 'moveAllowed', allowed, m, that );
 			};
 
@@ -470,7 +470,8 @@ bu.plugins.navigation = {};
 					// Refresh post status badges
 					// @todo move to callback
 					if (c.showStatuses) {
-						appendPostStatus($node);
+						recalculateStatuses($node);
+						setStatusBadges($node);
 					}
 
 					that.broadcast('postUpdated', [updated]) ;
@@ -561,7 +562,9 @@ bu.plugins.navigation = {};
 					meta: node.data('post_meta') || {},
 					originalParent: parseInt(node.data('originalParent'), 10),
 					originalOrder: parseInt(node.data('originalOrder'), 10),
-					originalExclude: node.data('originalExclude')
+					originalExclude: node.data('originalExclude'),
+					inheritedExclusion: node.data('inheritedExclusion') || false,
+					inheritedRestriction: node.data('inheritedRestriction') || false
 				};
 
 				return bu.hooks.applyFilters('nodeToPost', post, node);
@@ -653,26 +656,14 @@ bu.plugins.navigation = {};
 			// ======= Private ======= //
 
 			var calculateCounts = function($node, includeDescendents) {
-				var count, $count, $a;
+				var count;
 				includeDescendents = includeDescendents || true;
 
-				// Tally up descendent li's to determine count
+				// Use DOM to calculate descendent count
 				count = $node.find('li').length;
-				$a = $node.children('a');
 
-				if (count) {
-					$count = $a.find('> .title-count > .count');
-					// Append count node if it isn't already there'
-					if ($count.length === 0) {
-						$count = $('<span class="count"></span>');
-						$a.children('.title-count').append($count);
-					}
-					// Set current count
-					$count.text('(' + count + ')');
-				} else {
-					// Remove count if empty
-					$a.find('> .title-count > .count').remove();
-				}
+				// Update markup
+				setCount($node, count);
 
 				// Recurse to all descendents
 				if (includeDescendents) {
@@ -682,7 +673,50 @@ bu.plugins.navigation = {};
 				}
 			};
 
-			var appendPostStatus = function( $node ) {
+			var setCount = function ($node, count) {
+				var $a = $node.children('a'), $count;
+				if ($a.children('.title-count').children('.count').length === 0) {
+					$a.children('.title-count').append('<span class="count"></span>');
+				}
+
+				$count = $a.find('> .title-count > .count').empty();
+
+				if (count) {
+					// Set current count
+					$count.text('(' + count + ')');
+				} else {
+					// Remove count if empty
+					$count.text('');
+				}
+			}
+
+			// Update post meta that may change depending on ancestors
+			var recalculateStatuses = function($node) {
+
+				var post = my.nodeToPost($node), excluded, restricted;
+
+				// Check for inherited exclusions based on current position in hierarchy 
+				excluded = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () { return $(this).data('post_meta')['excluded']; } ).length;
+
+				if (excluded) {
+					$node.data('inheritedExclusion', true);
+				} else {
+					$node.data('inheritedExclusion', false);
+				}
+
+				// Check for inherited restrictions based on current position in hierarchy 
+				restricted = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () { return $(this).data('post_meta')['restricted']; } ).length;
+
+				if (restricted) {
+					$node.data('inheritedRestriction', true);
+				} else {
+					$node.data('inheritedRestriction', false);
+				}
+
+			};
+
+			// Convert post meta data in to status badges
+			var setStatusBadges = function( $node ) {
 				var $a = $node.children('a');
 				if ($a.children('.post-statuses').length === 0) {
 					$a.append('<span class="post-statuses"></span>');
@@ -691,21 +725,21 @@ bu.plugins.navigation = {};
 				var post = my.nodeToPost( $node );
 
 				// Default metadata badges
-				var excluded = post.meta['excluded'] || false;
-				var restricted = post.meta['restricted'] || false;
+				var excluded = post.meta['excluded'] || post.inheritedExclusion || false;
+				var restricted = post.meta['restricted'] || post.inheritedRestriction || false;
 
 				var $statuses = $a.children('.post-statuses').empty();
 				var statuses = [];
 
-				if(post.status != 'publish')
+				if (post.status != 'publish')
 					statuses.push({ "class": post.status, "label": post.status });
-				if(excluded)
+				if (excluded)
 					statuses.push({ "class": 'excluded', "label": 'not in nav' });
-				if(restricted)
+				if (restricted)
 					statuses.push({ "class": 'restricted', "label": 'restricted' });
 
-				// Allow customization
-				statuses = bu.hooks.applyFilters( 'navPostStatuses', statuses );
+				// @todo implement this behavior through hooks for extensibility 
+				// statuses = bu.hooks.applyFilters( 'navPostStatuses', statuses, post );
 
 				// Append markup
 				for( var i = 0; i < statuses.length; i++ ) {
@@ -777,23 +811,33 @@ bu.plugins.navigation = {};
 			});
 
 			// Append extra markup to each tree node
-			if (c.showStatuses ) {
-				$tree.bind('clean_node.jstree', function( event, data ) {
-					var $nodes = data.rslt.obj;
+			$tree.bind('clean_node.jstree', function( event, data ) {
+				var $nodes = data.rslt.obj;
 
-					// skip root node
-					if ($nodes && $nodes !== -1) {
-						$nodes.each(function(i, node) {
-							var $node = $(node);
+				// skip root node
+				if ($nodes && $nodes !== -1) {
+					$nodes.each(function(i, node) {
+						var $node = $(node);
+
+						// Only add once
+						if ($node.data('bu-nav-extras-added')) return;
+
+						// Status badges
+						if (c.showStatuses) {
+
+							// Check and update statuses that depend on ancestors
+							recalculateStatuses($node);
 
 							// Append post statuses inside node anchor
-							if( $node.find('> a > .post-statuses').length === 0 ) {
-								appendPostStatus($node);
-							}
-						});
-					}
-				});
-			}
+							setStatusBadges($node);
+
+						}
+
+						$node.data('bu-nav-extras-added', true);
+
+					});
+				}
+			});
 
 			$tree.bind('create_node.jstree', function(event, data ) {
 				var $node = data.rslt.obj;

@@ -188,11 +188,11 @@ class BU_Navigation_Tree_View {
 
 			if( is_array( $posts ) && ( count( $posts ) > 0 ) ) {
 
-				foreach ($posts as $post) {
+				foreach( $posts as $post ) {
 
 					$has_children = false;
 
-					if( isset($posts_by_parent[$post->ID] ) && ( is_array($posts_by_parent[$post->ID]) ) && ( count($posts_by_parent[$post->ID] ) > 0))
+					if( isset( $posts_by_parent[$post->ID] ) && ( is_array( $posts_by_parent[$post->ID] ) ) && ( count( $posts_by_parent[$post->ID] ) > 0 ) )
 						$has_children = true;
 
 					// Format attributes for jstree
@@ -213,7 +213,7 @@ class BU_Navigation_Tree_View {
 
 					}
 
-					array_push($children, $p);
+					array_push( $children, $p );
 				}
 
 			}
@@ -349,7 +349,7 @@ class BU_Navigation_Tree_Query {
 
 		// Gather sections
 		$section_args = array('direction' => $this->args['direction'], 'depth' => $this->args['depth'], 'post_types' => $this->args['post_types']);
-		$sections = bu_navigation_gather_sections( $this->args['child_of'], $section_args);
+		$sections = bu_navigation_gather_sections( $this->args['child_of'], $section_args );
 
 		// Load pages in sections
 		$this->posts = bu_navigation_get_pages( array(
@@ -410,20 +410,6 @@ class BU_Navigation_Tree_Query {
 
 					$post->excluded = TRUE;
 
-				} else {
-
-					$parent_id = $post->post_parent;
-
-					while( $parent_id && array_key_exists( $parent_id, $posts ) ) {
-
-						if( array_key_exists( $parent_id, $exclusions ) ) {
-							$post->excluded = TRUE;
-							break;
-						}
-
-						$parent_id = $posts[$parent_id]->post_parent;
-					}
-
 				}
 
 				// Post restrictions (ACL restricted by access-control plugin)
@@ -433,21 +419,6 @@ class BU_Navigation_Tree_Query {
 				if( array_key_exists($post->ID, $restricted) ) {
 
 					$post->restricted = TRUE;
-
-				} else {
-
-					$parent_id = $post->post_parent;
-
-					while( $parent_id && ( array_key_exists( $parent_id, $posts ) ) ) {
-
-						if( array_key_exists( $parent_id, $restricted ) ) {
-							$post->restricted = TRUE;
-							break;
-						}
-
-						$parent_id = $posts[$parent_id]->post_parent;
-
-					}
 
 				}
 

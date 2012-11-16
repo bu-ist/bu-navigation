@@ -628,6 +628,7 @@ class BU_Navigation_Admin_Navman {
 	 * Whether or not the current user can publish top level content
 	 *
 	 * @todo decouple from section editing plugin
+	 * @todo needs unit tests
 	 */
 	public function can_publish_top_level() {
 
@@ -642,6 +643,7 @@ class BU_Navigation_Admin_Navman {
 	 * Can the current user edit the supplied post
 	 *
 	 * Needed because links are not registered post types and therefore current_user_can checks are insufficient
+	 * @todo needs unit tests
 	 *
 	 * @param object $post post to check edit caps for
 	 */
@@ -669,6 +671,7 @@ class BU_Navigation_Admin_Navman {
 	 * Can the current user delete the supplied post
 	 *
 	 * Needed because links are not registered post types and therefore current_user_can checks are insufficient
+	 * @todo needs unit tests
 	 *
 	 * @param object $post post to check delete caps for
 	 */
@@ -693,16 +696,29 @@ class BU_Navigation_Admin_Navman {
 	/**
 	 * Can the current user switch post parent for the supplied post
 	 *
+	 * @todo needs unit tests
+	 *
 	 * @param object $post post to check move for
 	 */
 	public function can_place_in_section( $post ) {
 		$allowed = false;
 
-		if( 0 == $post->parent && $post->originalParent != 0 ) {
-			$allowed = $this->can_publish_top_level();
+		// Top level move
+		if( 0 == $post->parent ) {
+
+			// Move is promotion to top level
+			if( 0 !== $post->originalParent ) {
+				$allowed = $this->can_publish_top_level();
+			} else {
+				// Post was already top level, move is allowed
+				$allowed = true;
+			}
+
 		} else {
+
+			// Move under another post -- check if parent is editable
 			$allowed = current_user_can( 'edit_post', $post->parent );
-			
+
 			// Don't allow movement of published posts under non-published posts
 			if( $post->status == 'publish') {
 				$parent = get_post($post->parent);
@@ -716,6 +732,7 @@ class BU_Navigation_Admin_Navman {
 	/**
 	 * Can the current user move the supplied post
 	 *
+	 * @todo needs unit tests
 	 * @param object $post post to check move for
 	 */
 	public function can_move( $post ) {

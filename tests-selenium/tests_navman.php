@@ -9,14 +9,18 @@ require_once 'page-objects/navman.php';
  *
  * @todo
  * 	- custom post types
- *  - context menus (depend on right click)
- * 	- edit link (dependent on right click / context menu)
  * 	- section editing tests
  *  - fix move before/after
+ *  - post status badges (draft, pending, restricted, not in nav)
  *
- *  AFTER REFACTORING:
- *  - post status labels (draft, pending, trash)
- *  - adjust test_save_with_deletions to pass (deleted post still shows up as it's in the trash)
+ *	- LOGIC TESTS:
+ *		- Allow top level
+ *			- CAN't Add top level links
+ *			- CAN't move non-top level content to top-level
+ *			- CAN move existing top-level content back and forth
+ *		- Inserting links after posts
+ *		- Status badges recalculate correctly on move
+ *		- Counts change correctly on move
  */
  class BU_Navigation_Navman_Test extends WP_SeleniumTestCase {
 
@@ -24,27 +28,11 @@ require_once 'page-objects/navman.php';
 
 		parent::setUp();
 
-		// Generate test pages and store ID's for test cases
-		$pid_one = $this->factory->post->create(array('post_title' => 'Parent page', 'post_type' => 'page' ) );
-		$pid_two = $this->factory->post->create(array('post_title' => 'Child page', 'post_parent' => $pid_one, 'post_type' => 'page' ) );
-		$pid_three = $this->factory->post->create(array('post_title' => 'Grand child page 1', 'post_parent' => $pid_two, 'post_type' => 'page' ) );
-		$pid_four = $this->factory->post->create(array('post_title' => 'Grand child page 2', 'post_parent' => $pid_two, 'post_type' => 'page' ) );
-		$pid_five = $this->factory->post->create(array('post_title' => 'Hidden page', 'post_type' => 'page' ) );
-		$pid_six = $this->factory->post->create(array('post_title' => 'Edit and Delete me', 'post_type' => 'page' ) );
-		$pid_seven = $this->factory->post->create(array('post_title' => 'Last page', 'post_type' => 'page' ) );
+		// Load initial post data from JSON
+		$posts_json = file_get_contents( dirname(__FILE__) . '/data/test_posts.json');
+		$posts = json_decode($posts_json, true);
 
-		$this->pages = array(
-			'parent' => $pid_one,
-			'child' => $pid_two,
-			'grandchild_one' => $pid_three,
-			'grandchild_two' => $pid_four,
-			'hidden' => $pid_five,
-			'edit' => $pid_six,
-			'last_page' => $pid_seven
-			);
-
-		// Hide last page
-		update_post_meta( $pid_five, '_bu_cms_navigation_exclude', "1" );
+		$this->load_test_posts( $posts );
 
 	}
 
@@ -52,16 +40,55 @@ require_once 'page-objects/navman.php';
 
 		parent::tearDown();
 
-		foreach( $this->pages as $slug => $id ) {
-			wp_delete_post( $id, true );
+		$this->delete_test_posts();
+
+	}
+
+	public function load_test_posts( $posts, $parent_id = 0 ) {
+
+		foreach( $posts as $key => $post ) {
+
+			$data = $post['data'];
+
+			// Maybe set parent
+			if( $parent_id )
+				$data['post_parent'] = $parent_id;
+
+			$id = $this->factory->post->create( $data );
+
+			// Post meta
+			$metadata = $post['metadata'];
+
+			if( !empty( $metadata ) ) {
+				foreach( $metadata as $meta_key => $meta_val ) {
+					update_post_meta( $id, $meta_key, $meta_val );
+				}
+			}
+
+			// Load children
+			$children = $post['children'];
+			if( !empty( $children ) ) {
+				$this->load_test_posts( $children, $id );
+			}
+
+			// Cache internally for access during tests
+			$this->pages[$key] = $id;
+
 		}
 
+	}
+
+	public function delete_test_posts() {
+		foreach( $this->pages as $id ) {
+			wp_delete_post( $id, true );
+		}
 	}
 
 	/* Test types */
 
 	/**
 	 * @group bu-navigation-types
+	 * @group bu-navigation-single
 	 */
 	public function test_leaf() {
 
@@ -74,22 +101,14 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-types
-	 *
-	 * Post 3.3, _update_blog_date_on_post_publish in includes/ms-blogs.php throws an error that we need to supress here
-	 * Error occurs because it attempts to grab a post type object for 'link', which is not a registerd post type
-	 *
-	 * @expectedException PHPUnit_Framework_Error
 	 */
 	public function test_link() {
 
-		$id = wp_insert_post(array('post_title' => 'Google', 'post_type' => 'link','post_content' => 'http://www.google.com', 'post_status' => 'publish' ));
-
 		$navman = new BUN_Navman_Page( $this, 'page' );
-		$page = $navman->getPage( $id );
+		$page = $navman->getPage( $this->pages['google'] );
 
 		$this->assertEquals( $page->getAttribute('rel'), BUN_Navman_Page::TYPES_LINK );
 
-		wp_delete_post( $id, true );
 	}
 
 	/**
@@ -232,10 +251,12 @@ require_once 'page-objects/navman.php';
 		// Open parent sections and move page
 		$navman->openSection( $this->pages['parent'] );
 		$navman->openSection( $this->pages['child'] );
-		$navman->movePage( $src_id, $dest_id, 'before' );
+		$navman->movePost( $src_id, $dest_id, 'before' );
 
 		// Verify move
-		$navman->assertMovedBefore( $src_id, $dest_id );
+		// $navman->assertMovedBefore( $src_id, $dest_id );
+
+		$this->markTestIncomplete('Moving posts is only partially implemented due to webdriver issues.');
 
 	}
 
@@ -251,7 +272,7 @@ require_once 'page-objects/navman.php';
 		// Open parent sections and move page
 		$navman->openSection( $this->pages['parent'] );
 		$navman->openSection( $this->pages['child'] );
-		$navman->movePage( $src_id, $dest_id, 'after' );
+		$navman->movePost( $src_id, $dest_id, 'after' );
 
 		// Verify move
 		$navman->assertMovedAfter( $src_id, $dest_id );
@@ -270,7 +291,7 @@ require_once 'page-objects/navman.php';
 		// Open parent sections and move page
 		$navman->openSection( $this->pages['parent'] );
 		$navman->openSection( $this->pages['child'] );
-		$navman->movePage( $src_id, $dest_id, 'inside' );
+		$navman->movePost( $src_id, $dest_id, 'inside' );
 
 		// Verify move
 		$navman->assertMovedInside( $src_id, $dest_id );
@@ -279,59 +300,148 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-actions
+	 * @group bu-navigation-edit-options
 	 */
 	public function test_edit_page() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
+		$edit_id = $this->pages['edit'];
 
 		// Select and edit a page
-		$navman->editPage( $this->pages['edit'] );
+		$navman->editPost( $edit_id );
 
 		// Check new URL
 		$url = $this->getCurrentUrl();
-		$edit_id = $this->pages['edit'];
 		$this->assertRegExp( "/wp\-admin\/post\.php\?action=edit&post=$edit_id/", $this->getCurrentUrl() );
 
 	}
 
 	/**
 	 * @group bu-navigation-actions
-	 * @expectedException PHPUnit_Framework_AssertionFailedError
+	 * @group bu-navigation-edit-options
 	 */
-	public function test_delete_page() {
+	public function test_trash_page() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
+		$edit_id = $this->pages['edit'];
 
 		// Select and remove a page
-		$navman->deletePage( $this->pages['edit'] );
+		$navman->movePostToTrash( $edit_id );
 
-		// Will throw an expected PHPUnit_Framework_AssertionFailedError
-		$navman->getPage( $this->pages['edit'] );
+		$navman->assertPostNotExists( $edit_id );
 
 	}
 
 	/**
+	 * @group bu-navigation-actions
 	 * @group bu-navigation-links
 	 */
 	public function test_add_link() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
 
-		$id = $navman->addLink( 'Test Link', 'http://www.bu.edu' );
+		$id = $navman->addLink( array( 'label' => 'Test Link', 'url' => 'http://www.bu.edu' ) );
 
 		$navman->assertNewLinkExists( $id );
 
 	}
 
-	// @todo need to figure out how to right click first
-	// public function test_edit_link() {
+	/**
+	 * @group bu-navigation-actions
+	 * @group bu-navigation-links
+	 */
+	public function test_edit_link() {
 
-	// }
+		$navman = new BUN_Navman_Page( $this, 'page' );
+		$id = $this->pages['google'];
 
-	// @todo need to figure out how to right click first
-	// public function test_delete_link() {
+		$navman->editLink( $id, array( 'label' => 'Bing', 'url' => 'http://www.bing.com', 'target' => 'new' ) );
 
-	// }
+	}
+
+	/**
+	 * @group bu-navigation-actions
+	 * @group bu-navigation-links
+	 */
+	public function test_delete_link() {
+
+		$navman = new BUN_Navman_Page( $this, 'page' );
+		$id = $this->pages['google'];
+
+		$navman->movePostToTrash( $id );
+
+		$navman->assertPostNotExists( $id );
+	}
+
+	// Count and status badges
+	// @todo implement
+
+	/**
+	 * @group bu-navigation-statuses
+	 */
+	public function test_status_draft() {
+
+		$this->markTestIncomplete();
+
+	}
+
+
+	/**
+	 * @group bu-navigation-statuses
+	 */
+	public function test_status_pending() {
+
+		$this->markTestIncomplete();
+
+	}
+
+
+	/**
+	 * @group bu-navigation-statuses
+	 */
+	public function test_status_excluded() {
+
+		$this->markTestIncomplete();
+
+	}
+
+
+	/**
+	 * @group bu-navigation-statuses
+	 */
+	public function test_status_restricted() {
+
+		$this->markTestIncomplete();
+
+	}
+
+
+	/**
+	 * @group bu-navigation-statuses
+	 */
+	public function test_counts() {
+
+		$this->markTestIncomplete();
+
+	}
+
+	/**
+	 * @group bu-navigation-statuses
+	 */
+	public function test_exclude_inheritance() {
+
+		$this->markTestIncomplete();
+
+	}
+
+	/**
+	 * @group bu-navigation-statuses
+	 */
+	public function test_count_calculations() {
+
+		$this->markTestIncomplete();
+
+	}
 
 	/**
 	 * @group bu-navigation-actions
@@ -341,8 +451,8 @@ require_once 'page-objects/navman.php';
 		$navman = new BUN_Navman_Page( $this, 'page' );
 
 		// Delete a page and then attempt to edit one, which prompts the diry warning
-		$navman->deletePage( $this->pages['edit'] );
-		$navman->editPage( $this->pages['last_page'] );
+		$navman->movePostToTrash( $this->pages['edit'] );
+		$navman->editPost( $this->pages['last_page'] );
 
 		// Confirm presence of alert
 		$txt = $this->getAlertText();
@@ -370,8 +480,8 @@ require_once 'page-objects/navman.php';
 		$url_before = $this->getCurrentUrl();
 
 		// Delete a page and then attempt to edit one, which prompts the diry warning
-		$navman->deletePage( $this->pages['edit'] );
-		$navman->editPage( $this->pages['last_page'] );
+		$navman->movePostToTrash( $this->pages['edit'] );
+		$navman->editPost( $this->pages['last_page'] );
 
 		// Confirm presence of alert
 		$txt = $this->getAlertText();
@@ -414,7 +524,7 @@ require_once 'page-objects/navman.php';
 		// Open parent sections
 		$navman->openSection( $this->pages['parent'] );
 		$navman->openSection( $this->pages['child'] );
-		$navman->movePage( $src_id, $dest_id, 'inside' );
+		$navman->movePost( $src_id, $dest_id, 'inside' );
 
 		// Save and verify changes were committed
 		$navman->save();
@@ -426,9 +536,7 @@ require_once 'page-objects/navman.php';
 		$navman->openSection( $this->pages['grandchild_one'] );
 
 		// Verify move
-		$selector = sprintf("#p%s > ul > #p%s", $dest_id, $src_id );
-		$newPage = $this->findElementBy( LocatorStrategy::cssSelector, $selector );
-		$this->assertNotNull( $newPage );
+		$this->assertMoveInside( $src_id, $dest_id );
 
 	}
 
@@ -440,7 +548,7 @@ require_once 'page-objects/navman.php';
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
 
-		$id = $navman->addLink( 'Test Link', 'http://www.bu.edu' );
+		$id = $navman->addLink( array( 'label' => 'Test Link', 'url' => 'http://www.bu.edu' ) );
 
 		$navman->assertNewLinkExists( $id );
 
@@ -451,53 +559,21 @@ require_once 'page-objects/navman.php';
 
 	/**
 	 * @group bu-navigation-save
-	 * @expectedException PHPUnit_Framework_AssertionFailedError
 	 */
 	public function test_save_with_deletions() {
 
 		$navman = new BUN_Navman_Page( $this, 'page' );
+		$id = $this->pages['parent'];
 
 		// Remove page
-		$navman->deletePage( $this->pages['parent'] );
+		$navman->movePostToTrash( $id );
 
 		// Save and verify changes were committed
 		$navman->save();
-		$navman->assertChangesWereSaved();
 
-		// Will throw an expected PHPUnit_Framework_AssertionFailedError
-		$navman->getPage( $this->pages['parent'] );
+		$navman->assertChangesWereSaved();
+		$navman->assertPostNotExists( $id );
 
 	}
-
-	/**
-	 * Contextual menu
-	 * @todo right clicking is not implemented in webdriver at the moment
-	 */
-
-	// public function test_context_open() {
-
-	// 	$navman = new BUN_Navman_Page( $this, 'page' );
-	// 	$page = $navman->getPage( $this->pages['parent'], 'a' );
-
-	// 	$menu = $this->getElement( LocatorStrategy::id, 'vakata-contextmenu' );
-
-	// 	$this->assertEquals( $menu->getCssProperty('visibility'), 'hidden' ));
-
-  // 		// Move the mouse and right click to open
-	// 	$this->moveTo( $page, 5, 5 );
-	// 	$this->buttonDown( 2 ); // 2 = right click
-	// 	$this->buttonUp( 2 ); // 2 = right click
-
-	// 	$this->assertEquals( $menu->getCssProperty('visibility'), 'visible' ));
-
-	// }
-
-	// public function test_context_edit() {
-
-	// }
-
-	// public function test_context_remove() {
-
-	// }
 
  }

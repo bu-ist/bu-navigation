@@ -37,7 +37,7 @@ bu.plugins.navigation = {};
 					listeners[event][i].apply(this, data || []);
 				}
 			}
-		}
+		};
 
 		// Objects that wish to broadcast signals must register themselves first
 		return {
@@ -467,11 +467,12 @@ bu.plugins.navigation = {};
 					$node.data('menu_order', parseInt(updated.menu_order, 10));
 					$node.data('post_meta', updated.meta);
 
-					// Refresh post status badges
+					// Refresh post status badges (recursively)
 					// @todo move to callback
 					if (c.showStatuses) {
-						recalculateStatuses($node);
-						setStatusBadges($node);
+						$node.find('li').andSelf().each(function (){
+							setStatusBadges($(this));
+						});
 					}
 
 					that.broadcast('postUpdated', [updated]) ;
@@ -657,7 +658,6 @@ bu.plugins.navigation = {};
 
 			var calculateCounts = function($node, includeDescendents) {
 				var count;
-				includeDescendents = includeDescendents || true;
 
 				// Use DOM to calculate descendent count
 				count = $node.find('li').length;
@@ -665,9 +665,9 @@ bu.plugins.navigation = {};
 				// Update markup
 				setCount($node, count);
 
-				// Recurse to all descendents
 				if (includeDescendents) {
-					$node.find('> ul > li').each(function (){
+					// Recurse to children
+					$node.find('li').each(function (){
 						calculateCounts($(this));
 					});
 				}
@@ -688,26 +688,30 @@ bu.plugins.navigation = {};
 					// Remove count if empty
 					$count.text('');
 				}
-			}
+			};
 
 			// Update post meta that may change depending on ancestors
-			var recalculateStatuses = function($node) {
+			var calculateInheritedStatuses = function ($node) {
 
-				var post = my.nodeToPost($node), excluded, restricted;
+				var post = my.nodeToPost($node), excluded, restricted, inheritedExclusion, inheritedRestriction;
 
-				// Check for inherited exclusions based on current position in hierarchy 
-				excluded = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () { return $(this).data('post_meta')['excluded']; } ).length;
+				// Check for inherited exclusions based on current position in hierarchy
+				inheritedExclusion = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () {
+					return $(this).data('post_meta')['excluded'] || $(this).data('inheritedExclusion');
+				}).length;
 
-				if (excluded) {
+				if (inheritedExclusion) {
 					$node.data('inheritedExclusion', true);
 				} else {
 					$node.data('inheritedExclusion', false);
 				}
 
-				// Check for inherited restrictions based on current position in hierarchy 
-				restricted = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () { return $(this).data('post_meta')['restricted']; } ).length;
+				// Check for inherited restrictions based on current position in hierarchy
+				inheritedRestriction = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () {
+					return $(this).data('post_meta')['restricted'] || $(this).data('inheritedRestriction');
+				}).length;
 
-				if (restricted) {
+				if (inheritedRestriction) {
 					$node.data('inheritedRestriction', true);
 				} else {
 					$node.data('inheritedRestriction', false);
@@ -716,20 +720,23 @@ bu.plugins.navigation = {};
 			};
 
 			// Convert post meta data in to status badges
-			var setStatusBadges = function( $node ) {
+			var setStatusBadges = function ($node) {
 				var $a = $node.children('a');
 				if ($a.children('.post-statuses').length === 0) {
 					$a.append('<span class="post-statuses"></span>');
 				}
 
-				var post = my.nodeToPost( $node );
+				// Re-calculate statuses that might depend on ancestors
+				calculateInheritedStatuses($node);
+
+				var post = my.nodeToPost( $node ), $statuses, statuses, excluded, restricted, i;
 
 				// Default metadata badges
-				var excluded = post.meta['excluded'] || post.inheritedExclusion || false;
-				var restricted = post.meta['restricted'] || post.inheritedRestriction || false;
+				excluded = post.meta['excluded'] || post.inheritedExclusion || false;
+				restricted = post.meta['restricted'] || post.inheritedRestriction || false;
 
-				var $statuses = $a.children('.post-statuses').empty();
-				var statuses = [];
+				$statuses = $a.children('.post-statuses').empty();
+				statuses = [];
 
 				if (post.status != 'publish')
 					statuses.push({ "class": post.status, "label": post.status });
@@ -738,13 +745,14 @@ bu.plugins.navigation = {};
 				if (restricted)
 					statuses.push({ "class": 'restricted', "label": 'restricted' });
 
-				// @todo implement this behavior through hooks for extensibility 
+				// @todo implement this behavior through hooks for extensibility
 				// statuses = bu.hooks.applyFilters( 'navPostStatuses', statuses, post );
 
 				// Append markup
-				for( var i = 0; i < statuses.length; i++ ) {
+				for (i = 0; i < statuses.length; i = i + 1) {
 					$statuses.append('<span class="post_status ' + statuses[i]['class'] + '">' + statuses[i]['label'] + '</span>');
 				}
+
 			};
 
 			var updateBranch = function ( $post ) {
@@ -767,7 +775,7 @@ bu.plugins.navigation = {};
 						$section = $post;
 					}
 
-					calculateCounts($section);
+					calculateCounts($section, true);
 				}
 			};
 
@@ -805,7 +813,7 @@ bu.plugins.navigation = {};
 					var $node = data.rslt.obj;
 
 					if (c.showCounts) {
-						calculateCounts($node);
+						calculateCounts($node, true);
 					}
 				}
 			});
@@ -824,9 +832,6 @@ bu.plugins.navigation = {};
 
 						// Status badges
 						if (c.showStatuses) {
-
-							// Check and update statuses that depend on ancestors
-							recalculateStatuses($node);
 
 							// Append post statuses inside node anchor
 							setStatusBadges($node);
@@ -901,7 +906,7 @@ bu.plugins.navigation = {};
 				that.broadcast('postsDeselected');
 			});
 
- 			$tree.bind('move_node.jstree', function(event, data ) {
+			$tree.bind('move_node.jstree', function (event, data ) {
 				var $moved = data.rslt.o;
 
 				// Repeat move behavior for each moved node (handles multi-select)
@@ -938,7 +943,7 @@ bu.plugins.navigation = {};
 
 					that.broadcast( 'postMoved', [post, oldParentID, oldOrder]);
 				});
- 			});
+			});
 
 			// Deselect all nodes on document clicks outside of a tree element or
 			// context menu item

@@ -29,7 +29,7 @@ class BU_Navigation_Tree_View {
 		$defaults = array(
 			'childOf' => 0,
 			'postTypes' => array('page','link'),
-			'postStatuses' => array('draft','pending','publish'),
+			'postStatuses' => array('publish'),
 			'themePath' => plugins_url('css/vendor/jstree/themes/bu-jstree', __FILE__ ),
 			'rpcUrl' => admin_url('admin-ajax.php?action=bu-get-navtree' ),
 			'getPostRpcUrl' => admin_url('admin-ajax.php?action=bu-get-post'),
@@ -314,7 +314,7 @@ class BU_Navigation_Tree_Query {
 		$defaults = array(
 				'child_of' => 0,
 				'post_types' => array('page', 'link'),
-				'post_status' => array('draft','pending','publish'),
+				'post_status' => array('publish'),
 				'direction' => 'down',
 				'depth' => 0
 		);

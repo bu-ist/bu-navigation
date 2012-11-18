@@ -117,7 +117,6 @@ class BU_Navigation_Admin_Navman {
 
 			$script_context = array(
 				'postTypes' => $post_types,
-				'postStatuses' => array('draft','pending','publish'),
 				'nodePrefix' => 'nm',
 				'lazyLoad' => true,
 				'showCounts' => true,

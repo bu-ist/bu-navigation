@@ -400,7 +400,7 @@ bu.plugins.navigation = {};
 					throw new TypeError('Post argument for insertPost must be defined!');
 				}
 
-				var $inserted, $parent, $sibling, parent, orderIndex, args, node;
+				var $inserted, $parent, $sibling, parent, orderIndex, args, node, pos;
 
 				// Assert parent and menu order values exist and are valid
 				post.parent = post.parent || 0;
@@ -414,18 +414,26 @@ bu.plugins.navigation = {};
 					$parent = $tree;
 				}
 
-				// Translate menu order to list item index of sibling to insert post after
-				orderIndex = post.menu_order - 2;
-				if (orderIndex >= 0) {
-					$sibling = $parent.find('> ul > li').get(orderIndex);
+				// Post will be first
+				if (1 == post.menu_order) {
+					pos = 'before';
+					$sibling = $parent.find('> ul > li').get(0);
 				} else {
-					$sibling = null;
+					// Translate menu order to list item index of sibling to insert post after
+					orderIndex = post.menu_order - 2;
+					if (orderIndex >= 0) {
+						pos = 'after';
+						$sibling = $parent.find('> ul > li').get(orderIndex);
+					} else {
+						pos = 'before';
+						$sibling = null;
+					}
 				}
 
 				// Setup create args based on values translated from parent/menu_order
 				args = {
 					which: $sibling,
-					position: $sibling ? 'after' : 'before',
+					position: pos,
 					skip_rename: true,
 					callback: function($node) { $tree.jstree('deselect_all'); $tree.jstree('select_node', $node); }
 				};
@@ -1132,11 +1140,9 @@ bu.plugins.navigation = {};
 			$tree.bind('reselect.jstree', function (e, data) {
 				var $current = my.getNodeForPost(currentPost);
 
-				// Insert new post if it isn't already represented in the tree
+				// Insert post if it isn't already represented in the tree (new, draft, or pending posts)
 				if (!$current) {
-					if ('new' === currentPost.status) {
-						that.insertPost(currentPost);
-					}
+					that.insertPost(currentPost);
 				}
 
 				// Select current post if it isn't already selected

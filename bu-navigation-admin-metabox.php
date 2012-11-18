@@ -76,7 +76,6 @@ class BU_Navigation_Admin_Metabox {
 
 		$script_context = array(
 			'postTypes' => $post_types,
-			'postStatuses' => array('draft','pending','publish'),
 			'currentPost' => $post_id,
 			'ancestors' => $ancestors,
 			'lazyLoad' => true,
@@ -258,7 +257,7 @@ class BU_Navigation_Admin_Metabox {
 		// Fetch siblings, as currently ordered by menu_order
 		$siblings = bu_navigation_get_pages( array(
 			'sections' => array($post->post_parent),
-			'post_status' => array('publish','pending','draft'),	// ignore post statuses that are not being displayed
+			'post_status' => array('publish'),	// ignore post statuses that are not being displayed
 			'suppress_filter_pages' => true,	// suppress is spelled with two p's...
 			'post_types' => $post_types,	// handle custom post types support
 		));

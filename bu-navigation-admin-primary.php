@@ -34,12 +34,21 @@ class BU_Navigation_Admin_Primary {
 			'themes.php',
 			__('Primary Navigation'),
 			__('Primary Navigation'),
-			'bu_edit_options',
+			$this->get_cap(),
 			'bu-navigation-settings',
 			array( $this, 'render' )
 			);
 
 	}
+
+	public function get_cap() {
+		if ( defined( 'BU_CMS' ) && BU_CMS == true ) {
+			return 'bu_edit_options';
+		} else {
+			return 'edit_theme_options';
+		}
+	}
+
 
 	public function enqueue_styles( $page ) {
 
@@ -72,7 +81,7 @@ class BU_Navigation_Admin_Primary {
 
 		if( ( array_key_exists( 'bu_navigation_primary_save', $_POST ) ) && ( $_POST['bu_navigation_primary_save'] == 'save' ) ) {
 
-			if( ! current_user_can( 'bu_edit_options' ) ) {
+			if( ! current_user_can( $this->get_cap() ) ) {
 				return false;
 			}
 

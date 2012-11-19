@@ -1011,10 +1011,18 @@
 			this.get_container()
 				.delegate("a", "mousedown.jstree", $.proxy(function (event) {
 						if(!$(event.currentTarget).hasClass("jstree-loading")) {
-							this.select_node(event.currentTarget, true, event);
+							// Don't select if we're already selected -- will break multi-selection
+							if(!this.is_selected(event.currentTarget)) {
+								this.select_node(event.currentTarget, true, event);
+							}
 						}
 					}, this))
 				.delegate("a", "click.jstree", $.proxy(function (event) {
+						// Restored original behavior -- allows click within multiple
+						// selection block to deselect others on mouse up
+						if(!$(event.currentTarget).hasClass("jstree-loading")) {
+							this.select_node(event.currentTarget, true, event);
+						}
 						event.preventDefault();
 						event.currentTarget.blur();
 					}, this))

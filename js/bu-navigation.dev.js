@@ -574,7 +574,7 @@ bu.plugins.navigation = {};
 					meta: node.data('post_meta') || {},
 					originalParent: parseInt(node.data('originalParent'), 10),
 					originalOrder: parseInt(node.data('originalOrder'), 10),
-					originalExclude: node.data('originalExclude'),
+					originalExclude: node.data('originalExclude')
 				};
 
 				return bu.hooks.applyFilters('nodeToPost', post, node);

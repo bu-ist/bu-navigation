@@ -575,8 +575,6 @@ bu.plugins.navigation = {};
 					originalParent: parseInt(node.data('originalParent'), 10),
 					originalOrder: parseInt(node.data('originalOrder'), 10),
 					originalExclude: node.data('originalExclude'),
-					inheritedExclusion: node.data('inheritedExclusion') || false,
-					inheritedRestriction: node.data('inheritedRestriction') || false
 				};
 
 				return bu.hooks.applyFilters('nodeToPost', post, node);
@@ -701,35 +699,6 @@ bu.plugins.navigation = {};
 				}
 			};
 
-			// Update post meta that may change depending on ancestors
-			var calculateInheritedStatuses = function ($node) {
-
-				var post = my.nodeToPost($node), excluded, restricted, inheritedExclusion, inheritedRestriction;
-
-				// Check for inherited exclusions based on current position in hierarchy
-				inheritedExclusion = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () {
-					return $(this).data('post_meta')['excluded'] || $(this).data('inheritedExclusion');
-				}).length;
-
-				if (inheritedExclusion) {
-					$node.data('inheritedExclusion', true);
-				} else {
-					$node.data('inheritedExclusion', false);
-				}
-
-				// Check for inherited restrictions based on current position in hierarchy
-				inheritedRestriction = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () {
-					return $(this).data('post_meta')['restricted'] || $(this).data('inheritedRestriction');
-				}).length;
-
-				if (inheritedRestriction) {
-					$node.data('inheritedRestriction', true);
-				} else {
-					$node.data('inheritedRestriction', false);
-				}
-
-			};
-
 			// Convert post meta data in to status badges
 			var setStatusBadges = function ($node) {
 				var $a = $node.children('a');
@@ -737,14 +706,11 @@ bu.plugins.navigation = {};
 					$a.append('<span class="post-statuses"></span>');
 				}
 
-				// Re-calculate statuses that might depend on ancestors
-				calculateInheritedStatuses($node);
-
 				var post = my.nodeToPost( $node ), $statuses, statuses, excluded, restricted, i;
 
 				// Default metadata badges
-				excluded = post.meta['excluded'] || post.inheritedExclusion || false;
-				restricted = post.meta['restricted'] || post.inheritedRestriction || false;
+				excluded = post.meta['excluded'] || false;
+				restricted = post.meta['restricted'] || false;
 
 				$statuses = $a.children('.post-statuses').empty();
 				statuses = [];

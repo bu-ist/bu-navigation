@@ -510,13 +510,10 @@ bu.plugins.navigation = {};
 			// Get post ancestors (by title)
 			that.getAncestors = function( postID ) {
 				var $node = my.getNodeForPost( postID );
-				// @todo write custom 'get_path' method that uses my.getNodeTitle instead of get_text
 				return $tree.jstree('get_path', $node);
 			};
 
 			// Save tree state
-			// @todo maybe optimize to not use rollback, use cookie plugin approach
-			// @todo should not save during lazy load
 			that.save = function() {
 
 				// Cache current rollback object
@@ -525,12 +522,18 @@ bu.plugins.navigation = {};
 			};
 
 			// Restore tree state
-			// @todo maybe optimize to not use rollback, use cookie plugin approach
-			// @todo find a better way to get around reselect/duplicate issue
-			// @todo should not restore during lazy load
 			that.restore = function() {
 				if (typeof d.rollback === 'undefined')
 					return;
+
+				// HACK: Don't restore previous selections by removing them before rolling back
+				// jstree has some buggy behavior with the ui/dnd plugins and selections
+				// These bugs can be worked around by not attempting to restore selections
+				// on rollbacks.
+
+				// @todo fix the buggy behavior rather then hacking it here
+				// @todo look at 1.0 release of jstree to see if it has been fixed
+				d.rollback.d.ui.selected = $([]);
 
 				// Run rollback
 				$.jstree.rollback(d.rollback);

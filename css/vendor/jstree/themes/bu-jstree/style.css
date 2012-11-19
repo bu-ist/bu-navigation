@@ -435,7 +435,7 @@ html[xmlns] .jstree-bu li {
 }
 
 /* Compact view */
-.jstree-compact .jstree-bu li a { 
+.jstree-compact .jstree-bu li a {
 	padding: 3px 0;
 	margin-bottom: 2px;
 }
@@ -582,11 +582,9 @@ html[xmlns] .jstree-bu li {
 	box-shadow: 0 0 3px #508a21;
 }
 
-
 #jstree-marker.jstree-bu {
-	display: none;
-	background: transparent;
 	text-indent: -100px;
+	margin-left: -20px;
 }
 
 #jstree-marker-line.jstree-bu {

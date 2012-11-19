@@ -2357,7 +2357,7 @@
 						}
 					}, this))
 				.bind("mouseleave.jstree", $.proxy(function (e) {
-						if(e.relatedTarget && e.relatedTarget.id && e.relatedTarget.id === "jstree-marker-line") {
+						if(e.relatedTarget && e.relatedTarget.id && e.relatedTarget.id.indexOf("jstree-marker") != -1 ) {
 							return false;
 						}
 						if($.vakata.dnd.is_drag && $.vakata.dnd.user_data.jstree) {
@@ -2432,7 +2432,7 @@
 					}, this))
 				.delegate("a", "mouseleave.jstree", $.proxy(function (e) {
 						if($.vakata.dnd.is_drag && $.vakata.dnd.user_data.jstree) {
-							if(e.relatedTarget && e.relatedTarget.id && e.relatedTarget.id === "jstree-marker-line") {
+							if(e.relatedTarget && e.relatedTarget.id && e.relatedTarget.id.indexOf("jstree-marker") != -1) {
 								return false;
 							}
 								if(m) { m.hide(); }
@@ -2603,11 +2603,15 @@
 				switch(r) {
 					case "before":
 						m.css({ "left" : pos + "px", "top" : (this.data.dnd.off.top - 6) + "px" }).show();
-						if(ml) { ml.css({ "left" : (pos + 8) + "px", "top" : (this.data.dnd.off.top - 1) + "px" }).show(); }
+						if(ml) {
+							ml.css({ "left" : (pos + 8) + "px", "top" : (this.data.dnd.off.top - 2) + "px" }).show();
+						}
 						break;
 					case "after":
 						m.css({ "left" : pos + "px", "top" : (this.data.dnd.off.top + this.data.core.li_height - 6) + "px" }).show();
-						if(ml) { ml.css({ "left" : (pos + 8) + "px", "top" : (this.data.dnd.off.top + this.data.core.li_height - 1) + "px" }).show(); }
+						if(ml) {
+							ml.css({ "left" : (pos + 8) + "px", "top" : (this.data.dnd.off.top + this.data.core.li_height +1) + "px" }).show();
+						}
 						break;
 					case "inside":
 						m.css({ "left" : pos + ( rtl ? -4 : 4) + "px", "top" : (this.data.dnd.off.top + this.data.core.li_height/2 - 5) + "px" }).show();

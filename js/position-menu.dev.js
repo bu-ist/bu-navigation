@@ -59,7 +59,11 @@ jQuery(function($) {
 	var handleSelection = function(e) {
 		var container = $(e.target);
 		var st = container.data("scrollingTree");
-		current_parent = st.getSelection();
+        var current_parent = null;
+
+        if ( st !== undefined ){
+            current_parent = st.getSelection();
+        }
 
 		if (current_parent !== null) {
 			var sibs = st.getChildren(current_parent);

@@ -819,6 +819,23 @@ bu.plugins.navigation = {};
 				}
 			});
 
+			$tree.bind('before.jstree', function (event, data) {
+				var $node;
+				
+				switch (data.func) {
+					case 'select_node':
+					case 'hover_node':
+					case 'start_drag':
+						// Restrict select, hover and drag operations for denied posts
+						$node = data.inst._get_node(data.args[0]);
+						if ($node.hasClass('denied')) {
+							return false;
+						}
+						break;
+				}
+				
+			});
+
 			$tree.bind('create_node.jstree', function(event, data ) {
 				var $node = data.rslt.obj;
 				var post = my.nodeToPost( $node );

@@ -190,7 +190,7 @@ html[xmlns] .jstree-bu li {
 	background-position: -48px 0;
 }
 
-.jstree-bu li[rel="denied"] > a > .jstree-icon {
+.jstree-bu li.denied > a > .jstree-icon {
 	background-position: -16px 0;
 }
 

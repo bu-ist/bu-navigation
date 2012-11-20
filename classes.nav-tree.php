@@ -256,6 +256,7 @@ class BU_Navigation_Tree_View {
 					'excluded' => ( isset($post->excluded) ? $post->excluded : false ),
 					'restricted' => ( isset($post->restricted) ? $post->restricted : false )
 					),
+				'url' => $post->url,
 				'originalParent' => $post->post_parent,
 				'originalOrder' => $post->menu_order,
 				'originalExclude' => ( isset($post->excluded) ? $post->excluded : false )

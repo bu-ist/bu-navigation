@@ -245,11 +245,6 @@ bu.plugins.navigation = {};
 							"select_node"		: canSelectNode,
 							"hover_node"		: canHoverNode,
 							"start_drag"		: canDragNode
-						},
-						"denied": {
-							"select_node"	: false,
-							"hover_node"	: false,
-							"start_drag"	: false
 						}
 					}
 				},
@@ -572,6 +567,7 @@ bu.plugins.navigation = {};
 					parent: parseInt(node.data('post_parent'), 10),
 					menu_order: node.index() + 1,
 					meta: node.data('post_meta') || {},
+					url: node.data('url'),
 					originalParent: parseInt(node.data('originalParent'), 10),
 					originalOrder: parseInt(node.data('originalOrder'), 10),
 					originalExclude: node.data('originalExclude')
@@ -593,7 +589,8 @@ bu.plugins.navigation = {};
 					type: 'page',
 					parent: 0,
 					menu_order: 1,
-					meta: {}
+					meta: {},
+					url: ''
 				};
 
 				p = $.extend({}, default_post, post);
@@ -616,6 +613,7 @@ bu.plugins.navigation = {};
 						"post_parent": p.parent,
 						"menu_order": p.menu_order,
 						"post_meta": p.meta,
+						"url" : p.url,
 						"originalParent": p.originalParent,
 						"originalOrder": p.originalOrder,
 						"originalExclude": p.originalExclude
@@ -952,37 +950,61 @@ bu.plugins.navigation = {};
 			var $tree = that.$el;
 			var d = that.data;
 
-			// Adds context menu plugin and edit/remove post events
+			var showOptionsMenu = function (node) {
+				var url = node.data('url'), type = node.data('post_type');
+
+				var options = {
+					"edit" : {
+						"label" : "Edit",
+						"action" : editPost
+					},
+					"view" : {
+						"label" : "View",
+						"action" : viewPost
+					},
+					"remove" : {
+						"label" : "Move to Trash",
+						"action" : removePost
+					}
+				};
+
+				// Can't view an item with no URL
+				if (!url) {
+					delete options['view'];
+				}
+
+				// Special behavior for links
+				if (type === 'link') {
+					// Links are permanently deleted -- "Move To Trash" is misleading
+					options['remove']['label'] = 'Delete';
+				}
+
+				return bu.hooks.applyFilters('navmanOptionsMenuItems', options, node);
+			};
+
+			var editPost = function( node ) {
+				var post = my.nodeToPost(node);
+				that.broadcast('editPost', [post]);
+			};
+
+			var viewPost = function (node) {
+				var post = my.nodeToPost(node);
+				if (post.url) {
+					window.open(post.url);
+				}
+			};
+
+			var removePost = function( node ) {
+				var post = my.nodeToPost(node);
+				that.removePost(post);
+			};
+
+			// Add context menu plugin
 			d.treeConfig["plugins"].push("contextmenu");
 
 			d.treeConfig["contextmenu"] = {
 				'show_at_node': false,
-				"items": function (node) {
-
-					var options = {
-						"edit" : {
-							"label" : "Edit",
-							"action" : editPost,
-							"icon" : "remove"
-						},
-						"remove" : {
-							"label" : "Move to Trash",
-							"action" : removePost
-						}
-					};
-
-					return bu.hooks.applyFilters('navmanContextItems', options, node );
-				}
-			};
-
-			var editPost = function( node ) {
-				var post = my.nodeToPost( node );
-				that.broadcast( 'editPost', [ post ]);
-			};
-
-			var removePost = function( node ) {
-				var post = my.nodeToPost( node );
-				that.removePost( post );
+				"items": showOptionsMenu
 			};
 
 			// Prevent default right click behavior

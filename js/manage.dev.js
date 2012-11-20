@@ -330,6 +330,7 @@ if ((typeof bu === 'undefined') ||
 
 				// Extract updates from form
 				link.content = $(this.ui.urlField).attr("value");
+				link.url = link.content;
 				link.title = $(this.ui.labelField).attr("value");
 				link.meta.bu_link_target = $("input[name='editlink_target']:checked").attr("value");
 

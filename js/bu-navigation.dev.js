@@ -148,9 +148,6 @@ bu.plugins.navigation = {};
 			// Need valid tree element to continue
 			var $tree = that.$el = $(c.el);
 
-			if( $tree.length === 0 )
-				throw new TypeError('Invalid DOM selector, can\'t create BU Navigation Tree');
-
 			// Prefetch tree assets
 			if (c.themePath && document.images) {
 				var themeSprite = new Image();
@@ -395,7 +392,7 @@ bu.plugins.navigation = {};
 					throw new TypeError('Post argument for insertPost must be defined!');
 				}
 
-				var $inserted, $parent, $sibling, parent, orderIndex, args, node, pos;
+				var $inserted, $parent, $which, parent, orderIndex, args, node, pos;
 
 				// Assert parent and menu order values exist and are valid
 				post.parent = post.parent || 0;
@@ -411,23 +408,26 @@ bu.plugins.navigation = {};
 
 				// Post will be first
 				if (1 == post.menu_order) {
+					$which = $parent.find('> ul > li').get(0);
 					pos = 'before';
-					$sibling = $parent.find('> ul > li').get(0);
 				} else {
 					// Translate menu order to list item index of sibling to insert post after
 					orderIndex = post.menu_order - 2;
 					if (orderIndex >= 0) {
+						$which = $parent.find('> ul > li').get(orderIndex);
 						pos = 'after';
-						$sibling = $parent.find('> ul > li').get(orderIndex);
-					} else {
-						pos = 'before';
-						$sibling = null;
 					}
+				}
+				
+				// No siblings in destination
+				if (!$which) {
+					$which = $parent;
+					pos = 'inside';
 				}
 
 				// Setup create args based on values translated from parent/menu_order
 				args = {
-					which: $sibling,
+					which: $which,
 					position: pos,
 					skip_rename: true,
 					callback: function($node) { $tree.jstree('deselect_all'); $tree.jstree('select_node', $node); }
@@ -828,7 +828,7 @@ bu.plugins.navigation = {};
 					case 'start_drag':
 						// Restrict select, hover and drag operations for denied posts
 						$node = data.inst._get_node(data.args[0]);
-						if ($node.hasClass('denied')) {
+						if ($node && $node.hasClass('denied')) {
 							return false;
 						}
 						break;

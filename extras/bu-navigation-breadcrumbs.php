@@ -17,6 +17,7 @@ function bu_navigation_breadcrumbs($args = '')
 		'container_id' => 'breadcrumbs',
 		'container_class' => '',
 		'anchor_class' => 'crumb',
+		'crumb_tag' => '',
 		'crumb_current' => 1,
 		'anchor_current' => 0,
 		'echo' => 0,
@@ -127,7 +128,14 @@ function bu_navigation_breadcrumbs($args = '')
 				$anchor_close = '</a>';
 			}
 
-			$crumb = $anchor_open . $title . $anchor_close;
+			$before_crumb = $after_crumb = '';
+
+			if( $r['crumb_tag'] ) {
+				$before_crumb = $current->ID == $p->ID ? sprintf('<%s class="current">', $r['crumb_tag']) : sprintf('<%s>', $r['crumb_tag']);
+				$after_crumb = sprintf('</%s>', $r['crumb_tag']);
+			}
+
+			$crumb = $before_crumb . $anchor_open . $title . $anchor_close . $after_crumb;
 
 			$crumb = apply_filters('bu_navigation_filter_crumb_html', $crumb, $current, $r);
 

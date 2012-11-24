@@ -159,7 +159,13 @@ class BU_Navigation_Admin_Metabox {
 		$output = '';
 
 		if( $post->post_parent ) {
-			$output = bu_navigation_breadcrumbs(array('show_links' => false, 'include_hidden' => true, 'include_statuses' => array('draft','pending','publish')));
+			$args = array(
+				'crumb_tag' => 'span',
+				'show_links' => false,
+				'include_hidden' => true,
+				'include_statuses' => array('draft','pending','publish')
+				);
+			$output = bu_navigation_breadcrumbs($args);
 		} else {
 			$output = __('Top level page');
 		}

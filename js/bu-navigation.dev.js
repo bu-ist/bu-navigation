@@ -163,7 +163,7 @@ bu.plugins.navigation = {};
 
 				var isTopLevelMove = m.cr === -1;
 				var isVisible = post.post_meta['excluded'] === false || post.post_type === 'link';
-				var wasTop = !post.originalExclude && (post.originalParent === 0 || post.post_status === 'new');
+				var wasTop = !post.originalExclude && (post.originalParent === 0 || (post.post_status === 'new' && post.post_type !== 'link'));
 
 				// Don't allow top level posts if global option prohibits it
 				if (isTopLevelMove && !wasTop && isVisible && !c.allowTop) {

@@ -96,7 +96,7 @@ if ((typeof bu === 'undefined') ||
 		},
 
 		editPost: function (post) {
-			if ('link' === post.type) {
+			if ('link' === post.post_type) {
 				Linkman.edit(post);
 			} else {
 				var url = "post.php?action=edit&post=" + post.ID;
@@ -110,7 +110,7 @@ if ((typeof bu === 'undefined') ||
 		},
 
 		linkUpdated: function (link) {
-			if ('new' === link.status) {
+			if ('new' === link.post_status) {
 				// Update to new link (not yet commited to DB)
 				this.data.insertions[link.ID] = link;
 			} else {
@@ -161,12 +161,13 @@ if ((typeof bu === 'undefined') ||
 		postMoved : function (post) {
 
 			// New post moves are tracked via the insertions cache
-			if ('new' === post.status) {
+			if ('new' === post.post_status) {
 				return;
 			}
 
 			// If post parent or menu order has changed, track this as a move
-			if (post.parent !== post.originalParent || post.menu_order !== post.originalOrder) {
+			// @todo possibly remove this check to force reordering if a post has been moved no matter what
+			if (post.post_parent !== post.originalParent || post.menu_order !== post.originalOrder) {
 				this.data.moves[post.ID] = post;
 				this.data.dirty = true;
 			}
@@ -196,7 +197,14 @@ if ((typeof bu === 'undefined') ||
 			$.each(this.data.moves, function (postID, post) {
 				current = Navtree.getPost(postID);
 				if (current) {
-					moves[current.ID] = current;
+					// Construct object for submission with just the fields we need
+					moves[current.ID] = {
+						ID: current.ID,
+						post_status: current.post_status,
+						post_type: current.post_type,
+						post_parent: current.post_parent,
+						menu_order: current.menu_order,
+					};
 				}
 			});
 
@@ -299,16 +307,16 @@ if ((typeof bu === 'undefined') ||
 			e.stopPropagation();
 
 			// Setup new link
-			this.data.currentLink = { "status": "new", "type": "link", "meta": {} };
+			this.data.currentLink = { "post_status": "new", "post_type": "link", "post_meta": {} };
 			this.$el.dialog('option', 'title', 'Add a Link').dialog('open');
 		},
 
 		edit: function (link) {
 
-			$(this.ui.urlField).attr("value", link.content);
-			$(this.ui.labelField).attr("value", link.title);
+			$(this.ui.urlField).attr("value", link.post_content);
+			$(this.ui.labelField).attr("value", link.post_title);
 
-			if ('new' === link.meta.bu_link_target) {
+			if ('new' === link.post_meta.bu_link_target) {
 				$(this.ui.targetNewField).attr("checked", "checked");
 			} else {
 				$(this.ui.targetSameField).attr("checked", "checked");
@@ -329,23 +337,23 @@ if ((typeof bu === 'undefined') ||
 				var link = this.data.currentLink, saved, selected;
 
 				// Extract updates from form
-				link.content = $(this.ui.urlField).attr("value");
-				link.url = link.content;
-				link.title = $(this.ui.labelField).attr("value");
-				link.meta.bu_link_target = $("input[name='editlink_target']:checked").attr("value");
+				link.post_content = $(this.ui.urlField).attr("value");
+				link.post_title = $(this.ui.labelField).attr("value");
+				link.url = link.post_content;
+				link.post_meta.bu_link_target = $("input[name='editlink_target']:checked").attr("value");
 
 				selected = Navtree.getSelectedPost();
 
 				if (selected) {
-					link.parent = selected.parent;
+					link.post_parent = selected.post_parent;
 					link.menu_order = selected.menu_order + 1;
 				} else {
-					link.parent = 0;
+					link.post_parent = 0;
 					link.menu_order = 1;
 				}
 
 				// Insert or update link
-				if ('new' === link.status && !link.ID) {
+				if ('new' === link.post_status && !link.ID) {
 
 					saved = Navtree.insertPost(link);
 					this.broadcast('linkInserted', [saved]);
@@ -387,8 +395,8 @@ if ((typeof bu === 'undefined') ||
 		},
 
 		onPostSelected: function (post) {
-			var parent = Navtree.getPost(post.parent);
-			var canAdd = this.data.allowTop || post.parent != 0;
+			var parent = Navtree.getPost(post.post_parent);
+			var canAdd = this.data.allowTop || post.post_parent != 0;
 
 			canAdd = bu.hooks.applyFilters('navmanCanAddLink', canAdd, post, parent);
 

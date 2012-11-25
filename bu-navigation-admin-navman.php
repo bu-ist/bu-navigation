@@ -36,6 +36,7 @@ class BU_Navigation_Admin_Navman {
 
 		$this->plugin = $plugin;
 		$this->post_type = $post_type;
+		$this->pages = array();
 
 		// Attach WP actions/filters
 		$this->register_hooks();
@@ -271,6 +272,7 @@ class BU_Navigation_Admin_Navman {
 	 */
 	public function render() {
 
+		// @todo reuse cap from admin_menu
 		if( ! current_user_can( 'edit_pages' ) ) {
 			wp_die('Cheatin, uh?');
 		}
@@ -358,6 +360,7 @@ class BU_Navigation_Admin_Navman {
 				$saved = true;
 			} else {
 				// @todo notify user of error messages from WP_Error objects
+				error_log('Errors encountered during navman save:' . print_r( $errors, true ) );
 			}
 
 		}
@@ -401,8 +404,12 @@ class BU_Navigation_Admin_Navman {
 					error_log(sprintf('[BU Navigation Navman] Unable to delete post %d', $id));
 					array_push( $failures, $id );
 				} else {
+
+					$this->reorder_tracker->mark_section_for_reordering( $post->post_parent );
+
 					// Temporary logging
-					// error_log('[+] Post deleted: ' . $id );
+					// error_log('Post deleted: ' . $id );
+					// error_log('Marking old section for reordering: ' . $post->post_parent);
 				}
 
 			}
@@ -445,8 +452,8 @@ class BU_Navigation_Admin_Navman {
 
 					$data = array(
 						'ID' => $post->ID,
-						'post_title' => $post->title,	// sanitize?
-						'post_content' => $post->content // sanitize?
+						'post_title' => $post->post_title,	// sanitize?
+						'post_content' => $post->post_content // sanitize?
 						);
 
 					$updated = wp_update_post( $data, true );
@@ -457,15 +464,15 @@ class BU_Navigation_Admin_Navman {
 
 					error_log(sprintf('[BU Navigation Navman] Could not update link: %s', print_r($post, true)));
 					error_log(print_r($updated,true));
-					array_push( $failures, $post->title );
+					array_push( $failures, $post->post_title );
 
 				} else {
 
-					$target = ($post->meta->bu_link_target === 'new') ? 'new' : 'same';
+					$target = ($post->post_meta->bu_link_target === 'new') ? 'new' : 'same';
 					update_post_meta( $post->ID, 'bu_link_target', $target );
 
 					// Temporary logging
-					// error_log('Link updated: ' . $post->title );
+					// error_log('Link updated: ' . $post->post_title );
 				}
 
 			}
@@ -501,22 +508,22 @@ class BU_Navigation_Admin_Navman {
 			foreach( $posts as $post ) {
 
 				// Special handling for new links -- need to get a valid post ID
-				if ( 'link' == $post->type ) {
+				if ( 'link' == $post->post_type ) {
 
 					$inserted = false;
 
-					$post->parent = (int) $post->parent;
+					$post->post_parent = (int) $post->post_parent;
 					$post->menu_order = (int) $post->menu_order;
 
 					if( $this->can_place_in_section( $post ) ) {
 
 						$data = array(
-							'post_title' => $post->title,
-							'post_content' => $post->content,
+							'post_title' => $post->post_title,
+							'post_content' => $post->post_content,
 							'post_excerpt' => '',
 							'post_status' => 'publish',
 							'post_type' => 'link',
-							'post_parent' => $post->parent,
+							'post_parent' => $post->post_parent,
 							'menu_order' => $post->menu_order
 							);
 
@@ -528,20 +535,20 @@ class BU_Navigation_Admin_Navman {
 
 						error_log(sprintf('[BU Navigation Navman] Could not create link: %s', print_r($post, true)));
 						error_log(print_r($inserted,true));
-						array_push( $failures, $post->title );
+						array_push( $failures, $post->post_title );
 
 					} else {
 
 						$post->ID = $inserted;
 
-						$target = ($post->meta->bu_link_target === 'new') ? 'new' : 'same';
+						$target = ($post->post_meta->bu_link_target === 'new') ? 'new' : 'same';
 						update_post_meta($post->ID, 'bu_link_target', $target );
 
 						// Mark for reordering
 						$this->reorder_tracker->mark_post_as_moved( $post );
 
 						// Temporary logging
-						// error_log('Link inserted: ' . $post->title . ' (' . $post->ID . ')' );
+						// error_log('Link inserted: ' . $post->post_title . ' (' . $post->ID . ')' );
 
 					}
 
@@ -583,10 +590,17 @@ class BU_Navigation_Admin_Navman {
 
 				$updated = false;
 
-				if( $this->can_move( $post ) ) {
+				$original = get_post($post->ID);
+
+				if( $post->post_parent == $original->post_parent && $post->menu_order == $original->menu_order ) {
+					error_log('Post was marked as moved, but neither parent or menu order has actually changed -- skipping...');
+					continue;
+				}
+
+				if( $this->can_move( $post, $original ) ) {
 
 					// Update post parent and menu order
-					$updated = wp_update_post(array('ID'=>$post->ID,'post_parent'=>$post->parent,'menu_order'=>$post->menu_order), true );
+					$updated = wp_update_post(array('ID'=>$post->ID,'post_parent'=>$post->post_parent,'menu_order'=>$post->menu_order), true );
 
 				}
 
@@ -604,6 +618,11 @@ class BU_Navigation_Admin_Navman {
 
 					// Temporary logging
 					// error_log('Post moved: ' . $post->ID );
+
+					if( $post->post_parent != $original->post_parent ) {
+						// error_log('Post has changed parent, marking old section for reordering: ' . $original->post_parent );
+						$this->reorder_tracker->mark_section_for_reordering( $original->post_parent );
+					}
 
 				}
 
@@ -651,7 +670,7 @@ class BU_Navigation_Admin_Navman {
 
 		// @todo we can't respect section editing permissions for links via current_user_can
 		// until they are a registered post type
-		if( 'link' == $post->type ) {
+		if( 'link' == $post->post_type ) {
 			$is_section_editor = ! is_super_admin() && current_user_can( 'edit_in_section' );
 
 			if( class_exists('BU_Group_Permissions') && $is_section_editor ) {
@@ -699,14 +718,14 @@ class BU_Navigation_Admin_Navman {
 	 *
 	 * @param object $post post to check move for
 	 */
-	public function can_place_in_section( $post ) {
+	public function can_place_in_section( $post, $prev_parent = null ) {
 		$allowed = false;
 
 		// Top level move
-		if( 0 == $post->parent ) {
+		if( 0 == $post->post_parent ) {
 
 			// Move is promotion to top level
-			if( 0 !== $post->originalParent ) {
+			if( 0 !== $prev_parent ) {
 				$allowed = $this->can_publish_top_level();
 			} else {
 				// Post was already top level, move is allowed
@@ -716,11 +735,11 @@ class BU_Navigation_Admin_Navman {
 		} else {
 
 			// Move under another post -- check if parent is editable
-			$allowed = current_user_can( 'edit_post', $post->parent );
+			$allowed = current_user_can( 'edit_post', $post->post_parent );
 
 			// Don't allow movement of published posts under non-published posts
-			if( $post->status == 'publish') {
-				$parent = get_post($post->parent);
+			if( $post->post_status == 'publish') {
+				$parent = get_post($post->post_parent);
 				$allowed = $allowed && $parent->post_status == 'publish';
 			}
 		}
@@ -734,10 +753,19 @@ class BU_Navigation_Admin_Navman {
 	 * @todo needs unit tests
 	 * @param object $post post to check move for
 	 */
-	public function can_move( $post ) {
+	public function can_move( $post, $original ) {
+		// error_log('===== Checking can_move =====');
+		// error_log('For Post: ' . print_r( $post, true ) );
+
+		if(!$original) {
+			$prev_parent = null;
+			// error_log('Post did not previously exist, previous parent is null...');
+		} else {
+			$prev_parent = $original->post_parent;
+		}
 
 		$can_edit_post = $this->can_edit( $post );
-		$can_edit_parent = $this->can_place_in_section( $post );
+		$can_edit_parent = $this->can_place_in_section( $post, $prev_parent );
 
 		return $can_edit_post && $can_edit_parent;
 	}

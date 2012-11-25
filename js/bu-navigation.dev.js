@@ -162,8 +162,8 @@ bu.plugins.navigation = {};
 				var allowed = true;
 
 				var isTopLevelMove = m.cr === -1;
-				var isVisible = post.meta['excluded'] === false || post.type === 'link';
-				var wasTop = !post.originalExclude && (post.originalParent === 0 || post.status === 'new');
+				var isVisible = post.post_meta['excluded'] === false || post.post_type === 'link';
+				var wasTop = !post.originalExclude && (post.originalParent === 0 || post.post_status === 'new');
 
 				// Don't allow top level posts if global option prohibits it
 				if (isTopLevelMove && !wasTop && isVisible && !c.allowTop) {
@@ -175,7 +175,7 @@ bu.plugins.navigation = {};
 				// Don't allow published posts to be moved under unpublished posts
 				if (m.np.length && m.np.attr('id') !== $tree.attr('id'))  {
 					parent = my.nodeToPost( m.np );
-					if (post.status == 'publish' && parent.status != 'publish') {
+					if (post.post_status == 'publish' && parent.post_status != 'publish') {
 						allowed = false;
 					}
 				}
@@ -250,8 +250,16 @@ bu.plugins.navigation = {};
 						"url" : c.rpcUrl,
 						"type" : "POST",
 						"data" : function (n) {
+							var post;
+
+							if(n === -1) {
+								post = {ID: 0};
+							} else {
+								post = my.nodeToPost(n);
+							}
+
 							return {
-								child_of : n.attr ? my.stripNodePrefix(n.attr("id")) : 0,
+								child_of : post.ID,
 								post_types : c.postTypes,
 								post_statuses : c.postStatuses,
 								instance : c.instance,
@@ -315,7 +323,7 @@ bu.plugins.navigation = {};
 			};
 
 			that.getPost = function( id ) {
-				var $node = my.getNodeForPost( id );
+				var $node = my.getNodeForPost(id);
 				if ($node) {
 					return my.nodeToPost($node);
 				}
@@ -336,21 +344,7 @@ bu.plugins.navigation = {};
 				parent.find('> ul > li').each(function (i, child) {
 					child = $(child);
 
-					post_id = child.attr('id');
-					post_type = child.data('post_type');
-					if (post_type != 'new') {
-						post_id = my.stripNodePrefix(post_id);
-					}
-
-					// Convert to post data
-					current_post = {
-						ID: post_id,
-						type: post_type,
-						status: child.data('post_status'),
-						title: $tree.jstree('get_text',child),
-						content: child.data('post_content'),
-						meta: child.data('post_meta')
-					};
+					current_post = my.nodeToPost(child);
 
 					// Recurse through children if this post has any
 					if( child.find('> ul > li').length ) {
@@ -395,13 +389,13 @@ bu.plugins.navigation = {};
 				var $inserted, $parent, $which, parent, orderIndex, args, node, pos;
 
 				// Assert parent and menu order values exist and are valid
-				post.parent = post.parent || 0;
+				post.post_parent = post.post_parent || 0;
 				post.menu_order = post.menu_order || 1;
 
 				// Translate post parent field to node
-				if (post.parent) {
-					$parent = my.getNodeForPost( post.parent );
-					parent = that.getPost( post.parent );
+				if (post.post_parent) {
+					$parent = my.getNodeForPost( post.post_parent );
+					parent = that.getPost( post.post_parent );
 				} else {
 					$parent = $tree;
 				}
@@ -418,7 +412,7 @@ bu.plugins.navigation = {};
 						pos = 'after';
 					}
 				}
-				
+
 				// No siblings in destination
 				if (!$which) {
 					$which = $parent;
@@ -458,17 +452,14 @@ bu.plugins.navigation = {};
 					updated = $.extend(true, {}, original, post);
 
 					// Set node text with navigation label
-					$tree.jstree('set_text', $node, updated.title);
+					$tree.jstree('set_text', $node, updated.post_title);
 
-					// Update metadata cache with node
-					// @todo do this dynamically by looping through post props
-					$node.data('post_content', updated.content);
-					$node.data('post_title', updated.title);
-					$node.data('post_status', updated.status);
-					$node.data('post_type', updated.type);
-					$node.data('post_parent', parseInt(updated.parent, 10));
-					$node.data('menu_order', parseInt(updated.menu_order, 10));
-					$node.data('post_meta', updated.meta);
+					// Type coercion
+					updated.post_parent = parseInt(updated.post_parent, 10);
+					updated.menu_order = parseInt(updated.menu_order, 10);
+
+					// Update DOM data attribute
+					$node.data('post', updated);
 
 					// Refresh post status badges (recursively)
 					// @todo move to callback
@@ -552,26 +543,27 @@ bu.plugins.navigation = {};
 				if (typeof node === 'undefined')
 					throw new TypeError('Invalid node!');
 
-				var id = node.attr('id');
+				var id, post;
 
+				id = node.attr('id');
+				post = $.extend({}, true, node.data('post'));
+
+				// ID processing
 				if (id.indexOf('post-new') === -1) {
 					id = parseInt(my.stripNodePrefix(id),10);
 				}
 
-				var post = {
-					ID: id,
-					title: $tree.jstree('get_text', node),
-					content: node.data('post_content'),
-					status: node.data('post_status'),
-					type: node.data('post_type'),
-					parent: parseInt(node.data('post_parent'), 10),
-					menu_order: node.index() + 1,
-					meta: node.data('post_meta') || {},
-					url: node.data('url'),
-					originalParent: parseInt(node.data('originalParent'), 10),
-					originalOrder: parseInt(node.data('originalOrder'), 10),
-					originalExclude: node.data('originalExclude')
-				};
+				// Populate dynamic fields with tree state
+				post.ID = id;
+				post.post_title = $tree.jstree('get_text', node);
+				post.menu_order = node.index() + 1;
+
+				// Type coercion
+				post.post_parent = parseInt(post.post_parent, 10);
+				post.originalParent = parseInt(post.originalParent, 10);
+				post.originalOrder = parseInt(post.originalOrder, 10);
+
+				post.post_meta = post.post_meta || {};
 
 				return bu.hooks.applyFilters('nodeToPost', post, node);
 			};
@@ -582,14 +574,15 @@ bu.plugins.navigation = {};
 
 				var default_post, p, node, post_id;
 
+				// @todo refactor to getDefaultPost method
 				default_post = {
-					title: '(no title)',
-					content: '',
-					status: 'new',
-					type: 'page',
-					parent: 0,
+					post_title: '(no title)',
+					post_content: '',
+					post_status: 'new',
+					post_type: 'page',
+					post_parent: 0,
 					menu_order: 1,
-					meta: {},
+					post_meta: {},
 					url: ''
 				};
 
@@ -601,22 +594,13 @@ bu.plugins.navigation = {};
 				node = {
 					"attr": {
 						"id": post_id,
-						"rel" : p.type
+						"rel" : p.post_type
 					},
 					"data": {
-						"title": p.title
+						"title": p.post_title
 					},
 					"metadata": {
-						"post_status": p.status,
-						"post_type": p.type,
-						"post_content": p.content,
-						"post_parent": p.parent,
-						"menu_order": p.menu_order,
-						"post_meta": p.meta,
-						"url" : p.url,
-						"originalParent": p.originalParent,
-						"originalOrder": p.originalOrder,
-						"originalExclude": p.originalExclude
+						"post": p
 					}
 				};
 
@@ -625,7 +609,7 @@ bu.plugins.navigation = {};
 
 			my.getNodeForPost = function( post ) {
 				if (typeof post === 'undefined')
-					throw new TypeError('Invalid post!');
+					return false;
 
 				var node_id, $node;
 
@@ -707,18 +691,21 @@ bu.plugins.navigation = {};
 				var post = my.nodeToPost( $node ), $statuses, statuses, excluded, restricted, i;
 
 				// Default metadata badges
-				excluded = post.meta['excluded'] || false;
-				restricted = post.meta['restricted'] || false;
+				excluded = post.post_meta['excluded'] || false;
+				restricted = post.post_meta['restricted'] || false;
+				pass_protected = post.post_meta['protected'] || false;
 
 				$statuses = $a.children('.post-statuses').empty();
 				statuses = [];
 
-				if (post.status != 'publish')
-					statuses.push({ "class": post.status, "label": post.status });
+				if (post.post_status != 'publish')
+					statuses.push({ "class": post.post_status, "label": post.post_status });
 				if (excluded)
 					statuses.push({ "class": 'excluded', "label": 'not in nav' });
 				if (restricted)
 					statuses.push({ "class": 'restricted', "label": 'restricted' });
+				if (pass_protected)
+					statuses.push({ "class": 'protected', "label": 'protected' });
 
 				// @todo implement this behavior through hooks for extensibility
 				// statuses = bu.hooks.applyFilters( 'navPostStatuses', statuses, post );
@@ -803,7 +790,7 @@ bu.plugins.navigation = {};
 						var $node = $(node);
 
 						// Only add once
-						if ($node.data('bu-nav-extras-added')) return;
+						if ($node.data('buNavExtrasAdded')) return;
 
 						// Status badges
 						if (c.showStatuses) {
@@ -813,7 +800,7 @@ bu.plugins.navigation = {};
 
 						}
 
-						$node.data('bu-nav-extras-added', true);
+						$node.data('buNavExtrasAdded', true);
 
 					});
 				}
@@ -821,7 +808,7 @@ bu.plugins.navigation = {};
 
 			$tree.bind('before.jstree', function (event, data) {
 				var $node;
-				
+
 				switch (data.func) {
 					case 'select_node':
 					case 'hover_node':
@@ -833,7 +820,7 @@ bu.plugins.navigation = {};
 						}
 						break;
 				}
-				
+
 			});
 
 			$tree.bind('create_node.jstree', function(event, data ) {
@@ -861,7 +848,7 @@ bu.plugins.navigation = {};
 				}
 
 				// Set parent and menu order
-				post['parent'] = postParent ? postParent.ID : 0;
+				post['post_parent'] = postParent ? postParent.ID : 0;
 				post['menu_order'] = position + 1;
 
 				that.broadcast('postInserted', [post]);
@@ -928,7 +915,7 @@ bu.plugins.navigation = {};
 					oldOrder = post['menu_order'];
 
 					// Extra post parameters that may be helpful to consumers
-					post['parent'] = parent_id;
+					post['post_parent'] = parent_id;
 					post['menu_order'] = menu_order;
 
 					that.updatePost(post);
@@ -968,7 +955,7 @@ bu.plugins.navigation = {};
 			var d = that.data;
 
 			var showOptionsMenu = function (node) {
-				var url = node.data('url'), type = node.data('post_type');
+				var post = my.nodeToPost(node);
 
 				var options = {
 					"edit" : {
@@ -986,12 +973,12 @@ bu.plugins.navigation = {};
 				};
 
 				// Can't view an item with no URL
-				if (!url) {
+				if (!post.url) {
 					delete options['view'];
 				}
 
 				// Special behavior for links
-				if (type === 'link') {
+				if (post.post_type === 'link') {
 					// Links are permanently deleted -- "Move To Trash" is misleading
 					options['remove']['label'] = 'Delete';
 				}
@@ -1074,14 +1061,14 @@ bu.plugins.navigation = {};
 				$tree.jstree('show_contextmenu', obj, pos.left, pos.top + yOffset );
 
 				if (currentMenuTarget && currentMenuTarget.attr('id') != obj.attr('id')) {
-					removeMenu( currentMenuTarget );
+					removeMenu(currentMenuTarget);
 				}
 				currentMenuTarget = obj;
 			});
 
 			// Remove active state on edit options button when the menu is removed
 			$(document).bind('context_hide.vakata', function(e, data){
-				removeMenu( currentMenuTarget );
+				removeMenu(currentMenuTarget);
 			});
 
 			var removeMenu = function ( target ) {
@@ -1155,7 +1142,7 @@ bu.plugins.navigation = {};
 
 				// Select current post if it isn't already selected
 				if ($tree.jstree('get_selected').length === 0) {
-					that.selectPost( currentPost );
+					that.selectPost(currentPost);
 					that.save();
 				}
 

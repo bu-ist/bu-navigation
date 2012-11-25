@@ -240,6 +240,22 @@ class BU_Navigation_Tree_View {
 			$post->navigation_label = $this->no_title_text;
 		}
 
+		$post_data = array(
+			'post_status' => $post->post_status,
+			'post_type' => $post->post_type,
+			'post_parent' => $post->post_parent,
+			'menu_order' => $post->menu_order,
+			'post_meta' => array(
+				'protected' => ( isset($post->protected) ? $post->protected : false ),
+				'excluded' => ( isset($post->excluded) ? $post->excluded : false ),
+				'restricted' => ( isset($post->restricted) ? $post->restricted : false )
+				),
+			'url' => $post->url,
+			'originalParent' => $post->post_parent,
+			'originalOrder' => $post->menu_order,
+			'originalExclude' => ( isset($post->excluded) ? $post->excluded : false )
+		);
+
 		// Base format
 		$p = array(
 			'attr' => array(
@@ -248,24 +264,13 @@ class BU_Navigation_Tree_View {
 				),
 			'data' => $post->navigation_label,
 			'metadata' => array(
-				'post_status' => $post->post_status,
-				'post_type' => $post->post_type,
-				'post_parent' => $post->post_parent,
-				'menu_order' => $post->menu_order,
-				'post_meta' => array(
-					'excluded' => ( isset($post->excluded) ? $post->excluded : false ),
-					'restricted' => ( isset($post->restricted) ? $post->restricted : false )
-					),
-				'url' => $post->url,
-				'originalParent' => $post->post_parent,
-				'originalOrder' => $post->menu_order,
-				'originalExclude' => ( isset($post->excluded) ? $post->excluded : false )
+				'post' => $post_data
 				)
 			);
 
 		if( 'link' == $post->post_type ) {
-			$p['metadata']['post_content'] = $post->post_content;
-			$p['metadata']['post_meta'] = array(
+			$p['metadata']['post']['post_content'] = $post->post_content;
+			$p['metadata']['post']['post_meta'] = array(
 				BU_NAV_META_TARGET => $post->target
 				);
 		}
@@ -423,12 +428,16 @@ class BU_Navigation_Tree_Query {
 
 				}
 
+				if( ! empty( $post->post_password ) ) {
+					$post->protected = TRUE;
+				}
+
 				$filtered[$post->ID] = $post;
 			}
 
 		}
 
-		return $filtered;
+		return apply_filters( 'bu_nav_tree_view_filter_posts', $filtered );
 
 	}
 
@@ -439,8 +448,9 @@ class BU_Navigation_Tree_Query {
 
 		// Adding post status so we can include status indicators in tree view
 		$fields[] = 'post_status';
+		$fields[] = 'post_password';
 
-		return $fields;
+		return apply_filters( 'bu_nav_tree_view_filter_fields', $fields );
 
 	}
 

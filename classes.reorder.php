@@ -33,12 +33,12 @@ class BU_Navigation_Reorder_Tracker {
 	public function mark_post_as_moved( $post ) {
 
 		// Push update to the map that triggers parent reordering
-		if( ! array_key_exists( $post->parent, $this->already_moved ) ) {
-			$this->already_moved[$post->parent] = array( 'ids' => array(), 'positions' => array() );
+		if( ! array_key_exists( $post->post_parent, $this->already_moved ) ) {
+			$this->already_moved[$post->post_parent] = array( 'ids' => array(), 'positions' => array() );
 		}
 
-		$this->already_moved[$post->parent]['ids'][] = $post->ID;
-		$this->already_moved[$post->parent]['positions'][] = $post->menu_order;
+		$this->already_moved[$post->post_parent]['ids'][] = $post->ID;
+		$this->already_moved[$post->post_parent]['positions'][] = $post->menu_order;
 
 	}
 

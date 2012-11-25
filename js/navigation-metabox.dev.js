@@ -63,11 +63,11 @@ if((typeof bu === 'undefined' ) ||
 			// Create current post object
 			this.settings.currentPost = {
 				ID: parseInt($(this.inputs['postID']).val(),10),
-				title: navLabel,
-				status: currentStatus == 'auto-draft' ? 'new' : currentStatus,
-				parent: currentParent,
+				post_title: navLabel,
+				post_status: currentStatus == 'auto-draft' ? 'new' : currentStatus,
+				post_parent: currentParent,
 				menu_order: currentOrder,
-				meta: { excluded: !navDisplay },
+				post_meta: { excluded: !navDisplay },
 				originalParent: currentParent,
 				originalExclude: !navDisplay
 			};
@@ -81,7 +81,7 @@ if((typeof bu === 'undefined' ) ||
 			// Bind event handlers
 			this.attachHandlers();
 
-			return this;	
+			return this;
 
 		},
 
@@ -114,7 +114,7 @@ if((typeof bu === 'undefined' ) ||
 
 		onLabelChange: function(e) {
 			var label = $(this.inputs.label).attr('value');
-			this.settings.currentPost.title = label;
+			this.settings.currentPost.post_title = label;
 
 			// Label updates should be reflected in tree view
 			Navtree.updatePost( this.settings.currentPost );
@@ -134,7 +134,7 @@ if((typeof bu === 'undefined' ) ||
 
 			} else {
 
-				this.settings.currentPost.meta['excluded'] = ! visible;
+				this.settings.currentPost.post_meta['excluded'] = ! visible;
 
 				// Nav visibility updates should be reflected in tree view
 				Navtree.updatePost( this.settings.currentPost );
@@ -147,7 +147,7 @@ if((typeof bu === 'undefined' ) ||
 		onLocationUpdated: function( post ) {
 
 			// Set form field values
-			$(this.inputs.parent).val(post.parent);
+			$(this.inputs.parent).val(post.post_parent);
 			$(this.inputs.order).val(post.menu_order);
 
 			this.updateBreadcrumbs( post );
@@ -159,7 +159,7 @@ if((typeof bu === 'undefined' ) ||
 		updateBreadcrumbs: function( post ) {
 			var ancestors = Navtree.getAncestors( post.ID );
 			var breadcrumbs = ancestors.join("&nbsp;&raquo;&nbsp;");
-			
+
 			// Update breadcrumbs
 			if (ancestors.length > 1) {
 				$(this.ui.breadcrumbs).html(breadcrumbs);
@@ -171,7 +171,7 @@ if((typeof bu === 'undefined' ) ||
 		isAllowedInNavigationLists: function( post ) {
 			var alreadyInNav = post.originalExclude === false && post.originalParent === 0;
 
-			if (!alreadyInNav && post.parent === 0) {
+			if (!alreadyInNav && post.post_parent === 0) {
 				return this.settings.allowTop;
 			}
 
@@ -257,6 +257,7 @@ if((typeof bu === 'undefined' ) ||
 
 			tb_show(title,href,g);
 
+			// @todo this doesn't do anything with new layout
 			Navtree.scrollToSelection();
 
 			// Restore navtree state on close (cancel)

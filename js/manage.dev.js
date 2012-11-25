@@ -203,7 +203,7 @@ if ((typeof bu === 'undefined') ||
 						post_status: current.post_status,
 						post_type: current.post_type,
 						post_parent: current.post_parent,
-						menu_order: current.menu_order,
+						menu_order: current.menu_order
 					};
 				}
 			});

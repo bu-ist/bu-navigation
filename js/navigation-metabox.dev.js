@@ -155,14 +155,18 @@ if((typeof bu === 'undefined' ) ||
 			this.settings.currentPost = post;
 		},
 
-		//Methods
+		// Methods
 		updateBreadcrumbs: function( post ) {
-			var ancestors = Navtree.getAncestors( post.ID );
-			var breadcrumbs = ancestors.join("&nbsp;&raquo;&nbsp;");
+			var ancestors, crumbs, $crumbs;
+			ancestors = Navtree.getAncestors( post.ID );
+			ancestors = $.map(ancestors, function(title) { return '<span>' + title + '</span>'; });
+			crumbs = ancestors.join("&nbsp;&raquo;&nbsp;");
+			$crumbs = $(crumbs);
 
 			// Update breadcrumbs
-			if (ancestors.length > 1) {
-				$(this.ui.breadcrumbs).html(breadcrumbs);
+			if ($crumbs.length > 1) {
+				$crumbs.last('span').addClass('current');
+				$(this.ui.breadcrumbs).empty().append($crumbs);
 			} else {
 				$(this.ui.breadcrumbs).html('Top level page');
 			}

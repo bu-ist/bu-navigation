@@ -54,6 +54,31 @@ class BU_Navigation_Admin_Navman {
 	}
 
 	/**
+	 * Generate admin menu cap for the given post type
+	 *
+	 * Includes logic that makes menu accessible for section editors
+	 */
+	public function get_menu_cap_for_post_type( $post_type ) {
+		$pto = get_post_type_object( $post_type );
+
+		if ( $pto->map_meta_cap ) {
+			if ( current_user_can( $pto->cap->edit_published_posts ) ) {
+				$cap = $pto->cap->edit_published_posts;
+			} else {
+				$cap = 'edit_' . $post_type . '_in_section';
+			}
+		} else {
+			if ( current_user_can( $pto->cap->edit_others_posts ) ) {
+				$cap = $pto->cap->edit_others_posts;
+			} else {
+				$cap = 'edit_' . $post_type . '_in_section';
+			}
+		}
+
+		return $cap;
+	}
+
+	/**
 	 * Add "Edit Order" submenu pages to allow editing the navigation of the supported post types
 	 */
 	public function register_menu() {
@@ -64,27 +89,12 @@ class BU_Navigation_Admin_Navman {
 		foreach( $post_types as $pt ) {
 
 			$parent_slug = 'edit.php?post_type=' . $pt;
-			$post_type = get_post_type_object( $pt );
-
-			if ( $post_type->map_meta_cap ) {
-				if ( current_user_can( $post_type->cap->edit_published_posts ) ) {
-					$cap = $post_type->cap->edit_published_posts;
-				} else {
-					$cap = 'edit_' . $pt . '_in_section';
-				}
-			} else {
-				if ( current_user_can( $post_type->cap->edit_others_posts ) ) {
-					$cap = $post_type->cap->edit_others_posts;
-				} else {
-					$cap = 'edit_' . $pt . '_in_section';
-				}
-			}
 
 			$page = add_submenu_page(
 				$parent_slug,
 				__('Edit Order'),
 				__('Edit Order'),
-				$cap,
+				$this->get_menu_cap_for_post_type( $pt ),
 				'bu-navigation-manager',
 				array( $this, 'render' )
 				);
@@ -272,22 +282,20 @@ class BU_Navigation_Admin_Navman {
 	 */
 	public function render() {
 
-		// @todo reuse cap from admin_menu
-		if( ! current_user_can( 'edit_pages' ) ) {
-			wp_die('Cheatin, uh?');
-		}
-
 		if( is_null( $this->post_type ) ) {
 			wp_die('Edit order page is not available for post type: ' . $this->post_type );
 			return;
 		}
 
-		// Actual post type and post types to fetch with get pages (remove that one after context is dealt with)
-		$post_type = $this->post_type;
+		$cap = $this->get_menu_cap_for_post_type( $this->post_type );
+
+		if( ! current_user_can( $cap ) ) {
+			wp_die('Cheatin, uh?');
+		}
 
 		// If link was a registered post type, we would use its publish meta cap here instead
 		$disable_add_link = ! $this->can_publish_top_level();
-
+		$post_type = $this->post_type;
 		$notices = $this->get_notice_list();
 
 		// Render interface

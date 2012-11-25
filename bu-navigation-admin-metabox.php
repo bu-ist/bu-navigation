@@ -1,5 +1,6 @@
 <?php
 require_once(dirname(__FILE__) . '/classes.nav-tree.php' );
+require_once(dirname(__FILE__) . '/classes.reorder.php' );
 
 /**
  * BU Navigation Admin Metabox controller
@@ -163,7 +164,7 @@ class BU_Navigation_Admin_Metabox {
 				'crumb_tag' => 'span',
 				'show_links' => false,
 				'include_hidden' => true,
-				'include_statuses' => array('draft','pending','publish')
+				'include_statuses' => array('draft','pending','private','publish')
 				);
 			$output = bu_navigation_breadcrumbs($args);
 		} else {
@@ -220,85 +221,40 @@ class BU_Navigation_Admin_Metabox {
 		if( 'auto-draft' == $post->post_status )
 			return;
 
-		if(array_key_exists('nav_label', $_POST)) {
+		if( array_key_exists( 'nav_label', $_POST ) ) {
 
 			// update the navigation meta data
 			$nav_label = $_POST['nav_label'];
-			$exclude = (array_key_exists('nav_display', $_POST) ? 0 : 1);
+			$exclude = ( array_key_exists( 'nav_display', $_POST ) ? 0 : 1 );
 
 			update_post_meta($post_id, '_bu_cms_navigation_page_label', $nav_label);
 			update_post_meta($post_id, '_bu_cms_navigation_exclude', $exclude);
 
 		}
 
-		// Reorder old siblings if my parent has changed
+		// Perform reordering if post parent or menu order has changed
+		$reorder = new BU_Navigation_Reorder_Tracker( $post->post_type );
+
+		// Reorder old and new section if parent has changed
 		if( $this->post->post_parent != $post->post_parent ) {
+
 			// error_log('Post parent has changed!  Reordering old and new siblings...');
-			$this->reorder_siblings( $this->post );	// Reorder old siblings by passing original post object
-			$this->reorder_siblings( $post ); // Reorder current siblings by passing new one
+			$reorder->mark_post_as_moved( $post );
+			$reorder->mark_section_for_reordering( $this->post->post_parent );
+
 		}
 
 		// Reorder current siblings if only my menu order has changed
 		else if( $this->post->menu_order != $post->menu_order ) {
+
 			// error_log('Menu order has changed!  Reordering current siblings...');
-			$this->reorder_siblings( $post );
+			$reorder->mark_post_as_moved( $post );
+
 		}
 
-	}
-
-	/**
-	 * Account for a possible change in menu_order by reordering siblings of the saved post
-	 *
-	 * @todo review logic more closely, especially args to bu_navigation_get_pages
-	 * @todo perhaps move this to a more globally accessible location, could be useful outside of here
-	 * @todo needs unit test
-	 */
-	public function reorder_siblings( $post ) {
-		global $wpdb;
-
-		// error_log("Reordering siblings for post {$post->post_title}, with parent: {$post->post_parent}");
-
-		$post_types = ( $post->post_type == 'page' ? array('page', 'link') : array($post->post_type) );
-
-		// Fetch siblings, as currently ordered by menu_order
-		$siblings = bu_navigation_get_pages( array(
-			'sections' => array($post->post_parent),
-			'post_status' => array('publish'),	// ignore post statuses that are not being displayed
-			'suppress_filter_pages' => true,	// suppress is spelled with two p's...
-			'post_types' => $post_types,	// handle custom post types support
-		));
-
-		$i = 1;
-
-		if ($siblings) {
-
-			foreach ($siblings as $sib) {
-
-				// Skip post being saved if present in siblings array (it already has menu_order set correctly)
-				if ($sib->ID == $post->ID) {
-					// error_log("Skipping myself, I already have the right menu order");
-					continue;
-				}
-
-				// If post being saved is among siblings, increment menu order counter to account for it
-				if ( in_array( $post->ID, array_keys( $siblings ) ) && $i == $post->menu_order) {
-					// error_log("Skipping my own menu order...");
-					$i++;
-				}
-
-				// Commit new order for this sibling
-				// @todo why not wp_update_post?  this will cause issues in new environment due to cacheing
-				$update = $wpdb->prepare("UPDATE $wpdb->posts SET menu_order = %d WHERE ID = %d", $i, $sib->ID);
-				$wpdb->query( $update );
-				// error_log("Updating menu order for {$sib->post_title} to: $i");
-				$i++;
-
-			}
-
-		} else {
-
-			 // error_log("No siblings found for post {$post->ID}, done!");
-
+		// Reorder
+		if( $reorder->has_moves() ) {
+			$reorder->run();
 		}
 
 	}

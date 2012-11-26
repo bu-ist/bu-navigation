@@ -379,8 +379,6 @@ class BU_Navigation_Admin_Navman {
 	/**
 	 * Trashes posts that have been removed using the navman interface
 	 *
-	 * @todo write unit tests
-	 *
 	 * @param array $post_ids an array of post ID's for trashing
 	 * @return bool|WP_Error $result the result of the post deletions
 	 */
@@ -654,7 +652,6 @@ class BU_Navigation_Admin_Navman {
 	 * Whether or not the current user can publish top level content
 	 *
 	 * @todo decouple from section editing plugin
-	 * @todo needs unit tests
 	 */
 	public function can_publish_top_level() {
 
@@ -669,12 +666,18 @@ class BU_Navigation_Admin_Navman {
 	 * Can the current user edit the supplied post
 	 *
 	 * Needed because links are not registered post types and therefore current_user_can checks are insufficient
-	 * @todo needs unit tests
 	 *
-	 * @param object $post post to check edit caps for
+	 * @param object|int $post post obj or post ID to check edit caps for
 	 */
 	public function can_edit( $post ) {
 		$allowed = false;
+
+		if( is_numeric( $post ) ) {
+			$post = get_post($post);
+		}
+		if( ! is_object( $post ) ) {
+			return false;
+		}
 
 		// @todo we can't respect section editing permissions for links via current_user_can
 		// until they are a registered post type
@@ -684,7 +687,7 @@ class BU_Navigation_Admin_Navman {
 			if( class_exists('BU_Group_Permissions') && $is_section_editor ) {
 				$allowed = BU_Group_Permissions::can_edit_section( wp_get_current_user(), $post->ID );
 			} else {
-				$allowed = true;
+				$allowed = current_user_can('edit_pages');
 			}
 		} else {
 			$allowed = current_user_can( 'edit_post', $post->ID );
@@ -697,12 +700,18 @@ class BU_Navigation_Admin_Navman {
 	 * Can the current user delete the supplied post
 	 *
 	 * Needed because links are not registered post types and therefore current_user_can checks are insufficient
-	 * @todo needs unit tests
 	 *
-	 * @param object $post post to check delete caps for
+	 * @param object|int $post post obj or post ID to check delete caps for
 	 */
 	public function can_delete( $post ) {
 		$allowed = false;
+
+		if( is_numeric( $post ) ) {
+			$post = get_post($post);
+		}
+		if( ! is_object( $post ) ) {
+			return false;
+		}
 
 		if( 'link' == $post->post_type ) {
 			$is_section_editor = ! is_super_admin() && current_user_can( 'edit_in_section' );
@@ -710,7 +719,7 @@ class BU_Navigation_Admin_Navman {
 			if( class_exists('BU_Group_Permissions') && $is_section_editor ) {
 				$allowed = BU_Group_Permissions::can_edit_section( wp_get_current_user(), $post->ID );
 			} else {
-				$allowed = true;
+				$allowed = current_user_can('edit_pages');
 			}
 		} else {
 			$allowed = current_user_can( 'delete_post', $post->ID );
@@ -722,12 +731,17 @@ class BU_Navigation_Admin_Navman {
 	/**
 	 * Can the current user switch post parent for the supplied post
 	 *
-	 * @todo needs unit tests
-	 *
-	 * @param object $post post to check move for
+	 * @param object|int $post post obj or post ID to check move for
 	 */
 	public function can_place_in_section( $post, $prev_parent = null ) {
 		$allowed = false;
+
+		if( is_numeric( $post ) ) {
+			$post = get_post($post);
+		}
+		if( ! is_object( $post ) ) {
+			return false;
+		}
 
 		// Top level move
 		if( 0 == $post->post_parent ) {
@@ -758,17 +772,26 @@ class BU_Navigation_Admin_Navman {
 	/**
 	 * Can the current user move the supplied post
 	 *
-	 * @todo needs unit tests
-	 * @param object $post post to check move for
+	 * @param object|int $post post obj or post ID to check move for
+	 * @param object|int $original post obj or post ID of previous parent
 	 */
 	public function can_move( $post, $original ) {
 		// error_log('===== Checking can_move =====');
 		// error_log('For Post: ' . print_r( $post, true ) );
 
-		if(!$original) {
-			$prev_parent = null;
-			// error_log('Post did not previously exist, previous parent is null...');
-		} else {
+		if( is_numeric( $post ) ) {
+			$post = get_post($post);
+		}
+		if( ! is_object( $post ) ) {
+			return false;
+		}
+
+		$prev_parent = null;
+
+		if( is_numeric( $original ) ) {
+			$original = get_post($original);
+		}
+		if( is_object( $original ) ) {
 			$prev_parent = $original->post_parent;
 		}
 

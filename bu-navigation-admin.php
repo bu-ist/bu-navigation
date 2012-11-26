@@ -35,7 +35,9 @@ class BU_Navigation_Admin {
 
 		// Componenents with menu items need to be registered for every admin request
 		$this->load_primary_settings_page();
-		$this->load_navman_page();
+
+		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'page';
+		$this->load_navman_page( $post_type );
 
 		// Other admin components can be loaded more selectively
 		add_action( 'load-edit.php', array( $this, 'load_filter_pages' ) );
@@ -92,13 +94,12 @@ class BU_Navigation_Admin {
 	 *
 	 * Accessed via the "Edit Order" menu item under support post type menus
 	 */
-	public function load_navman_page() {
-
-		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'page';
+	public function load_navman_page( $post_type = 'page' ) {
 
 		require_once(dirname(__FILE__) . '/bu-navigation-admin-navman.php');
 		$this->navman = new BU_Navigation_Admin_Navman( $post_type, $this->plugin );
 
+		return $this->navman;
 	}
 
 	/**

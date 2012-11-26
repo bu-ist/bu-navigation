@@ -15,7 +15,7 @@ class BU_Navigation_Settings_Test extends WP_UnitTestCase {
 		parent::setUp();
 
 		// Store reference to navigation plugin instance
-		$this->plugin = $GLOBALS['bu_navigation_plugin'];
+		$this->plugin = new BU_Navigation_Plugin();
 
 	}
 
@@ -59,7 +59,7 @@ class BU_Navigation_Settings_Test extends WP_UnitTestCase {
 			'max_items' => 3,
 			'dive' => false,
 			'depth' => 2,
-			'allow_top' => true
+			'allow_top' => false
 			);
 
 		$this->plugin->update_settings( $updates );

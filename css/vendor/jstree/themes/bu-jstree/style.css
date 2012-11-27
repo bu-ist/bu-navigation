@@ -585,6 +585,7 @@ html[xmlns] .jstree-bu li {
 #jstree-marker.jstree-bu {
 	text-indent: -100px;
 	margin-left: -20px;
+	background: none;
 }
 
 #jstree-marker-line.jstree-bu {

@@ -159,16 +159,16 @@ if((typeof bu === 'undefined' ) ||
 		updateBreadcrumbs: function( post ) {
 			var ancestors, crumbs, $crumbs;
 			ancestors = Navtree.getAncestors( post.ID );
-			ancestors = $.map(ancestors, function(title) { return '<span>' + title + '</span>'; });
-			crumbs = ancestors.join("&nbsp;&raquo;&nbsp;");
+			ancestors = $.map(ancestors, function(title) { return '<li>' + title + '</li>'; });
+			crumbs = ancestors.join('');
 			$crumbs = $(crumbs);
 
 			// Update breadcrumbs
 			if ($crumbs.length > 1) {
-				$crumbs.last('span').addClass('current');
+				$crumbs.last('li').addClass('current');
 				$(this.ui.breadcrumbs).empty().append($crumbs);
 			} else {
-				$(this.ui.breadcrumbs).html('Top level page');
+				$(this.ui.breadcrumbs).html('<li>Top level page</li>');
 			}
 		},
 

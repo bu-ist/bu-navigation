@@ -161,14 +161,17 @@ class BU_Navigation_Admin_Metabox {
 
 		if( $post->post_parent ) {
 			$args = array(
-				'crumb_tag' => 'span',
+				'container_tag' => 'ul', 
+				'container_id' => 'bu-post-breadcrumbs',
+				'crumb_tag' => 'li',
+				'glue' => '',
 				'show_links' => false,
 				'include_hidden' => true,
 				'include_statuses' => array('draft','pending','private','publish')
 				);
 			$output = bu_navigation_breadcrumbs($args);
 		} else {
-			$output = __('Top level page');
+			$output = "<ul id=\"bu-post-breadcrumbs\"><li>" . __('Top level page') . "</li></ul>\n";
 		}
 
 		return $output;

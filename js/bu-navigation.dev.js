@@ -562,6 +562,7 @@ bu.plugins.navigation = {};
 				post.post_parent = parseInt(post.post_parent, 10);
 				post.originalParent = parseInt(post.originalParent, 10);
 				post.originalOrder = parseInt(post.originalOrder, 10);
+				post.inheritedRestriction = node.data('inheritedRestriction') || false;
 
 				post.post_meta = post.post_meta || {};
 
@@ -681,6 +682,35 @@ bu.plugins.navigation = {};
 				}
 			};
 
+			// Update post meta that may change depending on ancestors
+			var calculateInheritedStatuses = function ($node) {
+
+				var post = my.nodeToPost($node), excluded, restricted, inheritedExclusion, inheritedRestriction;
+
+				// Check for inherited exclusions based on current position in hierarchy
+//				inheritedExclusion = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () {
+//					return $(this).data('post_meta')['excluded'] || $(this).data('inheritedExclusion');
+//				}).length;
+//
+//				if (inheritedExclusion) {
+//					$node.data('inheritedExclusion', true);
+//				} else {
+//					$node.data('inheritedExclusion', false);
+//				}
+
+				// Check for inherited restrictions based on current position in hierarchy
+				inheritedRestriction = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () {
+					return $(this).data('post')['post_meta']['restricted'] || $(this).data('inheritedRestriction');
+				}).length;
+
+				if (inheritedRestriction) {
+					$node.data('inheritedRestriction', true);
+				} else {
+					$node.data('inheritedRestriction', false);
+				}
+
+			};
+
 			// Convert post meta data in to status badges
 			var setStatusBadges = function ($node) {
 				var $a = $node.children('a');
@@ -688,11 +718,14 @@ bu.plugins.navigation = {};
 					$a.append('<span class="post-statuses"></span>');
 				}
 
-				var post = my.nodeToPost( $node ), $statuses, statuses, excluded, restricted, i;
+				var post = my.nodeToPost( $node ), $statuses, statuses, excluded, restricted, pass_protected, i;
 
+				// Re-calculate statuses that might depend on ancestors
+				calculateInheritedStatuses($node);
+				
 				// Default metadata badges
 				excluded = post.post_meta['excluded'] || false;
-				restricted = post.post_meta['restricted'] || false;
+				restricted = post.post_meta['restricted'] || $node.data('inheritedRestriction') || false;
 				pass_protected = post.post_meta['protected'] || false;
 
 				$statuses = $a.children('.post-statuses').empty();
@@ -1145,7 +1178,7 @@ bu.plugins.navigation = {};
 					that.selectPost(currentPost);
 					that.save();
 				}
-
+				
 			});
 
 			// Public

@@ -4593,6 +4593,7 @@
 		defaults : {
 			lazy_load: false,
 			drop_target: null,
+			drag_class: 'bu-dnd-is-dragging',
 			placeholder_class: 'bu-dnd-placeholder',
 			target_class: 'bu-dnd-target'
 		},
@@ -4640,10 +4641,12 @@
 						var $drag_src = data.data.obj;
 						$drag_src.addClass(s.placeholder_class);
 						$.vakata.dnd.helper.width($drag_src.width());
+						this.get_container().addClass(s.drag_class);
 					}, this))
 					.bind('drag_stop.vakata', $.proxy(function (event, data) {
 						var $drag_src = data.data.obj;
 						$drag_src.removeClass(s.placeholder_class);
+						this.get_container().removeClass(s.drag_class);
 					}, this));
 
 				// Increase default scroll speed during drag n' drop
@@ -4655,9 +4658,7 @@
 				// Lazy load begins after reselect
 				this.get_container()
 					.bind('reselect.jstree', $.proxy(function( event, data ) {
-						if (s.lazy_load) {
 							this.lazy_load();
-						}
 					}, this));
 			}
 
@@ -4928,6 +4929,9 @@
 							}, $.noop);
 						} else {
 							remaining = remaining - 1;
+							if (!remaining) {
+								t.lazy_loaded();
+							}
 						}
 					});
 				}

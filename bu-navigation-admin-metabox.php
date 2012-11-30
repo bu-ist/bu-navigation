@@ -66,14 +66,7 @@ class BU_Navigation_Admin_Metabox {
 		// Setup dynamic script context for navigation-metabox.js
 		$post_id = is_object( $this->post ) ? $this->post->ID : null;
 		$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
-		$ancestors = null;
-
-		// @todo setup an else clause here that fetches ancestors if they aren't set on the
-		// post object.  Something in our environment seems to be removing them randomly,
-		// and with memcache that can stick around for a while in the cache.
-
-		if( is_object( $this->post ) && isset( $this->post->ancestors ) && ! empty( $this->post->ancestors ))
-			$ancestors = $this->post->ancestors;
+		$ancestors = $this->get_formatted_ancestors();
 
 		$script_context = array(
 			'postTypes' => $post_types,
@@ -147,6 +140,55 @@ class BU_Navigation_Admin_Metabox {
 
 		include('interface/metabox-navigation-attributes.php');
 
+	}
+
+	public function get_formatted_ancestors() {
+		$ancestors = array();
+		$post = $this->post;
+
+		while( $post->post_parent != 0 ) {
+			$post = get_post($post->post_parent);
+			array_push($ancestors, $this->format_post( $post ) );
+		}
+		
+		return $ancestors;	
+	}
+	
+	public function format_post( $post ) {
+
+		// Get necessary metadata
+		$acl_option = defined( 'BuAccessControlList::PAGE_ACL_OPTION' ) ? BuAccessControlList::PAGE_ACL_OPTION : BU_ACL_PAGE_OPTION;
+		$nav_label = get_post_meta( $post->ID, BU_NAV_META_PAGE_LABEL, true );
+		$post->excluded = get_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE, true);
+		$post->excluded = ($post->excluded == "1" ) ? true : false; 
+		$post->protected = ! empty( $post->post_password ); 
+		$post->restricted = get_post_meta( $post->ID, $acl_option, true );
+		$post->restricted = ! empty( $post->restricted ) ? $post->restricted : false;
+		
+		// Label
+		if( ! empty( $nav_label ) ) {
+			$post->post_title = apply_filters( 'the_title', $nav_label );
+		}
+
+		if ( empty( $post->post_title ) ) {
+			$post->post_title = $this->no_title_text;
+		}
+
+		$formatted = array(
+			'ID' => $post->ID,
+			'post_title' => $post->post_title,
+			'post_status' => $post->post_status,
+			'post_type' => $post->post_type,
+			'post_parent' => $post->post_parent,
+			'menu_order' => $post->menu_order,
+			'post_meta' => array(
+				'protected' => $post->protected,
+				'excluded' => $post->excluded,
+				'restricted' => $post->restricted
+				)
+		);
+
+		return $formatted;
 	}
 
 	/**

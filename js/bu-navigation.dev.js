@@ -299,6 +299,16 @@ bu.plugins.navigation = {};
 				return that;
 			};
 
+			that.openPost = function (post) {
+				var $node = my.getNodeForPost(post);
+
+				if ($node) {
+					$tree.jstree('open_node', $node, $.noop, true);
+				} else {
+					return false;
+				}
+			}
+			
 			that.selectPost = function( post, deselect_all ) {
 				deselect_all = deselect_all || true;
 				var $node = my.getNodeForPost(post);
@@ -381,7 +391,7 @@ bu.plugins.navigation = {};
 
 			};
 
-			that.insertPost = function( post ) {
+			that.insertPost = function( post, after_insert ) {
 				if (typeof post === 'undefined') {
 					throw new TypeError('Post argument for insertPost must be defined!');
 				}
@@ -423,8 +433,7 @@ bu.plugins.navigation = {};
 				args = {
 					which: $which,
 					position: pos,
-					skip_rename: true,
-					callback: function($node) { $tree.jstree('deselect_all'); $tree.jstree('select_node', $node); }
+					callback: after_insert || function($node) { $tree.jstree('deselect_all'); $tree.jstree('select_node', $node); }
 				};
 
 				post = bu.hooks.applyFilters('preInsertPost', post, parent );
@@ -433,7 +442,7 @@ bu.plugins.navigation = {};
 				node = my.postToNode( post );
 
 				// Create tree node and update with insertion ID if post ID was not previously set
-				$inserted = $tree.jstree( 'create', args.which, args.position, node, args.callback, args.skip_rename );
+				$inserted = $tree.jstree('create_node', args.which, args.position, node, args.callback);
 				if (!post.ID) {
 					post.ID = $inserted.attr('id');
 				}
@@ -1135,20 +1144,23 @@ bu.plugins.navigation = {};
 			var extraTreeConfig = {};
 
 			// Build initial open and selection arrays from current post / ancestors
-			var toOpen = [], i;
+			// Replaced by the loaded.jstreee callback below to handle cases where
+			// ancestors and current page are not published.
 
-			if (c.ancestors && c.ancestors.length) {
-				// We want old -> young, which is not how they're passed
-				var ancestors = c.ancestors.reverse();
-				for (i = 0; i < ancestors.length; i = i + 1) {
-					toOpen.push( '#' + c.nodePrefix + c.ancestors[i] );
-				}
-			}
-			if (toOpen.length) {
-				extraTreeConfig['core'] = {
-					"initially_open": toOpen
-				};
-			}
+//			var toOpen = [], i;
+//
+//			if (c.ancestors && c.ancestors.length) {
+//				// We want old -> young, which is not how they're passed
+//				var ancestors = c.ancestors.reverse();
+//				for (i = 0; i < ancestors.length; i = i + 1) {
+//					toOpen.push( '#' + c.nodePrefix + c.ancestors[i]['ID'] );
+//				}
+//			}
+//			if (toOpen.length) {
+//				extraTreeConfig['core'] = {
+//					"initially_open": toOpen
+//				};
+//			}
 
 			// Merge base tree config with extras
 			$.extend( true, d.treeConfig, extraTreeConfig );
@@ -1164,22 +1176,93 @@ bu.plugins.navigation = {};
 			bu.hooks.addFilter( 'canSelectNode', assertCurrentPost );
 			bu.hooks.addFilter( 'canHoverNode', assertCurrentPost );
 			bu.hooks.addFilter( 'canDragNode', assertCurrentPost );
+	
+			// The following logic will be simplified once we don't have
+			// to handled unpublished content as special cases.
+			// For right now, they are excluded from the AJAX calls to
+			// list posts, which means we have to create any unpublished
+			// ancestors as well as the current post (if it is new or unpublished)
+			// client side to make sure they are represented in the tree.
+			
+			$tree.bind('loaded.jstree', function (e, data) {
+				var ancestors, i;
+				
+				// Need to load and open ancestors before we can select current post
+				if (c.ancestors && c.ancestors.length) {
+					
+					// We want old -> young, which is not how they're passed
+					ancestors = c.ancestors.reverse();
 
-			$tree.bind('reselect.jstree', function (e, data) {
-				var $current = my.getNodeForPost(currentPost);
+					var $root = my.getNodeForPost(ancestors[0].ID);
 
-				// Insert post if it isn't already represented in the tree (new, draft, or pending posts)
-				if (!$current) {
-					that.insertPost(currentPost);
+					if ($root) {
+
+						// Remove root post
+						ancestors.shift();
+						
+						// Wait for root node to load and open before continuing
+						$tree.jstree('open_node', $root, function() {
+							
+							// Open ancestors first
+							revealCurrentPost(ancestors);
+
+						}, true );
+
+					} else {
+						
+							// Open ancestors first
+							revealCurrentPost(ancestors);
+							
+					}
+					
+				} else {
+					
+						// Current post is top level -- select or insert
+						selectCurrentPost();
+						
 				}
 
-				// Select current post if it isn't already selected
-				if ($tree.jstree('get_selected').length === 0) {
+			});
+
+			var revealCurrentPost = function (ancestors) {
+				ancestors = ancestors || [];
+				
+				var current, i;
+				
+				// Root node does not exist, no nead to load
+				for (i = 0; i < ancestors.length; i = i + 1) {
+					current = c.ancestors[i];
+						
+					// Attempt to open, insert and open on failure
+					if (that.openPost(current.ID) === false) {
+						that.insertPost(current);
+						that.openPost(current.ID);
+					}
+						
+				}
+
+				// Select or insert current post
+				selectCurrentPost();
+
+			};
+
+			var selectCurrentPost = function () {
+				
+				// Insert post if it isn't already represented in the tree (new, draft, or pending posts)
+				var $current = my.getNodeForPost(currentPost);
+
+				if (!$current) {
+					// Insert and select self, then save tree state
+					that.insertPost(currentPost, function($node) { 
+						that.selectPost(currentPost);
+						that.save();
+					});
+				} else {
 					that.selectPost(currentPost);
 					that.save();
 				}
-				
-			});
+
+			};
 
 			// Public
 			that.getCurrentPost = function() {

@@ -58,5 +58,23 @@
 }
 
 #bu-post-breadcrumbs {
-	margin-bottom: 15px;   
+	margin-bottom: 15px;
+	font-size: 11px;
+}
+
+#bu-post-breadcrumbs li {
+	color: #9b9b9b;
+}
+
+#bu-post-breadcrumbs ul li {
+	background: url('../images/img-child-indicator.png') left 1px no-repeat transparent;
+	padding-left: 16px;
+}
+
+#bu-post-breadcrubs ul ul li {
+	margin-left: 16px;
+}
+
+#bu-post-breadcrumbs li.current {
+	color: #333;
 }

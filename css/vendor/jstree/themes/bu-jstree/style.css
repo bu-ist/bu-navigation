@@ -95,7 +95,6 @@ html[xmlns] .jstree-bu li {
 
 .jstree-bu li a {
 	display: block;
-	cursor:	default;
 	padding: 6px 0 6px 0;
 	border: 1px solid #dfdfdf;
 	border-radius: 3px;
@@ -132,7 +131,7 @@ html[xmlns] .jstree-bu li {
 .jstree-bu .denied > a {
 	background: #f7e3e3;
 	color: #af5d5d;
-	cursor: not-allowed;
+	cursor: default;
 }
 
 .jstree-bu .jstree-clicked .count {
@@ -223,6 +222,11 @@ html[xmlns] .jstree-bu li {
 	color: #fff;
 }
 
+.jstree-bu .post-statuses .post_status.protected {
+	background: #f0ac7b;
+	color: #fff;
+}
+
 .jstree-bu .post-statuses .post_status.excluded {
 	background: #f79c7d;
 	color: #fff;
@@ -269,14 +273,14 @@ html[xmlns] .jstree-bu li {
 	visibility: visible;
 }
 
+.jstree-bu.bu-dnd-is-dragging .jstree-hovered .edit-options {
+	visibility: hidden;
+}
+
 .jstree-bu .jstree-clicked .edit-options {
 	visibility: visible;
 	color: #87bedd;
 	border-left: 1px solid transparent;
-}
-
-.jstree-bu .jstree-clicked:hover {
-	cursor: move;
 }
 
 .jstree-bu .edit-options.clicked {
@@ -371,10 +375,6 @@ html[xmlns] .jstree-bu li {
 	background: #888;
 }
 
-.jstree-bu.buse-perm-editor .jstree-clicked:hover {
-	cursor: default;
-}
-
 .jstree-bu .edit-perms {
 	margin: -6px -1px;
 	padding: 4px 0 5px 0;
@@ -383,10 +383,10 @@ html[xmlns] .jstree-bu li {
 	border-top-right-radius: 3px;
 	border-bottom-right-radius: 3px;
 	font-size: 100%;
+	cursor:	pointer;
 }
 
 .jstree-bu .edit-perms.denied {
-	cursor:	pointer;
 	border: 1px solid #7b4949;
 	background: #cf5b5b;
 	background: -moz-linear-gradient(top, #cf5b5b 0%, #a24a4a 100%);
@@ -400,7 +400,6 @@ html[xmlns] .jstree-bu li {
 }
 
 .jstree-bu .edit-perms.allowed {
-	cursor:	pointer;
 	border: 1px solid #506527;
 	background: #6a9812;
 	background: -moz-linear-gradient(top, #6a9812 0%, #567812 100%);
@@ -426,11 +425,7 @@ html[xmlns] .jstree-bu li {
 }
 
 /* Page selector interface */
-.jstree-bu.bu-page-selector li a:hover {
-	cursor: pointer;
-}
-
-.jstree-bu.bu-page-selector .jstree-clicked:hover {
+.jstree-bu.bu-page-selector li a {
 	cursor: pointer;
 }
 
@@ -595,6 +590,7 @@ html[xmlns] .jstree-bu li {
 	box-shadow: 0 0 4px #6da73d;
 	margin-left: -18px;
 	width: 25%;
+	cursor: move;
 }
 
 #jstree-marker-line.jstree-bu.denied {
@@ -644,7 +640,6 @@ html[xmlns] .jstree-bu li {
 	background: linear-gradient(to bottom, #6da73effffff 0%,#508a21 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6da73e', endColorstr='#508a21',GradientType=0 );
 	color: white;
-	cursor: move;
 }
 
 #vakata-dragged.jstree-bu.jstree-ok .count {
@@ -668,7 +663,6 @@ html[xmlns] .jstree-bu li {
 	background: linear-gradient(to bottom, #d87474 0%,#bb5656 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d87474', endColorstr='#bb5656',GradientType=0 );
 	color: #fff;
-	cursor: not-allowed;
 }
 
 #vakata-dragged.jstree-bu.jstree-invalid .count {
@@ -753,3 +747,27 @@ html[xmlns] .jstree-bu li {
 
 .jstree-bu a.jstree-search { color: aqua; }
 .jstree-bu .jstree-locked a { color: silver; cursor: default; }
+
+/* Cursor states */
+
+.bu-navman li a {
+	cursor: move;
+}
+
+.bu-edit-post li a {
+	cursor: default;
+}
+
+.bu-edit-post li .jstree-clicked {
+	cursor: move;
+}
+
+.bu-edit-post.current-post-status-draft .denied > a,
+.bu-edit-post.current-post-status-draft .denied > a {
+	cursor: default;
+}
+
+.bu-navman.bu-dnd-is-dragging li a,
+.bu-edit-post.bu-dnd-is-dragging li a {
+	cursor: move;
+}

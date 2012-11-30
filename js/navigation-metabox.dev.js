@@ -72,6 +72,9 @@ if((typeof bu === 'undefined' ) ||
 				originalExclude: !navDisplay
 			};
 
+			// Tree container needs to know about current post status
+			$(this.ui.treeContainer).addClass('current-post-status-' + currentStatus );
+			
 			// References to key elements
 			this.$el = $(this.el);
 

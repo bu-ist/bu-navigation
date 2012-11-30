@@ -1,6 +1,6 @@
 .post-placement-toolbar .edit-buttons {
-	margin: 20px 0 0 auto;
-	width: 180px;
+	margin: 20px 0 0 0;
+	text-align: right;
 }
 
 #TB_window .post-placement-toolbar p.hint {
@@ -45,7 +45,7 @@
 }
 
 #bunavattrsdiv .container {
-	padding: 12px 6px;
+	padding: 12px 10px;
 	border-top: 1px solid #eee;
 }
 
@@ -57,9 +57,17 @@
 	height: 16px;
 }
 
+#bunavattrsdiv input[type="text"] {
+	width: 68%;
+}
+
 #bu-post-breadcrumbs {
-	margin-bottom: 15px;
+	margin: 0 0 15px 0;	
 	font-size: 11px;
+}
+
+#bu-post-breadcrumbs ul {
+    margin-top: 6px;
 }
 
 #bu-post-breadcrumbs li {

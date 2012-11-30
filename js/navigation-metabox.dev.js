@@ -160,18 +160,30 @@ if((typeof bu === 'undefined' ) ||
 
 		// Methods
 		updateBreadcrumbs: function( post ) {
-			var ancestors, crumbs, $crumbs;
+			var ancestors, crumbs, $crumbs, $crumb;
 			ancestors = Navtree.getAncestors( post.ID );
-			ancestors = $.map(ancestors, function(title) { return '<li>' + title + '</li>'; });
-			crumbs = ancestors.join('');
-			$crumbs = $(crumbs);
-
+			$crumbs = $(this.ui.breadcrumbs).clone().empty();
+			
+			$.each(ancestors, function(index, label) {
+				$crumb = $('<li></li>').html(label);
+				
+				if( index < ( ancestors.length - 1 ) ) {
+					$crumb.append('<ul></ul>');	
+				} else {
+					$crumb.addClass('current');
+				}
+				if( index === 0 ) {
+					$crumbs.append($crumb);
+				} else {
+					$crumbs.find('ul').last().append($crumb);
+				}
+			});
+			
 			// Update breadcrumbs
-			if ($crumbs.length > 1) {
-				$crumbs.last('li').addClass('current');
-				$(this.ui.breadcrumbs).empty().append($crumbs);
+			if ($crumbs.find('li').length > 1) {
+				$(this.ui.breadcrumbs).replaceWith($crumbs);
 			} else {
-				$(this.ui.breadcrumbs).html('<li>Top level page</li>');
+				$(this.ui.breadcrumbs).html('<li class="current">Top level page</li>');
 			}
 		},
 

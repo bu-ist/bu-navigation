@@ -17,7 +17,7 @@ if( version_compare( $wp_version, '3.2', '>=' ) ): ?>
 
 <div id="bu-navigation-label" class="container">
 		<label for="bu-post-nav-label" class="label"><?php _e('Label'); ?></label>
-		<input id="bu-post-nav-label" name="nav_label" type="text" size="30" value="<?php echo $nav_label; ?>"/>
+		<input id="bu-post-nav-label" name="nav_label" type="text" value="<?php echo $nav_label; ?>"/>
 </div>
 
 <div id="bu-navigation-visibility" class="container">

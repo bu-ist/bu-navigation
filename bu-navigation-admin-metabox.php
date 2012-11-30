@@ -158,7 +158,6 @@ class BU_Navigation_Admin_Metabox {
 
 		// Get necessary metadata
 		$acl_option = defined( 'BuAccessControlList::PAGE_ACL_OPTION' ) ? BuAccessControlList::PAGE_ACL_OPTION : BU_ACL_PAGE_OPTION;
-		$nav_label = get_post_meta( $post->ID, BU_NAV_META_PAGE_LABEL, true );
 		$post->excluded = get_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE, true);
 		$post->excluded = ($post->excluded == "1" ) ? true : false; 
 		$post->protected = ! empty( $post->post_password ); 
@@ -166,13 +165,7 @@ class BU_Navigation_Admin_Metabox {
 		$post->restricted = ! empty( $post->restricted ) ? $post->restricted : false;
 		
 		// Label
-		if( ! empty( $nav_label ) ) {
-			$post->post_title = apply_filters( 'the_title', $nav_label );
-		}
-
-		if ( empty( $post->post_title ) ) {
-			$post->post_title = $this->no_title_text;
-		}
+		$post->post_title = bu_navigation_get_label( $post );	
 
 		$formatted = array(
 			'ID' => $post->ID,
@@ -202,20 +195,33 @@ class BU_Navigation_Admin_Metabox {
 		$output = '';
 
 		if( $post->post_parent ) {
-			$args = array(
-				'container_tag' => 'ul', 
-				'container_id' => 'bu-post-breadcrumbs',
-				'crumb_tag' => 'li',
-				'glue' => '',
-				'show_links' => false,
-				'include_hidden' => true,
-				'include_statuses' => array('draft','pending','private','publish')
-				);
-			$output = bu_navigation_breadcrumbs($args);
+			$output = $this->get_post_breadcrumbs( $post );
 		} else {
-			$output = "<ul id=\"bu-post-breadcrumbs\"><li>" . __('Top level page') . "</li></ul>\n";
+			$output = "<ul id=\"bu-post-breadcrumbs\"><li class=\"current\">" . __('Top level page') . "</li></ul>\n";
 		}
 
+		return $output;
+	}
+
+	public function get_post_breadcrumbs( $post ) {
+		
+		$output = "<ul id=\"bu-post-breadcrumbs\">";
+
+		$ancestors = array_reverse( get_post_ancestors( $post->ID ) );
+		array_push( $ancestors, $post->ID );
+
+		foreach( $ancestors as $ancestor ) {
+			$p = get_post($ancestor);
+			$label = bu_navigation_get_label( $p );
+			
+			if( $ancestor != end($ancestors) ) {
+				$output .= "<li>" . $label . "<ul>";
+			} else {
+				$output .= "<li class=\"current\">" . $label;
+				$output .= str_repeat( "</li></ul>", count( $ancestors ) );
+			}
+		}
+		
 		return $output;
 	}
 

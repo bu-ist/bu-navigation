@@ -40,5 +40,27 @@ function bu_navigation_filter_pages_navlabels($pages)
 add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_navlabels');
 add_filter('bu_navigation_filter_page_labels', 'bu_navigation_filter_pages_navlabels');
 
+function bu_navigation_get_label( $post, $empty_label = '(no title)' ) {
+	if( is_numeric( $post ) ) {
+		$post = get_post( $post );
+	}
+
+	if( ! is_object( $post ) ) {
+		return false;
+	}
+	
+	$label = get_post_meta( $post->ID, BU_NAV_META_PAGE_LABEL, true );
+	
+	if( ! $label ) {
+		$label = $post->post_title;
+	}
+	
+	if( empty( $label ) ) {
+		$label = $empty_label;
+	}
+
+	return $label;
+	
+}
 
 ?>

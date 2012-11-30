@@ -68,6 +68,12 @@
 	margin-left: 138px;
 }
 
+
+.navform input {
+	line-height: 1.2em;
+}
+
+
 /* Start new styles */
 
 #navman-notices img {
@@ -96,8 +102,9 @@
 	text-decoration: none;
 }
 
-.navman-toolbar li.disabled {
-	display: none;
+.navman-toolbar li.disabled a {
+	color: #333;
+	cursor: default;
 }
 
 .navman-body {
@@ -108,12 +115,16 @@
 .navman-actions {
 	float: right;
 	margin-right: -170px;
-	width: 140px;
+	width: 155px;
+}
+
+.navman-actions img {
+	vertical-align: middle;
 }
 
 #navman-container .navman-actions .metabox-holder {
 	padding-top: 0;
-	min-width: 140px;
+	min-width: 155px;
 }
 
 #navman-container .navman-actions .metabox-holder h3 {
@@ -121,8 +132,9 @@
 }
 
 .navman-actions .actions {
-	padding: 10px 10px 8px;
-	text-align: center;
+	padding: 10px 5px 8px 5px;
+	text-align: right;
+	line-height: 23px;
 }
 
 #nav-tree-container {

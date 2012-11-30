@@ -50,7 +50,7 @@ class BU_Navigation_Admin_Navman {
 
 		add_action('admin_menu', array( $this, 'register_menu' ) );
 		add_action('admin_enqueue_scripts', array( $this, 'add_scripts' ) );
-
+		
 	}
 
 	/**
@@ -130,13 +130,12 @@ class BU_Navigation_Admin_Navman {
 				'postTypes' => $post_types,
 				'nodePrefix' => 'nm',
 				'lazyLoad' => true,
-				'showCounts' => true,
-				'imagesUrl' => plugins_url( '/images', __FILE__)
+				'showCounts' => true
 				);
 			// Navigation tree view will handle actual enqueuing of our script
 			$treeview = new BU_Navigation_Tree_View( 'bu_navman', $script_context );
 			$treeview->enqueue_script('bu-navman');
-
+			
 			// Styles
 			if ( 'classic' == get_user_option( 'admin_color') ) {
 				wp_enqueue_style ( 'bu-jquery-ui-css',  plugins_url( '/css/jquery-ui-classic.css', __FILE__ ), array(), BU_Navigation_Plugin::VERSION );
@@ -293,6 +292,8 @@ class BU_Navigation_Admin_Navman {
 			wp_die('Cheatin, uh?');
 		}
 
+		$ajax_spinner = plugins_url( '/images/wpspin_light.gif', __FILE__);
+		
 		// If link was a registered post type, we would use its publish meta cap here instead
 		$disable_add_link = ! $this->can_publish_top_level();
 		$post_type = $this->post_type;

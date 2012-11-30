@@ -42,7 +42,8 @@ if ((typeof bu === 'undefined') ||
 			updatesField: '#navman-updates',
 			deletionsField: '#navman-deletions',
 			expandAllBtn: '#navman_expand_all',
-			collapseAllBtn: '#navman_collapse_all'
+			collapseAllBtn: '#navman_collapse_all',
+			saveBtn: '#bu_navman_save'
 		},
 
 		data: {
@@ -75,11 +76,6 @@ if ((typeof bu === 'undefined') ||
 			$(this.ui.form).bind('submit', $.proxy(this.save, this));
 			$(this.ui.expandAllBtn).bind('click', this.expandAll);
 			$(this.ui.collapseAllBtn).bind('click', this.collapseAll);
-
-			// Preload spinner
-			var spinner_src = this.settings.imagesUrl + '/progress.gif';
-			this.$spinner = $('<img alt="Processing..."/>');
-			this.$spinner[0].src = spinner_src;
 
 		},
 
@@ -215,7 +211,8 @@ if ((typeof bu === 'undefined') ||
 			$(this.ui.movesField).attr("value", JSON.stringify(moves));
 
 			// Notify user that save is in progress
-			var $msg = $('<span>Saving navigation changes...</span>').prepend(this.$spinner);
+			var $msg = $('<span>Saving navigation changes...</span>')
+			$(this.ui.saveBtn).prev('img').css('visibility', 'visible');
 			this.notice( $msg.html(), 'message');
 
 			// Lock tree interface while saving
@@ -306,9 +303,15 @@ if ((typeof bu === 'undefined') ||
 			e.preventDefault();
 			e.stopPropagation();
 
-			// Setup new link
-			this.data.currentLink = { "post_status": "new", "post_type": "link", "post_meta": {} };
-			this.$el.dialog('option', 'title', 'Add a Link').dialog('open');
+			if ($(e.currentTarget).parent('li').hasClass('disabled')) {
+				// @todo change message if current user is section editor 
+				alert("You are not allowed to publish top level links.\n\nSelect any post to add a link underneath it.");
+			} else {
+				// Setup new link
+				this.data.currentLink = { "post_status": "new", "post_type": "link", "post_meta": {} };
+				this.$el.dialog('option', 'title', 'Add a Link').dialog('open');	
+			}
+			
 		},
 
 		edit: function (link) {
@@ -345,8 +348,8 @@ if ((typeof bu === 'undefined') ||
 				selected = Navtree.getSelectedPost();
 
 				if (selected) {
-					link.post_parent = selected.post_parent;
-					link.menu_order = selected.menu_order + 1;
+					link.post_parent = selected.ID;
+					link.menu_order = 1;
 				} else {
 					link.post_parent = 0;
 					link.menu_order = 1;
@@ -395,9 +398,12 @@ if ((typeof bu === 'undefined') ||
 		},
 
 		onPostSelected: function (post) {
-			var parent = Navtree.getPost(post.post_parent);
-			var canAdd = this.data.allowTop || post.post_parent != 0;
-
+			var parent = Navtree.getPost(post.post_parent), canAdd = true;
+			
+			if (post.post_type == 'link') {
+				canAdd = false;
+			}
+			
 			canAdd = bu.hooks.applyFilters('navmanCanAddLink', canAdd, post, parent);
 
 			if (canAdd) {

@@ -23,10 +23,11 @@
 			</div>
 			<div class="navman-actions">
 				<div class="postbox metabox-holder">
-					<h3>Publish Navigation</h3>
+					<h3>Publish</h3>
 					<div class="inside">
 						<p><strong>Note:</strong> You must publish changes to navigation, or all changes will be lost.</p>
 						<div class="actions">
+							<img src="<?php echo $ajax_spinner; ?>" class="ajax-loading" alt="" />
 							<input class="button button-primary" id="bu_navman_save" name="bu_navman_save" type="submit" value="Publish Changes" />
 						</div>
 					</div>

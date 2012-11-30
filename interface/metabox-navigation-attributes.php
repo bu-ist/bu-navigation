@@ -9,7 +9,7 @@ if( version_compare( $wp_version, '3.2', '>=' ) ): ?>
 <input type="hidden" name="menu_order" value="<?php echo $post->menu_order; ?>">
 
 <div id="bu-move-post" class="container">
-	<div id="bu-post-breadcrumbs"><?php echo $breadcrumbs; ?></div>
+	<?php echo $breadcrumbs; ?>
 	<a id="move-post-button" href="#TB_inline?width=640&inlineId=edit-post-placement" title="<?php echo esc_attr($dialog_title); ?>" class="button" >
 		<?php echo $move_post_btn_txt; ?>
 	</a>

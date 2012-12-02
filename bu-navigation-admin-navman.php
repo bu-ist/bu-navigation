@@ -600,11 +600,6 @@ class BU_Navigation_Admin_Navman {
 
 				$original = get_post($post->ID);
 
-				if( $post->post_parent == $original->post_parent && $post->menu_order == $original->menu_order ) {
-					error_log('Post was marked as moved, but neither parent or menu order has actually changed -- skipping...');
-					continue;
-				}
-
 				if( $this->can_move( $post, $original ) ) {
 
 					// Update post parent and menu order

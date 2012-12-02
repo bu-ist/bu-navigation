@@ -161,12 +161,8 @@ if ((typeof bu === 'undefined') ||
 				return;
 			}
 
-			// If post parent or menu order has changed, track this as a move
-			// @todo possibly remove this check to force reordering if a post has been moved no matter what
-			if (post.post_parent !== post.originalParent || post.menu_order !== post.originalOrder) {
-				this.data.moves[post.ID] = post;
-				this.data.dirty = true;
-			}
+			this.data.moves[post.ID] = post;
+			this.data.dirty = true;
 
 		},
 

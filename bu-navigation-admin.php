@@ -61,6 +61,7 @@ class BU_Navigation_Admin {
 
 		$screen = get_current_screen();
 
+		// Intended for edit.php, post.php and post-new.php
 		if( in_array( $screen->base, array( 'edit', 'post' ) ) ) {
 
 			$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
@@ -69,8 +70,7 @@ class BU_Navigation_Admin {
 
 			$post_type = $this->plugin->get_post_type( $screen->post_type );
 
-			// Intended for edit.php, post.php and post-new.php
-			wp_enqueue_script( 'bu-page-parent-deletion', $scripts_path . '/deletion' . $suffix . '.js', array('jquery'), BU_Navigation_Plugin::VERSION );
+			wp_enqueue_script( 'bu-page-parent-deletion', $scripts_path . '/deletion' . $suffix . '.js', array('jquery'), BU_Navigation_Plugin::VERSION, true );
 			wp_localize_script( 'bu-page-parent-deletion', 'bu_navigation_pt_labels', $this->plugin->get_post_type_labels( $post_type ) );
 
 		}
@@ -189,7 +189,7 @@ class BU_Navigation_Admin {
 		$post = get_post($post_id);
 		if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) return;
 
-		$exclude = get_post_meta($post_id, '_bu_cms_navigation_exclude', true);
+		$exclude = get_post_meta($post_id, BU_NAV_META_PAGE_EXCLUDE, true);
 
 		if ($exclude) {	// post was hidden
 			error_log("$post_id is now exclude: $exclude");
@@ -200,7 +200,7 @@ class BU_Navigation_Admin {
 			// mark each hidden
 			foreach ( (array) $children as $child ) {
 				error_log("setting the child $post_id to exclude: $exclude");
-				update_post_meta($child->ID, '_bu_cms_navigation_exclude', $exclude);
+				update_post_meta($child->ID, BU_NAV_META_PAGE_EXCLUDE, $exclude);
 			}
 		}
 	}
@@ -240,7 +240,7 @@ class BU_Navigation_Admin {
 			die;
 		}
 
-		$hidden = get_post_meta($post_id, '_bu_cms_navigation_exclude', true);
+		$hidden = get_post_meta($post_id, BU_NAV_META_PAGE_EXCLUDE, true);
 
 		// case: wasn't hidden, output the "ignore" flag
 		if ( !$hidden ) {

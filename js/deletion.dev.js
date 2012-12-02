@@ -38,7 +38,7 @@
 				if ( window.confirm(warning) ) {
 					return true;
 				} else {
-					// @todo remove spinner in #save-action
+					$('#draft-ajax-loading').css('visibility', 'hidden');
 					return false;
 				}
 				
@@ -54,7 +54,7 @@
 		 */
 		$('a.submitdelete').live('click', function(){
 			
-			var id = ( typeof(inlineEditPost) != "undefined" ) ? inlineEditPost.getId(this) : buNavSettings.currentPost;
+			var id = ( typeof(inlineEditPost) != "undefined" ) ? inlineEditPost.getId(this) : parseInt($('#post_ID').val(), 10);
 
 			// New posts won't have an ID, but there is no need to check for them anyways
 			if( id ) {

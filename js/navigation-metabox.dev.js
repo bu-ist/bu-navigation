@@ -224,7 +224,9 @@ if((typeof bu === 'undefined' ) ||
 			// save button
 			navSaveBtn: '#bu-post-placement-save',
 			// cancel button
-			navCancelBtn: '#bu-post-placement-cancel'
+			navCancelBtn: '#bu-post-placement-cancel',
+			// drag container
+			treeDragContainer: '#TB_ajaxContent'
 		};
 
 		c = $.extend(c, config);
@@ -298,7 +300,7 @@ if((typeof bu === 'undefined' ) ||
 			$node = $tree.jstree('get_selected');
 
 			if ($node.length) {
-				$container = $('#TB_ajaxContent');
+				$container = $(c.treeDragContainer);
 				containerHeight = $container.innerHeight();
 				nodeOffset = $node.position().top + ($node.height() / 2) - (containerHeight / 2);
 

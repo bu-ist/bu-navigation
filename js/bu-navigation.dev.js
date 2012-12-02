@@ -209,6 +209,9 @@ bu.plugins.navigation = {};
 					"theme": "bu",
 					"load_css": false
 				},
+				"dnd" : {
+					"drag_container": document
+				},
 				"types" : {
 					"types" : {
 						"default" : {
@@ -1161,7 +1164,11 @@ bu.plugins.navigation = {};
 //					"initially_open": toOpen
 //				};
 //			}
-
+	
+			extraTreeConfig['dnd'] = {
+				"drag_container": c.treeDragContainer	
+			};
+			
 			// Merge base tree config with extras
 			$.extend( true, d.treeConfig, extraTreeConfig );
 

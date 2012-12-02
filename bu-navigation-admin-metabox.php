@@ -72,8 +72,8 @@ class BU_Navigation_Admin_Metabox {
 			'postTypes' => $post_types,
 			'currentPost' => $post_id,
 			'ancestors' => $ancestors,
-			'lazyLoad' => true,
-			'showCounts' => true,
+			'lazyLoad' => false,
+			'showCounts' => false,
 			'nodePrefix' => 'na',
 			'deselectOnDocumentClick' => false
 			);

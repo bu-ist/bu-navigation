@@ -298,6 +298,7 @@ class BU_Navigation_Admin_Navman {
 		$disable_add_link = ! $this->can_publish_top_level();
 		$post_type = $this->post_type;
 		$notices = $this->get_notice_list();
+		$pt_labels = $this->plugin->get_post_type_labels( $post_type );
 
 		// Render interface
 		include(BU_NAV_PLUGIN_DIR . '/interface/manage.php');

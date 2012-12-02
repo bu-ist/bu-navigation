@@ -1,7 +1,6 @@
 <div class="wrap">
 	<div id="icon-edit-pages" class="icon32"><br></div>
-	<?php // @todo dynamic post type label for title ?>
-	<h2>Page Order</h2>
+	<h2><?php echo $pt_labels['singular']; ?> Order</h2>
 	<div id="navman-notices"><?php echo $notices; ?></div>
 
 	<div id="navman-container">

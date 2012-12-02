@@ -86,3 +86,11 @@
 #bu-post-breadcrumbs li.current {
 	color: #333;
 }
+
+#modal-denied-icon {
+	vertical-align: middle;
+	margin-left: 2px;
+	padding: 3px;
+	background-color: #EEE;
+	border: 1px solid #CCC;
+}

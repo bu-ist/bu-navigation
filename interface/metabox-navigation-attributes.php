@@ -33,6 +33,9 @@ if( version_compare( $wp_version, '3.2', '>=' ) ): ?>
 			<input id="bu-post-placement-save" class="button-primary" type="submit" value="Update Location">
 		</div>
 		<p class="hint">Drag <?php echo $lc_label; ?> to change the <?php echo $lc_label; ?>'s location in the hierarchy.</p>
+		<?php if( $post->post_status != 'publish' && current_user_can('edit_in_section') && ! is_super_admin() ): ?>
+		<p class="hint"><strong>Note:</strong> The page you are moving is not published. You can move it to a new location, but you do not have permission to publish in sections marked as denied <img id="modal-denied-icon"src="<?php echo $images_url; ?>/img-section-denied.png" alt="denied"/></p>
+		<?php endif; ?>
 	</div>
 	<div id="edit-post-tree" class="jstree-bu"></div>
 </div>

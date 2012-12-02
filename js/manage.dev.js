@@ -298,10 +298,40 @@ if ((typeof bu === 'undefined') ||
 		add: function (e) {
 			e.preventDefault();
 			e.stopPropagation();
-
+			var msg = '';
+			var selected;
+			
 			if ($(e.currentTarget).parent('li').hasClass('disabled')) {
-				// @todo change message if current user is section editor 
-				alert("You are not allowed to publish top level links.\n\nSelect any post to add a link underneath it.");
+				selected = Navtree.getSelectedPost();
+				msg = "You are not allowed to add links";
+
+				// User is attempting to add a link below a link
+				if (selected && 'link' === selected.post_type ) {
+					msg = "Links are not permitted to have children.\n\n\
+Select a page that you can edit and click \"Add a Link\" \
+to create a new link below the selected page.";
+					
+				} else {
+					// User is a section editor attempting to add a top level link
+					if (Navman.settings.isSectionEditor) {
+						msg = "You do not have permission to create top level published content.\n\n\
+Select a page that you can edit and click \"Add a Link\" \
+to create a new link below the selected page.";
+						
+					} else {
+						// User is not a section editor, but not allowed to add top level pages due to allow top setting
+						if (!Navman.settings.allowTop) {
+							msg = "You are not allowed to create top level published content. \
+Select a page that you can edit and click \"Add a Link\" \
+to create a new link below the selected page.\n\n\
+Site administrators can change this behavior by visiting Site Design > Primary Navigation \
+and enabling the \"Allow Top-Level Pages\" setting.";
+						}
+					}
+				}
+				
+				alert(msg);
+				
 			} else {
 				// Setup new link
 				this.data.currentLink = { "post_status": "new", "post_type": "link", "post_meta": {} };
@@ -394,16 +424,18 @@ if ((typeof bu === 'undefined') ||
 		},
 
 		onPostSelected: function (post) {
-			var parent = Navtree.getPost(post.post_parent), canAdd = true;
+			var canAdd = true;
 			
 			if (post.post_type == 'link') {
 				canAdd = false;
 			}
 			
-			canAdd = bu.hooks.applyFilters('navmanCanAddLink', canAdd, post, parent);
+			canAdd = bu.hooks.applyFilters('navmanCanAddLink', canAdd, post, Navtree);
 
 			if (canAdd) {
 				$(this.ui.addBtn).parent('li').removeClass('disabled');
+			} else {
+				$(this.ui.addBtn).parent('li').addClass('disabled');
 			}
 		},
 
@@ -414,6 +446,8 @@ if ((typeof bu === 'undefined') ||
 
 			if (!canAdd) {
 				$(this.ui.addBtn).parent('li').addClass('disabled');
+			} else {
+				$(this.ui.addBtn).parent('li').removeClass('disabled');
 			}
 		},
 

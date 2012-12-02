@@ -30,7 +30,7 @@ class BU_Navigation_Tree_View {
 			'childOf' => 0,
 			'postTypes' => array('page','link'),
 			'postStatuses' => array('publish'),
-			'themePath' => plugins_url('css/vendor/jstree/themes/bu-jstree', __FILE__ ),
+			'themePath' => plugins_url('js/vendor/jstree/themes/bu-jstree', __FILE__ ),
 			'rpcUrl' => admin_url('admin-ajax.php?action=bu-get-navtree' ),
 			'getPostRpcUrl' => admin_url('admin-ajax.php?action=bu-get-post'),
 			'allowTop' => $this->plugin->get_setting('allow_top'),
@@ -76,7 +76,7 @@ class BU_Navigation_Tree_View {
 
 		// Main navigation scripts & styles
 		wp_register_script( 'bu-navigation', $scripts_path . '/bu-navigation' . $suffix . '.js', array( 'jquery', 'bu-jquery-tree', 'bu-jquery-cookie', 'json2' ), BU_Navigation_Plugin::VERSION, true );
-		wp_register_style( 'bu-navigation', $styles_path . '/vendor/jstree/themes/bu-jstree/style.css', array(), BU_Navigation_Plugin::VERSION );
+		wp_register_style( 'bu-navigation', $vendor_path . '/jstree/themes/bu-jstree/style.css', array(), BU_Navigation_Plugin::VERSION );
 
 	}
 

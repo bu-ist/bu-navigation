@@ -68,7 +68,6 @@ class BU_Navigation_Tree_View {
 
 		$scripts_path = plugins_url('js',__FILE__);
 		$vendor_path = plugins_url('js/vendor',__FILE__);
-		$styles_path = plugins_url('css',__FILE__);
 
 		// Vendor scripts
 		wp_register_script( 'bu-jquery-cookie', $vendor_path . '/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '00168770', true );
@@ -80,6 +79,15 @@ class BU_Navigation_Tree_View {
 
 	}
 
+	/**
+	 * Special wrapper around wp_enqueue_script that handles generating script context
+	 * for scripts utilizing this class.
+	 * 
+	 * @see bu-navigation-admin-navman.php or bu-navigation-admin-metabox.php for usage examples
+	 * 
+	 * @global string $wp_version
+	 * @param string $name script name to enqueue
+	 */
 	public function enqueue_script( $name ) {
 		global $wp_version;
 

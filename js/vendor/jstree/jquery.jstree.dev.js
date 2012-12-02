@@ -2242,17 +2242,18 @@
 
 			// maybe use a scrolling parent element instead of document?
 			if(e.type === "mousemove") { // thought of adding scroll in order to move the helper, but mouse poisition is n/a
+				var sel = $.vakata.dnd.drag_container || document;
 				var d = $(document), t = d.scrollTop(), l = d.scrollLeft();
 				if(e.pageY - t < 20) {
 					if(sti && dir1 === "down") { clearInterval(sti); sti = false; }
-					if(!sti) { dir1 = "up"; sti = setInterval(function () { $(document).scrollTop($(document).scrollTop() - $.vakata.dnd.scroll_spd); }, 150); }
+					if(!sti) { dir1 = "up"; sti = setInterval(function () { $(sel).scrollTop($(sel).scrollTop() - $.vakata.dnd.scroll_spd); }, 150); }
 				}
 				else {
 					if(sti && dir1 === "up") { clearInterval(sti); sti = false; }
 				}
 				if($(window).height() - (e.pageY - t) < 20) {
 					if(sti && dir1 === "up") { clearInterval(sti); sti = false; }
-					if(!sti) { dir1 = "down"; sti = setInterval(function () { $(document).scrollTop($(document).scrollTop() + $.vakata.dnd.scroll_spd); }, 150); }
+					if(!sti) { dir1 = "down"; sti = setInterval(function () { $(sel).scrollTop($(sel).scrollTop() + $.vakata.dnd.scroll_spd); }, 150); }
 				}
 				else {
 					if(sti && dir1 === "down") { clearInterval(sti); sti = false; }
@@ -2260,14 +2261,14 @@
 
 				if(e.pageX - l < 20) {
 					if(sli && dir2 === "right") { clearInterval(sli); sli = false; }
-					if(!sli) { dir2 = "left"; sli = setInterval(function () { $(document).scrollLeft($(document).scrollLeft() - $.vakata.dnd.scroll_spd); }, 150); }
+					if(!sli) { dir2 = "left"; sli = setInterval(function () { $(sel).scrollLeft($(sel).scrollLeft() - $.vakata.dnd.scroll_spd); }, 150); }
 				}
 				else {
 					if(sli && dir2 === "left") { clearInterval(sli); sli = false; }
 				}
 				if($(window).width() - (e.pageX - l) < 20) {
 					if(sli && dir2 === "left") { clearInterval(sli); sli = false; }
-					if(!sli) { dir2 = "right"; sli = setInterval(function () { $(document).scrollLeft($(document).scrollLeft() + $.vakata.dnd.scroll_spd); }, 150); }
+					if(!sli) { dir2 = "right"; sli = setInterval(function () { $(sel).scrollLeft($(sel).scrollLeft() + $.vakata.dnd.scroll_spd); }, 150); }
 				}
 				else {
 					if(sli && dir2 === "right") { clearInterval(sli); sli = false; }
@@ -2538,6 +2539,9 @@
 							}
 						}, this));
 			}
+			
+			$.vakata.dnd.drag_container = s.drag_container;
+			
 		},
 		defaults : {
 			copy_modifier	: "ctrl",
@@ -2548,7 +2552,8 @@
 			drop_finish		: $.noop,
 			drag_target		: ".jstree-draggable",
 			drag_finish		: $.noop,
-			drag_check		: function (data) { return { after : false, before : false, inside : true }; }
+			drag_check		: function (data) { return { after : false, before : false, inside : true }; },
+			drag_container: 'document'
 		},
 		_fn : {
 			dnd_prepare : function () {

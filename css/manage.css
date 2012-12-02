@@ -83,7 +83,7 @@
 
 #navman-container {
 	margin-top: 20px;
-	margin-right: 170px;
+	margin-right: 180px;
 }
 
 .navman-toolbar {
@@ -114,8 +114,8 @@
 
 .navman-actions {
 	float: right;
-	margin-right: -170px;
-	width: 155px;
+	margin-right: -180px;
+	width: 160px;
 }
 
 .navman-actions img {
@@ -124,7 +124,7 @@
 
 #navman-container .navman-actions .metabox-holder {
 	padding-top: 0;
-	min-width: 155px;
+	min-width: 160px;
 }
 
 #navman-container .navman-actions .metabox-holder h3 {

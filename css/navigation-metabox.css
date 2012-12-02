@@ -10,10 +10,6 @@
 	padding: 0;
 }
 
-#edit-post-tree {
-	position: relative; /* anchors absolutely positioned counts */
-}
-
 #TB_window .bu-edit-post a {
 	color: black;
 }

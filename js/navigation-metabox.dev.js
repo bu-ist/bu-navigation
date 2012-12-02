@@ -276,8 +276,7 @@ if((typeof bu === 'undefined' ) ||
 
 			tb_show(title,href,g);
 
-			// @todo this doesn't do anything with new layout
-			Navtree.scrollToSelection();
+			that.scrollToSelection();
 
 			// Restore navtree state on close (cancel)
 			$('#TB_window').bind('unload tb_unload', function(e){
@@ -290,6 +289,23 @@ if((typeof bu === 'undefined' ) ||
 			});
 
 			return false;
+
+		};
+	
+		that.scrollToSelection = function() {
+			var $tree, $node, $container, containerHeight, nodeOffset;
+			$tree = $(c.treeContainer),
+			$node = $tree.jstree('get_selected');
+
+			if ($node.length) {
+				$container = $('#TB_ajaxContent');
+				containerHeight = $container.innerHeight();
+				nodeOffset = $node.position().top + ($node.height() / 2) - (containerHeight / 2);
+
+				if (nodeOffset > 0) {
+					$container.scrollTop(nodeOffset);
+				}
+			}
 
 		};
 

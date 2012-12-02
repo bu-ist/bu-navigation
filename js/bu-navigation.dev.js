@@ -1282,28 +1282,6 @@ bu.plugins.navigation = {};
 				currentPost = post;
 			};
 
-			// @todo consider moving to ModalTree
-			that.scrollToSelection = function() {
-				var $node = $tree.jstree('get_selected');
-
-				if ($node.length) {
-
-					var $container = $(document);
-
-					if( $tree.css('overflow') === 'scroll' )
-						$container = $tree;
-
-					var treeHeight = $tree.innerHeight();
-					var nodeOffset = $node.position().top + ( $node.height() / 2 ) - ( treeHeight / 2 );
-
-					if (nodeOffset > 0) {
-						// $tree.animate({ scrollTop: nodeOffset }, 350 );
-						$tree.scrollTop( nodeOffset );
-					}
-				}
-
-			};
-
 			$tree.addClass('bu-edit-post');
 
 			return that;

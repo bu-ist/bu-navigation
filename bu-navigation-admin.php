@@ -5,7 +5,7 @@
  *
  * Navigation admin componenents:
  * 	- Primary settings page - "Appearance > Primary Navigation" (bu-navigation-admin-primary.php)
- *  - Navigation Manager - "Edit Order" page (bu-navman.php)
+ *  - Navigation Manager - "Edit Order" page (bu-navigation-admin-navman.php)
  *  - Navigation attributes metabox (bu-navigation-admin-metabox.php)
  *  - Manage posts "Section" dropdown (bu-navigation-admin-filter-pages.php)
  */

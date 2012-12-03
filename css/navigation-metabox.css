@@ -1,0 +1,92 @@
+.post-placement-toolbar .edit-buttons {
+	margin: 20px 0 0 0;
+	text-align: right;
+}
+
+#TB_window .post-placement-toolbar p.hint {
+	margin-left: 20px;
+	color: #777;
+	font-style: italic;
+	padding: 0;
+}
+
+#TB_window .bu-edit-post a {
+	color: black;
+}
+
+#TB_window .bu-edit-post .denied > a {
+    color: #AF5D5D;
+}
+
+#TB_window .bu-edit-post.current-post-status-draft .denied > a,
+#TB_window .bu-edit-post.current-post-status-pending .denied > a,
+#TB_window .bu-edit-post.current-post-status-private .denied > a {
+  color: black;
+	background: #eee;
+	background: -moz-linear-gradient(top, #ffffff 0%, #eeeeee 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #ffffff), color-stop(100%, #eeeeee));
+	background: -webkit-linear-gradient(top, #ffffff 0%,#eeeeee 100%);
+	background: -o-linear-gradient(top, #ffffff 0%,#eeeeee 100%);
+	background: -ms-linear-gradient(top, #ffffff 0%,#eeeeee 100%);
+	background: linear-gradient(to bottom, #ffffff 0%,#eeeeee 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eeeeee',GradientType=0 );
+}
+
+#TB_window .bu-edit-post .jstree-clicked {
+	color: white;
+}
+
+#bunavattrsdiv .inside {
+	margin: 0;
+}
+
+#bunavattrsdiv .container {
+	padding: 12px 10px;
+	border-top: 1px solid #eee;
+}
+
+#bunavattrsdiv .label {
+	display: inline-block;
+	*display: inline;
+	width: 29%;
+	font-weight: bold;
+	height: 16px;
+}
+
+#bunavattrsdiv input[type="text"] {
+	width: 68%;
+}
+
+#bu-post-breadcrumbs {
+	margin: 0 0 15px 0;	
+	font-size: 11px;
+}
+
+#bu-post-breadcrumbs ul {
+    margin-top: 6px;
+}
+
+#bu-post-breadcrumbs li {
+	color: #9b9b9b;
+}
+
+#bu-post-breadcrumbs ul li {
+	background: url('../images/img-child-indicator.png') left 1px no-repeat transparent;
+	padding-left: 16px;
+}
+
+#bu-post-breadcrubs ul ul li {
+	margin-left: 16px;
+}
+
+#bu-post-breadcrumbs li.current {
+	color: #333;
+}
+
+#modal-denied-icon {
+	vertical-align: middle;
+	margin-left: 2px;
+	padding: 3px;
+	background-color: #EEE;
+	border: 1px solid #CCC;
+}

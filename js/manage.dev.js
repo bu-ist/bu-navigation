@@ -1,478 +1,473 @@
-var navman = null;
-var navman_dirty = false;
+/**
+ * BU Navigation "Edit Order" admin page
+ *
+ * Presents users with a full view of hierarchical content for supported post types
+ * Provides a drag and drop tree interfcace for moving posts, as well as shortcuts
+ * for editing and trashing posts.
+ *
+ * Pages also add custom "Link" behavior -- the ability to add and edit external
+ * links and place them in the navigation hierarchy.
+ */
 
-var navman_links = [];
-var navman_delete = [];
-var navman_edits = {};
-var navman_editing = null;
+/*jslint browser: true, todo: true */
+/*global bu: true, bu_navman_settings: false, jQuery: false, console: false, window: false, document: false */
 
-function showPageDetail(data)
-{
-	jQuery("#navman_pagedetail h3").html(data.post_title);
-	jQuery("#navman_drop_target").html(data.post_title);
-	jQuery("#navman_drop").attr("rel", data.ID);
-	jQuery("#navman_pagedetail").show();
+// Check prerequisites
+if ((typeof bu === 'undefined') ||
+		(typeof bu.plugins.navigation === 'undefined') ||
+		(typeof bu.plugins.navigation.tree === 'undefined')) {
+	throw new TypeError('BU Navigation Manager script dependencies have not been met!');
 }
 
-function hidePageDetail()
-{
-	jQuery("#navman_pagedetail").hide();
-}
+(function ($) {
+	'use strict';
 
-function editNode(n)
-{
+	// If we are the first view object, set up our namespace
+	bu.plugins.navigation.views = bu.plugins.navigation.views || {};
 
-    var $node = jQuery(n);
-	if ($node.attr("rel") === "link" || $node.attr("rel") === "link_restricted")
-	{
-		if ($node.is('[class*="newlink_"]'))
-		{
-			/* this is a new link (unsaved) */
-			var re = /newlink_(\d+)/;
-			var id = re.exec($node.attr("class"))[1];
+	var Navman, Linkman, Navtree;
 
-			if (id)
-			{
-				var l = navman_links[id];
+	/* =====================================================================
+	 * Navigation manager interface
+	 * ===================================================================== */
+	Navman = bu.plugins.navigation.views.Navman = {
 
-				jQuery("#editlink_id").attr("value", "newlink_" + id);
-				jQuery("#editlink_address").attr("value", l.address);
-				jQuery("#editlink_label").attr("value", l.label);
+		el: '#nav-tree-container',
 
-				if (l.target == "new")
-				{
-					jQuery("#editlink_target_new").attr("checked", "checked");
-				}
-				else
-				{
-					jQuery("#editlink_target_same").attr("checked", "checked");
-				}
+		ui: {
+			form: '#navman_form',
+			noticesContainer: '#navman-notices',
+			movesField: '#navman-moves',
+			insertsField: '#navman-inserts',
+			updatesField: '#navman-updates',
+			deletionsField: '#navman-deletions',
+			expandAllBtn: '#navman_expand_all',
+			collapseAllBtn: '#navman_collapse_all',
+			saveBtn: '#bu_navman_save'
+		},
 
-				navman_editing = $node;
-				jQuery("#navman_editlink").dialog('open');
+		data: {
+			dirty: false,
+			deletions: [],
+			insertions: {},
+			updates: {},
+			moves: {}
+		},
+
+		initialize: function (config) {
+			// Create post navigation tree from server-provided instance settings object
+			var settings = this.settings = bu_navman_settings;
+			settings.el = this.el;
+
+			Navtree = bu.plugins.navigation.tree('navman', settings);
+
+			// Initialize link manager
+			Linkman.initialize({allowTop: !!settings.allowTop, isSectionEditor: !!settings.isSectionEditor});
+
+			// Subscribe to relevant tree signals
+			Navtree.listenFor('editPost', $.proxy(this.editPost, this));
+
+			Navtree.listenFor('postRemoved', $.proxy(this.postRemoved, this));
+			Navtree.listenFor('postMoved', $.proxy(this.postMoved, this));
+			Linkman.listenFor('linkInserted', $.proxy(this.linkInserted, this));
+			Linkman.listenFor('linkUpdated', $.proxy(this.linkUpdated, this));
+
+			// Form submission
+			$(this.ui.form).bind('submit', $.proxy(this.save, this));
+			$(this.ui.expandAllBtn).bind('click', this.expandAll);
+			$(this.ui.collapseAllBtn).bind('click', this.collapseAll);
+
+		},
+
+		expandAll: function (e) {
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			Navtree.showAll();
+		},
+
+		collapseAll: function (e) {
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			Navtree.hideAll();
+		},
+
+		editPost: function (post) {
+			if ('link' === post.post_type) {
+				Linkman.edit(post);
+			} else {
+				var url = "post.php?action=edit&post=" + post.ID;
+				window.location = url;
 			}
+		},
+
+		linkInserted: function (link) {
+			this.data.insertions[link.ID] = link;
+			this.data.dirty = true;
+		},
+
+		linkUpdated: function (link) {
+			if ('new' === link.post_status) {
+				// Update to new link (not yet commited to DB)
+				this.data.insertions[link.ID] = link;
+			} else {
+				// Update to previously existing link
+				this.data.updates[link.ID] = link;
+			}
+			this.data.dirty = true;
+		},
+
+		postRemoved: function (post) {
+			var id = post.ID;
+
+			if (id) {
+
+				if (typeof this.data.insertions[id] !== 'undefined') {
+
+					// Newly inserted posts aren't yet commited to DB, so just
+					// remove it from the insertions cache and move on
+					delete this.data.insertions[id];
+
+				} else if (typeof this.data.updates[id] !== 'undefined') {
+
+					// Post was marked to be updated -- remove from updates cache
+					// and push to deletions
+					delete this.data.updates[id];
+					this.data.deletions.push(id);
+					this.data.dirty = true;
+
+				} else if (typeof this.data.moves[id] !== 'undefined') {
+
+					// Post was marked to be moved -- remove from moves cache
+					// and push to deletions
+					delete this.data.moves[id];
+					this.data.deletions.push(id);
+					this.data.dirty = true;
+
+				} else {
+
+					// Deletion was not previously in any category, just add to deletions cache
+					// and mark page as dirty
+					this.data.deletions.push(id);
+					this.data.dirty = true;
+
+				}
+			}
+		},
+
+		postMoved : function (post) {
+
+			// New post moves are tracked via the insertions cache
+			if ('new' === post.post_status) {
+				return;
+			}
+
+			this.data.moves[post.ID] = post;
+			this.data.dirty = true;
+
+		},
+
+		save: function (e) {
+			var deletions = this.data.deletions, moves = {}, updates = {}, insertions = {}, current;
+
+			// Process insertions
+			$.each(this.data.insertions, function (postID, post) {
+				current = Navtree.getPost(postID);
+				if (current) {
+					insertions[current.ID] = current;
+				}
+			});
+
+			// Process updates
+			$.each(this.data.updates, function (postID, post) {
+				current = Navtree.getPost(postID);
+				if (current) {
+					updates[current.ID] = current;
+				}
+			});
+
+			// Process moves
+			$.each(this.data.moves, function (postID, post) {
+				current = Navtree.getPost(postID);
+				if (current) {
+					// Construct object for submission with just the fields we need
+					moves[current.ID] = {
+						ID: current.ID,
+						post_status: current.post_status,
+						post_type: current.post_type,
+						post_parent: current.post_parent,
+						menu_order: current.menu_order
+					};
+				}
+			});
+
+			// Push pending deletions, insertions, updates and moves to hidden inputs for POST'ing
+			$(this.ui.deletionsField).attr("value", JSON.stringify(deletions));
+			$(this.ui.insertsField).attr("value", JSON.stringify(insertions));
+			$(this.ui.updatesField).attr("value", JSON.stringify(updates));
+			$(this.ui.movesField).attr("value", JSON.stringify(moves));
+
+			// Notify user that save is in progress
+			var $msg = $('<span>Saving navigation changes...</span>')
+			$(this.ui.saveBtn).prev('img').css('visibility', 'visible');
+			this.notice( $msg.html(), 'message');
+
+			// Lock tree interface while saving
+			Navtree.lock();
+
+			// Let us through the window.unload check now that all pending moves are ready to go
+			this.data.dirty = false;
+
+		},
+
+		notice: function (message, type, replace_existing) {
+			replace_existing = replace_existing || true;
+
+			var $container = $(this.ui.noticesContainer), classes = '';
+
+			if (replace_existing) {
+				$container.empty();
+			}
+
+			classes = ('message' === type) ? 'updated fade' : 'error';
+
+			$container.append('<div class="' + classes + ' below-h2"><p>' + message + '</p></div>');
+
 		}
-		else
-		{
-			var re = /^p(\d+)/;
-			var id = re.exec($node.attr("id"))[1];
 
-			if ((id) && (navman_edits[id]))
-			{
-				/* existing link with unsaved changes */
-				jQuery("#editlink_id").attr("value", navman_edits[id].ID);
-				jQuery("#editlink_address").attr("value", navman_edits[id].post_content);
-				jQuery("#editlink_label").attr("value", navman_edits[id].post_title);
+	};
 
-				if (navman_edits[id].target == "new")
-				{
-					jQuery("#editlink_target_new").attr("checked", "checked");
-				}
-				else
-				{
-					jQuery("#editlink_target_same").attr("checked", "checked");
-				}
+	/* =====================================================================
+	 * Link manager interface
+	 * ===================================================================== */
+	Linkman = bu.plugins.navigation.views.Linkman = {
 
-				navman_editing = $node;
-				jQuery("#navman_editlink").dialog('open');
-			}
-			else
-			{
-				/* this is an existing link */
-				jQuery.getJSON(rpcPageURL, {"id" : $node.attr("id")}, function (data) {
-					jQuery("#editlink_id").attr("value", data.ID);
-					jQuery("#editlink_address").attr("value", data.post_content);
-					jQuery("#editlink_label").attr("value", data.post_title);
+		el: '#navman-link-editor',
 
-					if (data.target == "new")
-					{
-						jQuery("#editlink_target_new").attr("checked", "checked");
-					}
-					else
-					{
-						jQuery("#editlink_target_same").attr("checked", "checked");
-					}
+		ui: {
+			form: '#navman_editlink_form',
+			addBtn: '#navman_add_link',
+			urlField: '#editlink_address',
+			labelField: '#editlink_label',
+			targetNewField: '#editlink_target_new',
+			targetSameField: '#editlink_target_same'
+		},
 
-					navman_editing = $node;
-					jQuery("#navman_editlink").dialog('open');
-					});
-				}
-			}
-	}
-	else
-	{
-		var re = /^p(\d+)/;
-		var id = re.exec($node.attr("id"))[1];
+		data: {
+			currentLink: null,
+			allowTop: true,
+			isSectionEditor: false
+		},
 
-		var url = "post.php?action=edit&post=" + id;
-		window.location = url;
-	}
-}
+		initialize: function (config) {
+			config = config || {};
+			$.extend(true, this.data, config);
 
-jQuery(document).ready( function($)
-{
-	/* edit link dialog */
-	jQuery("#navman_editlink").dialog({
-		autoOpen: false,
-		buttons: {
-			"Ok": function() {
+			// Implement the signals interface
+			bu.signals.register(this);
 
-				if (jQuery("#navman_editlink_form").valid())
-				{
-					if (jQuery("#editlink_id").attr("value").indexOf("newlink_") != -1)
-					{
-						/* changes to an unsaved link */
-						var re = /newlink_(\d+)/;
-						var id = re.exec(jQuery("#editlink_id").attr("value"))[1];
+			this.$el = $(this.el);
 
-						if (id)
-						{
-							navman_links[id] = {
-								"address": jQuery("#editlink_address").attr("value"),
-								"label": jQuery("#editlink_label").attr("value"),
-								"target": jQuery("input[name='editlink_target']:checked").attr("value")
-							};
+			this.$form = $(this.ui.form);
 
-							$navman.jstree("rename_node", navman_editing, navman_links[id].label);
+			// Edit link dialog
+			this.$el.dialog({
+				autoOpen: false,
+				buttons: {
+					"Ok": $.proxy(this.save, this),
+					"Cancel": $.proxy(this.cancel, this)
+				},
+				minWidth: 400,
+				width: 500,
+				modal: true,
+				resizable: false
+			});
+
+			// Prevent clicks in dialog/overlay from removing tree selections
+			$(document.body).delegate('.ui-widget-overlay, .ui-widget', 'click', this.stopPropagation);
+
+			// Add link event
+			$(this.ui.addBtn).bind('click', $.proxy(this.add, this));
+
+			// Enable/disable add link button with selection if allow top is false
+			Navtree.listenFor('postSelected', $.proxy(this.onPostSelected, this));
+			Navtree.listenFor('postDeselected', $.proxy(this.onPostDeselected, this));
+			Navtree.listenFor('postsDeselected', $.proxy(this.onPostDeselected, this));
+
+		},
+
+		add: function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			var msg = '';
+			var selected;
+			
+			if ($(e.currentTarget).parent('li').hasClass('disabled')) {
+				selected = Navtree.getSelectedPost();
+				msg = "You are not allowed to add links";
+
+				// User is attempting to add a link below a link
+				if (selected && 'link' === selected.post_type ) {
+					msg = "Links are not permitted to have children.\n\n\
+Select a page that you can edit and click \"Add a Link\" \
+to create a new link below the selected page.";
+					
+				} else {
+					// User is a section editor attempting to add a top level link
+					if (Navman.settings.isSectionEditor) {
+						msg = "You do not have permission to create top level published content.\n\n\
+Select a page that you can edit and click \"Add a Link\" \
+to create a new link below the selected page.";
+						
+					} else {
+						// User is not a section editor, but not allowed to add top level pages due to allow top setting
+						if (!Navman.settings.allowTop) {
+							msg = "You are not allowed to create top level published content. \
+Select a page that you can edit and click \"Add a Link\" \
+to create a new link below the selected page.\n\n\
+Site administrators can change this behavior by visiting Site Design > Primary Navigation \
+and enabling the \"Allow Top-Level Pages\" setting.";
 						}
 					}
-					else
-					{
-						/* changes to an existing link */
-						var data =
-						{
-							"ID": jQuery("#editlink_id").attr("value"),
-							"post_title": jQuery("#editlink_label").attr("value"),
-							"post_content": jQuery("#editlink_address").attr("value"),
-							"target": jQuery("input[name='editlink_target']:checked").attr("value")
-						};
-						navman_edits[data.ID] = data;
-
-						$navman.jstree("rename_node", navman_editing, data.post_title);
-					}
-
-					jQuery("#navman_editlink").dialog('close');
-
-					jQuery("#editlink_id").attr("value", "");
-					jQuery("#editlink_address").attr("value", "");
-					jQuery("#editlink_label").attr("value", "");
-					jQuery("#editlink_target_same").attr("checked", "");
-
-					navman_dirty = true;
-
-					navman_editing = null;
 				}
-			},
-			"Cancel": function() {
-				jQuery("#navman_editlink").dialog('close');
+				
+				alert(msg);
+				
+			} else {
+				// Setup new link
+				this.data.currentLink = { "post_status": "new", "post_type": "link", "post_meta": {} };
+				this.$el.dialog('option', 'title', 'Add a Link').dialog('open');	
+			}
+			
+		},
 
-				jQuery("#editlink_id").attr("value", "");
-				jQuery("#editlink_address").attr("value", "");
-				jQuery("#editlink_label").attr("value", "");
-				jQuery("#editlink_target_same").attr("checked", "");
+		edit: function (link) {
 
-				navman_editing = null;
+			$(this.ui.urlField).attr("value", link.post_content);
+			$(this.ui.labelField).attr("value", link.post_title);
+
+			if ('new' === link.post_meta.bu_link_target) {
+				$(this.ui.targetNewField).attr("checked", "checked");
+			} else {
+				$(this.ui.targetSameField).attr("checked", "checked");
+			}
+
+			this.data.currentLink = link;
+
+			this.$el.dialog('option', 'title', 'Edit a Link').dialog('open');
+		},
+
+		save: function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+
+			if (this.$form.valid()) {
+
+				// Global link being edited
+				var link = this.data.currentLink, saved, selected;
+
+				// Extract updates from form
+				link.post_content = $(this.ui.urlField).attr("value");
+				link.post_title = $(this.ui.labelField).attr("value");
+				link.url = link.post_content;
+				link.post_meta.bu_link_target = $("input[name='editlink_target']:checked").attr("value");
+
+				selected = Navtree.getSelectedPost();
+
+				if (selected) {
+					link.post_parent = selected.ID;
+					link.menu_order = 1;
+				} else {
+					link.post_parent = 0;
+					link.menu_order = 1;
+				}
+
+				// Insert or update link
+				if ('new' === link.post_status && !link.ID) {
+
+					saved = Navtree.insertPost(link);
+					this.broadcast('linkInserted', [saved]);
+
+				} else {
+
+					saved = Navtree.updatePost(link);
+					this.broadcast('linkUpdated', [saved]);
+
+				}
+
+				this.clear();
+
+				this.$el.dialog('close');
+
+			}
+
+		},
+
+		cancel: function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+
+			this.$el.dialog('close');
+
+			this.clear();
+		},
+
+		clear: function () {
+
+			// Clear dialog
+			$(this.ui.urlField).attr("value", "");
+			$(this.ui.labelField).attr("value", "");
+			$(this.ui.targetSameField).attr("checked", "checked");
+			$(this.ui.targetNewField).removeAttr("checked");
+
+			this.data.currentLink = null;
+
+		},
+
+		onPostSelected: function (post) {
+			var canAdd = true;
+			
+			if (post.post_type == 'link') {
+				canAdd = false;
+			}
+			
+			canAdd = bu.hooks.applyFilters('navmanCanAddLink', canAdd, post, Navtree);
+
+			if (canAdd) {
+				$(this.ui.addBtn).parent('li').removeClass('disabled');
+			} else {
+				$(this.ui.addBtn).parent('li').addClass('disabled');
 			}
 		},
-		minWidth: 400,
-		width: 500,
-		modal: true,
-		resizable: false
-	});
 
-	/* show the inner sidebar */
-	jQuery("div.inner-sidebar").show();
-	hidePageDetail();
+		onPostDeselected: function () {
+			var canAdd = this.data.allowTop;
 
-	var options = {
-		themes : {
-			theme : "classic"
+			canAdd = bu.hooks.applyFilters('navmanCanAddLink', canAdd);
+
+			if (!canAdd) {
+				$(this.ui.addBtn).parent('li').addClass('disabled');
+			} else {
+				$(this.ui.addBtn).parent('li').removeClass('disabled');
+			}
 		},
-        core : {
-            animation : 0,
-	    html_titles: true
-        },
-        plugins : ["themes", "json_data", "ui", "contextmenu", "types", "dnd", "crrm"],
-		types : {
-			types : {
-                "default" : {
-                    clickable	: true,
-                    renameable	: true,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
 
-                    icon: {
-                        "image": interfacePath + "/icons/page_regular.png"
-                    }
-                },
-                "folder" : {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/folder_regular.png"
-                    }
-                },
-                "folder_excluded": {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/folder_hidden.png"
-                    }
-                },
-                "folder_restricted": {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/folder_lock.png"
-                    }
-                },
-                "folder_excluded_restricted": {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/folder_hidden_restricted.png"
-                    }
-                },
-                "page": {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/page_regular.png"
-                    }
-                },
-                "page_excluded": {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/page_hidden.png"
-                    }
-                },
-                "page_restricted": {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/page_restricted.png"
-                    }
-                },
-                "page_excluded_restricted": {
-                    clickable	: true,
-                    renameable	: false,
-                    deletable	: true,
-                    creatable	: true,
-                    draggable	: true,
-                    max_children	: -1,
-                    max_depth	: -1,
-                    valid_children	: "all",
-                    icon: {
-                        image: interfacePath + "/icons/page_hidden_restricted.png"
-                    }
-                },
-                "link": {
-                    icon: {
-                        image: interfacePath + "/icons/page_white_link.png"
-                    },
-                    max_children: 0
-                },
-                "link_restricted": {
-                    icon: {
-                        image: interfacePath + "/icons/page_white_link.png"
-                    },
-                    max_children: 0
-                }
-            }
-		},
-		"json_data": {
-            "data" : pages,
-            "ajax" : {
-                url : rpcURL,
-                type : "POST",
-                data : function (n) {
-                    return {id : n.attr ? n.attr("id") : 0}
-                }
-            },
-            "progressive_render" : true
-        },
-        contextmenu : {
-                items : function() {
-                    return {
-                        "edit" : {
-                            "label" : "Edit",
-                            "action" : editNode,
-                            "icon" : "remove"
-                        },
-                        "remove" : {
-                            "label" : "Remove",
-                            "action" : function (obj) {if(this.is_selected(obj)) {this.remove();} else {this.remove(obj);}}
-                        }
-                    }
-                }
-        }
+		stopPropagation: function (e) {
+			e.stopPropagation();
+		}
+
 	};
-    $navman = jQuery("#navman_container");
 
-    $navman.bind("select_node.jstree", function() {
-        jQuery("input[name='bu_navman_delete']").removeAttr("disabled");
-        jQuery("input[name='bu_navman_edit']").removeAttr("disabled");
-    });
-
-    $navman.bind("deselect_node.jstree", function() {
-        jQuery("input[name='bu_navman_delete']").attr("disabled", "disabled");
-        jQuery("input[name='bu_navman_edit']").attr("disabled", "disabled");
-        hidePageDetail();
-    });
-
-	$navman.bind("remove.jstree", function(n, prev) {
-		var node = jQuery(prev.rslt.obj);
-
-		var re = /^p(\d+)/;
-		var id = re.exec(node.attr('id'))[1];
-
-		if (id) {
-			navman_delete.push(id);
-			navman_dirty = true;
+	window.onbeforeunload = function () {
+		if (Navman.data.dirty) {
+			return 'You have made changes to your navigation that have not yet been saved.';
 		}
-    		console.log(navman_delete);
-	});
 
-    $navman.jstree(options);
-
-	/* expand/collapse */
-	jQuery("#navman_expand_all").click(function(e) {
-		$navman.jstree("open_all");
-		e.preventDefault();
-		e.stopImmediatePropagation();
-	});
-
-	jQuery("#navman_collapse_all").click(function(e) {
-		$navman.jstree("close_all");
-		e.preventDefault();
-		e.stopImmediatePropagation();
-	});
-
-	jQuery("#bu_navman_save").click(function(e) {
-		navman_dirty = false;
-	});
-
-	jQuery("#navman_expand_all_b").click(function(e) {
-		$navman.jstree("open_all");
-		e.preventDefault();
-		e.stopImmediatePropagation();
-	});
-
-	jQuery("#navman_collapse_all_b").click(function(e) {
-		navman.jstree("close_all");
-		e.preventDefault();
-		e.stopImmediatePropagation();
-	});
-
-	jQuery("#bu_navman_save_b").click(function(e) {
-		navman_dirty = false;
-	});
-
-	/* handler for adding link */
-	jQuery("#addlink_add").click(function (e) {
-		if (jQuery("#navman_addlink_form").valid())
-		{
-			var address = jQuery("#addlink_address").attr("value").replace(/^\s+|\s+$/g,"");
-			var label = jQuery("#addlink_label").attr("value").replace(/^\s+|\s+$/g,"");
-			var target = jQuery("input[name='addlink_target']:checked").attr("value");
-
-			jQuery("#addlink_address").attr("value", "");
-			jQuery("#addlink_label").attr("value", "");
-
-			var className = 'newlink_' + navman_links.length;
-
-			var data = {
-				"attr": {"rel": "link", "class": className},
-				"data": {"title": label}
-			};
-
-			var link = {"address": address, "label": label, "target": target};
-			navman_links.push(link);
-
-			$navman.jstree("create", null, "after", data, null, true);
-			navman_dirty = true;
-		}
-	});
-
-	/* delete/rename buttons */
-	jQuery("input[name='bu_navman_delete']").attr("disabled", "disabled");
-	jQuery("input[name='bu_navman_edit']").attr("disabled", "disabled");
-
-	jQuery("input[name='bu_navman_delete']").click(function (e) {
-		$navman.jstree("remove");
-	});
-
-
-	jQuery("input[name='bu_navman_edit']").click(function (e) {
-		var n = $navman.jstree("get_selected");
-		editNode(n);
-	});
-
-	jQuery("#navman_form").submit(function (e) {
-		var data = $navman.jstree("get_json", -1);
-
-		jQuery("#navman_data").attr("value", JSON.stringify(data));
-		jQuery("#navman_links").attr("value", JSON.stringify(navman_links));
-		jQuery("#navman_delete").attr("value", JSON.stringify(navman_delete));
-		jQuery("#navman_edits").attr("value", JSON.stringify(navman_edits));
-	});
-});
-
-window.onbeforeunload = function()
-{
-	if (navman_dirty)
-	{
-		return 'You have made changes to your navigation that have not yet been saved.';
-	}
-	else
-	{
 		return;
-	}
-};
+	};
+
+}(jQuery));
+
+jQuery(document).ready(function ($) {
+	'use strict';
+	bu.plugins.navigation.views.Navman.initialize();
+});

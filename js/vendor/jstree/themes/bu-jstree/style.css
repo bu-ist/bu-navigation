@@ -1,0 +1,730 @@
+/*
+ * jsTree BU theme 1.0
+ * Supported features: dots/no-dots, icons/no-icons, focused, loading
+ * Supported plugins: ui (hovered, clicked), checkbox, contextmenu, search
+*/
+
+.jstree-bu li:after {
+	content: ".";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+}
+
+.jstree-bu li {
+	display: inline-block;
+	clear: both;
+}
+
+html[xmlns] .jstree-bu li {
+	display: block;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+* html .jstree-bu li {
+	height: 1%;
+}
+
+.jstree-bu ins {
+	background-image: url("sprite.png");
+	background-repeat: no-repeat;
+	background-color: transparent;
+	margin: 8px 4px 0 0;
+}
+
+.jstree.jstree-bu ul {
+	margin-top: 2px;
+	padding-left: 14px;
+}
+
+.jstree.jstree-bu ul ul {
+	margin-top: 2px;
+	margin-bottom: -1px;
+	padding-left: 14px;
+}
+
+.jstree.jstree-bu li {
+	margin-bottom: 1px;
+	border: 1px solid transparent;
+}
+
+.jstree-bu ul li {
+	display: block;
+	height: 1%;
+}
+
+.jstree.jstree-bu li.jstree-last {
+	margin-bottom: 0;
+}
+
+.jstree.jstree-bu li li, .jstree.jstree-bu li li li {
+	margin-top: 1px;
+	margin-bottom: 0;
+}
+
+.jstree-bu > ul > li[rel="section"] { /* Sets the to level section bold */
+	font-weight: 700;
+}
+
+.jstree-bu ul li[rel="page"] a, .jstree-bu ul li[rel="link"] a, .jstree-bu > ul > li > ul > li[rel="section"] { /* Sets all subsequent child sections not bold */
+	font-weight: 100;
+}
+
+.jstree-bu .count {
+	font-weight: 100;
+	color: #999;
+}
+
+.jstree-bu li .count {
+	color: #999;
+	position: absolute;
+	margin-left: 4px;
+}
+
+.jstree-bu li ins {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	margin: 5px 4px 0 -18px;
+	float: left;
+}
+
+.jstree-bu li a {
+	display: block;
+	padding: 6px 0 6px 0;
+	border: 1px solid #dfdfdf;
+	border-radius: 3px;
+	background: #eee;
+	background: -moz-linear-gradient(top, #ffffff 0%, #eeeeee 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #ffffff), color-stop(100%, #eeeeee));
+	background: -webkit-linear-gradient(top, #ffffff 0%,#eeeeee 100%);
+	background: -o-linear-gradient(top, #ffffff 0%,#eeeeee 100%);
+	background: -ms-linear-gradient(top, #ffffff 0%,#eeeeee 100%);
+	background: linear-gradient(to bottom, #ffffff 0%,#eeeeee 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eeeeee',GradientType=0 );
+}
+
+.jstree-bu li a .title {
+	max-width: 50%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: inline-block;
+}
+
+.jstree-bu .jstree-clicked {
+	color: white;
+	border: 1px solid #666;
+	background: #7f7f7f;
+	background: -moz-linear-gradient(top, #3084b3 0%, #2a729a 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #3084b3), color-stop(100%, #2a729a));
+	background: -webkit-linear-gradient(top, #3084b3 0%,#2a729a 100%);
+	background: -o-linear-gradient(top, #3084b3 0%,#2a729a 100%);
+	background: -ms-linear-gradient(top, #3084b3 0%,#2a729a 100%);
+	background: linear-gradient(to bottom, #3084b3 0%,#2a729a 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3084b3', endColorstr='#2a729a',GradientType=0 );
+}
+
+.jstree-bu .denied > a {
+	background: #f7e3e3;
+	color: #af5d5d;
+	cursor: default;
+}
+
+.jstree-bu .jstree-clicked .count {
+	color: #8dc0df;
+}
+
+.jstree-bu .denied .count {
+	color: #ccb3b3;
+}
+
+.jstree-bu li.jstree-closed > ins {
+	background-position: 0 -16px;
+}
+
+.jstree-bu li.jstree-open > ins {
+	background-position: -16px -16px;
+}
+
+.jstree-bu li.jstree-leaf > ins {
+	background-position: -48px -32px;
+}
+
+.jstree-bu li.jstree-closed > ins:hover, .jstree-bu li.jstree-open > ins:hover {
+	cursor: pointer;
+}
+
+.jstree-bu a ins {
+	margin: 0 4px 0 8px;
+}
+
+.jstree-bu li[rel="section"] > a > .jstree-icon,
+.jstree-bu li[rel="page"] > a > .jstree-icon,
+.jstree-bu li[rel="link"] > a > .jstree-icon,
+.jstree-bu li[rel="allowed"] > a > .jstree-icon,
+.jstree-bu li[rel="allowed-desc-denied"] > a > .jstree-icon,
+.jstree-bu li[rel="allowed-desc-unknown"] > a > .jstree-icon,
+.jstree-bu li[rel="denied"] > a > .jstree-icon,
+.jstree-bu li[rel="denied-desc-allowed"] > a > .jstree-icon,
+.jstree-bu li[rel="denied-desc-unknown"] > a > .jstree-icon,
+.jstree-icon {
+	background-image: url("sprite.png");
+	background-repeat: no-repeat;
+	background-color: transparent;
+}
+
+.jstree-bu li[rel="section"] > a > .jstree-icon {
+	background-position: -32px 0;
+}
+
+.jstree-bu li[rel="page"] > a > .jstree-icon {
+	background-position: -32px 0;
+}
+
+.jstree-bu li[rel="link"] > a > .jstree-icon {
+	background-position: -48px 0;
+}
+
+.jstree-bu li.denied > a > .jstree-icon {
+	background-position: -16px 0;
+}
+
+.jstree-bu .post-statuses {
+	float: right;
+	margin-right: 8px;
+}
+
+@-moz-document url-prefix() {
+    .jstree-bu .post-statuses {
+        margin-top: -16px;
+    }
+}
+
+.jstree-bu .post-statuses .post_status {
+	margin-left: 1px;
+	padding: 3px 4px;
+	border-radius: 2px;
+	font-weight: 100;
+	font-size: 80%;
+}
+
+.jstree-bu .post-statuses .post_status.draft {
+	background: #f7cf60;
+	color: #fff;
+}
+
+.jstree-bu .post-statuses .post_status.restricted {
+	background: #f0ac7b;
+	color: #fff;
+}
+
+.jstree-bu .post-statuses .post_status.protected {
+	background: #f0ac7b;
+	color: #fff;
+}
+
+.jstree-bu .post-statuses .post_status.excluded {
+	background: #f79c7d;
+	color: #fff;
+}
+
+.jstree-bu .post-statuses .post_status.pending {
+	background: #f7cf60;
+	color: #fff;
+}
+
+.jstree-bu .post-statuses .post_status.new {
+	background: #a4cd43;
+	color: #deeedf;
+}
+
+.jstree-bu .jstree-clicked .post_status {
+	background: #246082 !important;
+	color: #87bedd !important;
+}
+
+.jstree-bu .edit-options {
+	visibility: hidden;
+	border: 0;
+	background: transparent;
+	color: #888;
+	font-weight: 100;
+	float: right;
+	padding: 7px 5px 7px 10px;
+	margin: -7px 0 0 9px;
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+	cursor: pointer;
+	position: relative;
+	right: 0;
+	outline: none;
+}
+
+@-moz-document url-prefix() {
+    .jstree-bu .edit-options {
+	    margin-top: -24px;
+    }
+}
+
+.jstree-bu .jstree-hovered .edit-options {
+	visibility: visible;
+}
+
+.jstree-bu.bu-dnd-is-dragging .jstree-hovered .edit-options {
+	visibility: hidden;
+}
+
+.jstree-bu .jstree-clicked .edit-options {
+	visibility: visible;
+	color: #87bedd;
+	border-left: 1px solid transparent;
+}
+
+.jstree-bu .edit-options.clicked {
+	visibility: visible;
+	background: white;
+	color: black;
+	padding-top: 6px;
+	border-top: 1px solid #ccc;
+	border-bottom-right-radius: 0;
+	border-bottom-left-radius: 0;
+	-moz-box-shadow: 1px 3px 9px #aaa;
+	-webkit-box-shadow: 1px 9px 5px #aaa;
+	box-shadow: 1px 3px 9px #aaa;
+}
+
+.jstree-bu .edit-options .jstree-icon {
+	float: right;
+	background-position: -32px -16px;
+	margin: 0 0 0 4px;
+}
+
+.jstree-bu .jstree-clicked .edit-options .jstree-icon {
+	background-position: -48px -16px;
+}
+
+.jstree-bu .jstree-clicked .edit-options.clicked .jstree-icon {
+	background-position: -32px -16px;
+}
+
+/* Permissions editor */
+.jstree-bu.buse-perm-editor li[rel="allowed"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="allowed-desc-denied"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="allowed-desc-unknown"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="denied"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="denied-desc-allowed"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="denied-desc-unknown"] > a > .jstree-icon {
+	margin-top: -6px;
+	margin-right: 5px;
+	margin-left: -2px;
+	border-radius: 3px 0 0 3px;
+	width: 14px;
+	height: 24px;
+}
+
+.jstree-bu.buse-perm-editor li[rel="allowed"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="allowed-desc-denied"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="allowed-desc-unknown"] > a > .jstree-icon {
+	background-position: -16px -48px !important;
+	border-top: 1px solid #7d9a42;
+	border-left: 1px solid #7d9a42;
+	border-bottom: 1px solid #7d9a42;
+}
+
+.jstree-bu.buse-perm-editor li[rel="allowed"] > a.jstree-clicked > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="allowed-desc-denied"] > a.jstree-clicked > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="allowed-desc-unknown"] > a.jstree-clicked > .jstree-icon {
+	background-position: -16px -72px !important;
+	border-top: 1px solid #6d6d6d;
+	border-left: 1px solid #6d6d6d;
+	border-bottom: 1px solid #6d6d6d;
+}
+
+.jstree-bu.buse-perm-editor li[rel="denied"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="denied-desc-allowed"] > a > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="denied-desc-unknown"] > a > .jstree-icon {
+	background-position: 0 -48px !important;
+	border-top: 1px solid #9e5b5b;
+	border-left: 1px solid #9e5b5b;
+	border-bottom: 1px solid #9e5b5b;
+}
+
+.jstree-bu.buse-perm-editor li[rel="denied"] > a.jstree-clicked > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="denied-desc-allowed"] > a.jstree-clicked > .jstree-icon,
+.jstree-bu.buse-perm-editor li[rel="denied-desc-unknown"] > a.jstree-clicked > .jstree-icon {
+	background-position: 0 -72px !important;
+	border-top: 1px solid #6d6d6d;
+	border-left: 1px solid #6d6d6d;
+	border-bottom: 1px solid #6d6d6d;
+}
+
+.jstree-bu.buse-perm-editor a {
+	height: 18px;
+	padding: 5px 0 1px 0;
+}
+
+.jstree-bu.buse-perm-editor a ins {
+	margin: 0 4px 0 -1px;
+}
+
+.jstree-bu.buse-perm-editor .jstree-clicked {
+	border: 1px solid #6d6d6d;
+	background: #888;
+}
+
+.jstree-bu .edit-perms {
+	margin: -6px -1px;
+	padding: 4px 0 5px 0;
+	color: white;
+	text-shadow: 0 0 3px rgba(0, 0, 0, .25);
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+	font-size: 100%;
+	cursor:	pointer;
+}
+
+.jstree-bu .edit-perms.denied {
+	border: 1px solid #7b4949;
+	background: #cf5b5b;
+	background: -moz-linear-gradient(top, #cf5b5b 0%, #a24a4a 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #cf5b5b), color-stop(100%, #a24a4a));
+	background: -webkit-linear-gradient(top, #cf5b5b 0%,#a24a4a 100%);
+	background: -o-linear-gradient(top, #cf5b5b 0%,#a24a4a 100%);
+	background: -ms-linear-gradient(top, #cf5b5b 0%,#a24a4a 100%);
+	background: linear-gradient(to bottom, #cf5b5b 0%,#a24a4a 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cf5b5b', endColorstr='#a24a4a',GradientType=0 );
+	box-shadow: inset 3px 0 5px rgba(0, 0, 0, .20);
+}
+
+.jstree-bu .edit-perms.allowed {
+	border: 1px solid #506527;
+	background: #6a9812;
+	background: -moz-linear-gradient(top, #6a9812 0%, #567812 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #6a9812), color-stop(100%, #567812));
+	background: -webkit-linear-gradient(top, #6a9812 0%,#567812 100%);
+	background: -o-linear-gradient(top, #6a9812 0%,#567812 100%);
+	background: -ms-linear-gradient(top, #6a9812 0%,#567812 100%);
+	background: linear-gradient(to bottom, #6a9812 0%,#567812 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6a9812', endColorstr='#567812',GradientType=0 );
+	box-shadow: inset 3px 0 5px rgba(0, 0, 0, .20);
+}
+
+.jstree-bu .perm-stats {
+    padding-left: 5px;
+}
+
+.jstree-bu .perm-stats.allowed {
+    color: #6a9812;
+}
+
+.jstree-bu .perm-stats.denied {
+    color: #cf5b5b;
+}
+
+/* Page selector interface */
+.jstree-bu.bu-page-selector li a {
+	cursor: pointer;
+}
+
+/* Compact view */
+.jstree-compact .jstree-bu li a {
+	padding: 3px 0;
+	margin-bottom: 2px;
+}
+
+.jstree-compact .jstree-bu a ins {
+	margin: 0 4px 0 5px;
+}
+
+.jstree-compact .jstree-bu .edit-options {
+	padding: 4px 3px 4px 10px;
+}
+
+.jstree-compact .jstree-bu .edit-options .jstree-icon {
+	margin: 0 0 0 2px;
+}
+
+.jstree-bu .perm-stats .jstree-icon {
+	background: none;
+	float: none;
+	margin-left: 10px;
+}
+
+.jstree-bu .perm-stats.denied .jstree-icon {
+	background: url("sprite.png");
+	background-position: -16px -96px;
+	background-repeat: no-repeat;
+}
+
+.jstree-bu .perm-stats.allowed .jstree-icon {
+	background: url("sprite.png");
+	background-position: 0px -96px;
+	background-repeat: no-repeat;
+}
+
+.jstree-bu .jstree-clicked .perm-stats.denied .jstree-icon {
+	background: url("sprite.png");
+	background-position: -48px -96px;
+	background-repeat: no-repeat;
+}
+
+.jstree-bu .jstree-clicked .perm-stats.allowed .jstree-icon {
+	background: url("sprite.png");
+	background-position: -32px -96px;
+	background-repeat: no-repeat;
+}
+
+.jstree-bu .jstree-clicked .perm-stats .label {
+	color: #ccc;
+}
+
+.jstree-bu .perm-stats .label {
+	margin-left: -3px;
+}
+
+#vakata-contextmenu.jstree-bu-context,
+#vakata-contextmenu.jstree-bu-context li ul {
+	background: white;
+	border: none;
+	-webkit-box-shadow: 2px 5px 5px #bbb;
+	-moz-box-shadow: 2px 5px 5px #bbb;
+	box-shadow: 2px 5px 5px #bbb;
+}
+
+#vakata-contextmenu.jstree-bu-context a {
+	padding: 5px;
+}
+
+#vakata-contextmenu.jstree-bu-context a:hover,
+#vakata-contextmenu.jstree-bu-context .vakata-hover > a {
+	background: #e8eff7;
+	color: black;
+}
+
+#vakata-contextmenu.jstree-bu-context li.jstree-contextmenu-disabled a,
+#vakata-contextmenu.jstree-bu-context li.jstree-contextmenu-disabled a:hover {
+	color: silver;
+	background: transparent;
+	border: 0;
+	padding: 1px 4px;
+}
+
+#vakata-contextmenu.jstree-bu-context li.vakata-separator {
+	background: white;
+	margin: 0;
+}
+
+#vakata-contextmenu.jstree-bu-context li ul {
+	margin-left: -4px;
+}
+
+.jstree-bu a.jstree-loading .jstree-icon {
+	background: url("throbber.gif") center center no-repeat !important;
+}
+
+.jstree-bu .bu-dnd-placeholder {
+	text-indent: -9999em;
+	background: #d0d0d0;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+	border: 1px dashed #9c9c9c !important;
+	border-radius: 4px;
+	box-shadow: inset 3px 3px 3px #bbb;
+}
+
+.jstree-bu .bu-dnd-placeholder a {
+	background: transparent;
+}
+
+.jstree-bu .bu-dnd-placeholder ins, .jstree-bu .bu-dnd-placeholder .edit-options {
+	visibility: hidden;
+}
+
+.bu-dnd-target {
+	border-color: #6da73d !important;
+	box-shadow: 0 0 3px #508a21;
+}
+
+#jstree-marker.jstree-bu {
+	text-indent: -100px;
+	margin-left: -20px;
+	background: none;
+}
+
+#jstree-marker-line.jstree-bu {
+	background: #6da73d;
+	height: 3px;
+	border: 0px;
+	box-shadow: 0 0 4px #6da73d;
+	margin-left: -18px;
+	width: 25%;
+	cursor: move;
+}
+
+#jstree-marker-line.jstree-bu.denied {
+	background: #ca4242;
+	height: 3px;
+	border: 0px;
+	box-shadow: 0 0 4px #de8585;
+}
+
+#vakata-dragged.jstree-bu {
+	width: 768px;
+	padding: 8px 8px 8px 24px;
+	border: 1px solid #508a21;
+	border-radius: 4px;
+	background: #eee;
+	background: -moz-linear-gradient(top, #6da73e 0%, #508a21 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #6da73e), color-stop(100%, #508a21));
+	background: -webkit-linear-gradient(top, #6da73e 0%,#508a21 100%);
+	background: -o-linear-gradient(top, #6da73e 0%,#508a21 100%);
+	background: -ms-linear-gradient(top, #6da73e 0%,#508a21 100%);
+	background: linear-gradient(to bottom, #6da73effffff 0%,#508a21 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6da73e', endColorstr='#508a21',GradientType=0 );
+	color: white;
+	cursor: move;
+}
+
+#vakata-dragged.jstree-bu .count {
+	color: #b3ce9d;
+	font-weight: 100;
+}
+
+#vakata-dragged.jstree-bu.jstree-ok {
+	border: 1px solid #508a21;
+	background: #eee;
+	background: -moz-linear-gradient(top, #6da73e 0%, #508a21 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #6da73e), color-stop(100%, #508a21));
+	background: -webkit-linear-gradient(top, #6da73e 0%,#508a21 100%);
+	background: -o-linear-gradient(top, #6da73e 0%,#508a21 100%);
+	background: -ms-linear-gradient(top, #6da73e 0%,#508a21 100%);
+	background: linear-gradient(to bottom, #6da73effffff 0%,#508a21 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6da73e', endColorstr='#508a21',GradientType=0 );
+	color: white;
+}
+
+#vakata-dragged.jstree-bu.jstree-ok .count {
+	color: #b3ce9d;
+	font-weight: 100;
+}
+
+#vakata-dragged.jstree-bu.jstree-invalid {
+	padding: 8px 8px 8px 24px;
+	border: 1px solid #b74f4f;
+	background: #d87474;
+	background: -moz-linear-gradient(top, #d87474 0%, #bb5656 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #d87474), color-stop(100%, #bb5656));
+	background: -webkit-linear-gradient(top, #d87474 0%,#bb5656 100%);
+	background: -o-linear-gradient(top, #d87474 0%,#bb5656 100%);
+	background: -ms-linear-gradient(top, #d87474 0%,#bb5656 100%);
+	background: linear-gradient(to bottom, #d87474 0%,#bb5656 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d87474', endColorstr='#bb5656',GradientType=0 );
+	color: #fff;
+}
+
+#vakata-dragged.jstree-bu.jstree-invalid .count {
+	color: #e3a0a0;
+	font-weight: 100;
+}
+
+#vakata-dragged.jstree-bu .jstree-ok {
+	float: left;
+	margin: 4px 22220px 0 0;
+	background: url("sprite.png") 0px -32px no-repeat;
+}
+
+#vakata-dragged.jstree-bu .jstree-invalid {
+	float: left;
+	margin: 5px 1123123px 0 0;
+	background: url("sprite.png") -16px -32px no-repeat;
+}
+
+
+/* Responsive */
+
+@media screen and (max-width: 1024px) {
+
+	.jstree-bu li a .title {
+		max-width: 35%;
+	}
+
+	.ie7 .jstree-bu li a .title, .ie8 .jstree-bu li a .title {
+		max-width: 35%;
+	}
+
+}
+
+@media screen and (max-width: 850px) {
+
+	.jstree-bu li a .title {
+		max-width: 30%;
+	}
+
+	.ie7 .jstree-bu li a .title, .ie8 .jstree-bu li a .title {
+		max-width: 30%;
+	}
+
+}
+
+/* Because IE7 is redonkulous */
+.ie7 .jstree-bu a {
+	height: 30px !important;
+}
+
+.ie7 .jstree-bu .jstree-icon {
+	margin-top: 8px;
+}
+
+.ie7 .jstree-bu .title {
+	margin-top: 8px;
+}
+
+.ie7 .jstree-bu .count {
+	margin-top: 8px;
+}
+
+.ie7 .jstree-bu .post-statuses {
+	margin-top: -18px;
+}
+
+.ie7 .jstree-bu .edit-options {
+	width: 80px;
+	padding: 4px 5px 4px 5px;
+	margin-top: -22px !important;
+}
+
+.ie7 .jstree-bu .edit-options .jstree-icon {
+	margin-top: 0px;
+}
+
+.jstree-bu a.jstree-search { color: aqua; }
+.jstree-bu .jstree-locked a { color: silver; cursor: default; }
+
+/* Cursor states */
+
+.bu-navman li a {
+	cursor: move;
+}
+
+.bu-edit-post li a {
+	cursor: default;
+}
+
+.bu-edit-post li .jstree-clicked {
+	cursor: move;
+}
+
+.bu-edit-post.current-post-status-draft .denied > a,
+.bu-edit-post.current-post-status-draft .denied > a {
+	cursor: default;
+}
+
+.bu-navman.bu-dnd-is-dragging li a,
+.bu-edit-post.bu-dnd-is-dragging li a {
+	cursor: move;
+}

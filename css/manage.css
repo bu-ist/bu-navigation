@@ -1,0 +1,154 @@
+/* Edit link form */
+#navman-link-editor {
+	display: none;
+}
+
+.navform div label {
+	padding-bottom: 4px;
+}
+
+.navform {
+	font-size: 11px;
+}
+
+.navform div {
+	clear: both;
+	margin: 6px 0;
+}
+
+.navform label {
+	display: block;
+	float: left;
+	padding-left: 8px;
+	width: 93px;
+}
+
+.navformwide label {
+	width: 130px;
+}
+
+.navform div.radios label {
+	display: inline;
+	float: none;
+	padding: 0;
+	width: auto;
+}
+
+.navform sup.req {
+	color: #cc0000;
+	font-weight: bold;
+}
+
+.navform div.radios {
+	margin-left: 8px;
+}
+
+.navform div.buttons {
+	text-align: center;
+}
+
+.navform div input.error {
+	margin: 0;
+	padding: 3px;
+	-moz-border-radius-bottomleft: 4px;
+	-moz-border-radius-bottomright: 4px;
+	-moz-border-radius-topleft: 4px;
+	-moz-border-radius-topright: 4px;
+}
+
+.navform label.error {
+	clear: both;
+	margin-top: 4px;
+	margin-left: 101px;
+	width: auto;
+	color: red;
+}
+
+.navformwide label.error {
+	margin-left: 138px;
+}
+
+
+.navform input {
+	line-height: 1.2em;
+}
+
+
+/* Start new styles */
+
+#navman-notices img {
+	vertical-align: middle;
+	margin-right: 5px;
+}
+
+#navman-container {
+	margin-top: 20px;
+	margin-right: 180px;
+}
+
+.navman-toolbar {
+	font-size: 90%;
+	margin-bottom: 12px;
+	margin-top: 30px;
+}
+
+.navman-toolbar li {
+    display: inline-block;
+    zoom: 1;
+    *display: inline;
+}
+
+.navman-toolbar a {
+	text-decoration: none;
+}
+
+.navman-toolbar li.disabled a {
+	color: #333;
+	cursor: default;
+}
+
+.navman-body {
+	float: left;
+	width: 100%;
+}
+
+.navman-actions {
+	float: right;
+	margin-right: -180px;
+	width: 160px;
+}
+
+.navman-actions img {
+	vertical-align: middle;
+}
+
+#navman-container .navman-actions .metabox-holder {
+	padding-top: 0;
+	min-width: 160px;
+}
+
+#navman-container .navman-actions .metabox-holder h3 {
+	cursor: default;
+}
+
+.navman-actions .actions {
+	padding: 10px 5px 8px 5px;
+	text-align: right;
+	line-height: 23px;
+}
+
+#nav-tree-container {
+    background: transparent;
+}
+
+.metabox-holder .inside p {
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.metabox-holder .inside .actions {
+	background: #ebf2fb;
+	border-top: 1px solid #ddd;
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+}

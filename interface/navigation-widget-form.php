@@ -7,7 +7,7 @@
 	<br />
 	<input class="nav-title-static" type="radio" name="<?php echo $this->get_field_name('navigation_title'); ?>" id="<?php echo $this->get_field_id('navigation_title_static'); ?>" value="static" <?php if ($navigation_title == 'static') echo 'checked="checked"'; ?> />
 	<label for="<?php echo $this->get_field_id('navigation_title_static'); ?>">Use this text for title:</label>
-	<input class="widefat only-if-static" id="<?php echo $this->get_field_id('navigation_title_text'); ?>" name="<?php echo $this->get_field_name('navigation_title_text'); ?>" type="text" value="<?php echo $navigation_title_text; ?>" />				
+	<input class="widefat only-if-static" id="<?php echo $this->get_field_id('navigation_title_text'); ?>" name="<?php echo $this->get_field_name('navigation_title_text'); ?>" type="text" value="<?php echo $navigation_title_text; ?>" />
 	<br />
 	<label for="<?php echo $this->get_field_id('navigation_title_url'); ?>">URL:</label>
 	<input class="widefat only-if-static" id="<?php echo $this->get_field_id('navigation_title_url'); ?>" name="<?php echo $this->get_field_name('navigation_title_url'); ?>" type="text" value="<?php echo $navigation_title_url; ?>" />
@@ -35,26 +35,26 @@
 function bu_navigation_widget_<?php echo $this->number; ?>_style_description()
 {
 	var description = "";
-	
+
 	var style = jQuery("input[name='<?php echo $this->get_field_name('navigation_style'); ?>']:checked").val();
-	
+
 	switch (style)
 	{
 		case 'site':
 		description = "The entire site's structure will be used for content navigation. ";
 		break;
-		
+
 		case 'section':
 		description = "Only the active section's structure will be used for content navigation. ";
 		break;
-		
+
 		case 'adaptive':
 		description = "The content navigation widget will adapt to your site's content. This option is recommended for larger sites. ";
 		break;
 	}
-	
+
 	description += "<br />The current page will always be displayed in the content navigation. ";
-		
+
 	jQuery("#<?php echo $this->get_field_id('bu_navigation_style_description'); ?>").html(description);
 }
 
@@ -98,15 +98,15 @@ function bu_navigation_widget_<?php echo $this->number; ?>_title_changed()
 	}
 }
 
-jQuery(document).ready( function($) 
+jQuery(document).ready( function($)
 {
 	jQuery('#<?php echo $this->get_field_id('navigation_title_none');?>')
 		.add('#<?php echo $this->get_field_id('navigation_title_section');?>')
 		.add('#<?php echo $this->get_field_id('navigation_title_static');?>')
 		.change(bu_navigation_widget_<?php echo $this->number; ?>_title_changed);
-	
+
 	jQuery('#<?php echo $this->get_field_id('navigation_title_static');?>').change();
-	
+
 	jQuery("#<?php echo $this->get_field_id('navigation_title_static'); ?>").change(function () {
 		if (jQuery("#<?php echo $this->get_field_id('navigation_title_static'); ?>:checked").val())
 		jQuery("#<?php echo $this->get_field_id('navigation_title_text'); ?>").focus();
@@ -118,7 +118,7 @@ jQuery(document).ready( function($)
 	});
 	bu_navigation_widget_<?php echo $this->number; ?>_title_label();
 	bu_navigation_widget_<?php echo $this->number; ?>_validate(null);
-	
+
 	var validationHandler = function (e) {
 		bu_navigation_widget_<?php echo $this->number; ?>_validate(e);
 	};
@@ -128,17 +128,17 @@ jQuery(document).ready( function($)
 		{
 			jQuery("#<?php echo $this->get_field_id('navigation_title_static'); ?>").attr("checked", "checked");
 		}
-		
+
 		validationHandler(null);
 	});
-	
+
 	jQuery("#<?php echo $this->get_field_id('navigation_title_text'); ?>").change(function () {
 		if (jQuery("#<?php echo $this->get_field_id('navigation_title_text'); ?>").val())
 		{
 			jQuery("#<?php echo $this->get_field_id('navigation_title_static'); ?>").attr("checked", "checked");
 		}
 	});
-	
+
 	jQuery("input[name='<?php echo $this->get_field_name('navigation_style'); ?>']").click(function () {
 		bu_navigation_widget_<?php echo $this->number; ?>_style_description();
 	});

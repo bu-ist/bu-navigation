@@ -7,14 +7,14 @@
 function bu_navigation_filter_pages_ancestors($pages)
 {
 	global $wpdb, $post;
-	
+
 	if (!$post) return $pages;
-	
+
 	$post_types = ( $post->post_type == 'page' ? array('page', 'link') : array($post->post_type) );
 	$ancestors = bu_navigation_gather_sections($post->ID, array( 'post_types' => $post_types ));
-	
+
 	$filtered = array();
-	
+
 	if ((is_array($pages)) && (count($pages) > 0))
 	{
 		if ((is_array($ancestors)) && (count($ancestors) > 0))
@@ -22,12 +22,12 @@ function bu_navigation_filter_pages_ancestors($pages)
 			foreach ($pages as $page)
 			{
 				$page->active_section = FALSE;
-				
+
 				if ((in_array($page->ID, $ancestors)) && ($page->ID != $post->ID))
 				{
 					$page->active_section = TRUE;
 				}
-				
+
 				$filtered[$page->ID] = $page;
 			}
 		}

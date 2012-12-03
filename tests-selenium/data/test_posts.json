@@ -1,0 +1,82 @@
+{
+    "parent": {
+        "data": {
+                "post_title": "Parent Page",
+                "post_type": "page"
+            },
+        "metadata": {},
+        "children": {
+
+            "child": {
+                "data": {
+                        "post_title": "Child Page",
+                        "post_type": "page"
+                    },
+                "metadata": {
+                    "_bu_cms_navigation_exclude": "1"
+                },
+                "children": {
+
+                    "grandchild_one": {
+                        "data": {
+                                "post_title": "Grand Child Page 1",
+                                "post_type": "page"
+                            },
+                        "metadata": {},
+                        "children": {}
+
+                    },
+
+                    "grandchild_two": {
+                        "data": {
+                                "post_title": "Grand Child Page 2",
+                                "post_type": "page"
+                            },
+                        "metadata": {},
+                        "children": {}
+
+                    }
+                }
+            }
+        }
+    },
+
+    "hidden": {
+        "data": {
+                "post_title": "Hidden Page",
+                "post_type": "page"
+            },
+        "metadata": { "_bu_cms_navigation_exclude": "1" },
+        "children": {}
+    },
+
+    "edit": {
+        "data": {
+                "post_title": "Edit and Delete Me",
+                "post_type": "page"
+            },
+        "metadata": {},
+        "children": {}
+    },
+
+    "google": {
+        "data": {
+                "post_title": "Google",
+                "post_content": "http://www.google.com",
+                "post_type": "link"
+            },
+        "metadata": {
+            "bu_link_target": "new"
+            },
+        "children": {}
+    },
+
+    "last_page": {
+        "data": {
+                "post_title": "Last Page",
+                "post_type": "page"
+            },
+        "metadata": {},
+        "children": {}
+    }
+}

@@ -1096,14 +1096,24 @@ bu.plugins.navigation = {};
 				e.preventDefault();
 				e.stopPropagation();
 
-				var pos = $(this).offset();
-				var yOffset = $(this).height() + 5;
-				var obj = $(this).parent('a').parent('li');
+				var pos, width, height, top, left, obj;
+				
+				// Calculate location
+				pos = $(this).offset();
+				width = $(this).outerWidth();
+				height = $(this).outerHeight();
+				top = pos.top;
+				left = pos.left;
+				top = top + height;
+				left = (left + width) - 180;
+				
+				obj = $(this).closest('li');
 
 				$tree.jstree('deselect_all');
-				$(this).addClass('clicked');
 				$tree.jstree('select_node', obj );
-				$tree.jstree('show_contextmenu', obj, pos.left, pos.top + yOffset );
+				$tree.jstree('show_contextmenu', obj, left, top);
+
+				$(this).addClass('clicked');
 
 				if (currentMenuTarget && currentMenuTarget.attr('id') != obj.attr('id')) {
 					removeMenu(currentMenuTarget);

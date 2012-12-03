@@ -255,12 +255,13 @@ html[xmlns] .jstree-bu li {
 	font-weight: 100;
 	float: right;
 	padding: 7px 5px 7px 10px;
-	margin: -7px -1px 0 9px;
+	margin: -7px 0 0 9px;
 	border-top-right-radius: 3px;
 	border-bottom-right-radius: 3px;
 	cursor: pointer;
 	position: relative;
 	right: 0;
+	outline: none;
 }
 
 @-moz-document url-prefix() {
@@ -485,30 +486,6 @@ html[xmlns] .jstree-bu li {
 	margin-left: -3px;
 }
 
-#vakata-contextmenu.jstree-bu-context {
-	margin-top: 9px;
-	margin-left: -105px;
-}
-
-@-moz-document url-prefix() {
-    #vakata-contextmenu.jstree-bu-context {
-	    margin-left: -99px;
-	    margin-top: 9px;
-    }
-}
-
-.ie9 #vakata-contextmenu.jstree-bu-context {
-	margin-left: -102px;
-}
-
-.ie8 #vakata-contextmenu.jstree-bu-context {
-	margin-left: -103px;
-}
-
-.ie7 #vakata-contextmenu.jstree-bu-context {
-	margin-left: -103px;
-}
-
 #vakata-contextmenu.jstree-bu-context,
 #vakata-contextmenu.jstree-bu-context li ul {
 	background: white;
@@ -516,10 +493,6 @@ html[xmlns] .jstree-bu li {
 	-webkit-box-shadow: 2px 5px 5px #bbb;
 	-moz-box-shadow: 2px 5px 5px #bbb;
 	box-shadow: 2px 5px 5px #bbb;
-}
-
-#vakata-contextmenu.jstree-bu-context li {
-
 }
 
 #vakata-contextmenu.jstree-bu-context a {
@@ -722,16 +695,11 @@ html[xmlns] .jstree-bu li {
 .ie7 .jstree-bu .edit-options {
 	width: 80px;
 	padding: 4px 5px 4px 5px;
-	margin-top: -23px !important;
+	margin-top: -22px !important;
 }
 
 .ie7 .jstree-bu .edit-options .jstree-icon {
 	margin-top: 0px;
-}
-
-.ie7 #vakata-contextmenu.jstree-bu-context {
-	margin-top: 7px !important;
-	margin-left: -103px !important;
 }
 
 .jstree-bu a.jstree-search { color: aqua; }

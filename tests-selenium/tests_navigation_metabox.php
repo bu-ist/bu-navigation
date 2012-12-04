@@ -19,11 +19,17 @@ class BU_Navigation_Metabox extends WP_SeleniumTestCase {
 
 	}
 
+
+	public function pre_test_setup() {
+		$this->timeouts()->implicitWait(5000);
+		$this->wp->login( $this->settings['login'], $this->settings['password'] );
+	}
+
 	/**
 	 * Edit new page
 	 */
 	public function test_new_page() {
-
+		$this->pre_test_setup();
 		$page = new BUN_EditPage( $this, array( 'post_type' => 'page' ) );
 	}
 
@@ -31,7 +37,7 @@ class BU_Navigation_Metabox extends WP_SeleniumTestCase {
 	 * Edit existing page
 	 */
 	public function test_edit_page() {
-
+		$this->pre_test_setup();
 		$page = new BUN_EditPage( $this, array( 'post_id' => $this->pages[0] ) );
 
 	}

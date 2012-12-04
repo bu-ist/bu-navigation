@@ -48,11 +48,11 @@ class BUN_EditPage {
 
 		$this->webdriver = $webdriver;
 
-		$this->webdriver->open( $request_url  );
+		$this->webdriver->url( $request_url  );
 
 		try {
-			$this->webdriver->findElementBy( LocatorStrategy::xpath, $test_xpath );
-		} catch( NoSuchElementException $e ) {
+			$this->webdriver->byXpath( $test_xpath );
+		} catch( RuntimeException $e ) {
 			throw new Exception('BU Navigation edit page failed to load with URL: ' . $request_url );
 		}
 

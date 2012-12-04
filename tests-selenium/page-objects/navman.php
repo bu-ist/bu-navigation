@@ -5,7 +5,7 @@
  */
 class BUN_Navman_Page {
 
-	protected $webdriver = null;
+	protected $test = null;
 
 	/* URL's */
 	const NAVMAN_BASE_URL = '/wp-admin/edit.php?page=bu-navigation-manager';
@@ -48,6 +48,7 @@ class BUN_Navman_Page {
 	const LEAF_ID_PREFIX = 'nm';
 
 	// Tree operations
+	const TREE_LOAD_TEST_XPATH = '//div[@id="nav-tree-container"]//li/a[not(contains(@class,"jstree-loading"))]';
 	const GET_POST_BASE_XPATH = '//li[@id="%s"]';
 	const GET_POST_ANCHOR_XPATH = '//li[@id="%s"]/a';
 	const OPEN_CONTEXT_MENU_XPATH = '//li[@id="%s"]//button[@class="edit-options"]';
@@ -66,19 +67,24 @@ class BUN_Navman_Page {
 	/**
 	 * Load the Navman page
 	 */
-	function __construct( $webdriver, $post_type = 'page' ) {
+	function __construct( $test, $post_type = 'page' ) {
 
-		$this->webdriver = $webdriver;
+		$this->test = $test;
 
 		// Generate request URL
 		$request_url = self::NAVMAN_BASE_URL . '&post_type=' . $post_type;
-		$this->webdriver->open( $request_url  );
+		$this->test->url( $request_url  );
 
 		try {
-			$this->webdriver->findElementBy( LocatorStrategy::xpath, self::NAVMAN_PAGE_HEADER_XPATH );
-		} catch( NoSuchElementException $e ) {
+			$this->test->byXpath( self::NAVMAN_PAGE_HEADER_XPATH );
+		} catch( RuntimeException $e ) {
 			throw new Exception('BU Navigation Edit Order page failed to load with URL: ' . $request_url );
 		}
+
+		// Wait for tree to load
+		// @todo find a better way to do this
+		// $this->test->byXpath( self::TREE_LOAD_TEST_XPATH );
+		sleep(2);
 
 	}
 
@@ -102,7 +108,7 @@ class BUN_Navman_Page {
 				break;
 		}
 
- 		return $this->webdriver->getElement( LocatorStrategy::xpath, $xpath );
+		return $this->test->byXpath( $xpath );
 
 	}
 
@@ -114,7 +120,7 @@ class BUN_Navman_Page {
  		if( $expand_first )
  			$this->expandAll();
 
- 		return $this->webdriver->getElement( LocatorStrategy::cssSelector, '#nav-tree-container li[class*="jstree-closed"], #nav-tree-container li[class*="jstree-open"]');
+ 		return $this->test->byCssSelector( '#nav-tree-container li[class*="jstree-closed"], #nav-tree-container li[class*="jstree-open"]');
 
 	}
 
@@ -126,7 +132,7 @@ class BUN_Navman_Page {
 		$id = self::LEAF_ID_PREFIX . $id;
 
 		$xpath = sprintf( self::GET_POST_ANCHOR_XPATH, $id );
-		$page = $this->webdriver->getElement( LocatorStrategy::xpath, $xpath );
+		$page = $this->test->byXpath( $xpath );
 
 		$page->click();
 
@@ -136,14 +142,14 @@ class BUN_Navman_Page {
 	 * Expand a section in the nav tree by parent ID
 	 */
 	public function openSection( $id ) {
+
 		$id = self::LEAF_ID_PREFIX . $id;
 
 		$xpath = sprintf( self::OPEN_SECTION_ICON_XPATH, $id );
-		$el = $this->webdriver->getElement( LocatorStrategy::xpath, $xpath );
+
+		$el = $this->test->byXpath( $xpath );
 
 		$el->click();
-
-		sleep(2);
 
 	}
 
@@ -159,10 +165,8 @@ class BUN_Navman_Page {
 		$id = self::LEAF_ID_PREFIX . $id;
 
 		$xpath = sprintf( self::OPEN_CONTEXT_MENU_XPATH, $id );
-		$button = $this->webdriver->getElement( LocatorStrategy::xpath, $xpath );
+		$button = $this->test->byXpath( $xpath );
 		$button->click();
-
-		sleep(1);
 
 	}
 
@@ -174,7 +178,7 @@ class BUN_Navman_Page {
 		$this->openOptionsMenu( $id );
 
 		$edit_xpath = sprintf( self::CONTEXT_MENU_ITEM, 'edit' );
-		$btn = $this->webdriver->getElement( LocatorStrategy::xpath, $edit_xpath );
+		$btn = $this->test->byXpath( $edit_xpath );
 		$btn->click();
 
 		sleep(2);
@@ -189,7 +193,7 @@ class BUN_Navman_Page {
 		$this->openOptionsMenu( $id );
 
 		$remove_xpath = sprintf( self::CONTEXT_MENU_ITEM, 'remove' );
-		$btn = $this->webdriver->getElement( LocatorStrategy::xpath, $remove_xpath );
+		$btn = $this->test->byXpath( $remove_xpath );
 		$btn->click();
 
 		sleep(2);
@@ -210,7 +214,7 @@ class BUN_Navman_Page {
 		$data = wp_parse_args( $data, $defaults );
 
 		// Open modal
-		$add_link_anchor = $this->webdriver->getElement( LocatorStrategy::id, self::ADD_LINK_ANCHOR );
+		$add_link_anchor = $this->test->byId( self::ADD_LINK_ANCHOR );
 		$add_link_anchor->click();
 
 		// Newly created links do not get a proper post ID until after changes are saved.
@@ -220,12 +224,12 @@ class BUN_Navman_Page {
 		$id = self::get_next_new_link_id();
 
 		// Locate form elements
-		$address_field = $this->webdriver->getElement( LocatorStrategy::id, self::EDIT_LINK_ADDRESS_INPUT );
-		$label_field = $this->webdriver->getElement( LocatorStrategy::id, self::EDIT_LINK_LABEL_INPUT );
-		$add_btn = $this->webdriver->getElement( LocatorStrategy::xpath, self::EDIT_LINK_BUTTON_OK );
+		$address_field = $this->test->byId( self::EDIT_LINK_ADDRESS_INPUT );
+		$label_field = $this->test->byId( self::EDIT_LINK_LABEL_INPUT );
+		$add_btn = $this->test->byXpath( self::EDIT_LINK_BUTTON_OK );
 
 		$target_selector = sprintf('input[name="%s"][value="%s"]', self::EDIT_LINK_TARGET_RADIO, $data['target'] );
-		$target_radio = $this->webdriver->getElement( LocatorStrategy::cssSelector, $target_selector );
+		$target_radio = $this->test->byCssSelector( $target_selector );
 
 		// Fill out form
 		$address_field->sendKeys( array( $data['url'] ) );
@@ -253,12 +257,12 @@ class BUN_Navman_Page {
 		$data = wp_parse_args( $data, $defaults );
 
 		// Locate form elements
-		$address_field = $this->webdriver->getElement( LocatorStrategy::id, self::EDIT_LINK_ADDRESS_INPUT );
-		$label_field = $this->webdriver->getElement( LocatorStrategy::id, self::EDIT_LINK_LABEL_INPUT );
-		$add_btn = $this->webdriver->getElement( LocatorStrategy::xpath, self::EDIT_LINK_BUTTON_OK );
+		$address_field = $this->test->byId( self::EDIT_LINK_ADDRESS_INPUT );
+		$label_field = $this->test->byId( self::EDIT_LINK_LABEL_INPUT );
+		$add_btn = $this->test->byXpath( self::EDIT_LINK_BUTTON_OK );
 
 		$target_selector = sprintf('input[name="%s"][value="%s"]', self::EDIT_LINK_TARGET_RADIO, $data['target'] );
-		$target_radio = $this->webdriver->getElement( LocatorStrategy::cssSelector, $target_selector );
+		$target_radio = $this->test->byCssSelector( $target_selector );
 
 		// Fill out form
 		$address_field->clear();
@@ -283,7 +287,7 @@ class BUN_Navman_Page {
 		$new_link_count = 0;
 
 		try {
-			$newLinks = $this->webdriver->findElementsBy(LocatorStrategy::xpath, $xpath);
+			$newLinks = $this->test->byXpath( $xpath );
 			$new_link_count = count($newLinks);
 		} catch( NoSuchElementException $e ) {
 			return 0;
@@ -297,7 +301,6 @@ class BUN_Navman_Page {
 	 *
 	 * @todo
 	 *	- this isn't working correctly, perhaps due to issues with webdrivers moveto method
-	 *	- look at other php webdriver bindings
 	 */
 	public function movePost( $src_id, $dest_id, $location = 'inside' ) {
 
@@ -305,8 +308,8 @@ class BUN_Navman_Page {
  		$dest_xpath = sprintf( self::GET_POST_ANCHOR_XPATH, self::LEAF_ID_PREFIX . $dest_id );
 
  		// Find source and destination pages
-		$src = $this->webdriver->getElement( LocatorStrategy::xpath, $src_xpath );
-		$dest = $this->webdriver->getElement( LocatorStrategy::xpath, $dest_xpath );
+		$src = $this->test->byXpath( $src_xpath );
+		$dest = $this->test->byXpath( $dest_xpath );
 
 		// Calculate offset based on desired movement location
 		$y_offset = 0;
@@ -332,20 +335,20 @@ class BUN_Navman_Page {
 		// var_dump('Move location: ' . $location );
 		// var_dump('Y offset: ' . $y_offset );
 
-		// moveTo, buttownDown and buttonUp are not implemented in php-webdriver
+		// moveTo, buttownDown and buttonUp are not implemented in php-test
 		// we have added them in to ours
 		// @todo this works in theory, but the second moveTo doesn't appear to be working
 
-		$this->webdriver->moveTo( $src );
-		$this->webdriver->buttonDown();
-		$this->webdriver->moveTo( $dest, null, round($y_offset) );
-		$this->webdriver->buttonUp();
+		$this->test->moveto( $src );
+		$this->test->buttondown();
+		$this->test->moveto( $dest );
+		$this->test->buttonup();
 
 	}
 
 	public function expandAll() {
 
-		$btn = $this->webdriver->getElement( LocatorStrategy::id, self::NAVMAN_EXPAND_BTN );
+		$btn = $this->test->byId( self::NAVMAN_EXPAND_BTN );
 		$btn->click();
 		sleep(1);
 
@@ -353,14 +356,14 @@ class BUN_Navman_Page {
 
 	public function collapseAll() {
 
-		$btn = $this->webdriver->getElement( LocatorStrategy::id, self::NAVMAN_COLLAPSE_BTN );
+		$btn = $this->test->byId( self::NAVMAN_COLLAPSE_BTN );
 		$btn->click();
 		sleep(1);
 	}
 
 	public function save() {
 
-		$button = $this->webdriver->getElement( LocatorStrategy::id, self::NAVMAN_SAVE_BTN );
+		$button = $this->test->byId( self::NAVMAN_SAVE_BTN );
 		$button->click();
 		sleep(1);
 
@@ -371,7 +374,7 @@ class BUN_Navman_Page {
 	public function assertPostNotExists( $id ) {
 		try {
 			$xpath = sprintf( self::GET_POST_BASE_XPATH, $id );
-			$this->webdriver->findElementBy( LocatorStrategy::xpath, $xpath );
+			$this->test->findElementBy( LocatorStrategy::xpath, $xpath );
 		} catch( NoSuchElementException $e ) {
 			return true;
 		}
@@ -385,7 +388,12 @@ class BUN_Navman_Page {
 		$dest_id = self::LEAF_ID_PREFIX . $dest_id;
 
 		$selector = sprintf("#%s > ul > #%s", $dest_id, $src_id );
-		$this->webdriver->getElement( LocatorStrategy::cssSelector, $selector );
+
+		try {
+			$this->test->byCssSelector( $selector );
+		} catch( RuntimeException $e ) {
+			$this->test->fail("Failed to assert that post $src_id was moved inside of post $dest_id");
+		}
 
 	}
 
@@ -395,7 +403,13 @@ class BUN_Navman_Page {
 		$dest_id = self::LEAF_ID_PREFIX . $dest_id;
 
 		$selector = sprintf("#%s + #%s", $src_id, $dest_id );
-		$this->webdriver->getElement( LocatorStrategy::cssSelector, $selector );
+
+		$this->test->byCssSelector( $selector );
+
+		// try {
+		// } catch( RuntimeException $e ) {
+		// 	$this->test->fail("Failed to assert that post $src_id was moved before post $dest_id");
+		// }
 
 	}
 
@@ -405,35 +419,40 @@ class BUN_Navman_Page {
 		$dest_id = self::LEAF_ID_PREFIX . $dest_id;
 
 		$selector = sprintf("#%s + #%s", $dest_id, $src_id );
-		$this->webdriver->getElement( LocatorStrategy::cssSelector, $selector );
+
+		try {
+			$this->test->byCssSelector( $selector );
+		} catch( RuntimeException $e ) {
+			$this->test->fail("Failed to assert that post $src_id was moved after post $dest_id");
+		}
 
 	}
 
 	public function assertLinkExistsWithLabel( $label ) {
 
 		$xpath = sprintf('//li[@rel="link"]//span[@class="title" and contains(text(),"%s")]', $label );
-		$this->webdriver->getElement( LocatorStrategy::xpath, $xpath );
+		$this->test->byXpath( $xpath );
 
 	}
 
 	public function assertNewLinkExists( $id ) {
 
 		$xpath = sprintf(self::NEW_LINK_XPATH,$id);
-		$this->webdriver->getElement( LocatorStrategy::xpath, $xpath );
+		$this->test->byXpath( $xpath );
 
 	}
 
 	public function assertExistingLinkExists( $id ) {
 
 		$xpath = sprintf(self::GET_POST_BASE_XPATH, self::LEAF_ID_PREFIX . $id );
-		$this->webdriver->getElement( LocatorStrategy::xpath, $xpath );
+		$this->test->byXpath( $xpath );
 
 	}
 
 	public function assertChangesWereSaved() {
 
-		$msg = $this->webdriver->getElement( LocatorStrategy::xpath, self::NAVMAN_NOTICE_UPDATED_XPATH );
-		$this->webdriver->assertEquals( 'Your navigation changes have been saved', $msg->getText() );
+		$msg = $this->test->byXpath( self::NAVMAN_NOTICE_UPDATED_XPATH );
+		$this->test->assertEquals( 'Your navigation changes have been saved', $msg->getText() );
 
 	}
 

@@ -31,11 +31,11 @@ class BUN_Settings_Page {
 		$this->webdriver = $webdriver;
 
 		// Generate request URL
-		$this->webdriver->open( self::URL  );
+		$this->webdriver->url( self::URL  );
 
 		try {
-			$this->webdriver->findElementBy( LocatorStrategy::xpath, self::PAGE_HEADING_XPATH );
-		} catch( NoSuchElementException $e ) {
+			$this->webdriver->byXpath( self::PAGE_HEADING_XPATH );
+		} catch( RuntimeException $e ) {
 			throw new Exception('BU Navigation Settings page failed to load with URL: ' . self::URL );
 		}
 
@@ -73,7 +73,7 @@ class BUN_Settings_Page {
 		$this->assertChangesWereSaved();
 
 		// Reload settings page to make SURE form data has updated
-		$this->webdriver->open( self::URL );
+		$this->webdriver->url( self::URL );
 		$this->form = new SeleniumFormHelper( $this->webdriver, self::FORM_ID );
 
 
@@ -85,7 +85,7 @@ class BUN_Settings_Page {
 		$this->assertErrorSavingChanges();
 
 		// Reload settings page to make SURE form data has updated
-		$this->webdriver->open( self::URL );
+		$this->webdriver->url( self::URL );
 		$this->form = new SeleniumFormHelper( $this->webdriver, self::FORM_ID );
 
 	}
@@ -94,13 +94,13 @@ class BUN_Settings_Page {
 
 	public function assertChangesWereSaved() {
 
-		$notice = $this->webdriver->getElement( LocatorStrategy::xpath, self::NOTICE_UPDATED_XPATH );
+		$notice = $this->webdriver->byXpath( self::NOTICE_UPDATED_XPATH );
 
 	}
 
 	public function assertErrorSavingChanges() {
 
-		$notice = $this->webdriver->getElement( LocatorStrategy::xpath, self::NOTICE_ERRORS_XPATH );
+		$notice = $this->webdriver->byXpath( self::NOTICE_ERRORS_XPATH );
 
 	}
 

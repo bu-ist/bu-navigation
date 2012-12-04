@@ -15,11 +15,17 @@ require_once 'page-objects/primary-navigation-settings.php';
  */
  class BU_Navigation_Primary_Settings_Test extends WP_SeleniumTestCase {
 
+	public function pre_test_setup() {
+		$this->timeouts()->implicitWait(5000);
+		$this->wp->login( $this->settings['login'], $this->settings['password'] );
+	}
+
 	/**
 	* Primary navigation settings menu item is present and page loads correctly
 	*/
 	public function test_load_page() {
 
+		$this->pre_test_setup();
 		$page = new BUN_Settings_Page( $this );
 
 	}
@@ -28,7 +34,7 @@ require_once 'page-objects/primary-navigation-settings.php';
 	* Toggle "Display primary navigation bar" option
 	*/
 	public function test_display_navbar_field() {
-
+		$this->pre_test_setup();
 		$page = new BUN_Settings_Page( $this );
 
 		$value = $page->getOption('display');
@@ -52,7 +58,7 @@ require_once 'page-objects/primary-navigation-settings.php';
 	* Set maximum items count
 	*/
 	public function test_max_items_field() {
-
+		$this->pre_test_setup();
 		$page = new BUN_Settings_Page( $this );
 
 		// Test default value
@@ -86,7 +92,7 @@ require_once 'page-objects/primary-navigation-settings.php';
 	* Toggle "Use drop-down menus" option
 	*/
 	public function test_use_drop_downs_field() {
-
+		$this->pre_test_setup();
 		$page = new BUN_Settings_Page( $this );
 
 		$value = $page->getOption('dive');
@@ -110,14 +116,8 @@ require_once 'page-objects/primary-navigation-settings.php';
 	* Toggle "Allow Top-Level Pages" option
 	*/
 	public function test_allow_top_level_field() {
-
+		$this->pre_test_setup();
 		$page = new BUN_Settings_Page( $this );
-
-		$value = $page->getOption('allow_top');
-		$this->assertFalse( $value );
-
-		$page->setOptions( array( 'allow_top' =>  1 ) );
-		$page->save();
 
 		$value = $page->getOption('allow_top');
 		$this->assertTrue( $value );
@@ -127,6 +127,12 @@ require_once 'page-objects/primary-navigation-settings.php';
 
 		$value = $page->getOption('allow_top');
 		$this->assertFalse( $value );
+
+		$page->setOptions( array( 'allow_top' =>  1 ) );
+		$page->save();
+
+		$value = $page->getOption('allow_top');
+		$this->assertTrue( $value );
 
 	}
 

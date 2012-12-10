@@ -91,10 +91,10 @@ class BU_Navigation_Reorder_Tracker {
 
 			foreach( $children as $child ) {
 
-				// Skip update for any children that were already handled in process_insertions and process_moves
-				if( ! $this->post_already_moved( $child->ID, $parent_id ) ) {
+				// Skip reorder for posts that were already moved
+				if( ! $this->post_already_moved( $child ) ) {
 
-					// Skip over previously set positions
+					// Skip any positions that were previously set for a moved post
 					while( $this->position_already_set( $position, $parent_id ) ) {
 
 						// Skip over any positions that were set for previously updated children
@@ -113,6 +113,10 @@ class BU_Navigation_Reorder_Tracker {
 							$error_msg = sprintf('Error updating menu order (%s) for post (%s): %s', $position, $child->post_title, $wpdb->last_error );
 							error_log($error_msg);
 							array_push( $this->errors, new WP_Error( 'bu_navigation_reorder_error', $error_msg ) );
+						} else {
+
+							wp_cache_delete( $child->ID, 'posts' );
+
 						}
 
 						// Temporary logging
@@ -136,6 +140,9 @@ class BU_Navigation_Reorder_Tracker {
 
 		}
 
+		// Global caches
+		wp_cache_delete( 'get_pages' );
+
 		if( $this->has_errors() ) {
 			$result = false;
 		}
@@ -144,12 +151,31 @@ class BU_Navigation_Reorder_Tracker {
 
 	}
 
-	public function post_already_moved( $id, $parent = 0 ) {
-		return isset( $this->already_moved[$parent] ) && in_array( $id, $this->already_moved[$parent]['ids'] );
+	public function post_already_moved( $post ) {
+		if( is_numeric( $post ) ) {
+			$post = get_post( $post );
+		}
+		if( !is_object( $post ) ) {
+			return false;
+		}
+
+		return isset( $this->already_moved[$post->post_parent] ) && in_array( $post->ID, $this->already_moved[$post->post_parent]['ids'] );
 	}
 
 	public function position_already_set( $position, $parent = 0 ) {
+
 		return isset( $this->already_moved[$parent] ) && in_array( $position, $this->already_moved[$parent]['positions'] );
+
+	}
+
+	public function get_moved_posts() {
+		$moved = array();
+
+		foreach( $this->already_moved as $section => $moves ) {
+			array_merge( $moved, $moves['ids'] );
+		}
+
+		return array_unique( $moved );
 	}
 
 	public function has_moves() {

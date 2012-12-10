@@ -2,7 +2,8 @@
     "parent": {
         "data": {
                 "post_title": "Parent Page",
-                "post_type": "page"
+                "post_type": "page",
+                "menu_order": 1
             },
         "metadata": {},
         "children": {
@@ -10,7 +11,8 @@
             "child": {
                 "data": {
                         "post_title": "Child Page",
-                        "post_type": "page"
+                        "post_type": "page",
+                        "menu_order": 1
                     },
                 "metadata": {
                     "_bu_cms_navigation_exclude": "1"
@@ -20,7 +22,8 @@
                     "grandchild_one": {
                         "data": {
                                 "post_title": "Grand Child Page 1",
-                                "post_type": "page"
+                                "post_type": "page",
+                                "menu_order": 1
                             },
                         "metadata": {},
                         "children": {}
@@ -30,7 +33,9 @@
                     "grandchild_two": {
                         "data": {
                                 "post_title": "Grand Child Page 2",
-                                "post_type": "page"
+                                "post_type": "page",
+                                "menu_order": 2
+
                             },
                         "metadata": {},
                         "children": {}
@@ -44,7 +49,8 @@
     "hidden": {
         "data": {
                 "post_title": "Hidden Page",
-                "post_type": "page"
+                "post_type": "page",
+                "menu_order": 2
             },
         "metadata": { "_bu_cms_navigation_exclude": "1" },
         "children": {}
@@ -53,7 +59,8 @@
     "edit": {
         "data": {
                 "post_title": "Edit and Delete Me",
-                "post_type": "page"
+                "post_type": "page",
+                "menu_order": 3
             },
         "metadata": {},
         "children": {}
@@ -63,7 +70,8 @@
         "data": {
                 "post_title": "Google",
                 "post_content": "http://www.google.com",
-                "post_type": "link"
+                "post_type": "link",
+                "menu_order": 4
             },
         "metadata": {
             "bu_link_target": "new"
@@ -74,7 +82,8 @@
     "last_page": {
         "data": {
                 "post_title": "Last Page",
-                "post_type": "page"
+                "post_type": "page",
+                "menu_order": 5
             },
         "metadata": {},
         "children": {}

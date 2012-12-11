@@ -972,6 +972,10 @@ bu.plugins.navigation = {};
 			// Deselect all nodes on document clicks outside of a tree element or
 			// context menu item
 			var deselectOnDocumentClick = function (e) {
+				if (typeof $tree[0] === 'undefined') {
+					return;
+				}
+
 				var clickedTree = $.contains( $tree[0], e.target );
 				var clickedMenuItem = $.contains( $('#vakata-contextmenu')[0], e.target );
 
@@ -980,7 +984,7 @@ bu.plugins.navigation = {};
 				}
 			};
 
-			if (c.deselectOnDocumentClick ) {
+			if (c.deselectOnDocumentClick) {
 				$(document).bind( "click", deselectOnDocumentClick );
 			}
 

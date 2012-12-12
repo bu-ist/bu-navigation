@@ -18,6 +18,7 @@
     color: #AF5D5D;
 }
 
+#TB_window .bu-edit-post.current-post-status-auto-draft .denied > a,
 #TB_window .bu-edit-post.current-post-status-draft .denied > a,
 #TB_window .bu-edit-post.current-post-status-pending .denied > a,
 #TB_window .bu-edit-post.current-post-status-private .denied > a {

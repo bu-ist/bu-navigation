@@ -4,9 +4,9 @@
 // We are looking at the current version here to decide whether or not it is needed.
 global $wp_version;
 if( version_compare( $wp_version, '3.2', '>=' ) ): ?>
-<input type="hidden" name="parent_id" value="<?php echo $post->post_parent; ?>">
+<input type="hidden" name="parent_id" value="<?php echo $post->post_parent; ?>" />
 <?php endif; ?>
-<input type="hidden" name="menu_order" value="<?php echo $post->menu_order; ?>">
+<input type="hidden" name="menu_order" value="<?php echo $post->menu_order; ?>" />
 
 <div id="bu-move-post" class="container">
 	<?php echo $breadcrumbs; ?>
@@ -17,20 +17,20 @@ if( version_compare( $wp_version, '3.2', '>=' ) ): ?>
 
 <div id="bu-navigation-label" class="container">
 		<label for="bu-post-nav-label" class="label"><?php _e('Label'); ?></label>
-		<input id="bu-post-nav-label" name="nav_label" type="text" value="<?php echo $nav_label; ?>"/>
+		<input id="bu-post-nav-label" name="nav_label" type="text" value="<?php echo $nav_label; ?>" />
 </div>
 
 <div id="bu-navigation-visibility" class="container">
 	<span class="label"><?php _e('Visiblity'); ?></span>
-	<input id="bu-post-nav-display" name="nav_display" type="checkbox" value="yes" <?php checked( $nav_display, true ); ?>/>
-	<label for="bu-post-nav-display" class="hint">Display in navigation lists.</span>
+	<input id="bu-post-nav-display" name="nav_display" type="checkbox" value="yes" <?php checked( $nav_display, true ); ?> />
+	<label for="bu-post-nav-display" class="hint">Display in navigation lists.</label>
 </div>
 
 <div id="edit-post-placement" style="display:none;">
 	<div class="post-placement-toolbar">
 		<div class="edit-buttons">
 			<a href="#" id="bu-post-placement-cancel" class="button">Cancel</a>
-			<input id="bu-post-placement-save" class="button-primary" type="submit" value="Update Location">
+			<input id="bu-post-placement-save" class="button-primary" type="submit" value="Update Location" />
 		</div>
 		<p class="hint">Drag <?php echo $lc_label; ?> to change the <?php echo $lc_label; ?>'s location in the hierarchy.</p>
 		<?php if( $post->post_status != 'publish' && current_user_can('edit_in_section') && ! is_super_admin() ): ?>

@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Page Navigation
-Version: 1.0
+Version: 1.0.1
 Author URI: http://www.bu.edu/tech/help/
 Description: Provides alternative navigation elements designed for blogs with large page counts
 Author: Boston University (IS&T)
@@ -68,7 +68,7 @@ class BU_Navigation_Plugin {
 	const OPTION_DEPTH = 'bu_navigation_primarynav_depth';
 	const OPTION_ALLOW_TOP = 'bu_allow_top_level_page';
 
-	const VERSION = '1.0-RC1';
+	const VERSION = '1.0.1';
 
 	public function __construct() {
 

@@ -141,7 +141,7 @@ class BU_Navigation_Reorder_Tracker {
 		}
 
 		// Global caches
-		wp_cache_delete( 'get_pages' );
+		wp_cache_delete( 'get_pages', 'posts' );
 
 		if( $this->has_errors() ) {
 			$result = false;

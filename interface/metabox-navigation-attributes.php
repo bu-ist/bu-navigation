@@ -21,7 +21,7 @@ if( version_compare( $wp_version, '3.2', '>=' ) ): ?>
 </div>
 
 <div id="bu-navigation-visibility" class="container">
-	<span class="label"><?php _e('Visiblity'); ?></span>
+	<span class="label"><?php _e('Visibility'); ?></span>
 	<input id="bu-post-nav-display" name="nav_display" type="checkbox" value="yes" <?php checked( $nav_display, true ); ?> />
 	<label for="bu-post-nav-display" class="hint">Display in navigation lists.</label>
 </div>

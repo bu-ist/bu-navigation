@@ -1,22 +1,21 @@
 <?php
-/*
+/**
  * Generic navigation function for WordPress 2.8+
  * Niall Kavanagh
  * ntk@bu.edu
- *
- * It is recommended you load this library as needed. If it has already been
- * loaded, the BU_NAVIGATION_LIB_LOADED named constant will be defined. E.g.:
- *
- * if (!defined('BU_NAVIGATION_LIB_LOADED'))
- *     require_once('lib/bu-navigation/bu-navigation.php');
- *
  */
 
-define('BU_NAVIGATION_LIB_LOADED', TRUE);
-define('BU_NAVIGATION_PRIMARY_MAX', 6);
-define('BU_NAVIGATION_PRIMARY_DEPTH', 1);
-define('GROUP_CONCAT_MAX_LEN', 20480);
+define( 'BU_NAVIGATION_LIB_LOADED', TRUE );
 
+define( 'GROUP_CONCAT_MAX_LEN', 20480 );
+
+// Allow themes to override primary navigation defaults
+
+if ( !defined( 'BU_NAVIGATION_PRIMARY_MAX' ) )
+	define( 'BU_NAVIGATION_PRIMARY_MAX', 6 );
+
+if ( !defined( 'BU_NAVIGATION_PRIMARY_DEPTH' ) )
+	define( 'BU_NAVIGATION_PRIMARY_DEPTH', 1 );
 
 /**
  * Gets the supported post_types by the bu-navigation plugin.

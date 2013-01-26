@@ -41,18 +41,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * Filter for drilling into a particular section when view the edit pages screen
  */
 
-/* BU Navigation constants */
 define('BU_NAV_PLUGIN_DIR', dirname(__FILE__));
 
-/* Load navigation library */
-if (!defined('BU_INCLUDES_PATH')) {
-    if(!defined('BU_NAVIGATION_LIB_LOADED')) {
-        require_once('lib/bu-navigation/bu-navigation.php');
-        define('BU_NAVIGATION_LIB_LOADED', true);
-    }
-} else {
-    require_once(BU_INCLUDES_PATH . '/bu-navigation/bu-navigation.php');
-}
+require_once dirname( __FILE__ ) . '/includes/library.php';
 
 class BU_Navigation_Plugin {
 

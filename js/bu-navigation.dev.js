@@ -7,6 +7,8 @@
 /*jslint browser: true, todo: true */
 /*global bu: true, jQuery: false, console: false, window: false, document: false */
 
+// @todo remove hardcoded post->post_type = 'link', read from server
+
 var bu = bu || {};
 
 bu.plugins = bu.plugins || {};
@@ -266,7 +268,8 @@ bu.plugins.navigation = {};
 								post_types : c.postTypes,
 								post_statuses : c.postStatuses,
 								instance : c.instance,
-								prefix : c.nodePrefix
+								prefix : c.nodePrefix,
+								include_links: c.includeLinks
 							};
 						}
 					},
@@ -311,7 +314,7 @@ bu.plugins.navigation = {};
 					return false;
 				}
 			}
-			
+
 			that.selectPost = function( post, deselect_all ) {
 				deselect_all = deselect_all || true;
 				var $node = my.getNodeForPost(post);
@@ -734,7 +737,7 @@ bu.plugins.navigation = {};
 
 				// Re-calculate statuses that might depend on ancestors
 				calculateInheritedStatuses($node);
-				
+
 				// Default metadata badges
 				excluded = post.post_meta['excluded'] || false;
 				restricted = post.post_meta['restricted'] || $node.data('inheritedRestriction') || false;
@@ -1101,7 +1104,7 @@ bu.plugins.navigation = {};
 				e.stopPropagation();
 
 				var pos, width, height, top, left, obj;
-				
+
 				// Calculate location
 				pos = $(this).offset();
 				width = $(this).outerWidth();
@@ -1110,7 +1113,7 @@ bu.plugins.navigation = {};
 				left = pos.left;
 				top = top + height;
 				left = (left + width) - 180;
-				
+
 				obj = $(this).closest('li');
 
 				$tree.jstree('deselect_all');
@@ -1178,11 +1181,11 @@ bu.plugins.navigation = {};
 //					"initially_open": toOpen
 //				};
 //			}
-	
+
 			extraTreeConfig['dnd'] = {
-				"drag_container": c.treeDragContainer	
+				"drag_container": c.treeDragContainer
 			};
-			
+
 			// Merge base tree config with extras
 			$.extend( true, d.treeConfig, extraTreeConfig );
 
@@ -1197,20 +1200,20 @@ bu.plugins.navigation = {};
 			bu.hooks.addFilter( 'canSelectNode', assertCurrentPost );
 			bu.hooks.addFilter( 'canHoverNode', assertCurrentPost );
 			bu.hooks.addFilter( 'canDragNode', assertCurrentPost );
-	
+
 			// The following logic will be simplified once we don't have
 			// to handled unpublished content as special cases.
 			// For right now, they are excluded from the AJAX calls to
 			// list posts, which means we have to create any unpublished
 			// ancestors as well as the current post (if it is new or unpublished)
 			// client side to make sure they are represented in the tree.
-			
+
 			$tree.bind('loaded.jstree', function (e, data) {
 				var ancestors, i;
-				
+
 				// Need to load and open ancestors before we can select current post
 				if (c.ancestors && c.ancestors.length) {
-					
+
 					// We want old -> young, which is not how they're passed
 					ancestors = c.ancestors.reverse();
 
@@ -1220,46 +1223,46 @@ bu.plugins.navigation = {};
 
 						// Remove root post
 						ancestors.shift();
-						
+
 						// Wait for root node to load and open before continuing
 						$tree.jstree('open_node', $root, function() {
-							
+
 							// Open ancestors first
 							revealCurrentPost(ancestors);
 
 						}, true );
 
 					} else {
-						
+
 							// Open ancestors first
 							revealCurrentPost(ancestors);
-							
+
 					}
-					
+
 				} else {
-					
+
 						// Current post is top level -- select or insert
 						selectCurrentPost();
-						
+
 				}
 
 			});
 
 			var revealCurrentPost = function (ancestors) {
 				ancestors = ancestors || [];
-				
+
 				var current, i;
-				
+
 				// Root node does not exist, no nead to load
 				for (i = 0; i < ancestors.length; i = i + 1) {
 					current = c.ancestors[i];
-						
+
 					// Attempt to open, insert and open on failure
 					if (that.openPost(current.ID) === false) {
 						that.insertPost(current);
 						that.openPost(current.ID);
 					}
-						
+
 				}
 
 				// Select or insert current post
@@ -1268,13 +1271,13 @@ bu.plugins.navigation = {};
 			};
 
 			var selectCurrentPost = function () {
-				
+
 				// Insert post if it isn't already represented in the tree (new, draft, or pending posts)
 				var $current = my.getNodeForPost(currentPost);
 
 				if (!$current) {
 					// Insert and select self, then save tree state
-					that.insertPost(currentPost, function($node) { 
+					that.insertPost(currentPost, function($node) {
 						that.selectPost(currentPost);
 						that.save();
 					});

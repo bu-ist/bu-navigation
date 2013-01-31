@@ -124,17 +124,15 @@ class BU_Navigation_Admin_Navman {
 			wp_register_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-navigation','jquery-ui-dialog','bu-jquery-validate'), BU_Navigation_Plugin::VERSION, true );
 
 			// Setup dynamic script context for manage.js
-			$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
-
 			$script_context = array(
-				'postTypes' => $post_types,
+				'postTypes' => $this->post_type,
 				'nodePrefix' => 'nm',
 				'lazyLoad' => true,
 				'showCounts' => true
 				);
 			// Navigation tree view will handle actual enqueuing of our script
 			$treeview = new BU_Navigation_Tree_View( 'bu_navman', $script_context );
-			$treeview->enqueue_script('bu-navman');
+			$treeview->enqueue_script( 'bu-navman' );
 
 			// Styles
 			if ( 'classic' == get_user_option( 'admin_color') ) {
@@ -400,7 +398,7 @@ class BU_Navigation_Admin_Navman {
 				$deleted = $force_delete = false;
 
 				// Permanently delete links, as there is currently no way to recover them from trash
-				if( 'link' == $post->post_type ) {
+				if( BU_NAVIGATON_LINK_POST_TYPE == $post->post_type ) {
 					$force_delete = true;
 				}
 
@@ -435,8 +433,6 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Updates posts (really just links at this time) that have been modified using the navman interface
-	 *
-	 * @todo write unit tests
 	 *
 	 * @param array $posts an array of posts which have been modified
 	 * @return bool|WP_Error $result the result of the post updates
@@ -499,8 +495,6 @@ class BU_Navigation_Admin_Navman {
 	/**
 	 * Insert posts (really just links at this time) that have been added using the navman interface
 	 *
-	 * @todo write unit tests
-	 *
 	 * @param array $posts an array of posts which have been added
 	 * @return bool|WP_Error $result the result of the post insertions
 	 */
@@ -516,7 +510,7 @@ class BU_Navigation_Admin_Navman {
 			foreach( $posts as $post ) {
 
 				// Special handling for new links -- need to get a valid post ID
-				if ( 'link' == $post->post_type ) {
+				if ( BU_NAVIGATON_LINK_POST_TYPE == $post->post_type ) {
 
 					$inserted = false;
 
@@ -530,7 +524,7 @@ class BU_Navigation_Admin_Navman {
 							'post_content' => $post->post_content,
 							'post_excerpt' => '',
 							'post_status' => 'publish',
-							'post_type' => 'link',
+							'post_type' => BU_NAVIGATON_LINK_POST_TYPE,
 							'post_parent' => $post->post_parent,
 							'menu_order' => $post->menu_order
 							);
@@ -577,8 +571,6 @@ class BU_Navigation_Admin_Navman {
 
 	/**
 	 * Updates posts that have been moved using the navman interface
-	 *
-	 * @todo write unit tests
 	 *
 	 * @param array $posts an array of posts which have new menu_order or post_parent fields
 	 * @return bool|WP_Error $result the result of the post movements
@@ -678,7 +670,7 @@ class BU_Navigation_Admin_Navman {
 
 		// @todo we can't respect section editing permissions for links via current_user_can
 		// until they are a registered post type
-		if( 'link' == $post->post_type ) {
+		if( BU_NAVIGATON_LINK_POST_TYPE == $post->post_type ) {
 			$is_section_editor = ! is_super_admin() && current_user_can( 'edit_in_section' );
 
 			if( class_exists('BU_Group_Permissions') && $is_section_editor ) {

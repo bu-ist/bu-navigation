@@ -26,6 +26,9 @@ class BU_Widget_Pages extends WP_Widget
 
 	/**
 	 * Returns HTML fragment containing a section title
+	 *
+	 * @todo update to use "include_links" instead of post type logic
+	 *
 	 * @return string HTML fragment with title
 	 */
 	function section_title($args, $instance)
@@ -37,7 +40,7 @@ class BU_Widget_Pages extends WP_Widget
 		$href = '';
 
 		$section_id = 0;
-		$post_types = ($post->post_type == 'page' ? array('page', 'link') : array($post->post_type));
+		$post_types = ($post->post_type == 'page' ? array('page', BU_NAVIGATON_LINK_POST_TYPE) : array($post->post_type));
 
 		if ($instance['navigation_style'] != 'site')
 		{
@@ -87,13 +90,16 @@ class BU_Widget_Pages extends WP_Widget
 		return $html;
 	}
 
+	/**
+	 * @todo update to use "include_links" instead of post type logic
+	 */
 	function widget( $args, $instance )
 	{
 		global $post;
 
 		// only works for supported post_types
 		if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) return;
-		$post_types = ($post->post_type == 'page' ? array('page', 'link') : array($post->post_type));
+		$post_types = ($post->post_type == 'page' ? array('page', BU_NAVIGATON_LINK_POST_TYPE) : array($post->post_type));
 
 		extract( $args );
 

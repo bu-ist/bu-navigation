@@ -65,21 +65,20 @@ class BU_Navigation_Admin_Metabox {
 
 		// Setup dynamic script context for navigation-metabox.js
 		$post_id = is_object( $this->post ) ? $this->post->ID : null;
-		$post_types = ( $this->post_type == 'page' ? array( 'page', 'link' ) : array( $this->post_type ) );
 		$ancestors = $this->get_formatted_ancestors();
 
 		$script_context = array(
-			'postTypes' => $post_types,
+			'postTypes' => $this->post_type,
 			'currentPost' => $post_id,
 			'ancestors' => $ancestors,
 			'lazyLoad' => false,
 			'showCounts' => false,
 			'nodePrefix' => 'na',
-			'deselectOnDocumentClick' => false
+			'deselectOnDocumentClick' => false,
 			);
 		// Navigation tree view will handle actual enqueuing of our script
 		$treeview = new BU_Navigation_Tree_View( 'nav_metabox', $script_context );
-		$treeview->enqueue_script('bu-navigation-metabox');
+		$treeview->enqueue_script( 'bu-navigation-metabox' );
 
 		// Styles
 		wp_enqueue_style( 'bu-navigation-metabox', $styles_path . '/navigation-metabox.css', array(), BU_Navigation_Plugin::VERSION );
@@ -151,22 +150,24 @@ class BU_Navigation_Admin_Metabox {
 			$post = get_post($post->post_parent);
 			array_push($ancestors, $this->format_post( $post ) );
 		}
-		
-		return $ancestors;	
+
+		return $ancestors;
 	}
-	
+
 	public function format_post( $post ) {
 
+		// @todo -- move to ACL plugin
 		// Get necessary metadata
 		$acl_option = defined( 'BuAccessControlList::PAGE_ACL_OPTION' ) ? BuAccessControlList::PAGE_ACL_OPTION : BU_ACL_PAGE_OPTION;
+
 		$post->excluded = get_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE, true);
-		$post->excluded = ($post->excluded == "1" ) ? true : false; 
-		$post->protected = ! empty( $post->post_password ); 
+		$post->excluded = ($post->excluded == "1" ) ? true : false;
+		$post->protected = ! empty( $post->post_password );
 		$post->restricted = get_post_meta( $post->ID, $acl_option, true );
 		$post->restricted = ! empty( $post->restricted ) ? $post->restricted : false;
-		
+
 		// Label
-		$post->post_title = bu_navigation_get_label( $post );	
+		$post->post_title = bu_navigation_get_label( $post );
 
 		$formatted = array(
 			'ID' => $post->ID,
@@ -205,7 +206,7 @@ class BU_Navigation_Admin_Metabox {
 	}
 
 	public function get_post_breadcrumbs( $post ) {
-		
+
 		$output = "<ul id=\"bu-post-breadcrumbs\">";
 
 		$ancestors = array_reverse( get_post_ancestors( $post->ID ) );
@@ -214,7 +215,7 @@ class BU_Navigation_Admin_Metabox {
 		foreach( $ancestors as $ancestor ) {
 			$p = get_post($ancestor);
 			$label = bu_navigation_get_label( $p );
-			
+
 			if( $ancestor != end($ancestors) ) {
 				$output .= "<li>" . $label . "<ul>";
 			} else {
@@ -222,7 +223,7 @@ class BU_Navigation_Admin_Metabox {
 				$output .= str_repeat( "</li></ul>", count( $ancestors ) );
 			}
 		}
-		
+
 		return $output;
 	}
 

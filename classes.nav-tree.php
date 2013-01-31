@@ -28,13 +28,15 @@ class BU_Navigation_Tree_View {
 		// Merge default script context with arg
 		$defaults = array(
 			'childOf' => 0,
-			'postTypes' => array('page','link'),
+			'postTypes' => array('page'),
 			'postStatuses' => array('publish'),
+			'includeLinks' => true,
 			'themePath' => plugins_url('js/vendor/jstree/themes/bu-jstree', __FILE__ ),
 			'rpcUrl' => admin_url('admin-ajax.php?action=bu-get-navtree' ),
 			'getPostRpcUrl' => admin_url('admin-ajax.php?action=bu-get-post'),
 			'allowTop' => $this->plugin->get_setting('allow_top'),
-			'loadInitialData' => false,
+			'linksEnabled' => BU_NAVIGATION_LINKS_ENABLED,
+			'loadInitialData' => true,
 			'lazyLoad' => true,
 			'showCounts' => true,
 			'showStatuses' => true,
@@ -42,11 +44,15 @@ class BU_Navigation_Tree_View {
 			);
 		$this->settings = wp_parse_args( $script_context, $defaults );
 
+		if( false === BU_NAVIGATION_LINKS_ENABLED )
+			$this->settings['includeLinks'] = false;
+
 		// Setup query args based on script context
 		$query_args = array(
-				'child_of' => $this->settings['childOf'],
-				'post_types' => $this->settings['postTypes'],
-				'post_status' => $this->settings['postStatuses']
+			'child_of' => $this->settings['childOf'],
+			'post_types' => $this->settings['postTypes'],
+			'post_status' => $this->settings['postStatuses'],
+			'include_links' => $this->settings['includeLinks']
 		);
 		$this->query = new BU_Navigation_Tree_Query( $query_args );
 
@@ -82,9 +88,9 @@ class BU_Navigation_Tree_View {
 	/**
 	 * Special wrapper around wp_enqueue_script that handles generating script context
 	 * for scripts utilizing this class.
-	 * 
+	 *
 	 * @see bu-navigation-admin-navman.php or bu-navigation-admin-metabox.php for usage examples
-	 * 
+	 *
 	 * @global string $wp_version
 	 * @param string $name script name to enqueue
 	 */
@@ -164,7 +170,7 @@ class BU_Navigation_Tree_View {
 		$child_of = $this->query->args['child_of'];
 
 		// Structure in to parent/child sections keyed by parent ID
-		$posts_by_parent = bu_navigation_pages_by_parent($this->query->posts);
+		$posts = $this->query->posts_by_parent();
 
 		// Display children only for non-top level page requests
 		if( $child_of == 0 ) {
@@ -174,7 +180,7 @@ class BU_Navigation_Tree_View {
 		}
 
 		// Convert to jstree formatted posts
-		$formatted_posts = $this->get_formatted_posts( $child_of, $posts_by_parent, $load_children );
+		$formatted_posts = $this->get_formatted_posts( $child_of, $posts, $load_children );
 
 		return $formatted_posts;
 	}
@@ -268,7 +274,7 @@ class BU_Navigation_Tree_View {
 		$p = array(
 			'attr' => array(
 				'id' => $this->add_node_prefix( $post->ID ),
-				'rel' => ( $post->post_type == 'link' ? $post->post_type : 'page' ),
+				'rel' => BU_NAVIGATON_LINK_POST_TYPE == $post->post_type ? 'link' : 'page',
 				),
 			'data' => $post->navigation_label,
 			'metadata' => array(
@@ -276,7 +282,7 @@ class BU_Navigation_Tree_View {
 				)
 			);
 
-		if( 'link' == $post->post_type ) {
+		if( BU_NAVIGATON_LINK_POST_TYPE == $post->post_type ) {
 			$p['metadata']['post']['post_content'] = $post->post_content;
 			$p['metadata']['post']['post_meta'] = array(
 				BU_NAV_META_TARGET => $post->target
@@ -311,6 +317,9 @@ class BU_Navigation_Tree_View {
 
 /**
  * WP_Query-like class optimized for querying hierarchical post types
+ *
+ * @todo move to separate file
+ * @todo move logic from library in to this query class, make the library functions wrappers around this object
  */
 class BU_Navigation_Tree_Query {
 
@@ -319,18 +328,24 @@ class BU_Navigation_Tree_Query {
 	public $args;
 
 	public function __construct( $query_args = array() ) {
+
 		$this->setup_query( $query_args );
 		$this->query();
+
 	}
 
+	/**
+	 * @todo build in include_links arg, defaults to true
+	 */
 	protected function setup_query( $query_args = array() ) {
 
 		$defaults = array(
-				'child_of' => 0,
-				'post_types' => array('page', 'link'),
-				'post_status' => array('publish'),
-				'direction' => 'down',
-				'depth' => 0
+			'child_of' => 0,
+			'post_types' => array('page'),
+			'post_status' => array('publish'),
+			'direction' => 'down',
+			'depth' => 0,
+			'include_links' => true
 		);
 
 		$this->args = array();
@@ -338,6 +353,20 @@ class BU_Navigation_Tree_Query {
 
 		if( ! empty( $this->args['post_types'] ) && is_string( $this->args['post_types'] ) ) {
 			$this->args['post_types'] = explode( ',', $this->args['post_types'] );
+		}
+
+		$this->args['post_types'] = (array) $this->args['post_types'];
+
+		// Add link post types if they are included
+		if ( $this->args['include_links'] ) {
+			if( in_array( 'page', $this->args['post_types'] ) )
+				$this->args['post_types'][] = BU_NAVIGATON_LINK_POST_TYPE;
+		}
+
+		// But if links are disabled, take it away
+		if ( false === BU_NAVIGATON_LINK_POST_TYPE && in_array( BU_NAVIGATON_LINK_POST_TYPE, $this->args['post_types'] ) ) {
+			$key = array_search( BU_NAVIGATON_LINK_POST_TYPE, $this->args['post_types'] );
+			unset( $this->args['post_types'][$key] );
 		}
 
 		if( ! empty( $this->args['post_status'] ) && is_string( $this->args['post_status'] ) ) {
@@ -359,7 +388,6 @@ class BU_Navigation_Tree_Query {
 		// Setup filters
 		remove_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
 		add_filter('bu_navigation_filter_pages', array( __CLASS__, 'filter_posts' ) );
-		add_filter('bu_navigation_filter_fields', array( __CLASS__, 'filter_fields' ) );
 
 		// Gather sections
 		$section_args = array('direction' => $this->args['direction'], 'depth' => $this->args['depth'], 'post_types' => $this->args['post_types']);
@@ -376,9 +404,14 @@ class BU_Navigation_Tree_Query {
 		$this->post_count = count($this->posts);
 
 		// Restore filters
-		remove_filter('bu_navigation_filter_fields', array( __CLASS__, 'filter_fields' ) );
 		remove_filter('bu_navigation_filter_pages', array( __CLASS__, 'filter_posts' ) );
 		add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
+
+	}
+
+	public function posts_by_parent() {
+
+		return bu_navigation_pages_by_parent($this->posts);
 
 	}
 
@@ -449,19 +482,6 @@ class BU_Navigation_Tree_Query {
 
 	}
 
-	/**
-	 * Filter wp_post columns to fetch from DB
-	 */
-	public static function filter_fields( $fields ) {
-
-		// Adding post status so we can include status indicators in tree view
-		$fields[] = 'post_status';
-		$fields[] = 'post_password';
-
-		return apply_filters( 'bu_nav_tree_view_filter_fields', $fields );
-
-	}
-
 }
 
 /**
@@ -471,16 +491,18 @@ function bu_navigation_ajax_get_navtree() {
 	if( defined('DOING_AJAX') && DOING_AJAX ) {
 
 		$child_of = isset($_POST['child_of']) ? $_POST['child_of'] : 0;
-		$post_types = isset($_POST['post_types']) ? $_POST['post_types'] : array('page','link');
+		$post_types = isset($_POST['post_types']) ? $_POST['post_types'] : 'page';
 		$post_statuses = isset($_POST['post_statuses']) ? $_POST['post_statuses'] : 'publish';
 		$instance = isset($_POST['instance']) ? $_POST['instance'] : 'default';
 		$prefix = isset($_POST['prefix']) ? $_POST['prefix'] : 'p';
+		$include_links = isset($_POST['include_links']) ? (bool) $_POST['include_links'] : true;
 
 		$tree_view = new BU_Navigation_Tree_View( $instance, array(
 			'childOf' => $child_of,
 			'postTypes' => $post_types,
 			'postStatuses' => $post_statuses,
-			'nodePrefix' => $prefix
+			'nodePrefix' => $prefix,
+			'includeLinks' => $include_links
 			)
 		);
 
@@ -507,7 +529,7 @@ function bu_navigation_ajax_get_post() {
 		$post = get_post($post_id);
 
 		// Add extra fields to response for links
-		if( $post->post_type == 'link' ){
+		if( BU_NAVIGATON_LINK_POST_TYPE == $post->post_type ){
 			$post->target = get_post_meta( $post_id, 'bu_link_target', TRUE );
 			$post->url = $post->post_content;
 		} else {

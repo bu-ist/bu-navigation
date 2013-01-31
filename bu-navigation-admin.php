@@ -231,7 +231,7 @@ class BU_Navigation_Admin {
 		// get children pages/links
 		$page_children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='$post->post_type'", $post_id);
 		$page_children = $wpdb->get_results($page_children_query);
-		$link_children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='link'", $post_id);
+		$link_children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='".BU_NAVIGATON_LINK_POST_TYPE."'", $post_id);
 		$link_children = $wpdb->get_results($link_children_query);
 
 		// case no children, output the "ignore" flag

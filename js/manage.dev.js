@@ -12,6 +12,10 @@
 /*jslint browser: true, todo: true */
 /*global bu: true, bu_navman_settings: false, jQuery: false, console: false, window: false, document: false */
 
+
+// @todo remove Link Manager if links are disabled (?)
+// @todo remove hard coded post->post_type = 'link', read from server
+
 // Check prerequisites
 if ((typeof bu === 'undefined') ||
 		(typeof bu.plugins.navigation === 'undefined') ||
@@ -300,7 +304,7 @@ if ((typeof bu === 'undefined') ||
 			e.stopPropagation();
 			var msg = '';
 			var selected;
-			
+
 			if ($(e.currentTarget).parent('li').hasClass('disabled')) {
 				selected = Navtree.getSelectedPost();
 				msg = "You are not allowed to add links";
@@ -310,14 +314,14 @@ if ((typeof bu === 'undefined') ||
 					msg = "Links are not permitted to have children.\n\n\
 Select a page that you can edit and click \"Add a Link\" \
 to create a new link below the selected page.";
-					
+
 				} else {
 					// User is a section editor attempting to add a top level link
 					if (Navman.settings.isSectionEditor) {
 						msg = "You do not have permission to create top level published content.\n\n\
 Select a page that you can edit and click \"Add a Link\" \
 to create a new link below the selected page.";
-						
+
 					} else {
 						// User is not a section editor, but not allowed to add top level pages due to allow top setting
 						if (!Navman.settings.allowTop) {
@@ -329,15 +333,15 @@ and enabling the \"Allow Top-Level Pages\" setting.";
 						}
 					}
 				}
-				
+
 				alert(msg);
-				
+
 			} else {
 				// Setup new link
 				this.data.currentLink = { "post_status": "new", "post_type": "link", "post_meta": {} };
-				this.$el.dialog('option', 'title', 'Add a Link').dialog('open');	
+				this.$el.dialog('option', 'title', 'Add a Link').dialog('open');
 			}
-			
+
 		},
 
 		edit: function (link) {
@@ -425,11 +429,11 @@ and enabling the \"Allow Top-Level Pages\" setting.";
 
 		onPostSelected: function (post) {
 			var canAdd = true;
-			
+
 			if (post.post_type == 'link') {
 				canAdd = false;
 			}
-			
+
 			canAdd = bu.hooks.applyFilters('navmanCanAddLink', canAdd, post, Navtree);
 
 			if (canAdd) {

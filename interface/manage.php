@@ -13,7 +13,7 @@
 			<ul class="navman-toolbar">
 				<li><a href="#nav-tree-container" id="navman_expand_all">Expand All</a></li>
 				<li>| <a href="#nav-tree-container" id="navman_collapse_all">Collapse All</a></li>
-				<?php if( $post_type === 'page' ): ?>
+				<?php if( BU_NAVIGATION_LINKS_ENABLED && $post_type === 'page' ): ?>
 				<li <?php if( $disable_add_link ) echo 'class="disabled"'; ?>>| <a href="#" id="navman_add_link">Add a Link</a></li>
 				<?php endif; ?>
 			</ul>
@@ -34,7 +34,7 @@
 			</div>
 		</form>
 	</div>
-	<?php if( $post_type === 'page' ): ?>
+	<?php if( BU_NAVIGATION_LINKS_ENABLED && $post_type === 'page' ): ?>
 	<div id="navman-link-editor">
 		<div class="submitbox navform navformwide">
 			<form id="navman_editlink_form">

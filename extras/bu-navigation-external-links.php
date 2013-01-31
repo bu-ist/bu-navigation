@@ -1,16 +1,58 @@
 <?php
+
+if ( !defined( 'BU_NAVIGATION_LINKS_ENABLED' ) )
+	define( 'BU_NAVIGATION_LINKS_ENABLED', true );
+
+if ( !defined( 'BU_NAVIGATON_LINK_POST_TYPE' ) )
+	define( 'BU_NAVIGATON_LINK_POST_TYPE', 'link' );
+
 define('BU_NAV_META_TARGET', 'bu_link_target'); // name of meta_key used to hold target window
 
 /**
- * Filter fields retrieved from DB when grabbing navigation data to add post_content when post_type=link
- * @return array Filtered list of fields
+ * Register 'link' as a private post type for use representing external links in page navigation menus
  */
-function bu_navigation_filter_fields_external_links($fields)
-{
-	array_push($fields, "(IF(post_type='link',post_content,'')) AS post_content");
-	return $fields;
+function bu_navigation_register_link() {
+
+	$labels = array(
+		'name'                => _x( 'BU Navigation Links', 'Post Type General Name', 'bu_navigation' ),
+		'singular_name'       => _x( 'BU Navigation Link', 'Post Type Singular Name', 'bu_navigation' ),
+		'menu_name'           => __( 'Link', 'bu_navigation' ),
+		'parent_item_colon'   => __( 'Parent Link:', 'bu_navigation' ),
+		'all_items'           => __( 'All Links', 'bu_navigation' ),
+		'view_item'           => __( 'View Link', 'bu_navigation' ),
+		'add_new_item'        => __( 'Add New Link', 'bu_navigation' ),
+		'add_new'             => __( 'New Link', 'bu_navigation' ),
+		'edit_item'           => __( 'Edit Link', 'bu_navigation' ),
+		'update_item'         => __( 'Update Link', 'bu_navigation' ),
+		'search_items'        => __( 'Search links', 'bu_navigation' ),
+		'not_found'           => __( 'No links found', 'bu_navigation' ),
+		'not_found_in_trash'  => __( 'No links found in Trash', 'bu_navigation' ),
+	);
+
+	$args = array(
+		'label'               => __( 'BU Navigation Link', 'bu_navigation' ),
+		'description'         => __( 'External links used by BU Navigation plugin', 'bu_navigation' ),
+		'labels'              => $labels,
+		'hierarchical'        => false,
+		'public'              => false,
+		'show_ui'             => false,
+		'show_in_menu'        => false,
+		'show_in_nav_menus'   => false,
+		'show_in_admin_bar'   => false,
+		'menu_position'       => 5,
+		'menu_icon'           => '',
+		'can_export'          => true,	//
+		'has_archive'         => false,
+		'exclude_from_search' => true,
+		'publicly_queryable'  => true,
+		'rewrite'             => false,
+		'capability_type'     => 'post',
+	);
+
+	register_post_type( BU_NAVIGATON_LINK_POST_TYPE, $args );
 }
-add_filter('bu_navigation_filter_fields', 'bu_navigation_filter_fields_external_links');
+
+add_action( 'init', 'bu_navigation_register_link' );
 
 /**
  * Filter pages before displaying navigation to set external URL and window target for external links
@@ -32,7 +74,7 @@ function bu_navigation_filter_pages_external_links($pages)
 
 		foreach ($pages as $page)
 		{
-			if ($page->post_type == 'link')
+			if ( $page->post_type == BU_NAVIGATON_LINK_POST_TYPE )
 			{
 				$page->url = $page->post_content;
 
@@ -45,6 +87,7 @@ function bu_navigation_filter_pages_external_links($pages)
 
 	return $filtered;
 }
+
 add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_external_links');
 
 /**
@@ -67,7 +110,7 @@ add_filter('bu_navigation_filter_anchor_attrs', 'bu_navigation_filter_anchor_att
  */
 function bu_navigation_page_link_filter($link, $id)
 {
-	if (($page = get_post($id, OBJECT, 'raw', FALSE)) && ($page->post_type === 'link')) {
+	if (($page = get_post($id, OBJECT, 'raw', FALSE)) && ($page->post_type === BU_NAVIGATON_LINK_POST_TYPE )) {
 		$link = $page->post_content;
 	}
 	return $link;

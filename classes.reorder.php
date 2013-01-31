@@ -13,9 +13,12 @@ class BU_Navigation_Reorder_Tracker {
 
 		if( is_string( $post_types ) ) {
 			$post_types = explode(',', $post_types );
+		} else {
+			$post_types = (array) $post_types;
 		}
-		if( in_array( 'page', $post_types ) ) {
-			array_push( $post_types, 'link' );
+
+		if( BU_NAVIGATION_LINKS_ENABLED && in_array( 'page', $post_types ) ) {
+			array_push( $post_types, BU_NAVIGATON_LINK_POST_TYPE );
 		}
 
 		$this->post_types = $post_types;

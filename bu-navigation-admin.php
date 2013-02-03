@@ -34,15 +34,22 @@ class BU_Navigation_Admin {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 
 		// Componenents with menu items need to be registered for every admin request
-		$this->load_primary_settings_page();
+		if ( $this->plugin->supports( 'primary' ) )
+			$this->load_primary_settings_page();
 
 		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'page';
-		$this->load_navman_page( $post_type );
+
+		if ( $this->plugin->supports( 'manager' ) ) {
+
+			$this->load_navman_page( $post_type );
+
+			add_action( 'load-post.php', array( $this, 'load_metaboxes' ) );
+			add_action( 'load-post-new.php', array( $this, 'load_metaboxes' ) );
+
+		}
 
 		// Other admin components can be loaded more selectively
 		add_action( 'load-edit.php', array( $this, 'load_filter_pages' ) );
-		add_action( 'load-post.php', array( $this, 'load_metaboxes' ) );
-		add_action( 'load-post-new.php', array( $this, 'load_metaboxes' ) );
 
 		// for WP 3.2: change delete_post to before_delete_post (because at that point, the children posts haven't moved up)
 		if( version_compare( $wp_version, '3.2', '<' ) ) {
@@ -231,7 +238,7 @@ class BU_Navigation_Admin {
 		// get children pages/links
 		$page_children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='$post->post_type'", $post_id);
 		$page_children = $wpdb->get_results($page_children_query);
-		$link_children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='".BU_NAVIGATON_LINK_POST_TYPE."'", $post_id);
+		$link_children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='".BU_NAVIGATION_LINK_POST_TYPE."'", $post_id);
 		$link_children = $wpdb->get_results($link_children_query);
 
 		// case no children, output the "ignore" flag

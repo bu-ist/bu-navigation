@@ -41,18 +41,28 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * Filter for drilling into a particular section when view the edit pages screen
  */
 
+// Absolute server path to this plugin dir for use by included files
 define( 'BU_NAV_PLUGIN_DIR', dirname( __FILE__ ) );
+
+// Primary navigation max items to display per level
+define( 'BU_NAVIGATION_PRIMARY_MAX', 6 );
+
+// Primary navigation maxium depth
+define( 'BU_NAVIGATION_PRIMARY_DEPTH', 1 );
 
 require_once dirname( __FILE__ ) . '/includes/library.php';
 
 class BU_Navigation_Plugin {
 
+	// Admin object
 	public $admin;
 
 	// Plugin settings
+	// @todo move to separate settings object
 	private $settings = array();
 
 	// Plugin settings option names
+	// @todo move to separate settings object
 	const OPTION_DISPLAY = 'bu_navigation_primarynav';
 	const OPTION_MAX_ITEMS = 'bu_navigation_primarynav_max';
 	const OPTION_DIVE = 'bu_navigation_primarynav_dive';
@@ -75,7 +85,8 @@ class BU_Navigation_Plugin {
 		add_action( 'init', array( $this, 'init' ), 1 );
 
 		// Filter plugin settings utilized by bu_navigation_display_primary function
-		add_filter('bu_filter_primarynav_defaults', array( $this, 'filter_primary_nav_defaults' ) );
+		// @todo move to primary navigation class
+		add_filter( 'bu_filter_primarynav_defaults', array( $this, 'primary_nav_defaults' ) );
 
 	}
 
@@ -93,7 +104,8 @@ class BU_Navigation_Plugin {
 
 		$this->load_extras();
 
-		$this->load_widget();
+		if ( $this->supports( 'widget' ) )
+			$this->load_widget();
 
 		do_action('bu_navigation_init');
 
@@ -143,6 +155,7 @@ class BU_Navigation_Plugin {
 
 	/**
 	 * Get a single plugin setting by slug
+	 * @todo move to separate settings object
 	 */
 	public function get_setting( $name ) {
 
@@ -157,6 +170,7 @@ class BU_Navigation_Plugin {
 
 	/**
 	 * Get all plugin settings
+	 * @todo move to separate settings object
 	 */
 	public function get_settings() {
 
@@ -180,6 +194,7 @@ class BU_Navigation_Plugin {
 
 	/**
 	 * Update plugin settings
+	 * @todo move to separate settings object
 	 */
 	public function update_settings( $updates ) {
 
@@ -189,9 +204,14 @@ class BU_Navigation_Plugin {
 
 			if( array_key_exists( $key, $settings ) ) {
 
-				// Prevent depth setting from exceeding theme limit (BU_NAVIGATION_SUPPORTED_DEPTH)
-				if( $key == 'depth' )
-					$val = $this->depth_fix( $val );
+				// Prevent depth setting from exceeding theme limit
+				// @todo move to primary navigation class
+				if( $key == 'depth' ) {
+					$max_depth = $this->primary_max_depth();
+
+					if( $val > $max_depth )
+						$val = $max_depth;
+				}
 
 				// Cooerce booleans into ints for update_option
 				if( is_bool( $val ) ) $val = intval( $val );
@@ -216,6 +236,7 @@ class BU_Navigation_Plugin {
 
 	/**
 	 * Clear internal settings object
+	 * @todo move to separate settings object
 	 *
 	 * Useful for unit tests that want to check actual DB values
 	 */
@@ -228,8 +249,10 @@ class BU_Navigation_Plugin {
 	/**
 	 * Filter the navigation settings used by bu_navigation_display_primary to
 	 * utilize plugin settings
+	 *
+	 * @todo move to primary navigation class
 	 */
-	public function filter_primary_nav_defaults( $defaults ) {
+	public function primary_nav_defaults( $defaults = array() ) {
 
 		$defaults['echo'] = $this->get_setting('display');
 		$defaults['depth'] = $this->get_setting('depth');
@@ -241,17 +264,107 @@ class BU_Navigation_Plugin {
 	}
 
 	/**
-	 * Assure that current max depth is below the threshold set by the current themes BU_NAVIGATION_SUPPORTED_DEPTH constant
+	 * Return the current max primary navigation depth
+	 *
+	 * @todo move to primary navigation class
+	 *
+	 * The depth can be set by:
+	 *  BU_NAVIGATION_SUPPORTED_DEPTH constant
+	 *  'bu-navigation-primary' theme feature
+	 *
+	 * Themes calling add_theme_support( 'bu-navigation-primary' ) can pass an optional second argument --
+	 * an associative array.  At this time, only one option is configurable:
+	 *
+	 * 	'depth' - Maxinum levels to nest in navigation lists
+	 *
+	 * Thus `add_theme_support( 'bu-navigation-primary', array( 'depth' => 3 ) )` would allow for three levels
+	 * of pages to appear in the primary navigation menu.
 	 */
-	public function depth_fix( $curr_depth = 0 ) {
+	public function primary_max_depth() {
 
-		if ( defined('BU_NAVIGATION_SUPPORTED_DEPTH') && $curr_depth > BU_NAVIGATION_SUPPORTED_DEPTH ) {
-			return BU_NAVIGATION_SUPPORTED_DEPTH;
+		$override_const = defined( 'BU_NAVIGATION_SUPPORTED_DEPTH' ) ? BU_NAVIGATION_SUPPORTED_DEPTH : null;
+		$override_theme = get_theme_support( 'bu-navigation-primary' );
+
+		// Get default primary navigation settings
+		$defaults = $this->primary_nav_defaults();
+		$theme_opts = array();
+
+		// Merge with any possible values set using first arg of add_theme_support
+		if( is_array( $override_theme ) && count( $override_theme ) >= 1 ) {
+			$theme_opts = wp_parse_args( (array) $override_theme[0], $defaults );
 		}
 
-		if ( !$curr_depth ) $curr_depth = BU_NAVIGATION_PRIMARY_DEPTH;
+		if( $override_const ) return $override_const;
+		if( $override_theme && array_key_exists( 'depth', (array) $theme_opts ) ) return $theme_opts['depth'];
 
-		return $curr_depth;
+		return BU_NAVIGATION_PRIMARY_DEPTH;
+
+	}
+
+	/**
+	 * Navigation plugin features
+	 *
+	 * @todo discuss these open source defaults with BU
+	 *
+	 * The navigation plugin is configurable in a few different regards.  This function returns an associative array
+	 * of features, with the key representing the feature name and the value holding the default.
+	 *
+	 * bu-navigation-manager (on by default)
+	 * 	- turn on or off the navigation management interfaces ("Edit Order" pages, "Navigation Attributes" metabox)
+	 *
+	 * bu-navigation-widget (on by default)
+	 * 	- turn on or off the "Content Navigation" widget (on by default)
+	 *
+	 * bu-navigation-primary (off by default -- theme authors, use add_theme_support( 'bu-navigation-primary' ))
+	 *  - turn on or off the "Primary Navigation" appearance menu item
+	 *
+	 * bu-navigation-links
+	 *  - turn on or off the external link feature, include with 'page' post type nav menus (on by default)
+	 */
+	public function features() {
+
+		return array(
+			'manager' => true,
+			'widget' => true,
+			'links' => false,
+			'primary' => false,
+			);
+
+	}
+
+	/**
+	 * Does the current install or theme support a navigation feature?
+	 *
+	 * There are three different ways to configure navigation features -- two with PHP constants, and
+	 * one using the theme support API.
+	 *
+	 * Installs can use the constants to enable or disable navigation features for all themes.
+	 *
+	 * Individual themes can use the theme support API to add theme support for any feature that is off by default.
+	 *
+	 * The structure and priority of the feature support mechanism is as follows:
+	 * 	BU_NAVIGATON_DISABLE_* - Allows installs to explicitly disable feature (highest priority)
+	 * 	BU_NAVIGATION_SUPPORTS_* - Allows installs to explicitly enable feature (second highest priority)
+	 * 	add_theme_support( 'bu-navigation-*' ) - Allows individual themes to register support for a feature (recommended for theme authors)
+	 */
+	public function supports( $feature ) {
+
+		$feature = strtolower( $feature );
+		$defaults = $this->features();
+
+		if ( ! in_array( $feature, array_keys( $defaults ) ) ) {
+			error_log( "[bu-navigation] Unknown feature: $feature" );
+			return false;
+		}
+
+		$disabled_const = 'BU_NAVIGATION_DISABLE_' . strtoupper( $feature );
+		$supported_const = 'BU_NAVIGATION_SUPPORTS_' . strtoupper( $feature );
+
+		$disabled = defined( $disabled_const ) && constant( $disabled_const );
+		$const_supported = defined( $supported_const ) ? constant( $supported_const ) : $defaults[$feature];
+		$theme_supported = current_theme_supports( 'bu-navigation-' . $feature );
+
+		return ( ! $disabled && ( $const_supported || $theme_supported ) );
 
 	}
 

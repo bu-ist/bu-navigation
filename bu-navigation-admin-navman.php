@@ -297,6 +297,7 @@ class BU_Navigation_Admin_Navman {
 		$post_type = $this->post_type;
 		$notices = $this->get_notice_list();
 		$pt_labels = $this->plugin->get_post_type_labels( $post_type );
+		$include_links = $this->plugin->supports( 'links' ) && 'page' == $post_type;
 
 		// Render interface
 		include(BU_NAV_PLUGIN_DIR . '/interface/manage.php');
@@ -398,7 +399,7 @@ class BU_Navigation_Admin_Navman {
 				$deleted = $force_delete = false;
 
 				// Permanently delete links, as there is currently no way to recover them from trash
-				if( BU_NAVIGATON_LINK_POST_TYPE == $post->post_type ) {
+				if( BU_NAVIGATION_LINK_POST_TYPE == $post->post_type ) {
 					$force_delete = true;
 				}
 
@@ -510,7 +511,7 @@ class BU_Navigation_Admin_Navman {
 			foreach( $posts as $post ) {
 
 				// Special handling for new links -- need to get a valid post ID
-				if ( BU_NAVIGATON_LINK_POST_TYPE == $post->post_type ) {
+				if ( BU_NAVIGATION_LINK_POST_TYPE == $post->post_type ) {
 
 					$inserted = false;
 
@@ -524,7 +525,7 @@ class BU_Navigation_Admin_Navman {
 							'post_content' => $post->post_content,
 							'post_excerpt' => '',
 							'post_status' => 'publish',
-							'post_type' => BU_NAVIGATON_LINK_POST_TYPE,
+							'post_type' => BU_NAVIGATION_LINK_POST_TYPE,
 							'post_parent' => $post->post_parent,
 							'menu_order' => $post->menu_order
 							);
@@ -670,7 +671,7 @@ class BU_Navigation_Admin_Navman {
 
 		// @todo we can't respect section editing permissions for links via current_user_can
 		// until they are a registered post type
-		if( BU_NAVIGATON_LINK_POST_TYPE == $post->post_type ) {
+		if( BU_NAVIGATION_LINK_POST_TYPE == $post->post_type ) {
 			$is_section_editor = ! is_super_admin() && current_user_can( 'edit_in_section' );
 
 			if( class_exists('BU_Group_Permissions') && $is_section_editor ) {

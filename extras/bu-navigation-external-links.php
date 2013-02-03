@@ -1,10 +1,7 @@
 <?php
 
-if ( !defined( 'BU_NAVIGATION_LINKS_ENABLED' ) )
-	define( 'BU_NAVIGATION_LINKS_ENABLED', true );
-
-if ( !defined( 'BU_NAVIGATON_LINK_POST_TYPE' ) )
-	define( 'BU_NAVIGATON_LINK_POST_TYPE', 'link' );
+if ( ! defined( 'BU_NAVIGATION_LINK_POST_TYPE' ) )
+	define( 'BU_NAVIGATION_LINK_POST_TYPE', 'bu_link' );
 
 define('BU_NAV_META_TARGET', 'bu_link_target'); // name of meta_key used to hold target window
 
@@ -49,7 +46,7 @@ function bu_navigation_register_link() {
 		'capability_type'     => 'post',
 	);
 
-	register_post_type( BU_NAVIGATON_LINK_POST_TYPE, $args );
+	register_post_type( BU_NAVIGATION_LINK_POST_TYPE, $args );
 }
 
 add_action( 'init', 'bu_navigation_register_link' );
@@ -74,7 +71,7 @@ function bu_navigation_filter_pages_external_links($pages)
 
 		foreach ($pages as $page)
 		{
-			if ( $page->post_type == BU_NAVIGATON_LINK_POST_TYPE )
+			if ( $page->post_type == BU_NAVIGATION_LINK_POST_TYPE )
 			{
 				$page->url = $page->post_content;
 
@@ -110,7 +107,7 @@ add_filter('bu_navigation_filter_anchor_attrs', 'bu_navigation_filter_anchor_att
  */
 function bu_navigation_page_link_filter($link, $id)
 {
-	if (($page = get_post($id, OBJECT, 'raw', FALSE)) && ($page->post_type === BU_NAVIGATON_LINK_POST_TYPE )) {
+	if (($page = get_post($id, OBJECT, 'raw', FALSE)) && ($page->post_type === BU_NAVIGATION_LINK_POST_TYPE )) {
 		$link = $page->post_content;
 	}
 	return $link;

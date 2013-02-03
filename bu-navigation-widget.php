@@ -40,7 +40,7 @@ class BU_Widget_Pages extends WP_Widget
 		$href = '';
 
 		$section_id = 0;
-		$post_types = ($post->post_type == 'page' ? array('page', BU_NAVIGATON_LINK_POST_TYPE) : array($post->post_type));
+		$post_types = ($post->post_type == 'page' ? array('page', BU_NAVIGATION_LINK_POST_TYPE) : array($post->post_type));
 
 		if ($instance['navigation_style'] != 'site')
 		{
@@ -99,7 +99,7 @@ class BU_Widget_Pages extends WP_Widget
 
 		// only works for supported post_types
 		if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) return;
-		$post_types = ($post->post_type == 'page' ? array('page', BU_NAVIGATON_LINK_POST_TYPE) : array($post->post_type));
+		$post_types = ($post->post_type == 'page' ? array('page', BU_NAVIGATION_LINK_POST_TYPE) : array($post->post_type));
 
 		extract( $args );
 

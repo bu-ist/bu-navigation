@@ -8,8 +8,12 @@ class BU_Navigation_Reorder_Tracker {
 	public $post_types;
 	public $already_moved;
 	public $errors;
+	public $plugin;
 
-	public function __construct( $post_types ) {
+	public function __construct( $post_types, $plugin = null ) {
+
+		if( is_null( $plugin ) )
+			$this->plugin = $GLOBALS['bu_navigation_plugin'];
 
 		if( is_string( $post_types ) ) {
 			$post_types = explode(',', $post_types );
@@ -17,8 +21,8 @@ class BU_Navigation_Reorder_Tracker {
 			$post_types = (array) $post_types;
 		}
 
-		if( BU_NAVIGATION_LINKS_ENABLED && in_array( 'page', $post_types ) ) {
-			array_push( $post_types, BU_NAVIGATON_LINK_POST_TYPE );
+		if( $this->plugin->supports( 'links' ) && in_array( 'page', $post_types ) ) {
+			array_push( $post_types, BU_NAVIGATION_LINK_POST_TYPE );
 		}
 
 		$this->post_types = $post_types;

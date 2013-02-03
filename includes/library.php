@@ -9,20 +9,6 @@ define( 'BU_NAVIGATION_LIB_LOADED', TRUE );
 
 define( 'GROUP_CONCAT_MAX_LEN', 20480 );
 
-// Allow themes to override primary navigation defaults
-
-if ( !defined( 'BU_NAVIGATION_PRIMARY_MAX' ) )
-	define( 'BU_NAVIGATION_PRIMARY_MAX', 6 );
-
-if ( !defined( 'BU_NAVIGATION_PRIMARY_DEPTH' ) )
-	define( 'BU_NAVIGATION_PRIMARY_DEPTH', 1 );
-
-if ( !defined( 'BU_NAVIGATION_LINKS_ENABLED' ) )
-	define( 'BU_NAVIGATION_LINKS_ENABLED', true );
-
-if ( !defined( 'BU_NAVIGATON_LINK_POST_TYPE' ) )
-	define( 'BU_NAVIGATON_LINK_POST_TYPE', 'bu_link' );
-
 /**
  * Gets the supported post_types by the bu-navigation plugin.
  *
@@ -36,7 +22,7 @@ function bu_navigation_supported_post_types($include_link = false) {
 	$post_types = get_post_types(array('hierarchical' => true), 'names');
 	$post_types = apply_filters('bu_navigation_post_types', $post_types);
 
-	if ( BU_NAVIGATION_LINKS_ENABLED && $include_link )
+	if ( $GLOBALS['bu_navigation_plugin']->supports( 'links' ) && $include_link )
 		$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
 
 	return $post_types;
@@ -61,8 +47,8 @@ function bu_navigation_load_sections($post_types) {
 	if ( empty( $post_types ) ) {
 		$post_types = array( 'page' );
 
-		if( BU_NAVIGATION_LINKS_ENABLED )
-			$post_types[] = BU_NAVIGATON_LINK_POST_TYPE;
+		if( $GLOBALS['bu_navigation_plugin']->supports( 'links' ) )
+			$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
 	}
 
 	// handle custom post types support
@@ -149,7 +135,7 @@ function bu_navigation_gather_sections($page_id, $args = '', $all_sections = NUL
 	$defaults = array(
 		'direction' => 'up',
 		'depth' => 0,
-		'post_types' => BU_NAVIGATION_LINKS_ENABLED ? array('page', BU_NAVIGATON_LINK_POST_TYPE ) : array( 'page' ),
+		'post_types' => $GLOBALS['bu_navigation_plugin']->supports( 'links' ) ? array('page', BU_NAVIGATION_LINK_POST_TYPE ) : array( 'page' ),
 		);
 
 	$r = wp_parse_args($args, $defaults);
@@ -255,7 +241,7 @@ function bu_navigation_get_pages($args = '')
 		'hierarchical' => 1,
 		'primary' => '',
 		'max_items' => '',
-		'post_types' => BU_NAVIGATION_LINKS_ENABLED ? array( 'page', BU_NAVIGATON_LINK_POST_TYPE ) : array( 'page' ),
+		'post_types' => $GLOBALS['bu_navigation_plugin']->supports( 'links' ) ? array( 'page', BU_NAVIGATION_LINK_POST_TYPE ) : array( 'page' ),
 		'post_status' => 'publish',
 		'suppress_filter_pages' => FALSE,
 		'suppress_urls' => FALSE,
@@ -588,7 +574,7 @@ function bu_navigation_list_pages($args = '')
 		'container_class' => '',
 		'item_tag' => 'li',
 		'style' => NULL,
-		'post_types' => BU_NAVIGATION_LINKS_ENABLED ? array('page', BU_NAVIGATON_LINK_POST_TYPE ) : array( 'page' )
+		'post_types' => $GLOBALS['bu_navigation_plugin']->supports( 'links' ) ? array('page', BU_NAVIGATION_LINK_POST_TYPE ) : array( 'page' )
 		);
 
 	$r = wp_parse_args($args, $defaults);
@@ -714,7 +700,7 @@ function bu_navigation_display_primary($args = '')
 		'item_tag' => 'li',
 		'identify_top' => FALSE,
 		'whitelist_top' => NULL,
-		'post_types' => BU_NAVIGATION_LINKS_ENABLED ? array('page', BU_NAVIGATON_LINK_POST_TYPE ) : array( 'page' ),
+		'post_types' => $GLOBALS['bu_navigation_plugin']->supports( 'links' ) ? array('page', BU_NAVIGATION_LINK_POST_TYPE ) : array( 'page' ),
 		);
 
 	$defaults = apply_filters('bu_filter_primarynav_defaults', $defaults);

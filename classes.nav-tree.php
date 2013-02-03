@@ -35,7 +35,7 @@ class BU_Navigation_Tree_View {
 			'rpcUrl' => admin_url('admin-ajax.php?action=bu-get-navtree' ),
 			'getPostRpcUrl' => admin_url('admin-ajax.php?action=bu-get-post'),
 			'allowTop' => $this->plugin->get_setting('allow_top'),
-			'linksEnabled' => BU_NAVIGATION_LINKS_ENABLED,
+			'linksEnabled' => $this->plugin->supports( 'links' ),
 			'loadInitialData' => true,
 			'lazyLoad' => true,
 			'showCounts' => true,
@@ -44,7 +44,7 @@ class BU_Navigation_Tree_View {
 			);
 		$this->settings = wp_parse_args( $script_context, $defaults );
 
-		if( false === BU_NAVIGATION_LINKS_ENABLED )
+		if( ! $this->plugin->supports( 'links' ) )
 			$this->settings['includeLinks'] = false;
 
 		// Setup query args based on script context
@@ -274,7 +274,7 @@ class BU_Navigation_Tree_View {
 		$p = array(
 			'attr' => array(
 				'id' => $this->add_node_prefix( $post->ID ),
-				'rel' => BU_NAVIGATON_LINK_POST_TYPE == $post->post_type ? 'link' : 'page',
+				'rel' => BU_NAVIGATION_LINK_POST_TYPE == $post->post_type ? 'link' : 'page',
 				),
 			'data' => $post->navigation_label,
 			'metadata' => array(
@@ -282,7 +282,7 @@ class BU_Navigation_Tree_View {
 				)
 			);
 
-		if( BU_NAVIGATON_LINK_POST_TYPE == $post->post_type ) {
+		if( BU_NAVIGATION_LINK_POST_TYPE == $post->post_type ) {
 			$p['metadata']['post']['post_content'] = $post->post_content;
 			$p['metadata']['post']['post_meta'] = array(
 				BU_NAV_META_TARGET => $post->target
@@ -360,12 +360,12 @@ class BU_Navigation_Tree_Query {
 		// Add link post types if they are included
 		if ( $this->args['include_links'] ) {
 			if( in_array( 'page', $this->args['post_types'] ) )
-				$this->args['post_types'][] = BU_NAVIGATON_LINK_POST_TYPE;
+				$this->args['post_types'][] = BU_NAVIGATION_LINK_POST_TYPE;
 		}
 
 		// But if links are disabled, take it away
-		if ( false === BU_NAVIGATON_LINK_POST_TYPE && in_array( BU_NAVIGATON_LINK_POST_TYPE, $this->args['post_types'] ) ) {
-			$key = array_search( BU_NAVIGATON_LINK_POST_TYPE, $this->args['post_types'] );
+		if ( ! $this->plugin->supports( 'links' ) && in_array( BU_NAVIGATION_LINK_POST_TYPE, $this->args['post_types'] ) ) {
+			$key = array_search( BU_NAVIGATION_LINK_POST_TYPE, $this->args['post_types'] );
 			unset( $this->args['post_types'][$key] );
 		}
 
@@ -529,7 +529,7 @@ function bu_navigation_ajax_get_post() {
 		$post = get_post($post_id);
 
 		// Add extra fields to response for links
-		if( BU_NAVIGATON_LINK_POST_TYPE == $post->post_type ){
+		if( BU_NAVIGATION_LINK_POST_TYPE == $post->post_type ){
 			$post->target = get_post_meta( $post_id, 'bu_link_target', TRUE );
 			$post->url = $post->post_content;
 		} else {

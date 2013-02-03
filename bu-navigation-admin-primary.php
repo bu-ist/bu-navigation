@@ -72,6 +72,8 @@ class BU_Navigation_Admin_Primary {
 		$bu_navigation_primarynav_depth = $settings['depth'];
 		$bu_allow_top_level_page = $settings['allow_top'];
 
+		$supported_depth = $this->plugin->primary_max_depth();
+
 		require_once(BU_NAV_PLUGIN_DIR . '/interface/primary-navigation-admin.php');
 
 	}

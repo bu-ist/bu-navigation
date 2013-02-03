@@ -1,11 +1,14 @@
 <?php
 
 /**
- * BU Navigation Admin Settings interface
+ * BU Navigation Primary Navigation settings management interface
  */
 class BU_Navigation_Admin_Primary {
 
+	// Primary Navigation page hook
 	public $page;
+
+	// Reference to global plugin object
 	private $plugin;
 
 	public function __construct( $plugin ) {
@@ -27,9 +30,11 @@ class BU_Navigation_Admin_Primary {
 
 	}
 
+	/**
+	 * Add "Primary Navigation" settings page to "Appearance" or "Site Design" menu
+	 */
 	public function register_menu() {
 
-		// Add primary navigation settings page
 		$this->page = add_submenu_page(
 			'themes.php',
 			__('Primary Navigation'),
@@ -41,15 +46,9 @@ class BU_Navigation_Admin_Primary {
 
 	}
 
-	public function get_cap() {
-		if ( defined( 'BU_CMS' ) && BU_CMS == true ) {
-			return 'bu_edit_options';
-		} else {
-			return 'edit_theme_options';
-		}
-	}
-
-
+	/**
+	 * Primary Navigation page styles
+	 */
 	public function enqueue_styles( $page ) {
 
 		if( $page == $this->page ) {
@@ -60,6 +59,9 @@ class BU_Navigation_Admin_Primary {
 
 	}
 
+	/**
+	 * Render "Primary Navigation" admin page
+	 */
 	public function render() {
 
 		// Save first
@@ -67,19 +69,23 @@ class BU_Navigation_Admin_Primary {
 
 		$settings = $this->plugin->settings->get_all();
 
-		/* default options */
+		// Initial values
 		$bu_navigation_primarynav = $settings['display'];
 		$bu_navigation_primarynav_max = $settings['max_items'];
 		$bu_navigation_primarynav_dive = $settings['dive'];
 		$bu_navigation_primarynav_depth = $settings['depth'];
 		$bu_allow_top_level_page = $settings['allow_top'];
 
-		$supported_depth = $this->plugin->settings->primary_max_depth();
+		// Maxiumum allowed depth, as dictated by theme or install constant
+		$supported_depth = $this->max_supported_depth();
 
 		include( BU_NAV_PLUGIN_DIR . '/templates/primary-navigation.php' );
 
 	}
 
+	/**
+	 * Handle $_POST to "Primary Navigation" admin page
+	 */
 	public function save() {
 		$saved = NULL;
 
@@ -89,7 +95,7 @@ class BU_Navigation_Admin_Primary {
 				return false;
 			}
 
-			$saved = TRUE; /* no useful return from update_option */
+			$saved = TRUE;
 
 			$primarynav_display = isset($_POST['bu_navigation_primarynav']) ? intval($_POST['bu_navigation_primarynav']) : 0;
 
@@ -110,6 +116,12 @@ class BU_Navigation_Admin_Primary {
 			$primarynav_depth = isset($_POST['bu_navigation_primarynav_depth']) ? intval($_POST['bu_navigation_primarynav_depth']) : 0;
 			$bu_allow_top_level_page = isset($_POST['bu_allow_top_level_page']) ? intval($_POST['bu_allow_top_level_page']) : 0;
 
+			// Prevent depth setting from exceeding limit set by theme or install
+			$max_depth = $this->max_supported_depth();
+
+			if( $primarynav_depth > $max_depth )
+				$primarynav_depth = $max_depth;
+
 			$updates = array(
 				'display' => (int) $primarynav_display,
 				'max_items' => (int) $primarynav_max,
@@ -129,6 +141,56 @@ class BU_Navigation_Admin_Primary {
 		return $saved;
 
 	}
-}
 
-?>
+	/**
+	 * Return the current max primary navigation depth
+	 *
+	 * The depth can be set by:
+	 *  BU_NAVIGATION_SUPPORTED_DEPTH constant
+	 *  'bu-navigation-primary' theme feature
+	 *
+	 * Themes calling add_theme_support( 'bu-navigation-primary' ) can pass an optional second argument --
+	 * an associative array.  At this time, only one option is configurable:
+	 *
+	 * 	'depth' - Maxinum levels to nest in navigation lists
+	 *
+	 * Thus `add_theme_support( 'bu-navigation-primary', array( 'depth' => 3 ) )` would allow for three levels
+	 * of pages to appear in the primary navigation menu.
+	 */
+	public function max_supported_depth() {
+
+		$override_const = defined( 'BU_NAVIGATION_SUPPORTED_DEPTH' ) ? BU_NAVIGATION_SUPPORTED_DEPTH : null;
+		$override_theme = get_theme_support( 'bu-navigation-primary' );
+
+		// Get default primary navigation settings
+		$defaults = $this->plugin->settings->primary_nav_defaults();
+		$theme_opts = array();
+
+		// Merge with any possible values set using first arg of add_theme_support
+		if( is_array( $override_theme ) && count( $override_theme ) >= 1 ) {
+			$theme_opts = wp_parse_args( (array) $override_theme[0], $defaults );
+		}
+
+		if( $override_const ) return $override_const;
+		if( $override_theme && array_key_exists( 'depth', (array) $theme_opts ) ) return $theme_opts['depth'];
+
+		return BU_NAVIGATION_PRIMARY_DEPTH;
+
+	}
+
+	/**
+	 * Default capability for accessing this page
+	 *
+	 * Note: BU has a special capability to limit access
+	 */
+	public function get_cap() {
+
+		if ( defined( 'BU_CMS' ) && BU_CMS == true ) {
+			return 'bu_edit_options';
+		} else {
+			return 'edit_theme_options';
+		}
+
+	}
+
+}

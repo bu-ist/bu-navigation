@@ -70,15 +70,6 @@ class BU_Navigation_Settings {
 
 			if( array_key_exists( $key, $settings ) ) {
 
-				// Prevent depth setting from exceeding theme limit
-				// @todo move to primary navigation class
-				if( $key == 'depth' ) {
-					$max_depth = $this->primary_max_depth();
-
-					if( $val > $max_depth )
-						$val = $max_depth;
-				}
-
 				// Cooerce booleans into ints for update_option
 				if( is_bool( $val ) ) $val = intval( $val );
 
@@ -114,8 +105,6 @@ class BU_Navigation_Settings {
 	/**
 	 * Filter the navigation settings used by bu_navigation_display_primary to
 	 * utilize plugin settings
-	 *
-	 * @todo move to primary navigation class
 	 */
 	public function primary_nav_defaults( $defaults = array() ) {
 
@@ -125,44 +114,6 @@ class BU_Navigation_Settings {
 		$defaults['dive'] = $this->get('dive');
 
 		return $defaults;
-
-	}
-
-	/**
-	 * Return the current max primary navigation depth
-	 *
-	 * @todo move to primary navigation class
-	 *
-	 * The depth can be set by:
-	 *  BU_NAVIGATION_SUPPORTED_DEPTH constant
-	 *  'bu-navigation-primary' theme feature
-	 *
-	 * Themes calling add_theme_support( 'bu-navigation-primary' ) can pass an optional second argument --
-	 * an associative array.  At this time, only one option is configurable:
-	 *
-	 * 	'depth' - Maxinum levels to nest in navigation lists
-	 *
-	 * Thus `add_theme_support( 'bu-navigation-primary', array( 'depth' => 3 ) )` would allow for three levels
-	 * of pages to appear in the primary navigation menu.
-	 */
-	public function primary_max_depth() {
-
-		$override_const = defined( 'BU_NAVIGATION_SUPPORTED_DEPTH' ) ? BU_NAVIGATION_SUPPORTED_DEPTH : null;
-		$override_theme = get_theme_support( 'bu-navigation-primary' );
-
-		// Get default primary navigation settings
-		$defaults = $this->primary_nav_defaults();
-		$theme_opts = array();
-
-		// Merge with any possible values set using first arg of add_theme_support
-		if( is_array( $override_theme ) && count( $override_theme ) >= 1 ) {
-			$theme_opts = wp_parse_args( (array) $override_theme[0], $defaults );
-		}
-
-		if( $override_const ) return $override_const;
-		if( $override_theme && array_key_exists( 'depth', (array) $theme_opts ) ) return $theme_opts['depth'];
-
-		return BU_NAVIGATION_PRIMARY_DEPTH;
 
 	}
 

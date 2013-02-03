@@ -327,7 +327,11 @@ class BU_Navigation_Tree_Query {
 	public $post_count;
 	public $args;
 
+	public $plugin;
+
 	public function __construct( $query_args = array() ) {
+
+		$this->plugin = $GLOBALS['bu_navigation_plugin'];
 
 		$this->setup_query( $query_args );
 		$this->query();

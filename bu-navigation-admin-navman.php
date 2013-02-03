@@ -300,7 +300,7 @@ class BU_Navigation_Admin_Navman {
 		$include_links = $this->plugin->supports( 'links' ) && 'page' == $post_type;
 
 		// Render interface
-		include(BU_NAV_PLUGIN_DIR . '/interface/manage.php');
+		include( BU_NAV_PLUGIN_DIR . '/templates/edit-order.php' );
 
 	}
 

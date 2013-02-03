@@ -195,7 +195,7 @@ class BU_Widget_Pages extends WP_Widget
 
 		$navigation_style = (in_array($instance['navigation_style'], $this->styles)) ? $instance['navigation_style'] : 'site';
 
-		require(BU_NAV_PLUGIN_DIR . '/interface/navigation-widget-form.php');
+		include( BU_NAV_PLUGIN_DIR . '/templates/widget-form.php' );
 	}
 }
 ?>

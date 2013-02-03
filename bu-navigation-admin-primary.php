@@ -74,7 +74,7 @@ class BU_Navigation_Admin_Primary {
 
 		$supported_depth = $this->plugin->primary_max_depth();
 
-		require_once(BU_NAV_PLUGIN_DIR . '/interface/primary-navigation-admin.php');
+		include( BU_NAV_PLUGIN_DIR . '/templates/primary-navigation.php' );
 
 	}
 

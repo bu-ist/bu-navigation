@@ -138,7 +138,7 @@ class BU_Navigation_Admin_Metabox {
 
 		$move_post_btn_txt = "Move $lc_label";
 
-		include('interface/metabox-navigation-attributes.php');
+		include( 'templates/metabox-navigation-attributes.php' );
 
 	}
 
@@ -238,7 +238,7 @@ class BU_Navigation_Admin_Metabox {
 
 		$current_template = isset( $post->page_template ) ? $post->page_template : 'default';
 
-		include('interface/metabox-custom-template.php');
+		include( 'templates/metabox-custom-template.php' );
 
 	}
 

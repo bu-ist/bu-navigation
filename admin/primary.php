@@ -11,6 +11,8 @@ class BU_Navigation_Admin_Primary {
 	// Reference to global plugin object
 	private $plugin;
 
+	const nonce_action = 'bu-nav-primary-settings-update';
+
 	public function __construct( $plugin ) {
 
 		$this->plugin = $plugin;
@@ -64,20 +66,20 @@ class BU_Navigation_Admin_Primary {
 	 */
 	public function render() {
 
-		// Save first
-		$saved = $this->save();
-
-		$settings = $this->plugin->settings->get_all();
+		// Handle $_POST first
+		$status = $this->save();
 
 		// Initial values
-		$bu_navigation_primarynav = $settings['display'];
-		$bu_navigation_primarynav_max = $settings['max_items'];
-		$bu_navigation_primarynav_dive = $settings['dive'];
-		$bu_navigation_primarynav_depth = $settings['depth'];
-		$bu_allow_top_level_page = $settings['allow_top'];
+		$settings = $this->plugin->settings->get_all();
 
 		// Maxiumum allowed depth, as dictated by theme or install constant
-		$supported_depth = $this->max_supported_depth();
+		$supported_depth = $this->plugin->settings->max_supported_depth();
+
+		// Theme changes can affect this setting -- force the value to be within legal bounds prior to display
+		if ( $settings['depth'] > $supported_depth )
+			$settings['depth'] = $supported_depth;
+
+		$nonce = self::nonce_action;
 
 		include( BU_NAV_PLUGIN_DIR . '/templates/primary-navigation.php' );
 
@@ -87,94 +89,68 @@ class BU_Navigation_Admin_Primary {
 	 * Handle $_POST to "Primary Navigation" admin page
 	 */
 	public function save() {
-		$saved = NULL;
 
-		if( ( array_key_exists( 'bu_navigation_primary_save', $_POST ) ) && ( $_POST['bu_navigation_primary_save'] == 'save' ) ) {
+		if ( empty( $_POST ) )
+			return;
 
-			if( ! current_user_can( $this->get_cap() ) ) {
-				return false;
+		// Prevent illegal updates
+		if( ! current_user_can( $this->get_cap() ) || ! check_admin_referer( self::nonce_action ) ) {
+			error_log('[bu-navigation] Illegal access to "Primary Navigaiton" page!');
+			wp_die('Cheatin, eh?');
+		}
+
+		// Navigation settings have beenu pdated
+		if( array_key_exists( 'bu-nav-settings', $_POST ) ) {
+
+			$success = true;
+			$errors = array();
+
+			// Grab defaults for merging
+			$defaults = $this->plugin->settings->defaults();
+
+			// Sanitize
+			$updates = $_POST['bu-nav-settings'];
+
+			// Text fields
+			$updates['max_items'] = isset( $updates['max_items'] ) ? absint( sanitize_text_field( $updates['max_items'] ) ) : $defaults['max_items'];
+			$updates['depth'] = isset( $updates['depth'] ) ? absint( sanitize_text_field( $updates['depth'] ) ) : $defaults['depth'];
+
+			// Checkboxes
+			$updates['display'] = isset( $updates['display'] ) ? (bool) $updates['display'] : 0;
+			$updates['dive'] = isset( $updates['dive'] ) ? (bool) $updates['dive'] : 0;
+			$updates['allow_top'] = isset( $updates['allow_top'] ) ? (bool) $updates['allow_top'] : 0;
+
+			// Valdidate
+
+			// Force positive values for max items
+			if( array_key_exists( 'max_items', $_POST['bu-nav-settings'] ) && $updates['max_items'] !== (int) $_POST['bu-nav-settings']['max_items'] ) {
+				$errors[] = __( 'The "Maximum Items" setting most be a positive value.', BU_Navigation_Plugin::TEXT_DOMAIN );
+				$success = false;
 			}
-
-			$saved = TRUE;
-
-			$primarynav_display = isset($_POST['bu_navigation_primarynav']) ? intval($_POST['bu_navigation_primarynav']) : 0;
-
-			// primarynav maximum items
-			$primarynav_max = absint($_POST['bu_navigation_primarynav_max']);
-			if (!$primarynav_max) $primarynav_max = BU_NAVIGATION_PRIMARY_MAX;
-
-			// primarynav maximum items: error handling
-			if ($primarynav_max != $_POST['bu_navigation_primarynav_max']) {
-				$saved = array(
-					'success' => false,
-					'msg' => sprintf('The value "%s" entered for "Maximum items" is not correct.', esc_html($_POST['bu_navigation_primarynav_max']), $primarynav_max)
-				);
-				return $saved;
-			}
-
-			$primarynav_dive = isset($_POST['bu_navigation_primarynav_dive']) ? intval($_POST['bu_navigation_primarynav_dive']) : 0;
-			$primarynav_depth = isset($_POST['bu_navigation_primarynav_depth']) ? intval($_POST['bu_navigation_primarynav_depth']) : 0;
-			$bu_allow_top_level_page = isset($_POST['bu_allow_top_level_page']) ? intval($_POST['bu_allow_top_level_page']) : 0;
 
 			// Prevent depth setting from exceeding limit set by theme or install
-			$max_depth = $this->max_supported_depth();
+			$max_depth = $this->plugin->settings->max_supported_depth();
 
-			if( $primarynav_depth > $max_depth )
-				$primarynav_depth = $max_depth;
+			if( $updates['depth'] > $max_depth )
+				$updates['depth'] = $max_depth;
 
-			$updates = array(
-				'display' => (int) $primarynav_display,
-				'max_items' => (int) $primarynav_max,
-				'dive' => (int) $primarynav_dive,
-				'depth' => (int) $primarynav_depth,
-				'allow_top' => (int) $bu_allow_top_level_page
-				);
+			if( array_key_exists( 'depth', $_POST['bu-nav-settings'] ) && $updates['depth'] !== (int) $_POST['bu-nav-settings']['depth'] ) {
+				$errors[] = __( "The current theme only supports up to $max_depth level(s) of children.", BU_Navigation_Plugin::TEXT_DOMAIN  );
+				$success = false;
+			}
 
-			$this->plugin->settings->update( $updates );
+			// Update
+			if( $success && empty( $errors ) ) {
 
-			$bu_navigation_changes_saved = true;
+				$this->plugin->settings->update( $updates );
 
-			if (function_exists('invalidate_blog_cache')) invalidate_blog_cache();
+				if (function_exists('invalidate_blog_cache')) invalidate_blog_cache();
+
+			}
+
+			return array( 'success' => $success, 'errors' => $errors );
 
 		}
-
-		return $saved;
-
-	}
-
-	/**
-	 * Return the current max primary navigation depth
-	 *
-	 * The depth can be set by:
-	 *  BU_NAVIGATION_SUPPORTED_DEPTH constant
-	 *  'bu-navigation-primary' theme feature
-	 *
-	 * Themes calling add_theme_support( 'bu-navigation-primary' ) can pass an optional second argument --
-	 * an associative array.  At this time, only one option is configurable:
-	 *
-	 * 	'depth' - Maxinum levels to nest in navigation lists
-	 *
-	 * Thus `add_theme_support( 'bu-navigation-primary', array( 'depth' => 3 ) )` would allow for three levels
-	 * of pages to appear in the primary navigation menu.
-	 */
-	public function max_supported_depth() {
-
-		$override_const = defined( 'BU_NAVIGATION_SUPPORTED_DEPTH' ) ? BU_NAVIGATION_SUPPORTED_DEPTH : null;
-		$override_theme = get_theme_support( 'bu-navigation-primary' );
-
-		// Get default primary navigation settings
-		$defaults = $this->plugin->settings->primary_nav_defaults();
-		$theme_opts = array();
-
-		// Merge with any possible values set using first arg of add_theme_support
-		if( is_array( $override_theme ) && count( $override_theme ) >= 1 ) {
-			$theme_opts = wp_parse_args( (array) $override_theme[0], $defaults );
-		}
-
-		if( $override_const ) return $override_const;
-		if( $override_theme && array_key_exists( 'depth', (array) $theme_opts ) ) return $theme_opts['depth'];
-
-		return BU_NAVIGATION_PRIMARY_DEPTH;
 
 	}
 

@@ -1,6 +1,7 @@
-#bu_navigation_primary_navigation .bu_navigation_sub-option {
+#bu-nav-primary-settings .sub-option {
 	margin-left: 2em;
 }
-#bu_navigation_primary_navigation #bu_navigation_primarynav_depth {
+
+#bu-nav-primary-settings #bu-nav-setting-depth {
 	min-width: 40px;
 }

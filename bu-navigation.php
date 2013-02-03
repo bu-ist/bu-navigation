@@ -65,6 +65,7 @@ class BU_Navigation_Plugin {
 	public $settings;
 
 	const VERSION = '1.0.1';
+	const TEXT_DOMAIN = 'bu-navigation';
 
 	public function __construct() {
 

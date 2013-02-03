@@ -65,7 +65,7 @@ class BU_Navigation_Admin_Primary {
 		// Save first
 		$saved = $this->save();
 
-		$settings = $this->plugin->get_settings();
+		$settings = $this->plugin->settings->get_all();
 
 		/* default options */
 		$bu_navigation_primarynav = $settings['display'];
@@ -74,7 +74,7 @@ class BU_Navigation_Admin_Primary {
 		$bu_navigation_primarynav_depth = $settings['depth'];
 		$bu_allow_top_level_page = $settings['allow_top'];
 
-		$supported_depth = $this->plugin->primary_max_depth();
+		$supported_depth = $this->plugin->settings->primary_max_depth();
 
 		include( BU_NAV_PLUGIN_DIR . '/templates/primary-navigation.php' );
 
@@ -118,7 +118,7 @@ class BU_Navigation_Admin_Primary {
 				'allow_top' => (int) $bu_allow_top_level_page
 				);
 
-			$this->plugin->update_settings( $updates );
+			$this->plugin->settings->update( $updates );
 
 			$bu_navigation_changes_saved = true;
 

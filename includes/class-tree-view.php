@@ -34,7 +34,7 @@ class BU_Navigation_Tree_View {
 			'themePath' => plugins_url('js/vendor/jstree/themes/bu-jstree', BU_NAV_PLUGIN ),
 			'rpcUrl' => admin_url('admin-ajax.php?action=bu-get-navtree' ),
 			'getPostRpcUrl' => admin_url('admin-ajax.php?action=bu-get-post'),
-			'allowTop' => $this->plugin->get_setting('allow_top'),
+			'allowTop' => $this->plugin->settings->get( 'allow_top' ),
 			'linksEnabled' => $this->plugin->supports( 'links' ),
 			'loadInitialData' => true,
 			'lazyLoad' => true,

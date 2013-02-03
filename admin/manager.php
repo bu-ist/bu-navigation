@@ -646,7 +646,7 @@ class BU_Navigation_Admin_Manager {
 	 */
 	public function can_publish_top_level() {
 
-		$allow_top = $this->plugin->get_setting('allow_top');
+		$allow_top = $this->plugin->settings->get( 'allow_top' );
 		$is_section_editor = ! is_super_admin() && current_user_can( 'edit_in_section' );
 
 		return $allow_top && !$is_section_editor;

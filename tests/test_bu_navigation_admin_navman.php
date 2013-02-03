@@ -127,7 +127,7 @@ class BU_Navigation_Navman_Tests extends WP_UnitTestCase {
 		$this->assertTrue( $this->navman->can_publish_top_level() );
 
 		// Don't allow top level posts
-		$this->plugin->update_settings(array('allow_top'=>false));
+		$this->plugin->settings->update(array('allow_top'=>false));
 
 		$this->assertFalse( $this->navman->can_publish_top_level() );
 
@@ -194,7 +194,7 @@ class BU_Navigation_Navman_Tests extends WP_UnitTestCase {
 		$this->assertTrue( $this->navman->can_place_in_section( $post, $this->posts['child'] ) );
 
 		// Don't allow top level posts
-		$this->plugin->update_settings(array('allow_top'=>false));
+		$this->plugin->settings->update(array('allow_top'=>false));
 
 		$this->assertFalse( $this->navman->can_place_in_section( $post, $this->posts['child'] ) );
 
@@ -202,7 +202,7 @@ class BU_Navigation_Navman_Tests extends WP_UnitTestCase {
 		$this->assertTrue( $this->navman->can_place_in_section( $post, 0 ) );
 
 		// Re-allow top level posts
-		$this->plugin->update_settings(array('allow_top'=>true));
+		$this->plugin->settings->update(array('allow_top'=>true));
 
 		// Coverage for section editor logic
 		wp_set_current_user( $this->users['section_editor'] );
@@ -242,7 +242,7 @@ class BU_Navigation_Navman_Tests extends WP_UnitTestCase {
 		$this->assertTrue( $this->navman->can_move( $post, $original->ID ) );
 
 		// Don't allow top level posts
-		$this->plugin->update_settings(array('allow_top'=>false));
+		$this->plugin->settings->update(array('allow_top'=>false));
 		$this->assertFalse( $this->navman->can_move( $post, $original ) );
 
 		// Fake original location was top level
@@ -270,7 +270,7 @@ class BU_Navigation_Navman_Tests extends WP_UnitTestCase {
 		$this->assertFalse( $this->navman->can_move( $post, $original->ID ) );
 
 		// Don't allow top level posts
-		$this->plugin->update_settings(array('allow_top'=>false));
+		$this->plugin->settings->update(array('allow_top'=>false));
 		$this->assertFalse( $this->navman->can_move( $post, $original ) );
 
 		// Fake original location was top level

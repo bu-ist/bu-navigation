@@ -24,11 +24,11 @@ class BU_Navigation_Settings_Test extends WP_UnitTestCase {
 	 */
 	public function test_get_setting() {
 
-		$this->assertTrue( $this->plugin->get_setting( 'display' ) );
-		$this->assertEquals( BU_NAVIGATION_PRIMARY_MAX, $this->plugin->get_setting( 'max_items' ) );
-		$this->assertTrue( $this->plugin->get_setting( 'dive' ) );
-		$this->assertEquals( BU_NAVIGATION_PRIMARY_DEPTH, $this->plugin->get_setting( 'depth' ) );
-		$this->assertTrue( $this->plugin->get_setting( 'allow_top' ) );
+		$this->assertTrue( $this->plugin->settings->get( 'display' ) );
+		$this->assertEquals( BU_NAVIGATION_PRIMARY_MAX, $this->plugin->settings->get( 'max_items' ) );
+		$this->assertTrue( $this->plugin->settings->get( 'dive' ) );
+		$this->assertEquals( BU_NAVIGATION_PRIMARY_DEPTH, $this->plugin->settings->get( 'depth' ) );
+		$this->assertTrue( $this->plugin->settings->get( 'allow_top' ) );
 
 	}
 
@@ -45,7 +45,7 @@ class BU_Navigation_Settings_Test extends WP_UnitTestCase {
 			'allow_top' => true
 			);
 
-		$this->assertSame( $expected_settings, $this->plugin->get_settings() );
+		$this->assertSame( $expected_settings, $this->plugin->settings->get_all() );
 
 	}
 
@@ -62,35 +62,35 @@ class BU_Navigation_Settings_Test extends WP_UnitTestCase {
 			'allow_top' => false
 			);
 
-		$this->plugin->update_settings( $updates );
-		$this->plugin->clear_settings();
+		$this->plugin->settings->update( $updates );
+		$this->plugin->settings->clear();
 
-		$this->assertSame( $updates, $this->plugin->get_settings() );
+		$this->assertSame( $updates, $this->plugin->settings->update() );
 
 	}
 
 	/**
 	 * @group bu-navigation-settings
 	 */
-	 public function test_depth_fix() {
+	 // public function test_depth_fix() {
 
-	 	$this->assertEquals( BU_NAVIGATION_PRIMARY_DEPTH, $this->plugin->depth_fix() );
+	 // 	$this->assertEquals( BU_NAVIGATION_PRIMARY_DEPTH, $this->plugin->depth_fix() );
 
-	 	$this->assertEquals( 5, $this->plugin->depth_fix( 5 ) );
+	 // 	$this->assertEquals( 5, $this->plugin->depth_fix( 5 ) );
 
-	 	define( 'BU_NAVIGATION_SUPPORTED_DEPTH', 2 );
-	 	$this->assertEquals( 2, $this->plugin->depth_fix( 6 ) );
+	 // 	define( 'BU_NAVIGATION_SUPPORTED_DEPTH', 2 );
+	 // 	$this->assertEquals( 2, $this->plugin->depth_fix( 6 ) );
 
-	 }
+	 // }
 
 	 public function test_update_with_invalid_depth() {
 
 	 	$updates = array( 'depth' => 10 );
 
-	 	$this->plugin->update_settings( $updates );
-		$this->plugin->clear_settings();
+	 	$this->plugin->settings->update( $updates );
+		$this->plugin->settings->clear();
 
-	 	$this->assertEquals( 2, $this->plugin->get_setting( 'depth' ) );
+	 	$this->assertEquals( 2, $this->plugin->settings->get( 'depth' ) );
 
 	 }
 

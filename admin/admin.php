@@ -33,15 +33,15 @@ class BU_Navigation_Admin {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 
-		// Componenents with menu items need to be registered for every admin request
+		// Components with menu items need to be registered for every admin request
 		if ( $this->plugin->supports( 'primary' ) )
-			$this->load_primary_settings_page();
+			$this->load_primary();
 
 		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'page';
 
 		if ( $this->plugin->supports( 'manager' ) ) {
 
-			$this->load_navman_page( $post_type );
+			$this->load_manager( $post_type );
 
 			add_action( 'load-post.php', array( $this, 'load_metaboxes' ) );
 			add_action( 'load-post-new.php', array( $this, 'load_metaboxes' ) );
@@ -72,12 +72,11 @@ class BU_Navigation_Admin {
 		if( in_array( $screen->base, array( 'edit', 'post' ) ) ) {
 
 			$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
-			$scripts_path = plugins_url('js',__FILE__);
-			$vendor_path = plugins_url('js/vendor',__FILE__);
+			$scripts_url = plugins_url( 'js', BU_NAV_PLUGIN );
 
 			$post_type = $this->plugin->get_post_type( $screen->post_type );
 
-			wp_enqueue_script( 'bu-page-parent-deletion', $scripts_path . '/deletion' . $suffix . '.js', array('jquery'), BU_Navigation_Plugin::VERSION, true );
+			wp_enqueue_script( 'bu-page-parent-deletion', $scripts_url . '/deletion' . $suffix . '.js', array('jquery'), BU_Navigation_Plugin::VERSION, true );
 			wp_localize_script( 'bu-page-parent-deletion', 'bu_navigation_pt_labels', $this->plugin->get_post_type_labels( $post_type ) );
 
 		}
@@ -89,9 +88,9 @@ class BU_Navigation_Admin {
 	 *
 	 * Accessed via "Appearance > Primary Navigation" menu item
 	 */
-	public function load_primary_settings_page() {
+	public function load_primary() {
 
-		require_once(dirname(__FILE__) . '/bu-navigation-admin-primary.php');
+		require_once( dirname( __FILE__ ) . '/primary.php' );
 		$this->settings_page = new BU_Navigation_Admin_Primary( $this->plugin );
 
 	}
@@ -101,16 +100,18 @@ class BU_Navigation_Admin {
 	 *
 	 * Accessed via the "Edit Order" menu item under support post type menus
 	 */
-	public function load_navman_page( $post_type = 'page' ) {
+	public function load_manager( $post_type = 'page' ) {
 
-		require_once(dirname(__FILE__) . '/bu-navigation-admin-navman.php');
-		$this->navman = new BU_Navigation_Admin_Navman( $post_type, $this->plugin );
+		require_once( dirname( __FILE__ ) . '/manager.php' );
+		$this->navman = new BU_Navigation_Admin_Manager( $post_type, $this->plugin );
 
 		return $this->navman;
 	}
 
 	/**
 	 * Filter manage post tables by section dropdown
+	 *
+	 * @todo incorporate filter posts dropdown in to this class
 	 *
 	 * Found on the manage posts page (edit.php) for supported post types
 	 */
@@ -121,7 +122,7 @@ class BU_Navigation_Admin {
 
 		if( in_array( $post_type, bu_navigation_supported_post_types() ) ) {
 
-			require_once(dirname(__FILE__) . '/bu-navigation-admin-filter-pages.php');
+			require_once( dirname( __FILE__ ) . '/filter-pages.php' );
 			$this->filter_pages = new BU_Navigation_Admin_Filter_Pages( $post_type, $post_parent, $this->plugin );
 
 		}
@@ -177,7 +178,7 @@ class BU_Navigation_Admin {
 		}
 
 		// Load admin metabox class
-		require_once(dirname(__FILE__) . '/bu-navigation-admin-metabox.php'); // Position & Visibility
+		require_once( dirname( __FILE__ ) . '/metaboxes.php' );
 		$this->metabox = new BU_Navigation_Admin_Metabox( $post_id, $post_type, $this->plugin );
 
 	}

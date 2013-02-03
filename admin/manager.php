@@ -1,6 +1,4 @@
 <?php
-require_once(dirname(__FILE__) . '/classes.nav-tree.php' );
-require_once(dirname(__FILE__) . '/classes.reorder.php' );
 /*
 @todo
 	- test more thoroughly with multiple custom post types
@@ -17,7 +15,7 @@ require_once(dirname(__FILE__) . '/classes.reorder.php' );
 /**
  * BU Navigation Admin Navigation Manager interface
  */
-class BU_Navigation_Admin_Navman {
+class BU_Navigation_Admin_Manager {
 
 	public $page;
 	public $reorder_tracker;
@@ -118,10 +116,13 @@ class BU_Navigation_Admin_Navman {
 		if( is_array( $this->pages ) && in_array( $page, $this->pages ) ) {
 
 			$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
+			$scripts_url = plugins_url( 'js', BU_NAV_PLUGIN );
+			$vendor_url = plugins_url( 'js/vendor', BU_NAV_PLUGIN );
+			$styles_url = plugins_url( 'css', BU_NAV_PLUGIN );
 
 			// Scripts
-			wp_register_script('bu-jquery-validate', plugins_url('js/vendor/jquery.validate' . $suffix . '.js', __FILE__), array('jquery'), '1.8.1', true );
-			wp_register_script('bu-navman', plugins_url('js/manage' . $suffix . '.js', __FILE__), array('bu-navigation','jquery-ui-dialog','bu-jquery-validate'), BU_Navigation_Plugin::VERSION, true );
+			wp_register_script( 'bu-jquery-validate', $vendor_url . '/jquery.validate' . $suffix . '.js', array('jquery'), '1.8.1', true );
+			wp_register_script( 'bu-navman', $scripts_url . '/manage' . $suffix . '.js', array('bu-navigation','jquery-ui-dialog','bu-jquery-validate'), BU_Navigation_Plugin::VERSION, true );
 
 			// Setup dynamic script context for manage.js
 			$script_context = array(
@@ -136,12 +137,12 @@ class BU_Navigation_Admin_Navman {
 
 			// Styles
 			if ( 'classic' == get_user_option( 'admin_color') ) {
-				wp_enqueue_style ( 'bu-jquery-ui-css',  plugins_url( '/css/jquery-ui-classic.css', __FILE__ ), array(), BU_Navigation_Plugin::VERSION );
+				wp_enqueue_style ( 'bu-jquery-ui-css', $styles_url . '/jquery-ui-classic.css', array(), BU_Navigation_Plugin::VERSION );
 			} else {
-				wp_enqueue_style ( 'bu-jquery-ui-css',  plugins_url( '/css/jquery-ui-fresh.css', __FILE__ ), array(), BU_Navigation_Plugin::VERSION );
+				wp_enqueue_style ( 'bu-jquery-ui-css', $styles_url . '/jquery-ui-fresh.css', array(), BU_Navigation_Plugin::VERSION );
 			}
 
-			wp_enqueue_style('bu-navman', plugins_url('css/manage.css', __FILE__), array(), BU_Navigation_Plugin::VERSION );
+			wp_enqueue_style( 'bu-navman', $styles_url . '/manage.css', array(), BU_Navigation_Plugin::VERSION );
 
 		}
 
@@ -290,7 +291,7 @@ class BU_Navigation_Admin_Navman {
 			wp_die('Cheatin, uh?');
 		}
 
-		$ajax_spinner = plugins_url( '/images/wpspin_light.gif', __FILE__);
+		$ajax_spinner = plugins_url( '/images/wpspin_light.gif', BU_NAV_PLUGIN );
 
 		// If link was a registered post type, we would use its publish meta cap here instead
 		$disable_add_link = ! $this->can_publish_top_level();

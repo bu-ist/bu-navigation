@@ -1,5 +1,6 @@
 <?php
 /*
+ @todo this doesn't deserve a whole file/class -- move to admin.php
  @todo
  	- original file had "fix pagination" -- i'm not sure what's wrong with it
  */

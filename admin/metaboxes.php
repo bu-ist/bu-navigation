@@ -1,6 +1,4 @@
 <?php
-require_once(dirname(__FILE__) . '/classes.nav-tree.php' );
-require_once(dirname(__FILE__) . '/classes.reorder.php' );
 
 /**
  * BU Navigation Admin Metabox controller
@@ -57,11 +55,11 @@ class BU_Navigation_Admin_Metabox {
 	public function add_scripts( $page ) {
 
 		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
-		$scripts_path = plugins_url('js',__FILE__);
-		$styles_path = plugins_url('css',__FILE__);
+		$scripts_url = plugins_url( 'js', BU_NAV_PLUGIN );
+		$styles_url = plugins_url( 'css', BU_NAV_PLUGIN );
 
 		// Scripts
-		wp_register_script('bu-navigation-metabox', $scripts_path . '/navigation-metabox' . $suffix . '.js', array('bu-navigation'), BU_Navigation_Plugin::VERSION, true );
+		wp_register_script('bu-navigation-metabox', $scripts_url . '/navigation-metabox' . $suffix . '.js', array('bu-navigation'), BU_Navigation_Plugin::VERSION, true );
 
 		// Setup dynamic script context for navigation-metabox.js
 		$post_id = is_object( $this->post ) ? $this->post->ID : null;
@@ -81,7 +79,7 @@ class BU_Navigation_Admin_Metabox {
 		$treeview->enqueue_script( 'bu-navigation-metabox' );
 
 		// Styles
-		wp_enqueue_style( 'bu-navigation-metabox', $styles_path . '/navigation-metabox.css', array(), BU_Navigation_Plugin::VERSION );
+		wp_enqueue_style( 'bu-navigation-metabox', $styles_url . '/navigation-metabox.css', array(), BU_Navigation_Plugin::VERSION );
 
 	}
 
@@ -138,7 +136,7 @@ class BU_Navigation_Admin_Metabox {
 
 		$move_post_btn_txt = "Move $lc_label";
 
-		include( 'templates/metabox-navigation-attributes.php' );
+		include( BU_NAV_PLUGIN_DIR . '/templates/metabox-navigation-attributes.php' );
 
 	}
 
@@ -238,7 +236,7 @@ class BU_Navigation_Admin_Metabox {
 
 		$current_template = isset( $post->page_template ) ? $post->page_template : 'default';
 
-		include( 'templates/metabox-custom-template.php' );
+		include( BU_NAV_PLUGIN_DIR . '/templates/metabox-custom-template.php' );
 
 	}
 

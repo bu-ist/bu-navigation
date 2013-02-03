@@ -42,6 +42,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 // Absolute server path to this plugin dir for use by included files
+define( 'BU_NAV_PLUGIN', __FILE__ );
 define( 'BU_NAV_PLUGIN_DIR', dirname( __FILE__ ) );
 
 // Primary navigation max items to display per level
@@ -51,6 +52,9 @@ define( 'BU_NAVIGATION_PRIMARY_MAX', 6 );
 define( 'BU_NAVIGATION_PRIMARY_DEPTH', 1 );
 
 require_once dirname( __FILE__ ) . '/includes/library.php';
+
+require_once dirname( __FILE__ ) . '/classes.nav-tree.php';
+require_once dirname( __FILE__ ) . '/classes.reorder.php';
 
 class BU_Navigation_Plugin {
 
@@ -113,7 +117,7 @@ class BU_Navigation_Plugin {
 
 	public function load_admin() {
 
-		require_once(dirname(__FILE__) . '/bu-navigation-admin.php');
+		require_once(dirname(__FILE__) . '/admin/admin.php');
 		$this->admin = new BU_Navigation_Admin( $this );
 
 	}

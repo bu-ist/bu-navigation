@@ -53,7 +53,9 @@ class BU_Navigation_Admin_Primary {
 	public function enqueue_styles( $page ) {
 
 		if( $page == $this->page ) {
-			wp_enqueue_style( 'primary-navigation-admin', plugins_url( '/css/primary-navigation-admin.css', __FILE__ ), array(), BU_Navigation_Plugin::VERSION );
+			$styles_url = plugins_url( 'css', BU_NAV_PLUGIN );
+
+			wp_enqueue_style( 'primary-navigation-admin', $styles_url . '/primary-navigation-admin.css', array(), BU_Navigation_Plugin::VERSION );
 		}
 
 	}

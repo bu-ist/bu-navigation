@@ -31,7 +31,7 @@ class BU_Navigation_Tree_View {
 			'postTypes' => array('page'),
 			'postStatuses' => array('publish'),
 			'includeLinks' => true,
-			'themePath' => plugins_url('js/vendor/jstree/themes/bu-jstree', __FILE__ ),
+			'themePath' => plugins_url('js/vendor/jstree/themes/bu-jstree', BU_NAV_PLUGIN ),
 			'rpcUrl' => admin_url('admin-ajax.php?action=bu-get-navtree' ),
 			'getPostRpcUrl' => admin_url('admin-ajax.php?action=bu-get-post'),
 			'allowTop' => $this->plugin->get_setting('allow_top'),
@@ -71,17 +71,16 @@ class BU_Navigation_Tree_View {
 		global $wp_version;
 
 		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
-
-		$scripts_path = plugins_url('js',__FILE__);
-		$vendor_path = plugins_url('js/vendor',__FILE__);
+		$scripts_url = plugins_url( 'js', BU_NAV_PLUGIN );
+		$vendor_url = plugins_url( 'js/vendor', BU_NAV_PLUGIN );
 
 		// Vendor scripts
-		wp_register_script( 'bu-jquery-cookie', $vendor_path . '/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '00168770', true );
-		wp_register_script( 'bu-jquery-tree', $vendor_path . '/jstree/jquery.jstree' . $suffix . '.js', array( 'jquery', 'bu-jquery-cookie' ), '1.0-rc3', true );
+		wp_register_script( 'bu-jquery-cookie', $vendor_url . '/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '00168770', true );
+		wp_register_script( 'bu-jquery-tree', $vendor_url . '/jstree/jquery.jstree' . $suffix . '.js', array( 'jquery', 'bu-jquery-cookie' ), '1.0-rc3', true );
 
 		// Main navigation scripts & styles
-		wp_register_script( 'bu-navigation', $scripts_path . '/bu-navigation' . $suffix . '.js', array( 'jquery', 'bu-jquery-tree', 'bu-jquery-cookie', 'json2' ), BU_Navigation_Plugin::VERSION, true );
-		wp_register_style( 'bu-navigation', $vendor_path . '/jstree/themes/bu-jstree/style.css', array(), BU_Navigation_Plugin::VERSION );
+		wp_register_script( 'bu-navigation', $scripts_url . '/bu-navigation' . $suffix . '.js', array( 'jquery', 'bu-jquery-tree', 'bu-jquery-cookie', 'json2' ), BU_Navigation_Plugin::VERSION, true );
+		wp_register_style( 'bu-navigation', $vendor_url . '/jstree/themes/bu-jstree/style.css', array(), BU_Navigation_Plugin::VERSION );
 
 	}
 
@@ -391,7 +390,7 @@ class BU_Navigation_Tree_Query {
 
 		// Setup filters
 		remove_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
-		add_filter('bu_navigation_filter_pages', array( __CLASS__, 'filter_posts' ) );
+		add_filter('bu_navigation_filter_pages', array( $this, 'filter_posts' ) );
 
 		// Gather sections
 		$section_args = array('direction' => $this->args['direction'], 'depth' => $this->args['depth'], 'post_types' => $this->args['post_types']);
@@ -408,7 +407,7 @@ class BU_Navigation_Tree_Query {
 		$this->post_count = count($this->posts);
 
 		// Restore filters
-		remove_filter('bu_navigation_filter_pages', array( __CLASS__, 'filter_posts' ) );
+		remove_filter('bu_navigation_filter_pages', array( $this, 'filter_posts' ) );
 		add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
 
 	}
@@ -421,6 +420,8 @@ class BU_Navigation_Tree_Query {
 
 	/**
 	 * Default navigation manager page filter
+	 *
+	 * @todo move ACL restrictions to ACL plugin
 	 *
 	 * Appends "excluded" and "restricted" properties to each post object
 	 */

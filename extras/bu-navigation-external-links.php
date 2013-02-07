@@ -105,14 +105,14 @@ add_filter('bu_navigation_filter_anchor_attrs', 'bu_navigation_filter_anchor_att
  * @param int $id Post ID
  * @see get_page_link()
  */
-function bu_navigation_page_link_filter($link, $id)
+function bu_navigation_post_type_link_filter($link, $id)
 {
-	if (($page = get_post($id, OBJECT, 'raw', FALSE)) && ($page->post_type === BU_NAVIGATION_LINK_POST_TYPE )) {
-		$link = $page->post_content;
+	if (($post = get_post($id, OBJECT, 'raw', FALSE)) && ($post->post_type === BU_NAVIGATION_LINK_POST_TYPE )) {
+		$link = $post->post_content;
 	}
 	return $link;
 }
 
-add_filter('page_link', 'bu_navigation_page_link_filter', 10, 2);
+add_filter('post_type_link', 'bu_navigation_post_type_link_filter', 10, 2);
 
 ?>

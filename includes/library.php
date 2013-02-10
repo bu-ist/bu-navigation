@@ -23,7 +23,7 @@ function bu_navigation_supported_post_types($include_link = false) {
 	$post_types = apply_filters('bu_navigation_post_types', $post_types);
 
 	if ( $GLOBALS['bu_navigation_plugin']->supports( 'links' ) && $include_link )
-		$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
+		$post_types[BU_NAVIGATION_LINK_POST_TYPE] = BU_NAVIGATION_LINK_POST_TYPE;
 
 	return $post_types;
 

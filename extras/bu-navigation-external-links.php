@@ -107,7 +107,7 @@ add_filter('bu_navigation_filter_anchor_attrs', 'bu_navigation_filter_anchor_att
  */
 function bu_navigation_post_type_link_filter($link, $id)
 {
-	if (($post = get_post($id, OBJECT, 'raw')) && ($post->post_type === BU_NAVIGATION_LINK_POST_TYPE )) {
+	if (($post = get_post($id, OBJECT, 'raw', false)) && ($post->post_type === BU_NAVIGATION_LINK_POST_TYPE )) {
 		$link = $post->post_content;
 	}
 	return $link;

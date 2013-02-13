@@ -5,6 +5,12 @@
  * ntk@bu.edu
  */
 
+/*
+@todo
+	- as of now, this file is dependent on the main plugin class
+		- decide if that should be reversed so we can distribute just the library functionality
+*/
+
 define( 'BU_NAVIGATION_LIB_LOADED', TRUE );
 
 define( 'GROUP_CONCAT_MAX_LEN', 20480 );
@@ -12,20 +18,12 @@ define( 'GROUP_CONCAT_MAX_LEN', 20480 );
 /**
  * Gets the supported post_types by the bu-navigation plugin.
  *
- * This function is located here in the bu-includes because sometimes only this file is loaded to work with bu-navigation (like on the frontend listing pages).
- *
  * @param boolean $include_link true|false link post_type is something special, so we don't always need it
  * @return array of post_type strings
  */
-function bu_navigation_supported_post_types($include_link = false) {
+function bu_navigation_supported_post_types( $include_link = false, $output = 'names' ) {
 
-	$post_types = get_post_types(array('hierarchical' => true), 'names');
-	$post_types = apply_filters('bu_navigation_post_types', $post_types);
-
-	if ( $GLOBALS['bu_navigation_plugin']->supports( 'links' ) && $include_link )
-		$post_types[BU_NAVIGATION_LINK_POST_TYPE] = BU_NAVIGATION_LINK_POST_TYPE;
-
-	return $post_types;
+ 	return $GLOBALS['bu_navigation_plugin']->supported_post_types( $include_link, $output );
 
 }
 

@@ -213,6 +213,31 @@ class BU_Navigation_Plugin {
 	}
 
 	/**
+	 * Gets the supported post_types by the bu-navigation plugin.
+	 *
+	 * @todo needs-unit-test
+	 *
+	 * @param boolean $include_link true|false link post_type is something special, so we don't always need it
+	 * @param string $output type of output (names|objects)
+	 * @return array of post_type strings or objects depending on $output param
+	 */
+	public function supported_post_types( $include_link = false, $output = 'names' ) {
+
+		$post_types = get_post_types( array( 'hierarchical' => true ), $output );
+		$post_types = apply_filters( 'bu_navigation_post_types', $post_types );
+
+		if ( $this->supports( 'links' ) && $include_link ) {
+			if ( 'names' == $output )
+				$post_types[ BU_NAVIGATION_LINK_POST_TYPE ] = BU_NAVIGATION_LINK_POST_TYPE;
+			else
+				$post_types[ BU_NAVIGATION_LINK_POST_TYPE ] = get_post_type_object( BU_NAVIGATION_LINK_POST_TYPE );
+		}
+
+		return $post_types;
+
+	}
+
+	/**
 	 * Returns the original post type for an existing post
 	 *
 	 * @param mixed $post post ID, object, or post type string

@@ -1,7 +1,9 @@
 <?php
 
 /**
- * BU Navigation Admin Metabox controller
+ * BU Navigation Admin Post controller
+ *
+ * Loaded while editing posts
  *
  * Handles rendering and behavior of the navigation attributes metabox
  * 	-> Setting post parent and order
@@ -9,31 +11,54 @@
  * 	-> Showing/hiding of post in navigation menus
  *
  * @todo
- *	- Need to trigger sibling reorganization for restore from trash action
  *  - Add "Help" for navigation, label, visibilty
  */
-class BU_Navigation_Admin_Metabox {
+class BU_Navigation_Admin_Post {
 
+	public $post_id;
 	public $post;
 	public $post_type;
+	public $post_type_object;
 	public $post_type_labels;
 
 	private $plugin;
 
-	public function __construct( $post, $post_type, $plugin ) {
+	public function __construct( $plugin ) {
 
 		$this->plugin = $plugin;
 
-		// Set up properties
-		if( is_numeric( $post ) )
-			$post = get_post( $post );
+		// Use current screen to determine post info
+		$screen = get_current_screen();
 
-		$this->post = $post;
-		$this->post_type = $post_type;
-		$this->post_type_labels = $this->plugin->get_post_type_labels( $this->post_type );
+		// Determine current post
+		// var_dump( $screen );
 
-		// Attach WP actions/filters
-		$this->register_hooks();
+		// Determine current post type
+		$this->post_type = $screen->post_type;
+
+		if ( in_array( $this->post_type, $this->plugin->supported_post_types() ) ) {
+
+			// Store post type object & labels
+			$this->post_type_object = get_post_type_object( $this->post_type );
+			$this->post_type_labels = $this->plugin->get_post_type_labels( $this->post_type );
+
+			// Determine current post
+			if ( 'add' == $screen->action ) {
+				$this->post_id = 0;
+			} else if ( isset( $_GET['post'] ) ) {
+				$this->post_id = $_GET['post'];
+			} else if ( isset( $_POST['post_ID'] ) ) {
+				$this->post_id = $_POST['post_ID'];
+			}
+
+			// Store current post
+			if ( $this->post_id )
+				$this->post = get_post( $this->post_id );
+
+			// Attach WP actions/filters
+			$this->register_hooks();
+
+		}
 
 	}
 
@@ -42,10 +67,9 @@ class BU_Navigation_Admin_Metabox {
 	 */
 	public function register_hooks() {
 
-		add_action('admin_enqueue_scripts', array($this, 'add_scripts'));
-		add_action('add_meta_boxes', array($this, 'register_metaboxes'), 10, 2);
-
-		add_action('save_post', array($this, 'save_nav_meta_data'), 10, 2);
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_scripts' ) );
+		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 2 );
+		add_action( 'save_post', array( $this, 'save' ), 10, 2 );
 
 	}
 
@@ -62,12 +86,11 @@ class BU_Navigation_Admin_Metabox {
 		wp_register_script('bu-navigation-metabox', $scripts_url . '/navigation-metabox' . $suffix . '.js', array('bu-navigation'), BU_Navigation_Plugin::VERSION, true );
 
 		// Setup dynamic script context for navigation-metabox.js
-		$post_id = is_object( $this->post ) ? $this->post->ID : null;
 		$ancestors = $this->get_formatted_ancestors();
 
 		$script_context = array(
 			'postTypes' => $this->post_type,
-			'currentPost' => $post_id,
+			'currentPost' => $this->post_id,
 			'ancestors' => $ancestors,
 			'lazyLoad' => false,
 			'showCounts' => false,
@@ -88,21 +111,32 @@ class BU_Navigation_Admin_Metabox {
 	 *
 	 * @todo needs selenium tests
 	 */
-	public function register_metaboxes( $post_type, $post ) {
+	public function add_meta_boxes( $post_type, $post ) {
 
 		// Remove built in page attributes meta box
 		remove_meta_box('pageparentdiv', 'page', 'side');
 
-		// @todo use the appropriate post type label here
-		// Add in custom "Page templates" metabox if current theme has templates
-		$tpls = get_page_templates();
-		if (is_array($tpls) && (count($tpls) > 0)) {
-			add_meta_box('bupagetemplatediv', __('Page Template'), array($this, 'custom_template_metabox'), 'page', 'side', 'core');
+		$templates = get_page_templates();
+
+		if ( is_array( $templates ) && ( count( $templates ) > 0 ) ) {
+			add_meta_box(
+				'bupagetemplatediv',
+				__( sprintf( "%s Template", $this->post_type_labels['singular'] ), BU_Navigation_Plugin::TEXT_DOMAIN  ),
+				array($this, 'display_custom_template'),
+				$post_type,
+				'side',
+				'core'
+				);
 		}
 
-		if( in_array( $post_type, bu_navigation_supported_post_types() ) ) {
-			add_meta_box('bunavattrsdiv', __('Placement in Navigation'), array($this, 'navigation_attributes_metabox'), $post_type, 'side', 'core');
-		}
+		add_meta_box(
+			'bunavattrsdiv',
+			__( 'Placement in Navigation', BU_Navigation_Plugin::TEXT_DOMAIN ),
+			array( $this, 'display_nav_attributes' ),
+			$post_type,
+			'side',
+			'core'
+			);
 
 	}
 
@@ -117,15 +151,14 @@ class BU_Navigation_Admin_Metabox {
 	 * this page from navigation lists (i.e. content nav widget) with
 	 * a checkbox.
 	 */
-	public function navigation_attributes_metabox( $post ) {
+	public function display_nav_attributes( $post ) {
 
 		// retrieve previously saved settings for this post (if any)
-		$nav_meta_data = $this->get_nav_meta_data($post);
-		$nav_label = esc_attr($nav_meta_data['label']);
-		$nav_exclude = $nav_meta_data['exclude'];
+		$nav_label = esc_attr( bu_navigation_get_label( $post, '' ) );
+		$nav_exclude = bu_navigation_post_excluded( $post );
 
 		// new pages are not in the nav already, so we need to fix this
-		$nav_display = $post->post_status == 'auto-draft' ? false : (bool) !$nav_exclude;
+		$nav_display = $post->post_status == 'auto-draft' ? false : ! $nav_exclude;
 
 		// Labels
 		$breadcrumbs = $this->get_post_breadcrumbs_label( $post );
@@ -140,26 +173,104 @@ class BU_Navigation_Admin_Metabox {
 
 	}
 
+
+	/**
+	 * Render custom "Page Template" metabox
+	 *
+	 * Since we replace the standard "Page Attributes" meta box with our own,
+	 * we relocate the "Template" dropdown that usually appears there to its
+	 * own custom meta box
+	 */
+	public function display_custom_template( $post ) {
+
+		$current_template = isset( $post->page_template ) ? $post->page_template : 'default';
+
+		include( BU_NAV_PLUGIN_DIR . '/templates/metabox-custom-template.php' );
+
+	}
+
+	/**
+	 * Update navigation related meta data on post save
+	 *
+	 * WordPress will handle updating of post_parent and menu_order prior to this callback being run
+	 * The post property of stored in this object will hold the post data prior to update
+	 *
+	 * @todo don't hard code meta keys
+	 */
+	public function save( $post_id, $post ) {
+
+		if( ! in_array( $post->post_type, $this->plugin->supported_post_types() ) )
+			return;
+
+		if( 'auto-draft' == $post->post_status )
+			return;
+
+		if( array_key_exists( 'nav_label', $_POST ) ) {
+
+			// update the navigation meta data
+			$nav_label = $_POST['nav_label'];
+			$exclude = ( array_key_exists( 'nav_display', $_POST ) ? 0 : 1 );
+
+			update_post_meta( $post_id, BU_NAV_META_PAGE_LABEL, $nav_label );
+			update_post_meta( $post_id, BU_NAV_META_PAGE_EXCLUDE, $exclude );
+
+		}
+
+		// Perform reordering if post parent or menu order has changed
+		$reorder = new BU_Navigation_Reorder_Tracker( $post->post_type );
+
+		// Reorder old and new section if parent has changed
+		if( $this->post->post_parent != $post->post_parent ) {
+
+			$reorder->mark_post_as_moved( $post );
+			$reorder->mark_section_for_reordering( $this->post->post_parent );
+
+		}
+
+		// Reorder current siblings if only my menu order has changed
+		else if( $this->post->menu_order != $post->menu_order ) {
+
+			$reorder->mark_post_as_moved( $post );
+
+		}
+
+		// Reorder
+		if( $reorder->has_moves() ) {
+			$reorder->run();
+		}
+
+	}
+
+	/**
+	 * @todo consider moving
+	 * @todo investigate using get_post_ancestors instead of manually fetching post parents
+	 */
 	public function get_formatted_ancestors() {
 		$ancestors = array();
 		$post = $this->post;
 
+		if ( empty( $post ) )
+			return $ancestors;
+
 		while( $post->post_parent != 0 ) {
-			$post = get_post($post->post_parent);
+			$post = get_post( $post->post_parent );
 			array_push($ancestors, $this->format_post( $post ) );
 		}
 
 		return $ancestors;
 	}
 
+	/**
+	 * @todo this is redundant with work done in the BU_Navigation_Tree_View class
+	 * @todo think about refactoring
+	 */
 	public function format_post( $post ) {
 
 		// @todo -- move to ACL plugin
 		// Get necessary metadata
 		$acl_option = defined( 'BuAccessControlList::PAGE_ACL_OPTION' ) ? BuAccessControlList::PAGE_ACL_OPTION : BU_ACL_PAGE_OPTION;
 
-		$post->excluded = get_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE, true);
-		$post->excluded = ($post->excluded == "1" ) ? true : false;
+		$post->excluded = bu_navigation_post_excluded( $post );
 		$post->protected = ! empty( $post->post_password );
 		$post->restricted = get_post_meta( $post->ID, $acl_option, true );
 		$post->restricted = ! empty( $post->restricted ) ? $post->restricted : false;
@@ -223,91 +334,6 @@ class BU_Navigation_Admin_Metabox {
 		}
 
 		return $output;
-	}
-
-	/**
-	 * Render custom "Page Template" metabox
-	 *
-	 * Since we replace the standard "Page Attributes" meta box with our own,
-	 * we relocate the "Template" dropdown that usually appears there to its
-	 * own custom meta box
-	 */
-	public function custom_template_metabox($post) {
-
-		$current_template = isset( $post->page_template ) ? $post->page_template : 'default';
-
-		include( BU_NAV_PLUGIN_DIR . '/templates/metabox-custom-template.php' );
-
-	}
-
-	/**
-	 * retrieve and save navigation-related post meta data
-	 */
-	public function get_nav_meta_data($post) {
-
-		$nav_label = get_post_meta($post->ID, '_bu_cms_navigation_page_label', true);
-		$exclude = get_post_meta($post->ID, '_bu_cms_navigation_exclude', true);
-
-		return array(
-			'label' => (trim($nav_label) ? $nav_label : $post->post_title),
-			'exclude' => (int) $exclude
-			);
-
-	}
-
-	/**
-	 * Update navigation related meta data on post save
-	 *
-	 * WordPress will handle updating of post_parent and menu_order prior to this callback
-	 *
-	 * @todo needs selenium test
-	 *
-	 * @hook save_post
-	 */
-	public function save_nav_meta_data( $post_id, $post ) {
-
-		if( !in_array($post->post_type, bu_navigation_supported_post_types()) )
-			return;
-
-		if( 'auto-draft' == $post->post_status )
-			return;
-
-		if( array_key_exists( 'nav_label', $_POST ) ) {
-
-			// update the navigation meta data
-			$nav_label = $_POST['nav_label'];
-			$exclude = ( array_key_exists( 'nav_display', $_POST ) ? 0 : 1 );
-
-			update_post_meta($post_id, '_bu_cms_navigation_page_label', $nav_label);
-			update_post_meta($post_id, '_bu_cms_navigation_exclude', $exclude);
-
-		}
-
-		// Perform reordering if post parent or menu order has changed
-		$reorder = new BU_Navigation_Reorder_Tracker( $post->post_type );
-
-		// Reorder old and new section if parent has changed
-		if( $this->post->post_parent != $post->post_parent ) {
-
-			// error_log('Post parent has changed!  Reordering old and new siblings...');
-			$reorder->mark_post_as_moved( $post );
-			$reorder->mark_section_for_reordering( $this->post->post_parent );
-
-		}
-
-		// Reorder current siblings if only my menu order has changed
-		else if( $this->post->menu_order != $post->menu_order ) {
-
-			// error_log('Menu order has changed!  Reordering current siblings...');
-			$reorder->mark_post_as_moved( $post );
-
-		}
-
-		// Reorder
-		if( $reorder->has_moves() ) {
-			$reorder->run();
-		}
-
 	}
 
 }

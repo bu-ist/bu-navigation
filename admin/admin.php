@@ -14,7 +14,7 @@ class BU_Navigation_Admin {
 	// Administrative component classes
 	public $settings_page;
 	public $navman;
-	public $metabox;
+	public $edit_post;
 	public $filter_pages;
 
 	private $plugin;
@@ -39,12 +39,15 @@ class BU_Navigation_Admin {
 
 		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'page';
 
+		// Load navigation manager interfaces
 		if ( $this->plugin->supports( 'manager' ) ) {
 
+			// Navigation manager screen
 			$this->load_manager( $post_type );
 
-			add_action( 'load-post.php', array( $this, 'load_metaboxes' ) );
-			add_action( 'load-post-new.php', array( $this, 'load_metaboxes' ) );
+			// Edit post screens
+			add_action( 'load-post.php', array( $this, 'load_edit_post' ) );
+			add_action( 'load-post-new.php', array( $this, 'load_edit_post' ) );
 
 		}
 
@@ -109,6 +112,22 @@ class BU_Navigation_Admin {
 	}
 
 	/**
+	 * Navigation attributes edit post interface
+	 *
+	 * @todo test with BU Versions
+	 *
+	 * Displayed for supported post types.  Allows repositioning of page via modal tree interface, setting of
+	 * navigation label, and toggling of display in nav menus.
+	 */
+	public function load_edit_post() {
+
+		// Load admin post class
+		require_once( dirname( __FILE__ ) . '/post.php' );
+		$this->edit_post = new BU_Navigation_Admin_Post( $this->plugin );
+
+	}
+
+	/**
 	 * Filter manage post tables by section dropdown
 	 *
 	 * @todo incorporate filter posts dropdown in to this class
@@ -120,66 +139,12 @@ class BU_Navigation_Admin {
 		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'page';
 		$post_parent = isset( $_GET['post_parent'] ) ? intval($_GET['post_parent']) : 0;
 
-		if( in_array( $post_type, bu_navigation_supported_post_types() ) ) {
+		if( in_array( $post_type, $this->plugin->supported_post_types() ) ) {
 
 			require_once( dirname( __FILE__ ) . '/filter-pages.php' );
 			$this->filter_pages = new BU_Navigation_Admin_Filter_Pages( $post_type, $post_parent, $this->plugin );
 
 		}
-
-	}
-
-	/**
-	 * Navigation attributes meta box
-	 *
-	 * Displayed for supported post types.  Allows repositioning of page via modal tree interface, setting of
-	 * navigation label, and toggling of display in nav menus.
-	 */
-	public function load_metaboxes() {
-
-		$post_id = $post_type = null;
-
-		$screen = get_current_screen();
-
-		// Adding new post
-		if( 'add' == $screen->action ) {
-
-			$post_id = null;	// new post, no ID yet
-			$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'post';
-
-		} else {
-
-			// Edit post request
-			if( isset( $_GET['post'] ) ) {
-				$post_id = intval( $_GET['post'] );
-			}
-
-			// Save post request
-			else if( isset( $_POST['action'] ) && $_POST['action'] == 'editpost' ) {
-				$post_id = intval($_POST['post_ID'] );
-			}
-
-			// Report any unexpected cases and bail
-			else {
-				error_log('Unexpected request for load_edit_post:' );
-				error_log('REQUEST: ' . print_r( $_REQUEST, true ) );
-				return;
-			}
-
-			// Get correct post type
-			$post_type = $this->plugin->get_post_type( $post_id );
-
-		}
-
-		// Assert valid post ID and type before continuing
-		if( is_null( $post_id ) && is_null( $post_type ) ) {
-			error_log('BU Navigation Admin Metabox cannot be created without post ID and type');
-			return;
-		}
-
-		// Load admin metabox class
-		require_once( dirname( __FILE__ ) . '/metaboxes.php' );
-		$this->metabox = new BU_Navigation_Admin_Metabox( $post_id, $post_type, $this->plugin );
 
 	}
 
@@ -195,7 +160,7 @@ class BU_Navigation_Admin {
 		global $wpdb;
 
 		$post = get_post($post_id);
-		if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) return;
+		if ( !in_array($post->post_type, $this->plugin->supported_post_types() ) ) return;
 
 		$exclude = get_post_meta($post_id, BU_NAV_META_PAGE_EXCLUDE, true);
 
@@ -228,7 +193,7 @@ class BU_Navigation_Admin {
 		$post = get_post($post_id);
 
 		// case: not a supported post_type
-		if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) {
+		if ( !in_array($post->post_type, $this->plugin->supported_post_types() ) ) {
 			echo json_encode( array( 'ignore' => true ) );
 			die;
 		}

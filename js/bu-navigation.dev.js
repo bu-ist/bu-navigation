@@ -1253,20 +1253,28 @@ bu.plugins.navigation = {};
 
 				var current, i;
 
-				// Root node does not exist, no nead to load
-				for (i = 0; i < ancestors.length; i = i + 1) {
-					current = c.ancestors[i];
+				// Root node does not exist, no need to load
+				if ( ancestors.length ) {
+					for (i = 0; i < ancestors.length; i = i + 1) {
+						current = c.ancestors[i];
 
-					// Attempt to open, insert and open on failure
-					if (that.openPost(current.ID) === false) {
-						that.insertPost(current);
-						that.openPost(current.ID);
+						// Attempt to open ancestor, insert and open if it fails due to non-existance (i.e. draft post)
+						if (that.openPost(current.ID) === false) {
+							that.insertPost(current, function($node) {
+								that.openPost(current.ID);
+
+								// Select or insert current post if we're done adding ancestors
+								if ( i == ancestors.length ) {
+									console.log('Selecting current post...');
+									selectCurrentPost();
+								}
+							});
+						}
+
 					}
-
+				} else {
+					selectCurrentPost();
 				}
-
-				// Select or insert current post
-				selectCurrentPost();
 
 			};
 
@@ -1276,6 +1284,9 @@ bu.plugins.navigation = {};
 				var $current = my.getNodeForPost(currentPost);
 
 				if (!$current) {
+					console.log("Current post not found, inserting...");
+					console.log(currentPost);
+
 					// Insert and select self, then save tree state
 					that.insertPost(currentPost, function($node) {
 						that.selectPost(currentPost);

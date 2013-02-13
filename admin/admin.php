@@ -77,10 +77,8 @@ class BU_Navigation_Admin {
 			$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
 			$scripts_url = plugins_url( 'js', BU_NAV_PLUGIN );
 
-			$post_type = $this->plugin->get_post_type( $screen->post_type );
-
 			wp_enqueue_script( 'bu-page-parent-deletion', $scripts_url . '/deletion' . $suffix . '.js', array('jquery'), BU_Navigation_Plugin::VERSION, true );
-			wp_localize_script( 'bu-page-parent-deletion', 'bu_navigation_pt_labels', $this->plugin->get_post_type_labels( $post_type ) );
+			wp_localize_script( 'bu-page-parent-deletion', 'bu_navigation_pt_labels', $this->plugin->get_post_type_labels( $screen->post_type ) );
 
 		}
 

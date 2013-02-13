@@ -238,36 +238,6 @@ class BU_Navigation_Plugin {
 	}
 
 	/**
-	 * Returns the original post type for an existing post
-	 *
-	 * @param mixed $post post ID, object, or post type string
-	 * @return string $post_type post type name
-	 */
-	public function get_post_type( $post ) {
-
-		// Default arg -- post type string
-		$post_type = $post;
-
-		if( is_numeric( $post ) ) {
-			$post = get_post( $post );
-			if( $post === false )
-				return false;
-
-			$post_type = $post->post_type;
-
-		} else if ( is_object( $post ) ) {
-
-			$post_type = $post->post_type;
-
-		}
-
-		// @todo add BU Versions logic here
-
-		return $post_type;
-
-	}
-
-	/**
 	 * Helper for creating a post type labels arrays
 	 *
 	 * @param $post_type name of a registered post type to get labels for

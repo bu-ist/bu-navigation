@@ -30,30 +30,33 @@ class BU_Navigation_Admin_Post {
 		// Use current screen to determine post info
 		$screen = get_current_screen();
 
-		// Determine current post
-		// var_dump( $screen );
+		// Prior to WP < 3.3 the current screen object can not be used to reliably determine current post type at the time the load-* actions are fired.
+		// Otherwise, we'd just do this...
+		// $this->post_type = $screen->post_type;
 
-		// Determine current post type
-		$this->post_type = $screen->post_type;
+		// Determine current post and post type
+		if ( 'add' == $screen->action ) {
+			$this->post_id = 0;
+			$this->post_type = $_GET['post_type'];
+		} else if ( isset( $_GET['post'] ) ) {
+			$this->post_id = $_GET['post'];
+		} else if ( isset( $_POST['post_ID'] ) ) {
+			$this->post_id = $_POST['post_ID'];
+		}
 
+		if ( $this->post_id ) {
+			$this->post = get_post( $this->post_id );
+			if ( ! is_object( $this->post ) || ! isset( $this->post->post_type ) )
+				return;
+			$this->post_type = $this->post->post_type; 
+		}
+
+		// Only continue with a valid and supported post type
 		if ( in_array( $this->post_type, $this->plugin->supported_post_types() ) ) {
 
 			// Store post type object & labels
 			$this->post_type_object = get_post_type_object( $this->post_type );
 			$this->post_type_labels = $this->plugin->get_post_type_labels( $this->post_type );
-
-			// Determine current post
-			if ( 'add' == $screen->action ) {
-				$this->post_id = 0;
-			} else if ( isset( $_GET['post'] ) ) {
-				$this->post_id = $_GET['post'];
-			} else if ( isset( $_POST['post_ID'] ) ) {
-				$this->post_id = $_POST['post_ID'];
-			}
-
-			// Store current post
-			if ( $this->post_id )
-				$this->post = get_post( $this->post_id );
 
 			// Attach WP actions/filters
 			$this->register_hooks();

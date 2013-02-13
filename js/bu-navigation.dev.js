@@ -305,11 +305,12 @@ bu.plugins.navigation = {};
 				return that;
 			};
 
-			that.openPost = function (post) {
+			that.openPost = function (post, callback) {
 				var $node = my.getNodeForPost(post);
+				callback = callback || $.noop;
 
 				if ($node) {
-					$tree.jstree('open_node', $node, $.noop, true);
+					$tree.jstree('open_node', $node, callback, true);
 				} else {
 					return false;
 				}
@@ -1217,27 +1218,8 @@ bu.plugins.navigation = {};
 					// We want old -> young, which is not how they're passed
 					ancestors = c.ancestors.reverse();
 
-					var $root = my.getNodeForPost(ancestors[0].ID);
-
-					if ($root) {
-
-						// Remove root post
-						ancestors.shift();
-
-						// Wait for root node to load and open before continuing
-						$tree.jstree('open_node', $root, function() {
-
-							// Open ancestors first
-							revealCurrentPost(ancestors);
-
-						}, true );
-
-					} else {
-
-							// Open ancestors first
-							revealCurrentPost(ancestors);
-
-					}
+					// Handles opening (and possibly inserting) post ancestors one by one
+					openNextChild(0, ancestors);
 
 				} else {
 
@@ -1248,45 +1230,35 @@ bu.plugins.navigation = {};
 
 			});
 
-			var revealCurrentPost = function (ancestors) {
-				ancestors = ancestors || [];
-
-				var current, i;
-
-				// Root node does not exist, no need to load
-				if ( ancestors.length ) {
-					for (i = 0; i < ancestors.length; i = i + 1) {
-						current = c.ancestors[i];
-
-						// Attempt to open ancestor, insert and open if it fails due to non-existance (i.e. draft post)
-						if (that.openPost(current.ID) === false) {
-							that.insertPost(current, function($node) {
-								that.openPost(current.ID);
-
-								// Select or insert current post if we're done adding ancestors
-								if ( i == ancestors.length ) {
-									console.log('Selecting current post...');
-									selectCurrentPost();
-								}
-							});
-						}
-
+			/**
+			 * Recursively load ancestors, opening and possibly inserting along the way.
+			 * 
+			 * For now, unpublished content will not be represented in the tree passed to us
+			 * from the server, so we need to enter this recursive callback waterfall to make
+			 * sure all ancestors exist and are open before selecting the current post.
+			 */
+			var openNextChild = function (current, all) {
+				var post = all[current];
+				
+				if (post) {
+					if (that.openPost(post, function() { openNextChild( current + 1, all) }) === false ) {
+						that.insertPost(post, function($node) { openNextChild(current + 1, all); });
 					}
 				} else {
+					// No more ancestors ... we're safe to select the current post now
 					selectCurrentPost();
 				}
+			}
 
-			};
-
+			/**
+			 * Select the current post, inserting if it does not already exist in the tree (i.e. new post, or unpublished post)
+			 */
 			var selectCurrentPost = function () {
-
+				
 				// Insert post if it isn't already represented in the tree (new, draft, or pending posts)
 				var $current = my.getNodeForPost(currentPost);
 
 				if (!$current) {
-					console.log("Current post not found, inserting...");
-					console.log(currentPost);
-
 					// Insert and select self, then save tree state
 					that.insertPost(currentPost, function($node) {
 						that.selectPost(currentPost);

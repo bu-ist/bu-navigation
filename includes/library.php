@@ -36,7 +36,7 @@ function bu_navigation_supported_post_types( $include_link = false, $output = 'n
  * @param array $post_types focus on a specific post_type
  * @return array (sections => array(sectionid1 => [pageid1, ...], ...), pages => array( pageid1 => sectionid1, ... )
  */
-function bu_navigation_load_sections($post_types) {
+function bu_navigation_load_sections($post_types = array()) {
 
 	global $wpdb;
 

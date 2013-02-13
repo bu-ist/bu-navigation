@@ -82,7 +82,7 @@ class BU_Navigation_Admin_Manager {
 	public function register_menu() {
 
 		// Add "Edit Order" links to the submenu of each supported post type
-		$post_types = bu_navigation_supported_post_types();
+		$post_types = $this->plugin->supported_post_types();
 
 		foreach( $post_types as $pt ) {
 

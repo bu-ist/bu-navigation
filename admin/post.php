@@ -246,7 +246,6 @@ class BU_Navigation_Admin_Post {
 
 	/**
 	 * @todo consider moving
-	 * @todo investigate using get_post_ancestors instead of manually fetching post parents
 	 */
 	public function get_formatted_ancestors() {
 		$ancestors = array();
@@ -321,12 +320,19 @@ class BU_Navigation_Admin_Post {
 
 		$output = "<ul id=\"bu-post-breadcrumbs\">";
 
-		$ancestors = array_reverse( get_post_ancestors( $post->ID ) );
-		array_push( $ancestors, $post->ID );
-
+		// Manually fetch ancestors to get around BU WP core mod...
+		$ancestors = array( $post );
+		while( $post->post_parent != 0 ) {
+			$post = get_post( $post->post_parent );
+			array_push( $ancestors, $post );
+		}
+		
+		// Start from the root
+		$ancestors = array_reverse( $ancestors );
+		
+		// Print markup
 		foreach( $ancestors as $ancestor ) {
-			$p = get_post($ancestor);
-			$label = bu_navigation_get_label( $p );
+			$label = bu_navigation_get_label( $ancestor );
 
 			if( $ancestor != end($ancestors) ) {
 				$output .= "<li>" . $label . "<ul>";

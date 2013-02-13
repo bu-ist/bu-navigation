@@ -33,4 +33,23 @@ function bu_navigation_filter_pages_exclude($pages)
 
 add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
 
+function bu_navigation_post_excluded( $post ) {
+	if( is_numeric( $post ) ) {
+		$post = get_post( $post );
+	}
+
+	if( ! is_object( $post ) ) {
+		return false;
+	}
+
+	$excluded = get_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE, true );
+
+	// No value set yet, default to excluded
+	if ( $excluded === '' )
+		$excluded = true;
+
+	return (bool) $excluded;
+
+}
+
 ?>

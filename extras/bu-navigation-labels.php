@@ -48,19 +48,19 @@ function bu_navigation_get_label( $post, $empty_label = '(no title)' ) {
 	if( ! is_object( $post ) ) {
 		return false;
 	}
-	
+
 	$label = get_post_meta( $post->ID, BU_NAV_META_PAGE_LABEL, true );
-	
+
 	if( ! $label ) {
 		$label = $post->post_title;
 	}
-	
+
 	if( empty( $label ) ) {
 		$label = $empty_label;
 	}
 
 	return $label;
-	
+
 }
 
 ?>

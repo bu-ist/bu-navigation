@@ -338,43 +338,20 @@ class BU_Navigation_Tree_Query {
 	}
 
 	/**
-	 * @todo build in include_links arg, defaults to true
+	 * Special processing for query args
 	 */
 	protected function setup_query( $query_args = array() ) {
 
 		$defaults = array(
 			'child_of' => 0,
-			'post_types' => array('page'),
-			'post_status' => array('publish'),
-			'direction' => 'down',
+			'post_types' => array( 'page' ),
+			'post_status' => array( 'publish' ),
+			'include_links' => true,
 			'depth' => 0,
-			'include_links' => true
 		);
 
 		$this->args = array();
 		$this->args = wp_parse_args( $query_args, $defaults );
-
-		if( ! empty( $this->args['post_types'] ) && is_string( $this->args['post_types'] ) ) {
-			$this->args['post_types'] = explode( ',', $this->args['post_types'] );
-		}
-
-		$this->args['post_types'] = (array) $this->args['post_types'];
-
-		// Add link post types if they are included
-		if ( $this->args['include_links'] ) {
-			if( in_array( 'page', $this->args['post_types'] ) )
-				$this->args['post_types'][] = BU_NAVIGATION_LINK_POST_TYPE;
-		}
-
-		// But if links are disabled, take it away
-		if ( ! $this->plugin->supports( 'links' ) && in_array( BU_NAVIGATION_LINK_POST_TYPE, $this->args['post_types'] ) ) {
-			$key = array_search( BU_NAVIGATION_LINK_POST_TYPE, $this->args['post_types'] );
-			unset( $this->args['post_types'][$key] );
-		}
-
-		if( ! empty( $this->args['post_status'] ) && is_string( $this->args['post_status'] ) ) {
-			$this->args['post_status'] = explode( ',', $this->args['post_status'] );
-		}
 
 		// Don't allow fetching of entire tree
 		if( $this->args['child_of'] == 0 ) {
@@ -389,18 +366,19 @@ class BU_Navigation_Tree_Query {
 	protected function query() {
 
 		// Setup filters
-		remove_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
-		add_filter('bu_navigation_filter_pages', array( $this, 'filter_posts' ) );
+		remove_filter( 'bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude' );
+		add_filter( 'bu_navigation_filter_pages', array( $this, 'filter_posts' ) );
 
 		// Gather sections
-		$section_args = array('direction' => $this->args['direction'], 'depth' => $this->args['depth'], 'post_types' => $this->args['post_types']);
+		$section_args = array( 'direction' => 'down', 'depth' => $this->args['depth'], 'post_types' => $this->args['post_types'] );
 		$sections = bu_navigation_gather_sections( $this->args['child_of'], $section_args );
 
 		// Load pages in sections
-		$this->posts = bu_navigation_get_pages( array(
+		$this->posts = bu_navigation_get_posts( array(
 			'sections' => $sections,
 			'post_types' => $this->args['post_types'],
-			'post_status' => $this->args['post_status']
+			'post_status' => $this->args['post_status'],
+			'include_links' => $this->args['include_links'],
 			)
 		);
 

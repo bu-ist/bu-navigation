@@ -5,12 +5,6 @@
  * ntk@bu.edu
  */
 
-/*
-@todo
-	- as of now, this file is dependent on the main plugin class
-		- decide if that should be reversed so we can distribute just the library functionality
-*/
-
 define( 'BU_NAVIGATION_LIB_LOADED', TRUE );
 
 define( 'GROUP_CONCAT_MAX_LEN', 20480 );
@@ -31,32 +25,43 @@ function bu_navigation_supported_post_types( $include_link = false, $output = 'n
 /**
  * Returns all the sections with children and all the pages with parents (so both ways)
  *
- * @todo add an "include_links" argument
- *
  * @global type $wpdb
  * @param array $post_types focus on a specific post_type
+ * @param bool $include_links whether or not to include links (with pages only)
  * @return array (sections => array(sectionid1 => [pageid1, ...], ...), pages => array( pageid1 => sectionid1, ... )
  */
-function bu_navigation_load_sections($post_types = array()) {
-
-	global $wpdb;
+function bu_navigation_load_sections( $post_types = array(), $include_links = true ) {
+	global $wpdb, $bu_navigation_plugin;
 
 	$wpdb->query('SET SESSION group_concat_max_len = ' . GROUP_CONCAT_MAX_LEN);
 
+	// Setup target post type(s)
 	if ( empty( $post_types ) ) {
 		$post_types = array( 'page' );
-
-		if( $GLOBALS['bu_navigation_plugin']->supports( 'links' ) )
-			$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
+	} else if ( is_string( $post_types ) ) {
+		$post_types = explode( ',', $post_types );
+	} else {
+		$post_types = (array) $post_types;
 	}
 
-	// handle custom post types support
-	$in_post_types = "'" . implode("','", (array)$post_types) . "'";
+	// Handle links
+	if ( $include_links && ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types ) ) {
+		if ( in_array( 'page', $post_types ) && ( count( $post_types ) == 1 ) )
+			$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
+	}
+	if( is_object( $bu_navigation_plugin ) && ! $bu_navigation_plugin->supports( 'links' ) ) {
+		$index = array_search( BU_NAVIGATION_LINK_POST_TYPE, $post_types );
+		if ( $index !== false ) {
+			unset( $post_types[ $index ] );
+		}
+	}
+
+	$in_post_types = implode( "','", $post_types );
 
 	$query = sprintf("
 		SELECT DISTINCT(post_parent) AS section, GROUP_CONCAT(ID) AS children
 		  FROM %s
-		 WHERE post_type IN ($in_post_types)
+		 WHERE post_type IN ('$in_post_types')
 		 GROUP BY post_parent
 		 ORDER BY post_parent ASC", $wpdb->posts);
 	$rows = $wpdb->get_results($query);
@@ -64,23 +69,72 @@ function bu_navigation_load_sections($post_types = array()) {
 	$sections = array();
 	$pages = array();
 
-	if ((is_array($rows)) && (count($rows) > 0))
-	{
-		foreach ($rows as $row)
-		{
+	if ( is_array( $rows ) && ( count( $rows ) > 0 ) ) {
+		foreach ( $rows as $row ) {
 			$sections[$row->section] = explode(',', $row->children);
 
-			if ((is_array($sections[$row->section])) && (count($sections[$row->section]) > 0))
-			{
-				foreach ($sections[$row->section] as $child)
-				{
+			if ( is_array( $sections[$row->section] ) && ( count( $sections[ $row->section ] ) > 0 ) ) {
+				foreach ( $sections[$row->section] as $child ) {
 					$pages[$child] = $row->section;
 				}
 			}
 		}
 	}
 
-	return array('sections' => $sections, 'pages' => $pages);
+	return array( 'sections' => $sections, 'pages' => $pages );
+}
+
+/**
+ * @todo needs docblock
+ */
+function bu_navigation_gather_sections( $page_id, $args = '', $all_sections = NULL ) {
+	$defaults = array(
+		'direction' => 'up',
+		'depth' => 0,
+		'post_types' => array( 'page' ),
+		'include_links' => true
+		);
+	$r = wp_parse_args($args, $defaults);
+
+	if ( is_null( $all_sections ) )
+		$all_sections = bu_navigation_load_sections( $r['post_types'], $r['include_links'] );
+
+	$pages = $all_sections['pages'];
+	$sections = array();
+
+	// Include the current page as a section if it has any children
+	if ( array_key_exists( $page_id, $all_sections['sections'] ) )
+		array_push( $sections, $page_id );
+
+	// Gather descendants or ancestors depending on direction
+	if ($r['direction'] == 'down') {
+
+		$child_sections = bu_navigation_gather_childsections( $page_id, $all_sections['sections'], $r['depth'] );
+
+		if ( count( $child_sections ) > 0 )
+			$sections = array_merge( $sections, $child_sections );
+
+	} else {
+
+		if ( array_key_exists( $page_id, $pages ) ) {
+
+			$current_section = $pages[$page_id];
+			array_push( $sections, $current_section );
+
+			while ( $current_section != 0 ) {
+				if ( array_key_exists( $current_section, $pages ) ) {
+					$current_section = $pages[$current_section];
+					array_push($sections, $current_section);
+				} else {
+					break;
+				}
+			}
+		}
+	}
+
+	$sections = array_reverse( $sections );
+
+	return $sections;
 }
 
 /**
@@ -123,67 +177,6 @@ function bu_navigation_get_page_depth($page_id, $all_sections = NULL)
 	$depth--;
 
 	return $depth;
-}
-
-/**
- * @todo needs docblock
- * @todo add an "include_links" argument, and remove logic from post_types arg
- */
-function bu_navigation_gather_sections($page_id, $args = '', $all_sections = NULL)
-{
-	$defaults = array(
-		'direction' => 'up',
-		'depth' => 0,
-		'post_types' => $GLOBALS['bu_navigation_plugin']->supports( 'links' ) ? array('page', BU_NAVIGATION_LINK_POST_TYPE ) : array( 'page' ),
-		);
-
-	$r = wp_parse_args($args, $defaults);
-
-	if (is_null($all_sections)) $all_sections = bu_navigation_load_sections($r['post_types']);
-	$pages = $all_sections['pages'];
-
-	$sections = array();
-
-	/* if this page has children, count it as a section itself */
-
-	if (array_key_exists($page_id, $all_sections['sections'])) array_push($sections, $page_id);
-
-	if ($r['direction'] == 'down')
-	{
-		/* gather child sections */
-
-		$child_sections = bu_navigation_gather_childsections($page_id, $all_sections['sections'], $r['depth']);
-
-		if (count($child_sections) > 0) $sections = array_merge($sections, $child_sections);
-	}
-	else
-	{
-		/*  gather parent sections */
-
-		if (array_key_exists($page_id, $pages))
-		{
-			$current_section = $pages[$page_id];
-
-			array_push($sections, $current_section);
-
-			while ($current_section != 0)
-			{
-				if (array_key_exists($current_section, $pages))
-				{
-					$current_section = $pages[$current_section];
-					array_push($sections, $current_section);
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
-	}
-
-	$sections = array_reverse($sections);
-
-	return $sections;
 }
 
 /**
@@ -259,10 +252,9 @@ function bu_navigation_get_posts( $args = '' ) {
 		$post_types = array_map( 'trim', $post_types );
 
 		// Include links?
-		if ( $r['include_links'] ) {
-			if ( ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types ) ) {
+		if ( $r['include_links'] && ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types ) ) {
+			if ( in_array( 'page', $post_types ) && ( count( $post_types ) == 1 ) )
 				$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
-			}
 		}
 		if ( is_object( $bu_navigation_plugin ) && ! $bu_navigation_plugin->supports( 'links' ) ) {
 			$index = array_search( BU_NAVIGATION_LINK_POST_TYPE, $post_types );
@@ -749,7 +741,8 @@ function bu_navigation_display_primary($args = '')
 		'item_tag' => 'li',
 		'identify_top' => FALSE,
 		'whitelist_top' => NULL,
-		'post_types' => $GLOBALS['bu_navigation_plugin']->supports( 'links' ) ? array('page', BU_NAVIGATION_LINK_POST_TYPE ) : array( 'page' ),
+		'post_types' => array( 'page' ),
+		'include_links' => true
 		);
 
 	$defaults = apply_filters('bu_filter_primarynav_defaults', $defaults);
@@ -772,7 +765,13 @@ function bu_navigation_display_primary($args = '')
 		}
 	}
 
-	$section_args = array('direction' => 'down', 'depth' => $r['depth'], 'sections' => $sections, 'post_types' => $r['post_types']);
+	$section_args = array(
+		'direction' => 'down',
+		'depth' => $r['depth'],
+		'sections' => $sections,
+		'post_types' => $r['post_types'],
+		'include_links' => $r['include_links']
+		);
 	$r['sections'] = bu_navigation_gather_sections(0, $section_args);
 
 	/* grab all pages  we need for pnav */

@@ -12,7 +12,7 @@ function widget_bu_pages_args_adaptive($args)
 
 	if ( $args['page_id']) {
 
-		$section_args = array( 'post_types' => $args['post_types'], 'include_links' => $args['include_links'] );
+		$section_args = array( 'post_types' => $args['post_types'] );
 		$sections = bu_navigation_gather_sections( $args['page_id'], $section_args );
 
 		$args['sections'] = $sections;

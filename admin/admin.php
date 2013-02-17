@@ -134,7 +134,7 @@ class BU_Navigation_Admin {
 	 */
 	public function load_filter_pages() {
 
-		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'page';
+		$post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'post';
 		$post_parent = isset( $_GET['post_parent'] ) ? intval($_GET['post_parent']) : 0;
 
 		if( in_array( $post_type, $this->plugin->supported_post_types() ) ) {

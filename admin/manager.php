@@ -316,9 +316,6 @@ class BU_Navigation_Admin_Manager {
 
 		if( array_key_exists( 'bu_navman_save', $_POST ) ) {
 
-			// error_log('===== Starting navman save =====');
-			// $time_start = microtime(true);
-
 			$saved = false;
 
 			$this->reorder_tracker = new BU_Navigation_Reorder_Tracker( $this->post_type );
@@ -362,8 +359,6 @@ class BU_Navigation_Admin_Manager {
 				array_merge( $errors, $this->reorder_tracker->errors );
 			}
 
-			// error_log('Finished navman save in ' . sprintf('%f',(microtime(true) - $time_start)) . ' seconds');
-
 			if (function_exists('invalidate_blog_cache')) invalidate_blog_cache();
 
 			if( 0 == count( $errors ) ) {
@@ -385,8 +380,6 @@ class BU_Navigation_Admin_Manager {
 	 * @return bool|WP_Error $result the result of the post deletions
 	 */
 	public function process_deletions( $post_ids ) {
-		// error_log('===== Processing deletions =====');
-		// error_log('To delete: ' . print_r($post_ids,true ) );
 
 		$result = null;
 		$failures = array();
@@ -415,9 +408,6 @@ class BU_Navigation_Admin_Manager {
 
 					$this->reorder_tracker->mark_section_for_reordering( $post->post_parent );
 
-					// Temporary logging
-					// error_log('Post deleted: ' . $id );
-					// error_log('Marking old section for reordering: ' . $post->post_parent);
 				}
 
 			}
@@ -440,8 +430,6 @@ class BU_Navigation_Admin_Manager {
 	 * @return bool|WP_Error $result the result of the post updates
 	 */
 	public function process_updates( $posts ) {
-		// error_log('===== Processing updates =====');
-		// error_log('To update: ' . print_r($posts,true ) );
 
 		$result = null;
 		$failures = array();
@@ -477,8 +465,6 @@ class BU_Navigation_Admin_Manager {
 					$target = ($post->post_meta->bu_link_target === 'new') ? 'new' : 'same';
 					update_post_meta( $post->ID, 'bu_link_target', $target );
 
-					// Temporary logging
-					// error_log('Link updated: ' . $post->post_title );
 				}
 
 			}
@@ -501,8 +487,6 @@ class BU_Navigation_Admin_Manager {
 	 * @return bool|WP_Error $result the result of the post insertions
 	 */
 	public function process_insertions( $posts ) {
-		// error_log('===== Processing insertions =====');
-		// error_log('To insert: ' . print_r($posts,true ) );
 
 		$result = null;
 		$failures = array();
@@ -551,9 +535,6 @@ class BU_Navigation_Admin_Manager {
 						// Mark for reordering
 						$this->reorder_tracker->mark_post_as_moved( $post );
 
-						// Temporary logging
-						// error_log('Link inserted: ' . $post->post_title . ' (' . $post->ID . ')' );
-
 					}
 
 				}
@@ -578,8 +559,6 @@ class BU_Navigation_Admin_Manager {
 	 * @return bool|WP_Error $result the result of the post movements
 	 */
 	public function process_moves( $posts ) {
-		// error_log('===== Processing moves =====');
-		// error_log('To move: ' . print_r($posts,true ) );
 
 		$result = null;
 		$failures = array();
@@ -613,11 +592,7 @@ class BU_Navigation_Admin_Manager {
 					// Mark for reordering
 					$this->reorder_tracker->mark_post_as_moved( $post );
 
-					// Temporary logging
-					// error_log('Post moved: ' . $post->ID );
-
 					if( $post->post_parent != $original->post_parent ) {
-						// error_log('Post has changed parent, marking old section for reordering: ' . $original->post_parent );
 						$this->reorder_tracker->mark_section_for_reordering( $original->post_parent );
 					}
 
@@ -773,8 +748,6 @@ class BU_Navigation_Admin_Manager {
 	 * @param object|int $original post obj or post ID of previous parent
 	 */
 	public function can_move( $post, $original ) {
-		// error_log('===== Checking can_move =====');
-		// error_log('For Post: ' . print_r( $post, true ) );
 
 		if( is_numeric( $post ) ) {
 			$post = get_post($post);

@@ -293,12 +293,11 @@ class BU_Navigation_Admin_Manager {
 
 		$ajax_spinner = plugins_url( '/images/wpspin_light.gif', BU_NAV_PLUGIN );
 
-		// If link was a registered post type, we would use its publish meta cap here instead
-		$disable_add_link = ! $this->can_publish_top_level();
 		$post_type = $this->post_type;
 		$notices = $this->get_notice_list();
 		$pt_labels = $this->plugin->get_post_type_labels( $post_type );
 		$include_links = $this->plugin->supports( 'links' ) && 'page' == $post_type;
+		$disable_add_link = ! $this->can_publish_top_level( $post_type );
 
 		// Render interface
 		include( BU_NAV_PLUGIN_DIR . '/templates/edit-order.php' );
@@ -397,7 +396,7 @@ class BU_Navigation_Admin_Manager {
 					$force_delete = true;
 				}
 
-				if( $this->can_delete( $post ) ) {
+				if( current_user_can( 'delete_post', $post->ID ) ) {
 					$deleted = wp_delete_post( (int) $id, $force_delete );
 				}
 
@@ -442,12 +441,12 @@ class BU_Navigation_Admin_Manager {
 
 				$post->ID = (int) $post->ID;
 
-				if( $this->can_edit( $post ) ) {
+				if( current_user_can( 'edit_post', $post->ID ) ) {
 
 					$data = array(
 						'ID' => $post->ID,
-						'post_title' => $post->post_title,	// sanitize?
-						'post_content' => $post->post_content // sanitize?
+						'post_title' => $post->post_title,
+						'post_content' => $post->post_content
 						);
 
 					$updated = wp_update_post( $data, true );
@@ -615,83 +614,19 @@ class BU_Navigation_Admin_Manager {
 	}
 
 	/**
-	 * Whether or not the current user can publish top level content
-	 *
-	 * @todo decouple from section editing plugin
+	 * Whether or not the current user can publish top level content for the given post type
 	 */
-	public function can_publish_top_level() {
+	public function can_publish_top_level( $post_type = 'post' ) {
 
-		$allow_top = $this->plugin->settings->get( 'allow_top' );
-		$is_section_editor = ! is_super_admin() && current_user_can( 'edit_in_section' );
-
-		return $allow_top && !$is_section_editor;
-
-	}
-
-	/**
-	 * Can the current user edit the supplied post
-	 *
-	 * Needed because links are not registered post types and therefore current_user_can checks are insufficient
-	 *
-	 * @param object|int $post post obj or post ID to check edit caps for
-	 */
-	public function can_edit( $post ) {
-		$allowed = false;
-
-		if( is_numeric( $post ) ) {
-			$post = get_post($post);
-		}
-		if( ! is_object( $post ) ) {
+		$pto = get_post_type_object( $post_type );
+		if ( ! is_object( $pto ) )
 			return false;
-		}
 
-		// @todo we can't respect section editing permissions for links via current_user_can
-		// until they are a registered post type
-		if( BU_NAVIGATION_LINK_POST_TYPE == $post->post_type ) {
-			$is_section_editor = ! is_super_admin() && current_user_can( 'edit_in_section' );
+		$can_publish = current_user_can( $pto->cap->publish_posts );
+		$allow_top = (bool) $this->plugin->settings->get( 'allow_top' );
 
-			if( class_exists('BU_Group_Permissions') && $is_section_editor ) {
-				$allowed = BU_Group_Permissions::can_edit_section( wp_get_current_user(), $post->ID );
-			} else {
-				$allowed = current_user_can('edit_pages');
-			}
-		} else {
-			$allowed = current_user_can( 'edit_post', $post->ID );
-		}
+		return $can_publish && $allow_top;
 
-		return $allowed;
-	}
-
-	/**
-	 * Can the current user delete the supplied post
-	 *
-	 * Needed because links are not registered post types and therefore current_user_can checks are insufficient
-	 *
-	 * @param object|int $post post obj or post ID to check delete caps for
-	 */
-	public function can_delete( $post ) {
-		$allowed = false;
-
-		if( is_numeric( $post ) ) {
-			$post = get_post($post);
-		}
-		if( ! is_object( $post ) ) {
-			return false;
-		}
-
-		if( 'link' == $post->post_type ) {
-			$is_section_editor = ! is_super_admin() && current_user_can( 'edit_in_section' );
-
-			if( class_exists('BU_Group_Permissions') && $is_section_editor ) {
-				$allowed = BU_Group_Permissions::can_edit_section( wp_get_current_user(), $post->ID );
-			} else {
-				$allowed = current_user_can('edit_pages');
-			}
-		} else {
-			$allowed = current_user_can( 'delete_post', $post->ID );
-		}
-
-		return $allowed;
 	}
 
 	/**
@@ -709,6 +644,14 @@ class BU_Navigation_Admin_Manager {
 			return false;
 		}
 
+		// Need a valid post type to continue
+		$pto = get_post_type_object( $post->post_type );
+
+		if ( ! is_object( $pto ) )
+			return false;
+
+		$can_publish = current_user_can( $pto->cap->publish_posts );
+
 		// Top level move
 		if( 0 == $post->post_parent ) {
 
@@ -716,14 +659,15 @@ class BU_Navigation_Admin_Manager {
 			if( 0 !== $prev_parent ) {
 
 				// Top-level moves are okay as long as top level publishing is allowed or the post is excluded from nav menus
-				$allowed = $this->can_publish_top_level() || bu_navigation_post_excluded( $post );
+				$allow_top = $this->plugin->settings->get( 'allow_top' );
+				$excluded_from_nav = bu_navigation_post_excluded( $post );
 
-			} else if( current_user_can( 'edit_in_section' ) && ! is_super_admin() ) {
-				// Section editors cannot move to top level location, no matter what
-				$allowed = false;
+				$allowed = current_user_can( $pto->cap->publish_posts ) && ( $allow_top || $excluded_from_nav );
+
 			} else {
-				// Post was already top level, move is allowed
-				$allowed = true;
+
+				$allowed = current_user_can( $pto->cap->publish_posts );
+
 			}
 
 		} else {
@@ -736,9 +680,16 @@ class BU_Navigation_Admin_Manager {
 				$parent = get_post($post->post_parent);
 				$allowed = $allowed && $parent->post_status == 'publish';
 			}
+
+			// Don't allow links to have children
+			if( BU_NAVIGATION_LINK_POST_TYPE == $post->post_type ) {
+				$allowed = false;
+			}
+
 		}
 
 		return $allowed;
+
 	}
 
 	/**
@@ -765,7 +716,7 @@ class BU_Navigation_Admin_Manager {
 			$prev_parent = $original->post_parent;
 		}
 
-		$can_edit_post = $this->can_edit( $post );
+		$can_edit_post = current_user_can( 'edit_post', $post->ID );
 		$can_edit_parent = $this->can_place_in_section( $post, $prev_parent );
 
 		return $can_edit_post && $can_edit_parent;

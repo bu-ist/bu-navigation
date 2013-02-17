@@ -740,7 +740,8 @@ class BU_Navigation_Admin_Manager {
 			// Move is promotion to top level
 			if( 0 !== $prev_parent ) {
 
-				$allowed = $this->can_publish_top_level();
+				// Top-level moves are okay as long as top level publishing is allowed or the post is excluded from nav menus
+				$allowed = $this->can_publish_top_level() || bu_navigation_post_excluded( $post );
 
 			} else if( current_user_can( 'edit_in_section' ) && ! is_super_admin() ) {
 				// Section editors cannot move to top level location, no matter what

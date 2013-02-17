@@ -10,12 +10,12 @@ function widget_bu_pages_args_adaptive($args)
 {
 	remove_filter('widget_bu_pages_args', 'widget_bu_pages_args_adaptive');
 
-	if ($args['page_id'])
-	{
-		$sections = bu_navigation_gather_sections($args['page_id'], array( 'post_types' => $args['post_types']));
+	if ( $args['page_id']) {
+
+		$section_args = array( 'post_types' => $args['post_types'], 'include_links' => $args['include_links'] );
+		$sections = bu_navigation_gather_sections( $args['page_id'], $section_args );
 
 		$args['sections'] = $sections;
-
 		$args['page_id'] = NULL;
 	}
 

@@ -53,8 +53,9 @@ class BU_Widget_Pages extends WP_Widget
 			}
 			else
 			{
-				/* default to current top-level section */
-				$section_id = $sections[1];
+				/* default to current top-level section (if we have one) */
+				if ( isset( $sections[1] ) )
+					$section_id = $sections[1];
 			}
 		}
 
@@ -97,9 +98,9 @@ class BU_Widget_Pages extends WP_Widget
 	{
 		global $post;
 
-		// only works for supported post_types
-		if ( !in_array($post->post_type, bu_navigation_supported_post_types()) ) return;
-		$post_types = ($post->post_type == 'page' ? array('page', BU_NAVIGATION_LINK_POST_TYPE) : array($post->post_type));
+		// Only display navigation widget for supported post types
+		if ( ! in_array( $post->post_type, bu_navigation_supported_post_types() ) )
+			return;
 
 		extract( $args );
 
@@ -127,10 +128,10 @@ class BU_Widget_Pages extends WP_Widget
 			'page_id' => $post->ID,
 			'title_li' => '',
 			'echo' => 0,
-			'sort_column' => $sortby,
 			'exclude' => $exclude,
 			'container_id' => BU_WIDGET_PAGES_LIST_ID,
-			'post_types' => $post_types,
+			'post_types' => $post->post_type,
+			'include_links' => true
 			);
 
 		if (array_key_exists('navigation_style', $instance))
@@ -184,7 +185,16 @@ class BU_Widget_Pages extends WP_Widget
 	function form( $instance )
 	{
 		//Defaults
-		$instance = wp_parse_args( (array) $instance, array( 'sortby' => 'post_title', 'title' => '', 'exclude' => '') );
+		$defaults = array(
+			'sortby' => 'post_title',
+			'title' => '',
+			'exclude' => '',
+			'navigation_title' => 'none',
+			'navigation_title_text' => '',
+			'navigation_title_url' => '',
+			'navigation_style' => 'site'
+			);
+		$instance = wp_parse_args( $instance, $defaults );
 
 		$navigation_title = (in_array($instance['navigation_title'], $this->title_options)) ? $instance['navigation_title'] : 'none';
 

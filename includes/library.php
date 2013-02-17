@@ -598,89 +598,97 @@ function bu_navigation_list_section($parent_id, $pages_by_parent, $args = '')
 /**
  * Alternative to WordPress' wp_list_pages function
  *
- * @todo add an "include_links" arg, remove logic from post_types arg (used by content nav widget)
- *
  * @param $args mixed Array or string of WP-style arguments
  * @return string HTML fragment containing navigation list
  */
-function bu_navigation_list_pages($args = '')
-{
+function bu_navigation_list_pages( $args = '' ) {
 	$defaults = array(
-		'page_id' => NULL,
-		'title_li' => '',
+		'page_id' => null,
+		'sections' => null,
+		'post_types' => array( 'page' ),
+		'include_links' => true,
 		'echo' => 0,
+		'title_li' => '',
 		'navigate_in_section' => '',
 		'container_tag' => 'ul',
 		'container_id' => '',
 		'container_class' => '',
 		'item_tag' => 'li',
-		'style' => NULL,
-		'post_types' => $GLOBALS['bu_navigation_plugin']->supports( 'links' ) ? array('page', BU_NAVIGATION_LINK_POST_TYPE ) : array( 'page' )
+		'style' => null
 		);
-
 	$r = wp_parse_args($args, $defaults);
 
 	$output = '';
 
 	$section_ids = array();
 
-	if ((array_key_exists('page_id', $r)) && ($r['page_id']))
-	{
-		$all_sections = bu_navigation_load_sections($r['post_types']);
-		$section_ids = array_keys($all_sections['sections']);
+	// Get ancestors if a specific post is being listed
+	if ( $r['page_id'] ) {
+		$all_sections = bu_navigation_load_sections( $r['post_types'], $r['include_links'] );
 
-		$r['sections'] = bu_navigation_gather_sections($r['page_id'], NULL, $all_sections);
+		$section_ids = array_keys( $all_sections['sections'] );
+		$section_args = array(
+			'post_types' => $r['post_types'],
+			'include_links' => $r['include_links']
+			);
+		$r['sections'] = bu_navigation_gather_sections( $r['page_id'], $section_args, $all_sections );
+
 	}
 
-	$pages = bu_navigation_get_pages($r);
+	// Fetch post list, possibly limited to specific sections
+	$page_args = array(
+		'sections' => $r['sections'],
+		'post_types' => $r['post_types'],
+		'include_links' => $r['include_links'],
+		);
+	$pages = bu_navigation_get_pages( $page_args );
+	$pages_by_parent = bu_navigation_pages_by_parent($pages);
+
+	$sections = ! empty( $r['sections'] ) ? $r['sections'] : array_keys( $pages_by_parent );
 
 	$list_attributes = '';
 
-	if ($r['container_id']) $list_attributes .= sprintf(' id="%s"', $r['container_id']);
-	if ($r['container_class']) $list_attributes .= sprintf(' class="%s"', $r['container_class']);
+	if ( $r['container_id'] ) $list_attributes .= sprintf( ' id="%s"', $r['container_id'] );
+	if ( $r['container_class'] ) $list_attributes .= sprintf( ' class="%s"', $r['container_class'] );
 
-	$html = sprintf("<%s %s>\n", $r['container_tag'], $list_attributes);
+	$html = sprintf( "<%s %s>\n", $r['container_tag'], $list_attributes );
 
-	$pages_by_parent = bu_navigation_pages_by_parent($pages);
+	if ( $r['style'] == 'adaptive' ) {
 
-	$sections = array_key_exists('sections', $r) ? $r['sections'] : array_keys($pages_by_parent);
-
-	if ($r['style'] == 'adaptive')
-	{
-		/* if the "active" page isn't in the list of sections
-		 * (because it has no children), add it
-		 */
-		if (($r['page_id']) && (!in_array($r['page_id'], $sections)))
-		{
-			array_push($sections, $r['page_id']);
+		// If the "active" page isn't in the list of sections (because it has no children), add it
+		// @todo I don't think this can ever be true based on the code in bu-navigation-adaptive-contentnav.php
+		if ( $r['page_id'] && ! in_array( $r['page_id'], $sections ) ) {
+			array_push( $sections, $r['page_id'] );
 		}
 
-		if (count($sections) > 2)
-		{
-			$last_section = array_pop($sections);
-			array_push($sections, $last_section);
+		if ( count( $sections ) > 2 ) {
+			$last_section = array_pop( $sections );
+			array_push( $sections, $last_section );
 
-			if ((is_array($pages_by_parent[$last_section])) && (count($pages_by_parent[$last_section]) > 0))
-			{
-				/* The last section has children, so it will be the "top" */
+			if ( is_array( $pages_by_parent[$last_section] ) && ( count( $pages_by_parent[$last_section] ) > 0 ) ) {
+				// The last section has children, so it will be the "top"
 				$sections = array_slice($sections, -2);
-			}
-			else
-			{
-				/* Last section has no children, so it's parent will be the "top" */
+			} else {
+				// Last section has no children, so it's parent will be the "top"
 				$sections = array_slice($sections, -3);
 			}
 		}
 	}
 
-	$section = $sections[0]; // default to top level pages
+ 	// Default to top level pages
+	$section = $sections[0];
 
-	if ($r['navigate_in_section']) $section = $sections[1];
+	// Sectional navigation requires at least two levels
+	if ( $r['navigate_in_section'] ) {
+		if ( isset( $sections[1] ) )
+			$section = $sections[1];
+		else
+			$section = null;
+	}
 
-	/* loop over the top section */
-	if ((is_array($pages_by_parent[$section])) && (count($pages_by_parent[$section]) > 0))
-	{
-		/* arguments for sections */
+	// Loop over top section
+	if ( isset( $pages_by_parent[$section] ) && is_array( $pages_by_parent[$section] ) && ( count( $pages_by_parent[$section] ) > 0 ) ) {
+
 		$sargs = array(
 			'container_tag' => $r['container_tag'],
 			'item_tag' => $r['item_tag'],
@@ -689,11 +697,11 @@ function bu_navigation_list_pages($args = '')
 			);
 
 		$page_position = 1;
-		$number_siblings = count($pages_by_parent[$section]);
+		$number_siblings = count( $pages_by_parent[$section] );
 
-		foreach ($pages_by_parent[$section] as $page)
-		{
-			$child_html = bu_navigation_list_section($page->ID, $pages_by_parent, $sargs);
+		foreach ( $pages_by_parent[$section] as $page ) {
+
+			$child_html = bu_navigation_list_section( $page->ID, $pages_by_parent, $sargs );
 
 			$pargs = array(
 				'html' => $child_html,
@@ -708,15 +716,15 @@ function bu_navigation_list_pages($args = '')
 
 			$page_position++;
 		}
-	}
-	else
-	{
+
+	} else {
 		return ''; // nothing to display, return nothing
 	}
 
-	$html .= sprintf("</%s>\n", $r['container_tag']);
+	$html .= sprintf( "</%s>\n", $r['container_tag'] );
 
-	if ($r['echo']) echo $html;
+	if ( $r['echo'] )
+		echo $html;
 
 	return $html;
 }

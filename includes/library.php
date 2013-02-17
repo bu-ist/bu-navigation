@@ -728,114 +728,109 @@ function bu_navigation_list_pages($args = '')
  *
  * @return void
  */
-function bu_navigation_display_primary($args = '')
-{
+function bu_navigation_display_primary( $args = '' ) {
 	$defaults = array(
-		'echo' => 1,
+		'post_types' => array( 'page' ),
+		'include_links' => true,
 		'depth' => BU_NAVIGATION_PRIMARY_DEPTH,
-		'dive' => TRUE,
 		'max_items' => BU_NAVIGATION_PRIMARY_MAX,
+		'dive' => true,
 		'container_tag' => 'ul',
 		'container_id' => 'nav',
 		'container_class' => '',
 		'item_tag' => 'li',
-		'identify_top' => FALSE,
-		'whitelist_top' => NULL,
-		'post_types' => array( 'page' ),
-		'include_links' => true
+		'identify_top' => false,
+		'whitelist_top' => null,
+		'echo' => 1
 		);
+	$r = wp_parse_args( $args, apply_filters( 'bu_filter_primarynav_defaults', $defaults ) );
 
-	$defaults = apply_filters('bu_filter_primarynav_defaults', $defaults);
-
-	$r = wp_parse_args($args, $defaults);
-	$max_items = $r['max_items'];
-
-	/* first get top level pages only */
-	$sections = array(0);
-	$r['sections'] = $sections;
-	$pages = bu_navigation_get_pages($r);
-
-	/* now get children needed by pnav */
-
-	if ((is_array($pages)) && (count($pages) > 0))
-	{
-		foreach ($pages as $page_id => $page)
-		{
-			array_push($sections, $page_id);
-		}
-	}
-
+	// Gather all sections
 	$section_args = array(
 		'direction' => 'down',
 		'depth' => $r['depth'],
+		'post_types' => $r['post_types'],
+		'include_links' => $r['include_links']
+		);
+	$sections = bu_navigation_gather_sections( 0, $section_args );
+
+	// Fetch only posts in sections that we need
+	$post_args =  array(
 		'sections' => $sections,
 		'post_types' => $r['post_types'],
 		'include_links' => $r['include_links']
 		);
-	$r['sections'] = bu_navigation_gather_sections(0, $section_args);
+	$pages = bu_navigation_get_pages( $post_args );
+	$pages_by_parent = bu_navigation_pages_by_parent( $pages );
 
-	/* grab all pages  we need for pnav */
-	$r['max_items'] = '';
+	$top_level_pages = array();
+	$html = '';
 
-	$pages = bu_navigation_get_pages($r);
+	// Start displaying top level posts
+	if( is_array( $pages_by_parent ) && isset( $pages_by_parent[0] ) && ( count( $pages_by_parent[0] ) > 0 ) )
+		$top_level_pages = $pages_by_parent[0];
 
-	$html = sprintf('<%s id="%s" class="%s %s">', $r['container_tag'], $r['container_id'], $r['container_class'], ($r['dive']) ? '' : 'no-dive');
+	if ( ! empty( $top_level_pages ) ) {
 
-	$pages_by_parent = bu_navigation_pages_by_parent($pages);
+		$nItems = 0;
+		$whitelist = null;
 
-	$section = 0; // default to top level pages
+		// Optionally restrict top level posts to white list of post names
+		if ( $r['whitelist_top'] ) {
+			if ( is_string( $r['whitelist_top'] ) ) $whitelist = explode( ',', $r['whitelist_top'] );
+			if ( is_array( $r['whitelist_top'] ) ) $whitelist = $r['whitelist_top'];
+		}
 
-	$nItems = 0;
+		// Start list
+		$html = sprintf('<%s id="%s" class="%s %s">',
+			$r['container_tag'],
+			$r['container_id'],
+			$r['container_class'],
+			$r['dive'] ? '' : 'no-dive'
+			);
 
-	$whitelist = NULL; // whitelist for top level pages
-
-	if ($r['whitelist_top'])
-	{
-		if (is_string($r['whitelist_top'])) $whitelist = explode(',', $r['whitelist_top']);
-		if (is_array($r['whitelist_top'])) $whitelist = $r['whitelist_top'];
-	}
-
-	if ((is_array($pages_by_parent[$section])) && (count($pages_by_parent[$section]) > 0))
-	{
-		/* arguments for sections */
+		// Section arguments
 		$sargs = array(
 			'container_tag' => $r['container_tag'],
 			'item_tag' => $r['item_tag'],
 			'depth' => 2
 			);
 
-		/* loop over the top section */
-		foreach ($pages_by_parent[$section] as $page)
-		{
-			/* check whitelist if we're using one */
-			if ((is_array($whitelist)) && (!in_array($page->post_name, $whitelist))) continue;
+		foreach ( $top_level_pages as $page ) {
 
-			if ($r['dive']) $child_html = bu_navigation_list_section($page->ID, $pages_by_parent, $sargs);
+			// Check whitelist if it's being used
+			if ( is_array( $whitelist ) && ! in_array( $page->post_name, $whitelist ) )
+				continue;
 
-			if ($r['identify_top'])
-			{
-				$html .= bu_navigation_format_page($page, array('html' => $child_html, 'depth' => 1, 'item_tag' => $r['item_tag'], 'item_id' => $page->post_name));
-			}
-			else
-			{
-				$html .= bu_navigation_format_page($page, array('html' => $child_html, 'depth' => 1, 'item_tag' => $r['item_tag']));
+			$child_html = '';
+
+			// List children if we're diving
+			if ( $r['dive'] )
+				$child_html = bu_navigation_list_section( $page->ID, $pages_by_parent, $sargs );
+
+			// Display formatted page (optionally with post name as ID)
+			if ( $r['identify_top'] ) {
+				$html .= bu_navigation_format_page( $page, array( 'html' => $child_html, 'depth' => 1, 'item_tag' => $r['item_tag'], 'item_id' => $page->post_name ) );
+			} else {
+				$html .= bu_navigation_format_page( $page, array( 'html' => $child_html, 'depth' => 1, 'item_tag' => $r['item_tag'] ) );
 			}
 
 			$nItems++;
 
-			if ($nItems >= $max_items) break;
+			// Limit to max number of posts
+			if ( $nItems >= $r['max_items'] )
+				break;
 		}
 
-		$html .= sprintf("\n</%s>\n", $r['container_tag']);
-
-		if ($r['echo']) echo $html;
-
-		return $html;
+		// Close list
+		$html .= sprintf( "\n</%s>\n", $r['container_tag'] );
 	}
-	else
-	{
-		// no-op, display nothing
-	}
+
+	if ( $r['echo'] )
+		echo $html;
+
+	return $html;
+
 }
 
 /**

@@ -6,7 +6,7 @@ if ( ! defined( 'BU_NAVIGATION_LINK_POST_TYPE' ) )
 define('BU_NAV_META_TARGET', 'bu_link_target'); // name of meta_key used to hold target window
 
 /**
- * Register 'link' as a private post type for use representing external links in page navigation menus
+ * Register 'link' as a mostly private post type for use representing external links in page navigation menus
  */
 function bu_navigation_register_link() {
 
@@ -30,20 +30,19 @@ function bu_navigation_register_link() {
 		'label'               => __( 'BU Navigation Link', 'bu_navigation' ),
 		'description'         => __( 'External links used by BU Navigation plugin', 'bu_navigation' ),
 		'labels'              => $labels,
-		'hierarchical'        => false,
-		'public'              => false,
+		'hierarchical'        => true,
+		'public'              => true,
 		'show_ui'             => false,
 		'show_in_menu'        => false,
 		'show_in_nav_menus'   => false,
 		'show_in_admin_bar'   => false,
-		'menu_position'       => 5,
-		'menu_icon'           => '',
-		'can_export'          => true,	//
+		'can_export'          => true,
 		'has_archive'         => false,
 		'exclude_from_search' => true,
 		'publicly_queryable'  => true,
 		'rewrite'             => false,
 		'capability_type'     => 'post',
+		'map_meta_cap'        => true
 	);
 
 	register_post_type( BU_NAVIGATION_LINK_POST_TYPE, $args );

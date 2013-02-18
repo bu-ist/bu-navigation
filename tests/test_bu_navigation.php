@@ -10,9 +10,47 @@ require_once dirname( __FILE__ ) . '/bu_navigation_test.php';
  */
 class WP_Test_BU_Navigation_Plugin extends BU_Navigation_Test_Case {
 
-	public function test_supports() {
+	/**
+	 * @group bu-navigation-features
+	 */
+	public function test_supports_by_theme_support() {
 
-		$this->markTestIncomplete();
+		$features = $this->plugin->features();
+
+		foreach( $features as $feature => $default ) {
+
+			$this->assertEquals( $default, $this->plugin->supports( $feature ) );
+
+			add_theme_support( 'bu-navigation-' . $feature );
+			$this->assertTrue( $this->plugin->supports( $feature ) );
+
+			remove_theme_support( 'bu-navigation-' . $feature );
+			$this->assertEquals( $default, $this->plugin->supports( $feature ) );
+
+		}
+
+	}
+
+	/**
+	 * @todo figure out how to deal with constants in isolation...
+	 *
+	 * @group bu-navigation-features
+	 */
+	public function test_supports_by_constant() {
+
+		$features = $this->plugin->features();
+
+		foreach( $features as $feature => $default ) {
+
+			$this->assertEquals( $default, $this->plugin->supports( $feature ) );
+
+			define( 'BU_NAVIGATION_SUPPORTS_' . strtoupper( $feature ), true );
+			$this->assertTrue( $this->plugin->supports( $feature ) );
+
+			define( 'BU_NAVIGATION_DISABLE_' . strtoupper( $feature ), true );
+			$this->assertFalse( $this->plugin->supports( $feature ) );
+
+		}
 
 	}
 

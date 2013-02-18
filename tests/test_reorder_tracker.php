@@ -1,65 +1,28 @@
 <?php
 
+require_once dirname( __FILE__ ) . '/bu_navigation_test.php';
+
 /**
- * BU Navigation - Classes - Reorder
+ * Coverage for the BU_Navigation_Reorder_Tracker class
  *
  * @group bu
  * @group bu-navigation
  * @group bu-navigation-reorder
  */
-class BU_Navigation_Reorder_Tests extends WP_UnitTestCase {
+class WP_Test_Reorder_Tracker extends BU_Navigation_Test_Case {
 
-	public $plugin;
 	public $posts;
 
 	public function setUp() {
 
 		parent::setUp();
 
-		$this->plugin = new BU_Navigation_Plugin();
 		$this->plugin->load_admin();
-
-
-		register_post_type( 'link', array('name' => 'Link') );
 
 		// Setup posts
 		$posts_json = file_get_contents( dirname(__FILE__) . '/data/test_posts.json');
 		$posts = json_decode($posts_json, true);
 		$this->load_test_posts( $posts );
-
-	}
-
-	public function load_test_posts( $posts, $parent_id = 0 ) {
-
-		foreach( $posts as $key => $post ) {
-
-			$data = $post['data'];
-
-			// Maybe set parent
-			if( $parent_id )
-				$data['post_parent'] = $parent_id;
-
-			$id = $this->factory->post->create( $data );
-
-			// Post meta
-			$metadata = $post['metadata'];
-
-			if( !empty( $metadata ) ) {
-				foreach( $metadata as $meta_key => $meta_val ) {
-					update_post_meta( $id, $meta_key, $meta_val );
-				}
-			}
-
-			// Load children
-			$children = $post['children'];
-			if( !empty( $children ) ) {
-				$this->load_test_posts( $children, $id );
-			}
-
-			// Cache internally for access during tests
-			$this->posts[$key] = $id;
-
-		}
 
 	}
 
@@ -69,7 +32,7 @@ class BU_Navigation_Reorder_Tests extends WP_UnitTestCase {
 
 		$this->assertInternalType('array', $tracker->post_types);
 		$this->assertContains('page',$tracker->post_types);
-		$this->assertContains('link',$tracker->post_types);
+		$this->assertContains('bu_link',$tracker->post_types);
 
 	}
 

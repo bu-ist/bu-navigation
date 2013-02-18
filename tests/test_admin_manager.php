@@ -1,18 +1,19 @@
 <?php
 
+require_once dirname( __FILE__ ) . '/bu_navigation_test.php';
+
 /**
- * BU Navigation - Admin - Navman (Edit Order page)
+ * Coverage for the BU_Navigation_Admin_Manager class
  *
  * These tests depend on the BU Section Editing plugin
  *
  * @group bu
  * @group bu-navigation
  * @group bu-navigation-admin
- * @group bu-navigation-navman
+ * @group bu-navigation-admin-manager
  */
-class BU_Navigation_Navman_Tests extends WP_UnitTestCase {
+class WP_Test_BU_Navigation_Admin_Manager extends BU_Navigation_Test_Case {
 
-	public $plugin;
 	public $navman;
 
 	public $users;
@@ -25,13 +26,8 @@ class BU_Navigation_Navman_Tests extends WP_UnitTestCase {
 
 		parent::setUp();
 
-		$this->plugin = new BU_Navigation_Plugin();
 		$this->plugin->load_admin();
-
-		$this->navman = $this->plugin->admin->load_navman_page();
-		$this->navman->reorder_tracker = new BU_Navigation_Reorder_Tracker('page');
-
-		register_post_type( 'link', array('name' => 'Link') );
+		$this->navman = $this->plugin->admin->load_manager();
 
 		// Setup users
 		$this->users = array(
@@ -46,77 +42,6 @@ class BU_Navigation_Navman_Tests extends WP_UnitTestCase {
 
 		// Requires the BU Section Editing plugin to be activated
 		$this->create_test_group();
-
-	}
-
-	/**
-	 * Helper method that processes a specially formatted array structure to insert
-	 * posts and post metadata recursively
-	 *
-	 * Handles
-	 *  - all post fields (through the "data" attribute)
-	 *  - post meta data (by specifying "metakey" => "value" for the "metadata" attribute)
-	 * 	- hierarchical posts (by nesting post data in the "children" attribute)
-	 *
-	 * Each post should be given a unique key, which will be used to store the post ID
-	 * for reference during tests.
-	 *
-	 * See the file for an example:
-	 * 	tests/data/test_posts.json
-	 */
-	public function load_test_posts( $posts, $parent_id = 0 ) {
-
-		foreach( $posts as $key => $post ) {
-
-			$data = $post['data'];
-
-			// Maybe set parent
-			if( $parent_id )
-				$data['post_parent'] = $parent_id;
-
-			$id = $this->factory->post->create( $data );
-
-			// Post meta
-			$metadata = $post['metadata'];
-
-			if( !empty( $metadata ) ) {
-				foreach( $metadata as $meta_key => $meta_val ) {
-					update_post_meta( $id, $meta_key, $meta_val );
-				}
-			}
-
-			// Load children
-			$children = $post['children'];
-			if( !empty( $children ) ) {
-				$this->load_test_posts( $children, $id );
-			}
-
-			// Cache internally for access during tests
-			$this->posts[$key] = $id;
-
-		}
-
-	}
-
-	public function create_test_group() {
-
-		$section_editor = $this->factory->user->create(array('role'=>'section_editor','user_email'=>'wptest3@bu.edu'));
-		$this->users['section_editor'] = $section_editor;
-
-		$allowed = array( $this->posts['child'], $this->posts['grandchild_one'], $this->posts['grandchild_two'] );
-
-		$groupdata = array(
-			'name' => 'Test group',
-			'description' => 'Test description',
-			'users' => array($this->users['section_editor']),
-			'perms' => array(
-				'page' => array( 'allowed' => $allowed )
-			)
-		);
-
-		$group = BU_Edit_Groups::get_instance()->add_group( $groupdata );
-
-		$this->section_groups = array( 'test' => $group );
 
 	}
 
@@ -135,71 +60,26 @@ class BU_Navigation_Navman_Tests extends WP_UnitTestCase {
 
 	}
 
-	public function test_can_edit() {
-
-		wp_set_current_user( $this->users['admin'] );
-
-		$this->assertTrue( $this->navman->can_edit( $this->posts['parent'] ) );
-		$this->assertTrue( $this->navman->can_edit( $this->posts['child'] ) );
-		$this->assertTrue( $this->navman->can_edit( $this->posts['grandchild_one'] ) );
-		$this->assertTrue( $this->navman->can_edit( $this->posts['grandchild_two'] ) );
-		$this->assertTrue( $this->navman->can_edit( $this->posts['google'] ) );
-
-		wp_set_current_user( $this->users['contrib'] );
-
-		$this->assertFalse( $this->navman->can_edit( $this->posts['parent'] ) );
-		$this->assertFalse( $this->navman->can_edit( $this->posts['child'] ) );
-		$this->assertFalse( $this->navman->can_edit( $this->posts['grandchild_one'] ) );
-		$this->assertFalse( $this->navman->can_edit( $this->posts['grandchild_two'] ) );
-		$this->assertFalse( $this->navman->can_edit( $this->posts['google'] ) );
-
-		wp_set_current_user( $this->users['section_editor'] );
-
-		$this->assertTrue( $this->navman->can_edit( $this->posts['child'] ) );
-		$this->assertTrue( $this->navman->can_edit( $this->posts['grandchild_one'] ) );
-		$this->assertTrue( $this->navman->can_edit( $this->posts['grandchild_two'] ) );
-		$this->assertFalse( $this->navman->can_edit( $this->posts['parent'] ) );
-		$this->assertFalse( $this->navman->can_edit( $this->posts['google'] ) );
-	}
-
-	public function test_can_delete() {
-
-		wp_set_current_user( $this->users['admin'] );
-
-		$this->assertTrue( $this->navman->can_delete( $this->posts['parent'] ) );
-		$this->assertTrue( $this->navman->can_delete( $this->posts['google'] ) );
-
-		wp_set_current_user( $this->users['contrib'] );
-
-		$this->assertFalse( $this->navman->can_delete( $this->posts['parent'] ) );
-		$this->assertFalse( $this->navman->can_delete( $this->posts['google'] ) );
-
-		wp_set_current_user( $this->users['section_editor'] );
-
-		$this->assertTrue( $this->navman->can_delete( $this->posts['child'] ) );
-		$this->assertTrue( $this->navman->can_delete( $this->posts['grandchild_one'] ) );
-		$this->assertFalse( $this->navman->can_delete( $this->posts['parent'] ) );
-		$this->assertFalse( $this->navman->can_delete( $this->posts['google'] ) );
-
-	}
-
 	public function test_can_place_in_section() {
 
 		wp_set_current_user( $this->users['admin'] );
 
 		// Simulate move to top level
-		$post = get_post( $this->posts['grandchild_one'] );
-		$post->post_parent = 0;
+		$gc_one = get_post( $this->posts['grandchild_one'] );
+		$gc_two = get_post( $this->posts['grandchild_two'] );
 
-		$this->assertTrue( $this->navman->can_place_in_section( $post, $this->posts['child'] ) );
+		$this->assertTrue( $this->navman->can_place_in_section( $gc_one, $this->posts['child'] ) );
 
 		// Don't allow top level posts
 		$this->plugin->settings->update(array('allow_top'=>false));
 
-		$this->assertFalse( $this->navman->can_place_in_section( $post, $this->posts['child'] ) );
+		$gc_one->post_parent = 0;
+		$this->assertFalse( $this->navman->can_place_in_section( $gc_one, $this->posts['child'] ) );
+
+		$this->assertTrue( $this->navman->can_place_in_section( $gc_two, $this->posts['child'] ) );
 
 		// Simulate previously in nav exception
-		$this->assertTrue( $this->navman->can_place_in_section( $post, 0 ) );
+		$this->assertTrue( $this->navman->can_place_in_section( $gc_one, 0 ) );
 
 		// Re-allow top level posts
 		$this->plugin->settings->update(array('allow_top'=>true));
@@ -328,18 +208,20 @@ class BU_Navigation_Navman_Tests extends WP_UnitTestCase {
 		wp_set_current_user( $this->users['admin'] );
 
 		$link1 = array(
+			'ID' => 'post-new-0',
 			'post_title' => 'Example Link 1',
-			'post_type' => 'link',
+			'post_type' => 'bu_link',
 			'post_content' => 'http://www.example.com',
 			'post_status' => 'publish',
 			'post_meta' => (object) array( 'bu_link_target' => 'new' ),
-			'post_parent' => "0",
-			'menu_order' => "1"
+			'post_parent' => 0,
+			'menu_order' => 1
 			);
 
 		$link2 = array(
+			'ID' => 'post-new-1',
 			'post_title' => 'Example Link 2',
-			'post_type' => 'link',
+			'post_type' => 'bu_link',
 			'post_content' => 'http://www.example2.com',
 			'post_status' => 'publish',
 			'post_meta' => (object) array( 'bu_link_target' => 'same' ),
@@ -367,7 +249,7 @@ class BU_Navigation_Navman_Tests extends WP_UnitTestCase {
 			$this->posts['google'] => (object) array(
 				'ID' => $this->posts['google'],
 				'post_title' => 'Bing',
-				'post_type' => 'link',
+				'post_type' => 'bu_link',
 				'post_content' => 'http://www.bing.com',
 				'post_meta' => (object) array( 'bu_link_target' => 'same' ),
 				)
@@ -459,14 +341,14 @@ class BU_Navigation_Navman_Tests extends WP_UnitTestCase {
 		$this->navman->save();
 
 		// Inserts
-		$new_link = array_pop(get_posts(array('s'=>'New Link','post_type'=>'link')));
+		$new_link = array_pop(get_posts(array('s'=>'New Link','post_type'=>'bu_link')));
 		$this->assertEquals( 'New Link', $new_link->post_title );
 		$this->assertEquals( 'http://newlink.com', $new_link->post_content );
 		$this->assertEquals( $this->posts['last_page'], $new_link->post_parent );
 		$this->assertEquals( 1, $new_link->menu_order );
 		$this->assertEquals( 'new', get_post_meta( $new_link->ID, 'bu_link_target', true ) );
 
-		$new_link_two = array_pop(get_posts(array('s'=>'Top Level Link','post_type'=>'link')));
+		$new_link_two = array_pop(get_posts(array('s'=>'Top Level Link','post_type'=>'bu_link')));
 		$this->assertEquals( 'Top Level Link', $new_link_two->post_title );
 		$this->assertEquals( 'http://toplevel.com', $new_link_two->post_content );
 		$this->assertEquals( 0, $new_link_two->post_parent );

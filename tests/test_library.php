@@ -1,67 +1,32 @@
 <?php
 
+require_once dirname( __FILE__ ) . '/bu_navigation_test.php';
+
 /**
- * Traditional unit tests for BU Navigation library
+ * Coverage for functions in the BU Navigation library
  *
  * @group bu-navigation
  * @group bu-navigation-library
  */
-class BU_Navigation_Library_Test extends WP_UnitTestCase {
+class WP_Test_Navigation_Library extends BU_Navigation_Test_Case {
 
 	public $posts;
 
 	public function setUp() {
+
 		parent::setUp();
 
 		global $wp_rewrite;
 		$wp_rewrite->set_permalink_structure('/%year%/%monthnum%/%day%/%postname%/');
 
 		// Set up custom post type - 'test'
-		$args = array( 'hierarchical' => true );
+		$args = array( 'hierarchical' => true, 'public' => true );
 		register_post_type( 'test', $args );
-		register_post_type( 'link' ); // stop WP from whining about link not being a registered pt
 
 		// Setup posts
 		$posts_json = file_get_contents( dirname(__FILE__) . '/data/test_pages.json');
 		$posts = json_decode($posts_json, true);
 		$this->load_test_posts( $posts );
-
-	}
-
-	/*
-	*	Create All Test Pages using JSON
-	*/
-	public function load_test_posts( $posts, $parent_id = 0 ) {
-
-		foreach( $posts as $key => $post ) {
-
-			$data = $post['data'];
-
-			// Maybe set parent
-			if( $parent_id )
-				$data['post_parent'] = $parent_id;
-
-			$id = $this->factory->post->create( $data );
-
-			// Post meta
-			$metadata = $post['metadata'];
-
-			if( !empty( $metadata ) ) {
-				foreach( $metadata as $meta_key => $meta_val ) {
-					update_post_meta( $id, $meta_key, $meta_val );
-				}
-			}
-
-			// Load children
-			$children = $post['children'];
-			if( !empty( $children ) ) {
-				$this->load_test_posts( $children, $id );
-			}
-
-			// Cache internally for access during tests
-			$this->posts[$key] = $id;
-
-		}
 
 	}
 
@@ -73,12 +38,12 @@ class BU_Navigation_Library_Test extends WP_UnitTestCase {
 		// Post Types without Link pages + test
 		$exp_post_types = array( "page" => "page", "test" => "test" );
 		$post_types = bu_navigation_supported_post_types();
-		$this->assertEquals( $post_types, $exp_post_types );
+		$this->assertEquals( $exp_post_types, $post_types );
 
 		// Add "Link" to expected post types
-		$exp_post_types["0"] = "link";
+		$exp_post_types["bu_link"] = "bu_link";
 		$post_types = bu_navigation_supported_post_types( true );
-		$this->assertEquals( $post_types, $exp_post_types );
+		$this->assertEquals( $exp_post_types, $post_types );
 
 	}
 
@@ -382,7 +347,7 @@ class BU_Navigation_Library_Test extends WP_UnitTestCase {
 		$test_child 	 = $this->posts['test_child'];
 
 		// Get all pages
-		$args = array( 'post_types' => array( 'page', 'link', 'test' ));
+		$args = array( 'post_types' => array( 'page', 'bu_link', 'test' ));
 		$pages  = bu_navigation_get_pages( $args );
 
 		// Get the base url
@@ -434,7 +399,7 @@ class BU_Navigation_Library_Test extends WP_UnitTestCase {
 		$this->assertFalse( $custom_post_type_exists );	// assertFalse vs. assertEquals( $arg, false )
 
 		// Add the custom post type to args and make sure it is returned
-		$args = array( 'post_types' => array( 'page', 'link', 'test' ));
+		$args = array( 'post_types' => array( 'page', 'bu_link', 'test' ));
 		$pages = bu_navigation_get_pages( $args );
 		$custom_post_type = 'test';
 		$custom_post_type_exists = false;

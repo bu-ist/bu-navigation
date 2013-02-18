@@ -223,7 +223,7 @@ class BU_Navigation_Plugin {
 	 */
 	public function supported_post_types( $include_link = false, $output = 'names' ) {
 
-		$post_types = get_post_types( array( 'hierarchical' => true ), $output );
+		$post_types = get_post_types( array( 'show_ui' => true, 'hierarchical' => true ), $output );
 		$post_types = apply_filters( 'bu_navigation_post_types', $post_types );
 
 		if ( $this->supports( 'links' ) && $include_link ) {

@@ -36,6 +36,8 @@ class BU_Navigation_Admin_Manager {
 		$this->post_type = $post_type;
 		$this->pages = array();
 
+		$this->reorder_tracker = new BU_Navigation_Reorder_Tracker( $this->post_type );
+
 		// Attach WP actions/filters
 		$this->register_hooks();
 
@@ -316,8 +318,6 @@ class BU_Navigation_Admin_Manager {
 		if( array_key_exists( 'bu_navman_save', $_POST ) ) {
 
 			$saved = false;
-
-			$this->reorder_tracker = new BU_Navigation_Reorder_Tracker( $this->post_type );
 
 			// Process post removals
 			$deletions = json_decode( stripslashes($_POST['navman-deletions']) );
@@ -672,18 +672,27 @@ class BU_Navigation_Admin_Manager {
 
 		} else {
 
-			// Move under another post -- check if parent is editable
-			$allowed = current_user_can( 'edit_post', $post->post_parent );
+			// Check parent
+			$parent = get_post($post->post_parent);
 
-			// Don't allow movement of published posts under non-published posts
-			if( $post->post_status == 'publish') {
-				$parent = get_post($post->post_parent);
-				$allowed = $allowed && $parent->post_status == 'publish';
-			}
+			if ( ! is_object( $parent ) ) {
 
-			// Don't allow links to have children
-			if( BU_NAVIGATION_LINK_POST_TYPE == $post->post_type ) {
 				$allowed = false;
+
+			} else {
+
+				// Move under another post -- check if parent is editable
+				$allowed = current_user_can( 'edit_post', $parent->ID );
+
+				// Don't allow movement of published posts under non-published posts
+				if( $post->post_status == 'publish') {
+					$allowed = $allowed && $parent->post_status == 'publish';
+				}
+
+				if ( BU_NAVIGATION_LINK_POST_TYPE == $parent->post_type ) {
+					$allowed = false;
+				}
+
 			}
 
 		}

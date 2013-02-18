@@ -170,7 +170,7 @@ class BU_Navigation_Plugin {
 		return array(
 			'manager' => true,
 			'widget' => true,
-			'links' => false,
+			'links' => true,
 			'primary' => false,
 			);
 

@@ -3,6 +3,7 @@
         "data": {
                 "post_title": "Parent Page",
                 "post_type": "page",
+                "post_status": "publish",
                 "menu_order": 1
             },
         "metadata": {},
@@ -12,6 +13,7 @@
                 "data": {
                         "post_title": "Child Page",
                         "post_type": "page",
+                        "post_status": "publish",
                         "menu_order": 1
                     },
                 "metadata": {
@@ -25,7 +27,7 @@
                                 "post_type": "page",
                                 "menu_order": 1
                             },
-                        "metadata": {},
+                        "metadata": { "_bu_cms_navigation_exclude": "0" },
                         "children": {}
 
                     },
@@ -70,7 +72,7 @@
         "data": {
                 "post_title": "Google",
                 "post_content": "http://www.google.com",
-                "post_type": "link",
+                "post_type": "bu_link",
                 "menu_order": 4
             },
         "metadata": {

@@ -20,7 +20,7 @@
       "post_title":"New Link",
       "post_content":"http://newlink.com",
       "post_status":"new",
-      "post_type":"link",
+      "post_type":"bu_link",
       "post_parent": "%last_page%",
       "menu_order": 1,
       "post_meta":{
@@ -35,7 +35,7 @@
       "post_title":"Top Level Link",
       "post_content":"http://toplevel.com",
       "post_status":"new",
-      "post_type":"link",
+      "post_type":"bu_link",
       "post_parent": 0,
       "menu_order": 4,
       "post_meta":{
@@ -50,7 +50,7 @@
   "navman-updates": {
     "%google%":{
       "post_status":"publish",
-      "post_type":"link",
+      "post_type":"bu_link",
       "post_parent": 0,
       "menu_order": 4,
       "post_meta":{

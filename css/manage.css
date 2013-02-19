@@ -1,4 +1,3 @@
-/* Edit link form */
 #navman-link-editor {
 	display: none;
 }
@@ -68,13 +67,9 @@
 	margin-left: 138px;
 }
 
-
 .navform input {
 	line-height: 1.2em;
 }
-
-
-/* Start new styles */
 
 #navman-notices img {
 	vertical-align: middle;
@@ -93,9 +88,9 @@
 }
 
 .navman-toolbar li {
-    display: inline-block;
-    zoom: 1;
-    *display: inline;
+		display: inline-block;
+		zoom: 1;
+		*display: inline;
 }
 
 .navman-toolbar a {
@@ -118,6 +113,26 @@
 	width: 160px;
 }
 
+.navman-actions .inside {
+		margin: 0;
+		padding: 0;
+}
+
+.navman-actions .inside p {
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.navman-actions .inside .actions {
+	padding: 10px 5px 8px 5px;
+	text-align: right;
+	line-height: 23px;
+	background: #ebf2fb;
+	border-top: 1px solid #ddd;
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+}
+
 .navman-actions img {
 	vertical-align: middle;
 }
@@ -131,24 +146,7 @@
 	cursor: default;
 }
 
-.navman-actions .actions {
-	padding: 10px 5px 8px 5px;
-	text-align: right;
-	line-height: 23px;
-}
 
 #nav-tree-container {
-    background: transparent;
-}
-
-.metabox-holder .inside p {
-	padding-left: 10px;
-	padding-right: 10px;
-}
-
-.metabox-holder .inside .actions {
-	background: #ebf2fb;
-	border-top: 1px solid #ddd;
-	border-bottom-left-radius: 4px;
-	border-bottom-right-radius: 4px;
+		background: transparent;
 }

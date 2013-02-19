@@ -9,7 +9,7 @@ require_once dirname( __FILE__ ) . '/bu_navigation_test.php';
  * @group bu-navigation
  * @group bu-navigation-reorder
  */
-class WP_Test_Reorder_Tracker extends BU_Navigation_Test_Case {
+class WP_Test_Reorder_Tracker extends BU_Navigation_UnitTestCase {
 
 	public $posts;
 
@@ -20,9 +20,7 @@ class WP_Test_Reorder_Tracker extends BU_Navigation_Test_Case {
 		$this->plugin->load_admin();
 
 		// Setup posts
-		$posts_json = file_get_contents( dirname(__FILE__) . '/data/test_posts.json');
-		$posts = json_decode($posts_json, true);
-		$this->load_test_posts( $posts );
+		$this->posts = $this->load_fixture( 'posts' );
 
 	}
 

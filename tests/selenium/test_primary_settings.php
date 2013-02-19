@@ -1,24 +1,20 @@
 <?php
 
-require_once 'page-objects/primary-navigation-settings.php';
+require_once dirname( __FILE__ ) . '/navigation_selenium_testcase.php';
+require_once dirname( __FILE__ ) . '/page-objects/primary-navigation-settings.php';
 
 /**
- * @group bu
- * @group bu-navigation
+ * @group selenium
  * @group bu-navigation-settings
  *
  * @todo
+ *  - these tests are broken now that the primary navigation page requires theme support...
  * 	- create a dummy theme that utilizes bu_navigation_display_primrary and verify
  * 		settings on the front end
  *  - create a dummy theme that has BU_NAVIGATION_SUPPORTED_DEPTH set to test the
  * 		depth dropdown select for this page
  */
- class BU_Navigation_Primary_Settings_Test extends WP_SeleniumTestCase {
-
-	public function pre_test_setup() {
-		$this->timeouts()->implicitWait(5000);
-		$this->wp->login( $this->settings['login'], $this->settings['password'] );
-	}
+ class BU_Navigation_Primary_Settings_Test extends BU_Navigation_Selenium_Test_Case {
 
 	/**
 	* Primary navigation settings menu item is present and page loads correctly

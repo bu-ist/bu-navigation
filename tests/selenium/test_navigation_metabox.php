@@ -1,13 +1,14 @@
 <?php
 
-require_once 'page-objects/navigation-metabox.php';
+require_once dirname( __FILE__ ) . '/navigation_selenium_testcase.php';
+require_once dirname( __FILE__ ) . '/page-objects/navigation-metabox.php';
 
 /**
  * @group bu
  * @group bu-navigation
  * @group bu-navigation-metabox
  */
-class BU_Navigation_Metabox extends WP_SeleniumTestCase {
+class BU_Navigation_Metabox extends BU_Navigation_Selenium_Test_Case {
 
 	public function setUp() {
 
@@ -17,12 +18,6 @@ class BU_Navigation_Metabox extends WP_SeleniumTestCase {
 
 		$this->pages[] = $this->factory->post->create(array('post_title'=>'Test page','post_type'=>'page'));
 
-	}
-
-
-	public function pre_test_setup() {
-		$this->timeouts()->implicitWait(5000);
-		$this->wp->login( $this->settings['login'], $this->settings['password'] );
 	}
 
 	/**

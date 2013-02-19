@@ -7,12 +7,10 @@ require_once dirname( __FILE__ ) . '/bu_navigation_test.php';
  *
  * @group bu
  * @group bu-navigation
+ * @group bu-navigation-settings
  */
-class WP_Test_BU_Navigation_Settings extends BU_Navigation_Test_Case {
+class WP_Test_BU_Navigation_Settings extends BU_Navigation_UnitTestCase {
 
-	/**
-	 * @group bu-navigation-settings
-	 */
 	public function test_get() {
 
 		$this->assertTrue( $this->plugin->settings->get( 'display' ) );
@@ -23,9 +21,6 @@ class WP_Test_BU_Navigation_Settings extends BU_Navigation_Test_Case {
 
 	}
 
-	/**
-	 * @group bu-navigation-settings
-	 */
 	public function test_get_all() {
 
 		$expected_settings = array(
@@ -40,9 +35,6 @@ class WP_Test_BU_Navigation_Settings extends BU_Navigation_Test_Case {
 
 	}
 
-	/**
-	 * @group bu-navigation-settings
-	 */
 	public function test_update() {
 
 		$updates = array(

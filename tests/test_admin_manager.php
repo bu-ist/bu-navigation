@@ -12,15 +12,13 @@ require_once dirname( __FILE__ ) . '/bu_navigation_test.php';
  * @group bu-navigation-admin
  * @group bu-navigation-admin-manager
  */
-class WP_Test_BU_Navigation_Admin_Manager extends BU_Navigation_Test_Case {
+class WP_Test_BU_Navigation_Admin_Manager extends BU_Navigation_UnitTestCase {
 
 	public $navman;
 
 	public $users;
 	public $posts;
 	public $section_groups;
-
-	public $buse_is_active;
 
 	public function setUp() {
 
@@ -36,12 +34,11 @@ class WP_Test_BU_Navigation_Admin_Manager extends BU_Navigation_Test_Case {
 			);
 
 		// Setup posts
-		$posts_json = file_get_contents( dirname(__FILE__) . '/data/test_posts.json');
-		$posts = json_decode($posts_json, true);
-		$this->load_test_posts( $posts );
+		$this->posts = $this->load_fixture( 'posts' );
 
 		// Requires the BU Section Editing plugin to be activated
-		$this->create_test_group();
+		if ( is_plugin_active( 'bu-section-editing/bu-section-editing.php' ) )
+			$this->generate_section_group();
 
 	}
 
@@ -85,6 +82,9 @@ class WP_Test_BU_Navigation_Admin_Manager extends BU_Navigation_Test_Case {
 		$this->plugin->settings->update(array('allow_top'=>true));
 
 		// Coverage for section editor logic
+		if ( ! is_plugin_active( 'bu-section-editing/bu-section-editing.php' ) )
+			return;
+
 		wp_set_current_user( $this->users['section_editor'] );
 
 		// Simulate move to top level
@@ -328,8 +328,7 @@ class WP_Test_BU_Navigation_Admin_Manager extends BU_Navigation_Test_Case {
 		wp_set_current_user( $this->users['admin'] );
 
 		// Construct moves $_POST array from JSON file
-		$updates_json = file_get_contents( dirname(__FILE__) . '/data/test_navman_save.json');
-		$updates = $this->_process_save_file( $updates_json );
+		$updates = $this->load_manager_post( dirname(__FILE__) . '/fixtures/manager_post.json' );
 
 		$_POST['bu_navman_save'] = 'Publish Changes';
 		$_POST['navman-moves'] = json_encode($updates['navman-moves']);
@@ -392,11 +391,15 @@ class WP_Test_BU_Navigation_Admin_Manager extends BU_Navigation_Test_Case {
 	 * 	%grandchild_one% => $this->posts['grandchild_one']
 	 *
 	 * Those keys are determined by the json file used to load initial post data:
-	 * 	tests/data/test_posts.json
+	 * 	tests/fixture/test_posts.json
 	 */
-	protected function _process_save_file( $input ) {
+	protected function load_manager_post( $file ) {
 
-		$save = (array) json_decode( stripslashes( $input ) );
+		if ( ! is_readable( $file ) )
+			return false;
+
+		$data = file_get_contents( $file );
+		$save = (array) json_decode( stripslashes( $data ) );
 
 		$output = array(
 			'navman-moves' => array(),

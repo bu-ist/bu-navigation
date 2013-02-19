@@ -8,7 +8,7 @@ require_once dirname( __FILE__ ) . '/bu_navigation_test.php';
  * @group bu
  * @group bu-navigation
  */
-class WP_Test_BU_Navigation_Plugin extends BU_Navigation_Test_Case {
+class WP_Test_BU_Navigation_Plugin extends BU_Navigation_UnitTestCase {
 
 	/**
 	 * @group bu-navigation-features

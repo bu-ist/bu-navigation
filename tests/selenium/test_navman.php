@@ -1,21 +1,20 @@
 <?php
 
-require_once 'page-objects/navman.php';
+require_once dirname( __FILE__ ) . '/navigation_selenium_testcase.php';
+require_once dirname( __FILE__ ) . '/page-objects/navman.php';
 
 /**
- * @group bu-navigation-navman
+ * @group selenium
+ * @group bu-navigation-manager
  */
- class BU_Navigation_Navman_Test extends WP_SeleniumTestCase {
+ class BU_Navigation_Manager_Test extends BU_Navigation_Selenium_Test_Case {
 
 	public function setUp() {
 
 		parent::setUp();
 
-		// Load initial post data from JSON
-		$posts_json = file_get_contents( dirname(__FILE__) . '/data/test_posts.json');
-		$posts = json_decode($posts_json, true);
-
-		$this->load_test_posts( $posts );
+		// Load test posts
+		$this->pages = $this->load_fixture( 'posts' );
 
 	}
 
@@ -25,55 +24,6 @@ require_once 'page-objects/navman.php';
 
 		$this->delete_test_posts();
 
-	}
-
-	public function load_test_posts( $posts, $parent_id = 0 ) {
-
-		foreach( $posts as $key => $post ) {
-
-			$data = $post['data'];
-
-			// Maybe set parent
-			if( $parent_id )
-				$data['post_parent'] = $parent_id;
-
-			$id = $this->factory->post->create( $data );
-
-			// Post meta
-			$metadata = $post['metadata'];
-
-			if( !empty( $metadata ) ) {
-				foreach( $metadata as $meta_key => $meta_val ) {
-					update_post_meta( $id, $meta_key, $meta_val );
-				}
-			}
-
-			// Load children
-			$children = $post['children'];
-			if( !empty( $children ) ) {
-				$this->load_test_posts( $children, $id );
-			}
-
-			// Cache internally for access during tests
-			$this->pages[$key] = $id;
-
-		}
-
-	}
-
-	public function delete_test_posts() {
-		foreach( $this->pages as $id ) {
-			wp_delete_post( $id, true );
-		}
-	}
-
-	/**
-	 * Webdriver session does not exist during setUp, otherwise this would
-	 * be called from there...
-	 */
-	public function pre_test_setup() {
-		$this->timeouts()->implicitWait(5000);
-		$this->wp->login( $this->settings['login'], $this->settings['password'] );
 	}
 
 	/**
@@ -295,5 +245,3 @@ require_once 'page-objects/navman.php';
 	}
 
 }
-
-?>

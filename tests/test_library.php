@@ -8,7 +8,7 @@ require_once dirname( __FILE__ ) . '/bu_navigation_test.php';
  * @group bu-navigation
  * @group bu-navigation-library
  */
-class WP_Test_Navigation_Library extends BU_Navigation_Test_Case {
+class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 	public $posts;
 
@@ -24,9 +24,7 @@ class WP_Test_Navigation_Library extends BU_Navigation_Test_Case {
 		register_post_type( 'test', $args );
 
 		// Setup posts
-		$posts_json = file_get_contents( dirname(__FILE__) . '/data/test_pages.json');
-		$posts = json_decode($posts_json, true);
-		$this->load_test_posts( $posts );
+		$this->posts = $this->load_fixture( 'posts', 'lib_posts.json' );
 
 	}
 
@@ -352,7 +350,6 @@ class WP_Test_Navigation_Library extends BU_Navigation_Test_Case {
 
 		// Get the base url
 		$base_url = trailingslashit( get_option( 'home' ) );
-
 
 		// Remove current url
 		unset( $pages[$parent]->url );

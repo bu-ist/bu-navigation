@@ -1,6 +1,6 @@
 <?php
 
-class BU_Navigation_UnitTestCase extends WP_UnitTestCase {
+class BU_Navigation_Selenium_Test_Case extends WP_SeleniumTestCase {
 
 	public $plugin;
 
@@ -14,6 +14,15 @@ class BU_Navigation_UnitTestCase extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Webdriver session does not exist during setUp, otherwise this would
+	 * be called from there...
+	 */
+	public function pre_test_setup() {
+		$this->timeouts()->implicitWait(5000);
+		$this->wp->login( $this->settings['login'], $this->settings['password'] );
+	}
+
+	/**
 	 * Helper for loading fixtures from json files
 	 */
 	public function load_fixture( $type, $filename = null ) {
@@ -21,7 +30,7 @@ class BU_Navigation_UnitTestCase extends WP_UnitTestCase {
 		if ( is_null( $filename ) )
 			$filename = $type . '.json';
 
-		$path = dirname( __FILE__ ) . '/fixtures/' . $filename;
+		$path = dirname( __FILE__ ) . '/../fixtures/' . $filename;
 		$data = array();
 
 		if ( is_readable( $path ) ) {
@@ -89,41 +98,10 @@ class BU_Navigation_UnitTestCase extends WP_UnitTestCase {
 
 	}
 
-	public function load_test_users( $data ) {
-
-		foreach( (array) $data as $user ) {
-
+	public function delete_test_posts() {
+		foreach( $this->pages as $id ) {
+			wp_delete_post( $id, true );
 		}
-
-	}
-
-	/**
-	 * Helper to generate test section editing group
-	 *
-	 * @requires BU Section Editing plugin
-	 */
-	public function generate_section_group() {
-		if ( ! is_plugin_active( 'bu-section-editing/bu-section-editing.php' ) )
-			return;
-
-		$section_editor = $this->factory->user->create(array('role'=>'section_editor','user_email'=>'wptest3@bu.edu'));
-		$this->users['section_editor'] = $section_editor;
-
-		$allowed = array( $this->posts['child'], $this->posts['grandchild_one'], $this->posts['grandchild_two'] );
-
-		$groupdata = array(
-			'name' => 'Test group',
-			'description' => 'Test description',
-			'users' => array($this->users['section_editor']),
-			'perms' => array(
-				'page' => array( 'allowed' => $allowed )
-			)
-		);
-
-		$group = BU_Edit_Groups::get_instance()->add_group( $groupdata );
-
-		$this->section_groups = array( 'test' => $group );
-
 	}
 
 }

@@ -1,4 +1,5 @@
 <div class="wrap">
+	<div id="icon-themes" class="icon32"><br /></div>
 	<h2><?php _e('Primary Navigation'); ?></h2>
 
 	<?php if ( is_array( $status ) && $status['success'] ): ?>

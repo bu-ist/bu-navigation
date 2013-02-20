@@ -264,7 +264,6 @@ class BU_Navigation_Tree_View {
 			'post_meta' => array(
 				'protected' => ( isset($post->protected) ? $post->protected : false ),
 				'excluded' => ( isset($post->excluded) ? $post->excluded : false ),
-				'restricted' => ( isset($post->restricted) ? $post->restricted : false )
 				),
 			'url' => $post->url,
 			'originalParent' => $post->post_parent,
@@ -404,9 +403,7 @@ class BU_Navigation_Tree_Query {
 	/**
 	 * Default navigation manager page filter
 	 *
-	 * @todo move ACL restrictions to ACL plugin
-	 *
-	 * Appends "excluded" and "restricted" properties to each post object
+	 * Appends extra post meta properties to each post object
 	 */
 	public function filter_posts( $posts ) {
 		global $wpdb;
@@ -423,38 +420,12 @@ class BU_Navigation_Tree_Query {
 			$exclusions = $wpdb->get_results($query, OBJECT_K); // get results as objects in an array keyed on post_id
 			if (!is_array($exclusions)) $exclusions = array();
 
-			// Bulk fetch ACL restriction data for passed posts
-			// @todo move this query to the access control plugin
-			// look at bu-section-editing/plugin-support/bu-navigation
-			$restricted = array();
-
-			if (class_exists('BuAccessControlPlugin')) {
-
-				$acl_option = defined( 'BuAccessControlList::PAGE_ACL_OPTION' ) ? BuAccessControlList::PAGE_ACL_OPTION : BU_ACL_PAGE_OPTION;
-				$query = sprintf("SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value != '0'", $wpdb->postmeta, $acl_option, implode(',', $ids));
-				$restricted = $wpdb->get_results($query, OBJECT_K); // get results as objects in an array keyed on post_id
-				if (!is_array($restricted)) $restricted = array();
-
-			}
-
-			// Add 'excluded' and 'resticted' field to all posts
+			// Add 'excluded' and 'protected' field to all posts
 			foreach( $posts as $post ) {
 
 				// Post exclusions (hidden from navigation lists)
 				if( array_key_exists( $post->ID, $exclusions ) ) {
-
 					$post->excluded = TRUE;
-
-				}
-
-				// Post restrictions (ACL restricted by access-control plugin)
-				// @todo move to access-control plugin
-				$post->restricted = FALSE;
-
-				if( array_key_exists($post->ID, $restricted) ) {
-
-					$post->restricted = TRUE;
-
 				}
 
 				if( ! empty( $post->post_password ) ) {

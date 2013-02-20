@@ -268,14 +268,9 @@ class BU_Navigation_Admin_Post {
 	 */
 	public function format_post( $post ) {
 
-		// @todo -- move to ACL plugin
 		// Get necessary metadata
-		$acl_option = defined( 'BuAccessControlList::PAGE_ACL_OPTION' ) ? BuAccessControlList::PAGE_ACL_OPTION : BU_ACL_PAGE_OPTION;
-
 		$post->excluded = bu_navigation_post_excluded( $post );
 		$post->protected = ! empty( $post->post_password );
-		$post->restricted = get_post_meta( $post->ID, $acl_option, true );
-		$post->restricted = ! empty( $post->restricted ) ? $post->restricted : false;
 
 		// Label
 		$post->post_title = bu_navigation_get_label( $post );
@@ -290,11 +285,10 @@ class BU_Navigation_Admin_Post {
 			'post_meta' => array(
 				'protected' => $post->protected,
 				'excluded' => $post->excluded,
-				'restricted' => $post->restricted
 				)
 		);
 
-		return $formatted;
+		return apply_filters( 'bu_nav_metabox_format_post', $formatted, $post );
 	}
 
 	/**

@@ -168,7 +168,7 @@ class BU_Navigation_Admin_Post {
 		$pt_labels = $this->post_type_labels;
 		$lc_label = strtolower( $pt_labels['singular'] );
 		$dialog_title = ucfirst($pt_labels['singular']) . ' location';
-		$images_url = plugins_url( '/images', __FILE__ );
+		$images_url = plugins_url( 'images', BU_NAV_PLUGIN );
 
 		$move_post_btn_txt = "Move $lc_label";
 

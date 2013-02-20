@@ -293,7 +293,7 @@ class BU_Navigation_Admin_Manager {
 			wp_die('Cheatin, uh?');
 		}
 
-		$ajax_spinner = plugins_url( '/images/wpspin_light.gif', BU_NAV_PLUGIN );
+		$ajax_spinner = plugins_url( 'images/wpspin_light.gif', BU_NAV_PLUGIN );
 
 		$post_type = $this->post_type;
 		$notices = $this->get_notice_list();

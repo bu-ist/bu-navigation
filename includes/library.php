@@ -218,42 +218,39 @@ function bu_navigation_get_urls( $pages ) {
 			switch( $page->post_type ) {
 
 				case 'page':
-					if ( ! empty( $permastruct ) && isset( $page->post_status ) && ! $draft_or_pending ) {
-						if ( 'page' == get_option( 'show_on_front' ) && $page->ID == get_option( 'page_on_front' ) )
-								$url = home_url('/');
-						else {
-							$url = str_replace( '%pagename%', bu_navigation_get_page_uri( $page, $pages ), $permastruct );
-							$url = home_url( user_trailingslashit( $url, $page->post_type ) );
-						}
+					if ( 'page' == get_option( 'show_on_front' ) && $page->ID == get_option( 'page_on_front' ) ) {
+						$url = '/';
+					} else if ( ! empty( $permastruct ) && isset( $page->post_status ) && ! $draft_or_pending ) {
+						$url = str_replace( '%pagename%', bu_navigation_get_page_uri( $page, $pages ), $permastruct );
+						$url = user_trailingslashit( $url, $page->post_type );
 					} else {
 						$url = sprintf( "?page_id=%d", $page->ID );
-						$url = home_url($url);
 					}
+					$url = home_url( $url );
 					break;
 
-				// Nav links
 				case BU_NAVIGATION_LINK_POST_TYPE:
 					$url = $page->post_content;
 					break;
 
-				// Posts and all others
 				case 'post':
-				default:
-					$post_type = get_post_type_object($page->post_type);
+					default:
+					$post_type = get_post_type_object( $page->post_type );
+
 					if ( ! empty( $permastruct ) && isset( $page->post_status ) && ! $draft_or_pending ) {
 						if ( $post_type->hierarchical ) {
 							$slug = bu_navigation_get_page_uri( $page, $pages );
 						}
 						$url = str_replace( "%$page->post_type%", $slug, $permastruct );
-						$url = home_url( user_trailingslashit( $url ) );
+						$url = user_trailingslashit( $url );
 					} else {
-						if ( $post_type->query_var && ( isset($page->post_status) && !$draft_or_pending ) )
-							$url = add_query_arg($post_type->query_var, $slug, '');
-						else
-							$url = add_query_arg(array('post_type' => $page->post_type, 'p' => $page->ID), '');
-						$url = home_url($url);
+						if ( $post_type->query_var && ( isset( $page->post_status ) && ! $draft_or_pending ) ) {
+							$url = add_query_arg( $post_type->query_var, $slug, '' );
+						} else {
+							$url = add_query_arg( array('post_type' => $page->post_type, 'p' => $page->ID), '');
+						}
 					}
-
+					$url = home_url( $url );
 					break;
 			}
 
@@ -261,7 +258,6 @@ function bu_navigation_get_urls( $pages ) {
 			$pages_with_urls[$page->ID] = $page;
 		}
 	}
-
 	return $pages_with_urls;
 }
 

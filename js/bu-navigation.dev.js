@@ -7,8 +7,6 @@
 /*jslint browser: true, todo: true */
 /*global bu: true, jQuery: false, console: false, window: false, document: false */
 
-// @todo remove hardcoded post->post_type = 'link', read from server
-
 var bu = bu || {};
 
 bu.plugins = bu.plugins || {};
@@ -164,8 +162,8 @@ bu.plugins.navigation = {};
 				var allowed = true;
 
 				var isTopLevelMove = m.cr === -1;
-				var isVisible = post.post_meta['excluded'] === false || post.post_type === 'link';
-				var wasTop = !post.originalExclude && (post.originalParent === 0 || (post.post_status === 'new' && post.post_type !== 'link'));
+				var isVisible = post.post_meta['excluded'] === false || post.post_type === c.linksPostType;
+				var wasTop = !post.originalExclude && (post.originalParent === 0 || (post.post_status === 'new' && post.post_type !== c.linksPostType));
 
 				// Don't allow top level posts if global option prohibits it
 				if (isTopLevelMove && !wasTop && isVisible && !c.allowTop) {
@@ -1006,6 +1004,7 @@ bu.plugins.navigation = {};
 
 			var $tree = that.$el;
 			var d = that.data;
+			var c = that.config;
 
 			var showOptionsMenu = function (node) {
 				var post = my.nodeToPost(node);
@@ -1031,7 +1030,7 @@ bu.plugins.navigation = {};
 				}
 
 				// Special behavior for links
-				if (post.post_type === 'link') {
+				if (post.post_type === c.linksPostType) {
 					// Links are permanently deleted -- "Move To Trash" is misleading
 					options['remove']['label'] = 'Delete';
 				}

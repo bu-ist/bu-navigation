@@ -193,12 +193,12 @@ function bu_navigation_pull_page($page_id, $pages)
 
 /**
  * Add the post permalink as a property on the post object (efficiently)
- * 
+ *
  * Goes against every DRY bone in my body, but get_permalink is to query / memory
  * intensive to run with 2000+ posts
- * 
+ *
  * Most of this logic is borrowed from _get_page_link and get_post_link
- *  
+ *
  * @args array $pages an array of post objects
  * @return array $pages an array of post objects with, $post->url set to the permalink
  */
@@ -222,12 +222,12 @@ function bu_navigation_get_urls( $pages ) {
 						if ( 'page' == get_option( 'show_on_front' ) && $page->ID == get_option( 'page_on_front' ) )
 								$url = home_url('/');
 						else {
-							$url = str_replace( '%pagename%', bu_navigation_get_page_uri( $page, $pages ), $permastruct );	
+							$url = str_replace( '%pagename%', bu_navigation_get_page_uri( $page, $pages ), $permastruct );
 							$url = home_url( user_trailingslashit( $url, $page->post_type ) );
 						}
 					} else {
 						$url = sprintf( "?page_id=%d", $page->ID );
-						$url = home_url($url);	
+						$url = home_url($url);
 					}
 					break;
 
@@ -251,12 +251,12 @@ function bu_navigation_get_urls( $pages ) {
 							$url = add_query_arg($post_type->query_var, $slug, '');
 						else
 							$url = add_query_arg(array('post_type' => $page->post_type, 'p' => $page->ID), '');
-						$url = home_url($url);	
+						$url = home_url($url);
 					}
 
 					break;
 			}
-				
+
 			$page->url = $url;
 			$pages_with_urls[$page->ID] = $page;
 		}
@@ -266,22 +266,22 @@ function bu_navigation_get_urls( $pages ) {
 }
 
 function bu_navigation_get_page_uri( $page, $ancestors ) {
-	
+
 	if ( $page->post_parent == $page->ID ) {
 		error_log(sprintf("%s - Page %d is its own parent", __FUNCTION__, $page->ID ));
 		return false;
-	}	
-	
+	}
+
 	$uri = $page->post_name;
-	
+
 	while( isset( $page->post_parent ) && $page->post_parent != 0 ) {
 		$parent = bu_navigation_pull_page( $page->post_parent, $ancestors );
 		if ( is_object( $parent ) && isset( $parent->post_name ) )
 			$uri = $parent->post_name . '/' . $uri;
 		$page = $parent;
 	}
-	
-	return $uri;	
+
+	return $uri;
 }
 
 /**

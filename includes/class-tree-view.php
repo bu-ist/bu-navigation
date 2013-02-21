@@ -31,6 +31,7 @@ class BU_Navigation_Tree_View {
 			'postTypes' => array('page'),
 			'postStatuses' => array('publish'),
 			'includeLinks' => true,
+			'suppressUrls' => false,
 			'themePath' => plugins_url('js/vendor/jstree/themes/bu-jstree', BU_NAV_PLUGIN ),
 			'rpcUrl' => admin_url('admin-ajax.php?action=bu-get-navtree' ),
 			'getPostRpcUrl' => admin_url('admin-ajax.php?action=bu-get-post'),
@@ -53,7 +54,8 @@ class BU_Navigation_Tree_View {
 			'child_of' => $this->settings['childOf'],
 			'post_types' => $this->settings['postTypes'],
 			'post_status' => $this->settings['postStatuses'],
-			'include_links' => $this->settings['includeLinks']
+			'include_links' => $this->settings['includeLinks'],
+			'suppress_urls' => $this->settings['suppressUrls']
 		);
 		$this->query = new BU_Navigation_Tree_Query( $query_args );
 
@@ -348,6 +350,7 @@ class BU_Navigation_Tree_Query {
 			'post_types' => array( 'page' ),
 			'post_status' => array( 'publish' ),
 			'include_links' => true,
+			'suppress_urls' => false,
 			'depth' => 0,
 		);
 
@@ -380,6 +383,7 @@ class BU_Navigation_Tree_Query {
 			'post_types' => $this->args['post_types'],
 			'post_status' => $this->args['post_status'],
 			'include_links' => $this->args['include_links'],
+			'suppress_urls' => $this->args['suppress_urls']
 			)
 		);
 

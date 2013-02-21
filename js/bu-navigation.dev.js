@@ -576,7 +576,6 @@ bu.plugins.navigation = {};
 				post.post_parent = parseInt(post.post_parent, 10);
 				post.originalParent = parseInt(post.originalParent, 10);
 				post.originalOrder = parseInt(post.originalOrder, 10);
-				post.inheritedRestriction = node.data('inheritedRestriction') || false;
 
 				post.post_meta = post.post_meta || {};
 
@@ -696,66 +695,78 @@ bu.plugins.navigation = {};
 				}
 			};
 
+			// List of status badges
+			var getStatusBadges = function (inherited) {
+				var defaults, _builtins, badges, status, results;
+				
+				inherited = inherited || false;
+				_builtins = {
+					'excluded': { 'class': 'excluded', 'label': 'not in nav', 'inherited': false },
+					'protected': { 'class': 'protected', 'label': 'protected', 'inherited': false }
+				};
+				
+				badges = bu.hooks.applyFilters( 'navStatusBadges', _builtins );
+				results = badges;
+				
+				if (inherited) {
+					results = {};
+					for (status in badges) {
+						if (badges[status].hasOwnProperty('inherited') && badges[status].inherited)
+							results[status] = badges[status];
+					}
+				}
+				return results;
+			}
+
 			// Update post meta that may change depending on ancestors
 			var calculateInheritedStatuses = function ($node) {
+				var post, badges, status, inheriting_status;
+				
+				post = my.nodeToPost($node);
+				badges = getStatusBadges({'inherited': true});
 
-				var post = my.nodeToPost($node), excluded, restricted, inheritedExclusion, inheritedRestriction;
+				for (status in badges) {
+					inheriting_status = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () {
+						return $(this).data('post')['post_meta'][status] || $(this).data('inherited_'+status);
+					}).length;
 
-				// Check for inherited exclusions based on current position in hierarchy
-//				inheritedExclusion = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () {
-//					return $(this).data('post_meta')['excluded'] || $(this).data('inheritedExclusion');
-//				}).length;
-//
-//				if (inheritedExclusion) {
-//					$node.data('inheritedExclusion', true);
-//				} else {
-//					$node.data('inheritedExclusion', false);
-//				}
-
-				// Check for inherited restrictions based on current position in hierarchy
-				inheritedRestriction = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () {
-					return $(this).data('post')['post_meta']['restricted'] || $(this).data('inheritedRestriction');
-				}).length;
-
-				if (inheritedRestriction) {
-					$node.data('inheritedRestriction', true);
-				} else {
-					$node.data('inheritedRestriction', false);
+					// Cache inherited statuses on DOM node
+					if (inheriting_status) {
+						$node.data('inherited_'+status, true);
+					} else {
+						$node.removeData('inherited_'+status);
+					}
 				}
-
 			};
 
 			// Convert post meta data in to status badges
 			var setStatusBadges = function ($node) {
-				var $a = $node.children('a');
+				var $a, post, $statuses, statuses, badges, status, val, i;
+
+				// Prep the DOM
+				$a = $node.children('a');
 				if ($a.children('.post-statuses').length === 0) {
 					$a.append('<span class="post-statuses"></span>');
 				}
-
-				var post = my.nodeToPost( $node ), $statuses, statuses, excluded, restricted, pass_protected, i;
-
-				// Re-calculate statuses that might depend on ancestors
-				calculateInheritedStatuses($node);
-
-				// Default metadata badges
-				excluded = post.post_meta['excluded'] || false;
-				restricted = post.post_meta['restricted'] || $node.data('inheritedRestriction') || false;
-				pass_protected = post.post_meta['protected'] || false;
-
 				$statuses = $a.children('.post-statuses').empty();
+				
+				post = my.nodeToPost( $node );
 				statuses = [];
 
+				// Calculate statuses that can be inherited from ancestors
+				calculateInheritedStatuses($node);
+
+				// Push actual post statuses first
 				if (post.post_status != 'publish')
 					statuses.push({ "class": post.post_status, "label": post.post_status });
-				if (excluded)
-					statuses.push({ "class": 'excluded', "label": 'not in nav' });
-				if (restricted)
-					statuses.push({ "class": 'restricted', "label": 'restricted' });
-				if (pass_protected)
-					statuses.push({ "class": 'protected', "label": 'protected' });
-
-				// @todo implement this behavior through hooks for extensibility
-				// statuses = bu.hooks.applyFilters( 'navPostStatuses', statuses, post );
+				
+				// Push any additional status badges
+				badges = getStatusBadges();
+				for (status in badges) {
+					val = post.post_meta[status] || $node.data('inherited_'+status);
+					if (val)
+						statuses.push({ "class": badges[status]['class'], "label": badges[status]['label'] });
+				}
 
 				// Append markup
 				for (i = 0; i < statuses.length; i = i + 1) {

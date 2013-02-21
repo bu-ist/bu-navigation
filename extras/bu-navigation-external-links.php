@@ -51,6 +51,17 @@ function bu_navigation_register_link() {
 add_action( 'init', 'bu_navigation_register_link' );
 
 /**
+ * Filter fields retrieved from DB when grabbing navigation data to add post_content for navigation links
+ * @return array Filtered list of fields
+ */
+function bu_navigation_filter_fields_external_links( $fields ) {
+	array_push( $fields, sprintf( "(IF(post_type='%s',post_content,'')) AS post_content", BU_NAVIGATION_LINK_POST_TYPE ) );
+	return $fields;
+}
+
+add_filter( 'bu_navigation_filter_fields', 'bu_navigation_filter_fields_external_links' );
+
+/**
  * Filter pages before displaying navigation to set external URL and window target for external links
  * @return array Filtered list of pages
  */
@@ -72,8 +83,6 @@ function bu_navigation_filter_pages_external_links($pages)
 		{
 			if ( $page->post_type == BU_NAVIGATION_LINK_POST_TYPE )
 			{
-				$page->url = $page->post_content;
-
 				if ((is_array($targets)) && (array_key_exists($page->ID, $targets))) $page->target = $targets[$page->ID]->meta_value;
 			}
 

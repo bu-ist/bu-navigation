@@ -92,8 +92,8 @@ class BU_Navigation_Admin_Manager {
 
 			$page = add_submenu_page(
 				$parent_slug,
-				__('Edit Order'),
-				__('Edit Order'),
+				__('Edit Order', BU_NAV_TEXTDOMAIN ),
+				__('Edit Order', BU_NAV_TEXTDOMAIN ),
 				$this->get_menu_cap_for_post_type( $pt ),
 				'bu-navigation-manager',
 				array( $this, 'render' )
@@ -126,6 +126,26 @@ class BU_Navigation_Admin_Manager {
 			wp_register_script( 'bu-jquery-validate', $vendor_url . '/jquery.validate' . $suffix . '.js', array('jquery'), '1.8.1', true );
 			wp_register_script( 'bu-navman', $scripts_url . '/manage' . $suffix . '.js', array('bu-navigation','jquery-ui-dialog','bu-jquery-validate'), BU_Navigation_Plugin::VERSION, true );
 
+			// Strings for localization
+			if ( defined( 'BU_CMS' ) && BU_CMS ) {
+				$nav_menu_txt = __( 'Site Design > Primary Navigation', BU_NAV_TEXTDOMAIN );
+			} else {
+				$nav_menu_txt = __( 'Appearance > Primary Navigation', BU_NAV_TEXTDOMAIN );
+			}
+			$strings = array(
+				'addLinkDialogTitle' => __( 'Add a Link', BU_NAV_TEXTDOMAIN ),
+				'editLinkDialogTitle' => __( 'Edit Link', BU_NAV_TEXTDOMAIN ),
+				'cancelLinkBtn' => __( 'Cancel', BU_NAV_TEXTDOMAIN ),
+				'confirmLinkBtn' => __( 'Ok', BU_NAV_TEXTDOMAIN ),
+				'noTopLevelNotice' => __( 'You are not allowed to create top level published content.', BU_NAV_TEXTDOMAIN ),
+				'noLinksNotice' => __( 'You are not allowed to add links', BU_NAV_TEXTDOMAIN ),
+				'createLinkNotice' => __( 'Select a page that you can edit and click "Add a Link" to create a new link below the selected page.', BU_NAV_TEXTDOMAIN ),
+				'allowTopNotice' => sprintf( __( 'Site administrators can change this behavior by visiting %s and enabling the "Allow Top-Level Pages" setting.', BU_NAV_TEXTDOMAIN ), $nav_menu_txt ),
+				'noChildLinkNotice' => __( 'Links are not permitted to have children.', BU_NAV_TEXTDOMAIN ),
+				'unloadWarning' => __( 'You have made changes to your navigation that have not yet been saved.', BU_NAV_TEXTDOMAIN ),
+				'saveNotice' => __( 'Saving navigation changes...', BU_NAV_TEXTDOMAIN ),
+				);
+
 			// Setup dynamic script context for manage.js
 			$script_context = array(
 				'postTypes' => $this->post_type,
@@ -134,7 +154,7 @@ class BU_Navigation_Admin_Manager {
 				'showCounts' => true
 				);
 			// Navigation tree view will handle actual enqueuing of our script
-			$treeview = new BU_Navigation_Tree_View( 'bu_navman', $script_context );
+			$treeview = new BU_Navigation_Tree_View( 'bu_navman', array_merge( $script_context, $strings ) );
 			$treeview->enqueue_script( 'bu-navman' );
 
 			// Styles
@@ -207,15 +227,17 @@ class BU_Navigation_Admin_Manager {
 	 */
 	public function get_notice_by_code( $type, $code ) {
 
+		$user_markup = '<strong>%s</strong>';
+
 		$notices = array(
 			'message' => array(
 				0 => '', // Unused. Messages start at index 1.
-				1 => __('Your navigation changes have been saved')
+				1 => __( 'Your navigation changes have been saved', BU_NAV_TEXTDOMAIN )
 			),
 			'notice' => array(
 				0 => '',
-				1 => __('Errors occurred while saving your navigation changes.'),
-				2 => __('Warning: <strong>%s</strong> is currently editing this site\'s navigation.')
+				1 => __( 'Errors occurred while saving your navigation changes.', BU_NAV_TEXTDOMAIN ),
+				2 => sprintf( __( "Warning: %s is currently editing this site's navigation.", BU_NAV_TEXTDOMAIN ), $user_markup )
 			)
 		);
 
@@ -286,20 +308,17 @@ class BU_Navigation_Admin_Manager {
 			wp_die('Edit order page is not available for post type: ' . $this->post_type );
 			return;
 		}
-
 		$cap = $this->get_menu_cap_for_post_type( $this->post_type );
-
 		if( ! current_user_can( $cap ) ) {
 			wp_die('Cheatin, uh?');
 		}
 
+		// Template context
 		$ajax_spinner = plugins_url( 'images/wpspin_light.gif', BU_NAV_PLUGIN );
-
-		$post_type = $this->post_type;
+		$post_type = get_post_type_object( $this->post_type );
 		$notices = $this->get_notice_list();
-		$pt_labels = $this->plugin->get_post_type_labels( $post_type );
-		$include_links = $this->plugin->supports( 'links' ) && 'page' == $post_type;
-		$disable_add_link = ! $this->can_publish_top_level( $post_type );
+		$include_links = $this->plugin->supports( 'links' ) && 'page' == $this->post_type;
+		$disable_add_link = ! $this->can_publish_top_level( $this->post_type );
 
 		// Render interface
 		include( BU_NAV_PLUGIN_DIR . '/templates/edit-order.php' );

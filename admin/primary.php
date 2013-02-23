@@ -11,7 +11,7 @@ class BU_Navigation_Admin_Primary {
 	// Reference to global plugin object
 	private $plugin;
 
-	const nonce_action = 'bu-nav-primary-settings-update';
+	const NONCE_ACTION = 'bu-nav-primary-settings-update';
 
 	public function __construct( $plugin ) {
 
@@ -39,8 +39,8 @@ class BU_Navigation_Admin_Primary {
 
 		$this->page = add_submenu_page(
 			'themes.php',
-			__('Primary Navigation'),
-			__('Primary Navigation'),
+			__( 'Primary Navigation', BU_NAV_TEXTDOMAIN ),
+			__( 'Primary Navigation', BU_NAV_TEXTDOMAIN ),
 			$this->get_cap(),
 			'bu-navigation-settings',
 			array( $this, 'render' )
@@ -79,7 +79,7 @@ class BU_Navigation_Admin_Primary {
 		if ( $settings['depth'] > $supported_depth )
 			$settings['depth'] = $supported_depth;
 
-		$nonce = self::nonce_action;
+		$nonce = self::NONCE_ACTION;
 
 		include( BU_NAV_PLUGIN_DIR . '/templates/primary-navigation.php' );
 
@@ -94,7 +94,7 @@ class BU_Navigation_Admin_Primary {
 			return;
 
 		// Prevent illegal updates
-		if( ! current_user_can( $this->get_cap() ) || ! check_admin_referer( self::nonce_action ) ) {
+		if( ! current_user_can( $this->get_cap() ) || ! check_admin_referer( self::NONCE_ACTION ) ) {
 			error_log('[bu-navigation] Illegal access to "Primary Navigaiton" page!');
 			wp_die('Cheatin, eh?');
 		}
@@ -135,7 +135,7 @@ class BU_Navigation_Admin_Primary {
 				$updates['depth'] = $max_depth;
 
 			if( array_key_exists( 'depth', $_POST['bu-nav-settings'] ) && $updates['depth'] !== (int) $_POST['bu-nav-settings']['depth'] ) {
-				$errors[] = __( "The current theme only supports up to $max_depth level(s) of children.", BU_NAV_TEXTDOMAIN  );
+				$errors[] = sprintf( __( 'The current theme only supports up to %s level(s) of children.', BU_NAV_TEXTDOMAIN  ), $max_depth );
 				$success = false;
 			}
 

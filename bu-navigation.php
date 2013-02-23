@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // Absolute server path to this plugin dir and file for use by included files
 define( 'BU_NAV_PLUGIN', __FILE__ );
 define( 'BU_NAV_PLUGIN_DIR', dirname( __FILE__ ) );
+define( 'BU_NAV_TEXTDOMAIN', 'bu-navigation' );
 
 // Primary navigation max items to display per level
 define( 'BU_NAVIGATION_PRIMARY_MAX', 6 );

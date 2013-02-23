@@ -124,7 +124,7 @@ class BU_Navigation_Admin_Primary {
 
 			// Force positive values for max items
 			if( array_key_exists( 'max_items', $_POST['bu-nav-settings'] ) && $updates['max_items'] !== (int) $_POST['bu-nav-settings']['max_items'] ) {
-				$errors[] = __( 'The "Maximum Items" setting most be a positive value.', BU_Navigation_Plugin::TEXT_DOMAIN );
+				$errors[] = __( 'The "Maximum Items" setting most be a positive value.', BU_NAV_TEXTDOMAIN );
 				$success = false;
 			}
 
@@ -135,7 +135,7 @@ class BU_Navigation_Admin_Primary {
 				$updates['depth'] = $max_depth;
 
 			if( array_key_exists( 'depth', $_POST['bu-nav-settings'] ) && $updates['depth'] !== (int) $_POST['bu-nav-settings']['depth'] ) {
-				$errors[] = __( "The current theme only supports up to $max_depth level(s) of children.", BU_Navigation_Plugin::TEXT_DOMAIN  );
+				$errors[] = __( "The current theme only supports up to $max_depth level(s) of children.", BU_NAV_TEXTDOMAIN  );
 				$success = false;
 			}
 

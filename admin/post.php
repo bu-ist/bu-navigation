@@ -48,7 +48,7 @@ class BU_Navigation_Admin_Post {
 			$this->post = get_post( $this->post_id );
 			if ( ! is_object( $this->post ) || ! isset( $this->post->post_type ) )
 				return;
-			$this->post_type = $this->post->post_type; 
+			$this->post_type = $this->post->post_type;
 		}
 
 		// Only continue with a valid and supported post type
@@ -124,7 +124,7 @@ class BU_Navigation_Admin_Post {
 		if ( is_array( $templates ) && ( count( $templates ) > 0 ) ) {
 			add_meta_box(
 				'bupagetemplatediv',
-				__( sprintf( "%s Template", $this->post_type_labels['singular'] ), BU_Navigation_Plugin::TEXT_DOMAIN  ),
+				sprintf( __( "%s Template", BU_NAV_TEXTDOMAIN  ), $this->post_type_labels['singular'] ),
 				array($this, 'display_custom_template'),
 				$post_type,
 				'side',
@@ -134,7 +134,7 @@ class BU_Navigation_Admin_Post {
 
 		add_meta_box(
 			'bunavattrsdiv',
-			__( 'Placement in Navigation', BU_Navigation_Plugin::TEXT_DOMAIN ),
+			__( 'Placement in Navigation', BU_NAV_TEXTDOMAIN ),
 			array( $this, 'display_nav_attributes' ),
 			$post_type,
 			'side',
@@ -156,21 +156,14 @@ class BU_Navigation_Admin_Post {
 	 */
 	public function display_nav_attributes( $post ) {
 
-		// retrieve previously saved settings for this post (if any)
+		// Template context
+		$post_type = get_post_type_object( $post->post_type );
 		$nav_label = esc_attr( bu_navigation_get_label( $post, '' ) );
-		$nav_exclude = bu_navigation_post_excluded( $post );
-
-		// new pages are not in the nav already, so we need to fix this
-		$nav_display = $post->post_status == 'auto-draft' ? false : ! $nav_exclude;
-
-		// Labels
+		$nav_display = ! bu_navigation_post_excluded( $post );
 		$breadcrumbs = $this->get_post_breadcrumbs_label( $post );
-		$pt_labels = $this->post_type_labels;
-		$lc_label = strtolower( $pt_labels['singular'] );
-		$dialog_title = ucfirst($pt_labels['singular']) . ' location';
 		$images_url = plugins_url( 'images', BU_NAV_PLUGIN );
-
-		$move_post_btn_txt = "Move $lc_label";
+		$pub_cap = $post_type->cap->publish_posts;
+		$user_cannot_publish = ( $post->post_status != 'publish' && ! current_user_can( $pub_cap ) );
 
 		include( BU_NAV_PLUGIN_DIR . '/templates/metabox-navigation-attributes.php' );
 
@@ -186,6 +179,7 @@ class BU_Navigation_Admin_Post {
 	 */
 	public function display_custom_template( $post ) {
 
+		$post_type = get_post_type_object( $post->post_type );
 		$current_template = isset( $post->page_template ) ? $post->page_template : 'default';
 
 		include( BU_NAV_PLUGIN_DIR . '/templates/metabox-custom-template.php' );
@@ -304,7 +298,7 @@ class BU_Navigation_Admin_Post {
 		if( $post->post_parent ) {
 			$output = $this->get_post_breadcrumbs( $post );
 		} else {
-			$output = "<ul id=\"bu-post-breadcrumbs\"><li class=\"current\">" . __('Top level page') . "</li></ul>\n";
+			$output = "<ul id=\"bu-post-breadcrumbs\"><li class=\"current\">" . __('Top level page', BU_NAV_TEXTDOMAIN ) . "</li></ul>\n";
 		}
 
 		return $output;
@@ -320,10 +314,10 @@ class BU_Navigation_Admin_Post {
 			$post = get_post( $post->post_parent );
 			array_push( $ancestors, $post );
 		}
-		
+
 		// Start from the root
 		$ancestors = array_reverse( $ancestors );
-		
+
 		// Print markup
 		foreach( $ancestors as $ancestor ) {
 			$label = bu_navigation_get_label( $ancestor );

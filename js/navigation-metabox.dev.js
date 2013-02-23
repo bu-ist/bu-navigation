@@ -74,7 +74,7 @@ if((typeof bu === 'undefined' ) ||
 
 			// Tree container needs to know about current post status
 			$(this.ui.treeContainer).addClass('current-post-status-' + currentStatus );
-			
+
 			// References to key elements
 			this.$el = $(this.el);
 
@@ -129,11 +129,12 @@ if((typeof bu === 'undefined' ) ||
 
 		onToggleVisibility: function(e) {
 			var visible = $(e.target).attr('checked');
+			var msg = nav_metabox_settings.topLevelDisabled + "\n\n" + nav_metabox_settings.topLevelNotice;
 
 			if (visible && !this.isAllowedInNavigationLists(this.settings.currentPost)) {
 
 				e.preventDefault();
-				this.notify("Displaying top-level pages in the navigation is disabled. To change this behavior, go to Site Design > Primary Navigation and enable \"Allow Top-Level Pages.\"");
+				this.notify(msg);
 
 			} else {
 
@@ -163,12 +164,12 @@ if((typeof bu === 'undefined' ) ||
 			var ancestors, crumbs, $crumbs, $crumb;
 			ancestors = Navtree.getAncestors( post.ID );
 			$crumbs = $(this.ui.breadcrumbs).clone().empty();
-			
+
 			$.each(ancestors, function(index, label) {
 				$crumb = $('<li></li>').html(label);
-				
+
 				if( index < ( ancestors.length - 1 ) ) {
-					$crumb.append('<ul></ul>');	
+					$crumb.append('<ul></ul>');
 				} else {
 					$crumb.addClass('current');
 				}
@@ -178,12 +179,12 @@ if((typeof bu === 'undefined' ) ||
 					$crumbs.find('ul').last().append($crumb);
 				}
 			});
-			
+
 			// Update breadcrumbs
 			if ($crumbs.find('li').length > 1) {
 				$(this.ui.breadcrumbs).replaceWith($crumbs);
 			} else {
-				$(this.ui.breadcrumbs).html('<li class="current">Top level page</li>');
+				$(this.ui.breadcrumbs).html('<li class="current">' + nav_metabox_settings.topLevelLabel + '</li>');
 			}
 		},
 
@@ -293,7 +294,7 @@ if((typeof bu === 'undefined' ) ||
 			return false;
 
 		};
-	
+
 		that.scrollToSelection = function() {
 			var $tree, $node, $container, containerHeight, nodeOffset;
 			$tree = $(c.treeContainer),

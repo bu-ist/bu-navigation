@@ -86,10 +86,23 @@ class BU_Navigation_Admin_Post {
 		$styles_url = plugins_url( 'css', BU_NAV_PLUGIN );
 
 		// Scripts
-		wp_register_script('bu-navigation-metabox', $scripts_url . '/navigation-metabox' . $suffix . '.js', array('bu-navigation'), BU_Navigation_Plugin::VERSION, true );
+		wp_register_script( 'bu-navigation-metabox', $scripts_url . '/navigation-metabox' . $suffix . '.js', array('bu-navigation'), BU_Navigation_Plugin::VERSION, true );
 
 		// Setup dynamic script context for navigation-metabox.js
+		$post_type = get_post_type_object( $this->post_type );
 		$ancestors = $this->get_formatted_ancestors();
+
+		// Strings for localization
+		if ( defined( 'BU_CMS' ) && BU_CMS ) {
+			$nav_menu_path = __( 'Site Design > Primary Navigation', BU_NAV_TEXTDOMAIN );
+		} else {
+			$nav_menu_path = __( 'Appearance > Primary Navigation', BU_NAV_TEXTDOMAIN );
+		}
+		$strings = array(
+			'topLevelDisabled' => sprintf( __( 'Displaying top-level %s in navigation lists is currently disabled.', BU_NAV_TEXTDOMAIN ), strtolower( $post_type->labels->name ) ),
+			'topLevelNotice' => sprintf( __( 'To change this behavior, visit %s and enable the "Allow Top-Level Pages" setting.', BU_NAV_TEXTDOMAIN ), $nav_menu_path ),
+			'topLevelLabel' => sprintf( __( 'Top level %s', BU_NAV_TEXTDOMAIN ), strtolower( $post_type->labels->singular_name ) )
+			);
 
 		$script_context = array(
 			'postTypes' => $this->post_type,
@@ -101,7 +114,7 @@ class BU_Navigation_Admin_Post {
 			'deselectOnDocumentClick' => false,
 			);
 		// Navigation tree view will handle actual enqueuing of our script
-		$treeview = new BU_Navigation_Tree_View( 'nav_metabox', $script_context );
+		$treeview = new BU_Navigation_Tree_View( 'nav_metabox', array_merge( $script_context, $strings ) );
 		$treeview->enqueue_script( 'bu-navigation-metabox' );
 
 		// Styles

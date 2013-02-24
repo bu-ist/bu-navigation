@@ -18,8 +18,6 @@ class BU_Navigation_Admin_Post {
 	public $post_id;
 	public $post;
 	public $post_type;
-	public $post_type_object;
-	public $post_type_labels;
 
 	private $plugin;
 
@@ -53,10 +51,6 @@ class BU_Navigation_Admin_Post {
 
 		// Only continue with a valid and supported post type
 		if ( in_array( $this->post_type, $this->plugin->supported_post_types() ) ) {
-
-			// Store post type object & labels
-			$this->post_type_object = get_post_type_object( $this->post_type );
-			$this->post_type_labels = $this->plugin->get_post_type_labels( $this->post_type );
 
 			// Attach WP actions/filters
 			$this->register_hooks();
@@ -128,6 +122,7 @@ class BU_Navigation_Admin_Post {
 	 * @todo needs selenium tests
 	 */
 	public function add_meta_boxes( $post_type, $post ) {
+		$post_type_object = get_post_type_object( $post_type );
 
 		// Remove built in page attributes meta box
 		remove_meta_box('pageparentdiv', 'page', 'side');
@@ -137,7 +132,7 @@ class BU_Navigation_Admin_Post {
 		if ( is_array( $templates ) && ( count( $templates ) > 0 ) ) {
 			add_meta_box(
 				'bupagetemplatediv',
-				sprintf( __( "%s Template", BU_NAV_TEXTDOMAIN  ), $this->post_type_labels['singular'] ),
+				sprintf( __( "%s Template", BU_NAV_TEXTDOMAIN  ), $post_type_object->labels->singular_name ),
 				array($this, 'display_custom_template'),
 				$post_type,
 				'side',

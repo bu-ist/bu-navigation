@@ -316,7 +316,8 @@ function bu_navigation_get_posts( $args = '' ) {
 		'guid',
 		'menu_order',
 		'post_type',
-		'post_status'
+		'post_status',
+		'post_password'
 		);
 	$fields = apply_filters( 'bu_navigation_filter_fields', $fields );
 	$fields = implode( ",", $fields );

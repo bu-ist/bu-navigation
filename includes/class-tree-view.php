@@ -264,13 +264,13 @@ class BU_Navigation_Tree_View {
 			'post_parent' => $post->post_parent,
 			'menu_order' => $post->menu_order,
 			'post_meta' => array(
-				'protected' => ( isset($post->protected) ? $post->protected : false ),
-				'excluded' => ( isset($post->excluded) ? $post->excluded : false ),
+				'protected' => ( isset( $post->post_password ) && ! empty( $post->post_password ) ) ? true : false,
+				'excluded' => isset( $post->excluded ) ? $post->excluded : false,
 				),
 			'url' => $post->url,
 			'originalParent' => $post->post_parent,
 			'originalOrder' => $post->menu_order,
-			'originalExclude' => ( isset($post->excluded) ? $post->excluded : false )
+			'originalExclude' => isset( $post->excluded ) ? $post->excluded : false
 		);
 
 		// Base format
@@ -428,10 +428,6 @@ class BU_Navigation_Tree_Query {
 				// Post exclusions (hidden from navigation lists)
 				if( array_key_exists( $post->ID, $exclusions ) ) {
 					$post->excluded = TRUE;
-				}
-
-				if( ! empty( $post->post_password ) ) {
-					$post->protected = TRUE;
 				}
 
 				$filtered[$post->ID] = $post;

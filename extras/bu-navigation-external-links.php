@@ -3,7 +3,8 @@
 if ( ! defined( 'BU_NAVIGATION_LINK_POST_TYPE' ) )
 	define( 'BU_NAVIGATION_LINK_POST_TYPE', 'bu_link' );
 
-define('BU_NAV_META_TARGET', 'bu_link_target'); // name of meta_key used to hold target window
+// Name of meta_key used to hold target window
+define('BU_NAV_META_TARGET', 'bu_link_target');
 
 /**
  * Register 'link' as a mostly private post type for use representing external links in page navigation menus
@@ -65,27 +66,27 @@ add_filter( 'bu_navigation_filter_fields', 'bu_navigation_filter_fields_external
  * Filter pages before displaying navigation to set external URL and window target for external links
  * @return array Filtered list of pages
  */
-function bu_navigation_filter_pages_external_links($pages)
-{
+function bu_navigation_filter_pages_external_links( $pages ) {
 	global $wpdb;
 
 	$filtered = array();
 
-	if ((is_array($pages)) && (count($pages) > 0))
-	{
+	if ( is_array( $pages ) && count( $pages ) > 0 ) {
+
 		$ids = array_keys($pages);
+		$query = sprintf("SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s)",
+			$wpdb->postmeta,
+			BU_NAV_META_TARGET,
+			implode( ',', $ids )
+			);
+		$targets = $wpdb->get_results( $query, OBJECT_K );
 
-		$query = sprintf("SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s)", $wpdb->postmeta, BU_NAV_META_TARGET, implode(',', $ids));
-
-		$targets = $wpdb->get_results($query, OBJECT_K); // get results as objects in an array keyed on post_id
-
-		foreach ($pages as $page)
-		{
-			if ( $page->post_type == BU_NAVIGATION_LINK_POST_TYPE )
-			{
-				if ((is_array($targets)) && (array_key_exists($page->ID, $targets))) $page->target = $targets[$page->ID]->meta_value;
+		foreach ( $pages as $page ) {
+			if ( $page->post_type == BU_NAVIGATION_LINK_POST_TYPE ) {
+				if ( is_array( $targets ) && array_key_exists( $page->ID, $targets ) ) {
+					$page->target = $targets[$page->ID]->meta_value;
+				}
 			}
-
 			$filtered[$page->ID] = $page;
 		}
 	}
@@ -93,19 +94,20 @@ function bu_navigation_filter_pages_external_links($pages)
 	return $filtered;
 }
 
-add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_external_links');
+add_filter( 'bu_navigation_filter_pages', 'bu_navigation_filter_pages_external_links' );
 
 /**
  * Filter HTML attributes set on a navigation item anchor element to add window target where applicable
  * @return array Filtered anchor attributes
  */
-function bu_navigation_filter_anchor_attrs_external_links($attrs, $page = NULL)
-{
-	if ((!is_null($page)) && (isset($page->target)) && ($page->target == 'new')) $attrs['target'] = '_blank';
-
+function bu_navigation_filter_anchor_attrs_external_links( $attrs, $page = NULL ) {
+	if ( !is_null( $page ) && isset( $page->target ) && $page->target == 'new' ) {
+		$attrs['target'] = '_blank';
+	}
 	return $attrs;
 }
-add_filter('bu_navigation_filter_anchor_attrs', 'bu_navigation_filter_anchor_attrs_external_links');
+
+add_filter( 'bu_navigation_filter_anchor_attrs', 'bu_navigation_filter_anchor_attrs_external_links' );
 
 /**
  * Filter the page_link to support the custom post_type 'link'
@@ -113,14 +115,13 @@ add_filter('bu_navigation_filter_anchor_attrs', 'bu_navigation_filter_anchor_att
  * @param int $id Post ID
  * @see get_page_link()
  */
-function bu_navigation_post_type_link_filter($link, $id)
-{
-	if (($post = get_post($id, OBJECT, 'raw', false)) && ($post->post_type === BU_NAVIGATION_LINK_POST_TYPE )) {
+function bu_navigation_post_type_link_filter( $link, $id ) {
+	if ( ( $post = get_post( $id, OBJECT, 'raw', false ) ) && $post->post_type === BU_NAVIGATION_LINK_POST_TYPE ) {
 		$link = $post->post_content;
 	}
 	return $link;
 }
 
-add_filter('post_type_link', 'bu_navigation_post_type_link_filter', 10, 2);
+add_filter( 'post_type_link', 'bu_navigation_post_type_link_filter', 10, 2 );
 
 ?>

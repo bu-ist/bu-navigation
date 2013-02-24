@@ -180,17 +180,11 @@ class BU_Navigation_Plugin {
 	/**
 	 * Does the current install or theme support a navigation feature?
 	 *
-	 * There are three different ways to configure navigation features -- two with PHP constants, and
-	 * one using the theme support API.
+	 * There are two different ways to configure navigation features -- with PHP constants, or through the Theme Features API.
 	 *
-	 * Installs can use the constants to enable or disable navigation features for all themes.
-	 *
-	 * Individual themes can use the theme support API to add theme support for any feature that is off by default.
-	 *
-	 * The structure and priority of the feature support mechanism is as follows:
-	 * 	BU_NAVIGATON_DISABLE_* - Allows installs to explicitly disable feature (highest priority)
-	 * 	BU_NAVIGATION_SUPPORTS_* - Allows installs to explicitly enable feature (second highest priority)
-	 * 	add_theme_support( 'bu-navigation-*' ) - Allows individual themes to register support for a feature (recommended for theme authors)
+	 * These work as follows:
+	 * 1. Define `BU_NAVIGATION_SUPPORTS_*` constant as true or false in wp-config.php or your theme's functions.php (highest priority)
+	 * 2. Call add_theme_support( 'bu-navigation-*' ) within your theme's functions.php file (recommended for theme authors)
 	 */
 	public function supports( $feature ) {
 
@@ -202,14 +196,13 @@ class BU_Navigation_Plugin {
 			return false;
 		}
 
-		$disabled_const = 'BU_NAVIGATION_DISABLE_' . strtoupper( $feature );
 		$supported_const = 'BU_NAVIGATION_SUPPORTS_' . strtoupper( $feature );
 
-		$disabled = defined( $disabled_const ) && constant( $disabled_const );
-		$const_supported = defined( $supported_const ) ? constant( $supported_const ) : $defaults[$feature];
+		$disabled = ( defined( $supported_const ) && constant( $supported_const ) == false );
+		$supported = ( defined( $supported_const ) && constant( $supported_const ) == true ) || $defaults[$feature];
 		$theme_supported = current_theme_supports( 'bu-navigation-' . $feature );
 
-		return ( ! $disabled && ( $const_supported || $theme_supported ) );
+		return ( ! $disabled && ( $supported || $theme_supported ) );
 
 	}
 

@@ -23,7 +23,7 @@ class BU_Navigation_Tree_View {
 
 		$this->plugin = $GLOBALS['bu_navigation_plugin'];
 		$this->instance = $instance;
-		$this->no_title_text = __('(no title)');
+		$this->no_title_text = __('(no title)', BU_NAV_TEXTDOMAIN );
 
 		// Merge default script context with arg
 		$defaults = array(

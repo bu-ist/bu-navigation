@@ -42,7 +42,9 @@ class BU_Navigation_Tree_View {
 			'lazyLoad' => true,
 			'showCounts' => true,
 			'showStatuses' => true,
-			'nodePrefix' => 'p'
+			'nodePrefix' => 'p',
+			'statusBadgeExcluded' => __( 'not in nav', BU_NAV_TEXTDOMAIN ),
+			'statusBadgeProtected' => __( 'protected', BU_NAV_TEXTDOMAIN ),
 			);
 		$this->settings = wp_parse_args( $script_context, $defaults );
 

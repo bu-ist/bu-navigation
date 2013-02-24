@@ -698,16 +698,16 @@ bu.plugins.navigation = {};
 			// List of status badges
 			var getStatusBadges = function (inherited) {
 				var defaults, _builtins, badges, status, results;
-				
+
 				inherited = inherited || false;
 				_builtins = {
-					'excluded': { 'class': 'excluded', 'label': 'not in nav', 'inherited': false },
-					'protected': { 'class': 'protected', 'label': 'protected', 'inherited': false }
+					'excluded': { 'class': 'excluded', 'label': c.statusBadgeExcluded, 'inherited': false },
+					'protected': { 'class': 'protected', 'label': c.statusBadgeProtected, 'inherited': false }
 				};
-				
+
 				badges = bu.hooks.applyFilters( 'navStatusBadges', _builtins );
 				results = badges;
-				
+
 				if (inherited) {
 					results = {};
 					for (status in badges) {
@@ -721,7 +721,7 @@ bu.plugins.navigation = {};
 			// Update post meta that may change depending on ancestors
 			var calculateInheritedStatuses = function ($node) {
 				var post, badges, status, inheriting_status;
-				
+
 				post = my.nodeToPost($node);
 				badges = getStatusBadges({'inherited': true});
 
@@ -749,7 +749,7 @@ bu.plugins.navigation = {};
 					$a.append('<span class="post-statuses"></span>');
 				}
 				$statuses = $a.children('.post-statuses').empty();
-				
+
 				post = my.nodeToPost( $node );
 				statuses = [];
 
@@ -759,7 +759,7 @@ bu.plugins.navigation = {};
 				// Push actual post statuses first
 				if (post.post_status != 'publish')
 					statuses.push({ "class": post.post_status, "label": post.post_status });
-				
+
 				// Push any additional status badges
 				badges = getStatusBadges();
 				for (status in badges) {
@@ -1022,15 +1022,15 @@ bu.plugins.navigation = {};
 
 				var options = {
 					"edit" : {
-						"label" : "Edit",
+						"label" : c.optionsEditLabel,
 						"action" : editPost
 					},
 					"view" : {
-						"label" : "View",
+						"label" : c.optionsViewLabel,
 						"action" : viewPost
 					},
 					"remove" : {
-						"label" : "Move to Trash",
+						"label" : c.optionsTrashLabel,
 						"action" : removePost
 					}
 				};
@@ -1043,7 +1043,7 @@ bu.plugins.navigation = {};
 				// Special behavior for links
 				if (post.post_type === c.linksPostType) {
 					// Links are permanently deleted -- "Move To Trash" is misleading
-					options['remove']['label'] = 'Delete';
+					options['remove']['label'] = c.optionsDeleteLabel;
 				}
 
 				return bu.hooks.applyFilters('navmanOptionsMenuItems', options, node);
@@ -1092,7 +1092,7 @@ bu.plugins.navigation = {};
 
 						if( $a.children('.edit-options').length ) return;
 
-						var $button = $('<button class="edit-options"><ins class="jstree-icon">&#160;</ins>options</button>');
+						var $button = $('<button class="edit-options"><ins class="jstree-icon">&#160;</ins>' + c.optionsLabel + '</button>');
 						var $statuses = $a.children('.post-statuses');
 
 						// Button should appear before statuses
@@ -1242,14 +1242,14 @@ bu.plugins.navigation = {};
 
 			/**
 			 * Recursively load ancestors, opening and possibly inserting along the way.
-			 * 
+			 *
 			 * For now, unpublished content will not be represented in the tree passed to us
 			 * from the server, so we need to enter this recursive callback waterfall to make
 			 * sure all ancestors exist and are open before selecting the current post.
 			 */
 			var openNextChild = function (current, all) {
 				var post = all[current];
-				
+
 				if (post) {
 					if (that.openPost(post, function() { openNextChild( current + 1, all) }) === false ) {
 						that.insertPost(post, function($node) { openNextChild(current + 1, all); });
@@ -1264,7 +1264,7 @@ bu.plugins.navigation = {};
 			 * Select the current post, inserting if it does not already exist in the tree (i.e. new post, or unpublished post)
 			 */
 			var selectCurrentPost = function () {
-				
+
 				// Insert post if it isn't already represented in the tree (new, draft, or pending posts)
 				var $current = my.getNodeForPost(currentPost);
 

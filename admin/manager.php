@@ -133,6 +133,11 @@ class BU_Navigation_Admin_Manager {
 				$nav_menu_txt = __( 'Appearance > Primary Navigation', BU_NAV_TEXTDOMAIN );
 			}
 			$strings = array(
+				'optionsLabel' => __( 'options', BU_NAV_TEXTDOMAIN ),
+				'optionsEditLabel' => __( 'Edit', BU_NAV_TEXTDOMAIN ),
+				'optionsViewLabel' => __( 'View', BU_NAV_TEXTDOMAIN ),
+				'optionsDeleteLabel' => __( 'Delete', BU_NAV_TEXTDOMAIN ),
+				'optionsTrashLabel' => __( 'Move to Trash', BU_NAV_TEXTDOMAIN ),
 				'addLinkDialogTitle' => __( 'Add a Link', BU_NAV_TEXTDOMAIN ),
 				'editLinkDialogTitle' => __( 'Edit Link', BU_NAV_TEXTDOMAIN ),
 				'cancelLinkBtn' => __( 'Cancel', BU_NAV_TEXTDOMAIN ),

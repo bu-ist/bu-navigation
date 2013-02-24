@@ -160,14 +160,14 @@ class BU_Navigation_Admin {
 	 * but if they were hidden (as a result of the current post being hidden), they will become unhidden.
 	 * So we must go through all the children and mark them hidden.
 	 */
-	public function handle_hidden_page_deletion($post_id) {
+	public function handle_hidden_page_deletion( $post_id ) {
 		global $wpdb;
 
 		$post = get_post( $post_id );
 		if ( ! in_array( $post->post_type, $this->plugin->supported_post_types() ) )
 			return;
 
-		$exclude = get_post_meta( $post_id, BU_NAV_META_PAGE_EXCLUDE, true );
+		$exclude = bu_navigation_post_excluded( $post );
 
 		if ( $exclude ) {	// post was hidden
 			// get children
@@ -176,7 +176,7 @@ class BU_Navigation_Admin {
 
 			// mark each hidden
 			foreach ( (array) $children as $child ) {
-				update_post_meta( $child->ID, BU_NAV_META_PAGE_EXCLUDE, $exclude );
+				update_post_meta( $child->ID, BU_NAV_META_PAGE_EXCLUDE, (int) $exclude );
 			}
 		}
 	}
@@ -216,7 +216,7 @@ class BU_Navigation_Admin {
 			die;
 		}
 
-		$hidden = get_post_meta( $post_id, BU_NAV_META_PAGE_EXCLUDE, true );
+		$hidden = bu_navigation_post_excluded( $post );
 
 		// case: wasn't hidden, output the "ignore" flag
 		if ( ! $hidden ) {

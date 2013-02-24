@@ -238,26 +238,6 @@ class BU_Navigation_Plugin {
 
 	}
 
-	/**
-	 * Helper for creating a post type labels arrays
-	 *
-	 * @param $post_type name of a registered post type to get labels for
-	 */
-	public function get_post_type_labels( $post_type ) {
-
-		$pt_obj = get_post_type_object($post_type);
-
-		if( ! is_object( $pt_obj ) )
-			return false;
-
-		return array(
-			'post_type' => $post_type,
-			'singular' => $pt_obj->labels->singular_name,
-			'plural' => $pt_obj->labels->name,
-		);
-
-	}
-
 }
 
 // Instantiate plugin (only once)

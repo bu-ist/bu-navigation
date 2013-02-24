@@ -188,68 +188,71 @@ class BU_Navigation_Admin {
 
 		$response = array();
 		$post_id = (int) $_POST['post_id'];
-		$post = get_post($post_id);
+		$post = get_post( $post_id );
 
 		// case: not a supported post_type
-		if ( !in_array($post->post_type, $this->plugin->supported_post_types() ) ) {
+		if ( ! in_array( $post->post_type, $this->plugin->supported_post_types() ) ) {
 			echo json_encode( array( 'ignore' => true ) );
 			die;
 		}
 
 		// get post type labels
-		$pt_labels = $this->plugin->get_post_type_labels( $post->post_type );
+		$post_type = get_post_type_object( $post->post_type );
 
 		// get children pages/links
-		$page_children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='$post->post_type'", $post_id);
-		$page_children = $wpdb->get_results($page_children_query);
-		$link_children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='".BU_NAVIGATION_LINK_POST_TYPE."'", $post_id);
-		$link_children = $wpdb->get_results($link_children_query);
+		$page_children_query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='$post->post_type'", $post_id );
+		$page_children = $wpdb->get_results( $page_children_query );
+		$link_children_query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='".BU_NAVIGATION_LINK_POST_TYPE."'", $post_id );
+		$link_children = $wpdb->get_results( $link_children_query );
 
 		// case no children, output the "ignore" flag
-		if ( count($page_children) == 0 and count($link_children) == 0 ) {
+		if ( count( $page_children ) == 0 && count( $link_children ) == 0 ) {
 			echo json_encode( array( 'ignore' => true, 'children' => 0 ) );
 			die;
 		}
 
-		$hidden = get_post_meta($post_id, BU_NAV_META_PAGE_EXCLUDE, true);
+		$hidden = get_post_meta( $post_id, BU_NAV_META_PAGE_EXCLUDE, true );
 
 		// case: wasn't hidden, output the "ignore" flag
-		if ( !$hidden ) {
+		if ( ! $hidden ) {
 			echo json_encode( array( 'ignore' => true, 'children' => 0 ) );
 			die;
 		}
 
 		// case: child pages and/or links exist
 		// construct output msg based on how many child pages/links exist
-		$msg = sprintf('"%s" is a hidden ' . strtolower($pt_labels['singular']) . ' with ', $post->post_title);
+		$msg = sprintf( __( '"%s" is a hidden %s with ', BU_NAV_TEXTDOMAIN ), $post->post_title, strtolower( $post_type->labels->singular_name ) );
 		$children_msgs = array();
 
-		if (count($page_children) > 1) {
-			$children_msgs['page'] = count($page_children) . " child " . strtolower($pt_labels['plural']);
-		} else if ( count($page_children) == 1 ) {
-			$children_msgs['page'] = "a child " . strtolower($pt_labels['singular']);
+		if ( count( $page_children ) >= 1 ) {
+			$children_msgs['page'] = sprintf( _n( 'a child ', '%d child ', count( $page_children ), BU_NAV_TEXTDOMAIN ), count( $page_children ) );
+			$children_msgs['page'] .= ( count( $page_children ) == 1 ) ? strtolower( $post_type->labels->singular_name ) : strtolower( $post_type->labels->name );
 		}
 
-		if (count($link_children) > 1) {
-			$children_msgs['link'] = count($link_children) . " child links";
-		} else if ( count($link_children) == 1 ) {
-			$children_msgs['link'] = "a child link";
+		if ( count( $link_children ) >= 1 ) {
+			$children_msgs['link'] = sprintf( _n( 'a child link', '%d child links', count( $link_children ), BU_NAV_TEXTDOMAIN ), count( $link_children ) );
 		}
 
-		$children_msgs_vals = array_values($children_msgs);
-		$children_msg = count($children_msgs) > 1 ? implode(' and ', $children_msgs_vals) : current($children_msgs);
+		$children_msgs_vals = array_values( $children_msgs );
+		$children_msg = count( $children_msgs ) > 1 ? implode( __( ' and ', BU_NAV_TEXTDOMAIN ), $children_msgs_vals ) : current( $children_msgs );
 		$msg .= $children_msg . ".";
 
 		if ( isset( $children_msgs['page'] ) )
-			$msg .= sprintf(' If you delete this %1$s, %2$s will move up one node in the %1$s hierarchy, and will autmatically be marked as hidden.', strtolower($pt_labels['singular']), $children_msgs['page']);
+			$msg .= sprintf( __(' If you delete this %1$s, %2$s will move up one node in the %1$s hierarchy, and will automatically be marked as hidden.', BU_NAV_TEXTDOMAIN ),
+				strtolower( $post_type->labels->singular_name ),
+				$children_msgs['page']
+				);
 
 		if ( isset( $children_msgs['link'] ) )
-			$msg .= sprintf(' If you delete this %1$s, %2$s will move up one node in the %1$s hierarchy, and will be displayed in navigation menus.', strtolower($pt_labels['singular']), $children_msgs['link']);
+			$msg .= sprintf( __(' If you delete this %1$s, %2$s will move up one node in the %1$s hierarchy, and will be displayed in navigation menus.', BU_NAV_TEXTDOMAIN ),
+				strtolower( $post_type->labels->singular_name ),
+				$children_msgs['link']
+				);
 
-		$response = array (
+		$response = array(
 			'ignore' => false,
-			'msg' => $msg,
-		);
+			'msg' => $msg
+			);
 
 		echo json_encode( $response );
 		die;

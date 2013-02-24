@@ -56,13 +56,13 @@ class BU_Navigation_Admin {
 
 		// for WP 3.2: change delete_post to before_delete_post (because at that point, the children posts haven't moved up)
 		if( version_compare( $wp_version, '3.2', '<' ) ) {
-			add_action('delete_post', array( $this, 'handle_hidden_page_deletion'));
+			add_action( 'delete_post', array( $this, 'handle_hidden_page_deletion' ) );
 		} else {
-			add_action('before_delete_post', array( $this, 'handle_hidden_page_deletion'));
+			add_action( 'before_delete_post', array( $this, 'handle_hidden_page_deletion' ) );
 		}
 
 		if( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-			add_action('wp_ajax_check_hidden_page', array( $this, 'ajax_check_hidden_page'));
+			add_action( 'wp_ajax_check_hidden_page', array( $this, 'ajax_check_hidden_page' ) );
 		}
 
 	}
@@ -74,7 +74,7 @@ class BU_Navigation_Admin {
 		// Intended for edit.php, post.php and post-new.php
 		if( in_array( $screen->base, array( 'edit', 'post' ) ) ) {
 
-			$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
+			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '.dev' : '';
 			$scripts_url = plugins_url( 'js', BU_NAV_PLUGIN );
 
 			wp_enqueue_script( 'bu-page-parent-deletion', $scripts_url . '/deletion' . $suffix . '.js', array('jquery'), BU_Navigation_Plugin::VERSION, true );
@@ -157,21 +157,20 @@ class BU_Navigation_Admin {
 	public function handle_hidden_page_deletion($post_id) {
 		global $wpdb;
 
-		$post = get_post($post_id);
-		if ( !in_array($post->post_type, $this->plugin->supported_post_types() ) ) return;
+		$post = get_post( $post_id );
+		if ( ! in_array( $post->post_type, $this->plugin->supported_post_types() ) )
+			return;
 
-		$exclude = get_post_meta($post_id, BU_NAV_META_PAGE_EXCLUDE, true);
+		$exclude = get_post_meta( $post_id, BU_NAV_META_PAGE_EXCLUDE, true );
 
-		if ($exclude) {	// post was hidden
-			error_log("$post_id is now exclude: $exclude");
+		if ( $exclude ) {	// post was hidden
 			// get children
-			$children_query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_parent = %d", $post_id);
-			$children = $wpdb->get_results($children_query);
+			$children_query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_parent = %d", $post_id );
+			$children = $wpdb->get_results( $children_query );
 
 			// mark each hidden
 			foreach ( (array) $children as $child ) {
-				error_log("setting the child $post_id to exclude: $exclude");
-				update_post_meta($child->ID, BU_NAV_META_PAGE_EXCLUDE, $exclude);
+				update_post_meta( $child->ID, BU_NAV_META_PAGE_EXCLUDE, $exclude );
 			}
 		}
 	}

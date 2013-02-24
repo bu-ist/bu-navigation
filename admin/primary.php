@@ -135,7 +135,11 @@ class BU_Navigation_Admin_Primary {
 				$updates['depth'] = $max_depth;
 
 			if( array_key_exists( 'depth', $_POST['bu-nav-settings'] ) && $updates['depth'] !== (int) $_POST['bu-nav-settings']['depth'] ) {
-				$errors[] = sprintf( __( 'The current theme only supports up to %s level(s) of children.', BU_NAV_TEXTDOMAIN  ), $max_depth );
+				$errors[] = sprintf(
+					_n( 'The current theme only supports %s level of children.',
+						'The current theme only supports up to %s levels of children.',
+						$max_depth, BU_NAV_TEXTDOMAIN  ),
+					$max_depth );
 				$success = false;
 			}
 

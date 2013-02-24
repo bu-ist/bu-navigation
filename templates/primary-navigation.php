@@ -39,7 +39,12 @@
 			<?php if ( defined( 'BU_NAVIGATION_SUPPORTED_DEPTH' ) || current_theme_supports( 'bu-navigation-primary' ) ): ?>
 			<br />
 			<?php $supported_markup = "<strong>$supported_depth</strong>"; ?>
-			<?php printf( __( 'The theme your site is currently using supports displaying %s level(s) of children in the primary navigation bar.', BU_NAV_TEXTDOMAIN ), $supported_markup ); ?>
+			<?php printf(
+				_n( 'The theme your site is currently using supports displaying %s level of children in the primary navigation bar.',
+					'The theme your site is currently using supports displaying %s levels of children in the primary navigation bar.',
+					$supported_depth, BU_NAV_TEXTDOMAIN ),
+				$supported_markup );
+			?>
 			<?php endif; ?>
 		</p>
 		<?php if ( $supported_depth > 1 ): ?>

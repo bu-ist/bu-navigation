@@ -421,25 +421,16 @@ class BU_Navigation_Tree_Query {
 				BU_NAV_META_PAGE_EXCLUDE,
 				implode( ',', $ids )
 				);
-			$exclusions = $wpdb->get_results( $query, OBJECT_K );
+			$visible = $wpdb->get_results( $query, OBJECT_K );
 
-			if ( ! is_array( $exclusions ) )
-				$exclusions = array();
-
-			// Add 'excluded' field to all posts
-			foreach( $posts as $post ) {
-
-				// Default exclude
-				$post->excluded = true;
-
-				// If meta value is set to "0" for post exclusion, then this post was marked as visible in navigation lists
-				if( array_key_exists( $post->ID, $exclusions ) ) {
-					$post->excluded = false;
-				}
-
-				$filtered[$post->ID] = $post;
+			if ( ! is_array( $visible ) ) {
+				$visible = array();
 			}
 
+			foreach ( $posts as $post ) {
+				$post->excluded = ( array_key_exists( $post->ID, $visible ) ) ? false : true;
+				$filtered[ $post->ID ] = $post;
+			}
 		}
 
 		return apply_filters( 'bu_nav_tree_view_filter_posts', $filtered );

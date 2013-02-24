@@ -38,7 +38,7 @@ class BU_Navigation_Tree_View {
 			'allowTop' => $this->plugin->settings->get( 'allow_top' ),
 			'linksSupported' => $this->plugin->supports( 'links' ),
 			'linksPostType' => BU_NAVIGATION_LINK_POST_TYPE,
-			'loadInitialData' => true,
+			'loadInitialData' => false,
 			'lazyLoad' => true,
 			'showCounts' => true,
 			'showStatuses' => true,

@@ -414,20 +414,27 @@ class BU_Navigation_Tree_Query {
 
 		if( is_array( $posts ) && count( $posts ) > 0 ) {
 
-			$ids = array_keys($posts);
-
 			// Bulk fetch navigation exclusions data for passed posts
-			$exclude_option = BU_NAV_META_PAGE_EXCLUDE;
-			$query = sprintf("SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value != '0'", $wpdb->postmeta, $exclude_option, implode(',', $ids));
-			$exclusions = $wpdb->get_results($query, OBJECT_K); // get results as objects in an array keyed on post_id
-			if (!is_array($exclusions)) $exclusions = array();
+			$ids = array_keys( $posts );
+			$query = sprintf("SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value = '0'",
+				$wpdb->postmeta,
+				BU_NAV_META_PAGE_EXCLUDE,
+				implode( ',', $ids )
+				);
+			$exclusions = $wpdb->get_results( $query, OBJECT_K );
 
-			// Add 'excluded' and 'protected' field to all posts
+			if ( ! is_array( $exclusions ) )
+				$exclusions = array();
+
+			// Add 'excluded' field to all posts
 			foreach( $posts as $post ) {
 
-				// Post exclusions (hidden from navigation lists)
+				// Default exclude
+				$post->excluded = true;
+
+				// If meta value is set to "0" for post exclusion, then this post was marked as visible in navigation lists
 				if( array_key_exists( $post->ID, $exclusions ) ) {
-					$post->excluded = TRUE;
+					$post->excluded = false;
 				}
 
 				$filtered[$post->ID] = $post;

@@ -25,13 +25,6 @@ Additionally, themes that support the primary navigation feature gain the abilit
 * Easily toggle the visibility of specific pages or sections of pages from your navigation menus
 * Customize primary navigation settings through the “Primary Navigation” screen
 
-Additionally, themes that support the primary navigation feature gain the ability to display a primary navigation list fed from page order.  With two lines of code any theme can benefit from this feature-rich custom menu alternative.
-
-* Display a primary navigation menu using the natural page hierarchy, eliminating the need for end-users to manage navigation lists separatly from page order
-* Navigation labels give you the ability to vary your page’s navigation label from their title
-* Easily exclude specific pages or sections of pages from your navigation menus
-* Customize primary navigation settings through the “Primay Navigation” screen
-
 For more information check out [http://developer.bu.edu/bu-navigation/](http://developer.bu.edu/bu-navigation/).
 
 ### Developers ###

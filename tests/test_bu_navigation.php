@@ -45,9 +45,6 @@ class WP_Test_BU_Navigation_Plugin extends BU_Navigation_UnitTestCase {
 			define( 'BU_NAVIGATION_SUPPORTS_' . strtoupper( $feature ), true );
 			$this->assertTrue( $this->plugin->supports( $feature ) );
 
-			define( 'BU_NAVIGATION_DISABLE_' . strtoupper( $feature ), true );
-			$this->assertFalse( $this->plugin->supports( $feature ) );
-
 		}
 
 	}

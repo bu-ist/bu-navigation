@@ -1,10 +1,13 @@
 <?php
 /*
-Plugin Name: Page Navigation
-Version: 1.0.1
-Author URI: http://www.bu.edu/tech/help/
-Description: Provides alternative navigation elements designed for blogs with large page counts
+Plugin Name: BU Navigation
+Plugin URI: http://developer.bu.edu/bu-navigation/
 Author: Boston University (IS&T)
+Author URI: http://blogs.bu.edu/web/
+Description: Provides alternative navigation elements designed for blogs with large page counts
+Version: 1.0.1
+Text Domain: bu-navigation
+Domain Path: /languages
 */
 
 /**
@@ -28,18 +31,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 /*
 @author Niall Kavanagh <ntk@bu.edu>
-@author Gregory Cornelius <gcorne@bu.edu>
+@author Gregory Cornelius <gcorne@gmail.com>
 @author Mike Burns <mgburns@bu.edu>
 */
-
-/**
- * Components:
- *
- * Navigation Management Screens ("Edit Order" and "Primary Navigation")
- * Navigation Attributes Meta Box
- * Content navigation widget
- * Filter for drilling into a particular section when view the edit pages screen
- */
 
 // Absolute server path to this plugin dir and file for use by included files
 define( 'BU_NAV_PLUGIN', __FILE__ );
@@ -66,7 +60,6 @@ class BU_Navigation_Plugin {
 	public $settings;
 
 	const VERSION = '1.0.1';
-	const TEXT_DOMAIN = 'bu-navigation';
 
 	public function __construct() {
 
@@ -92,6 +85,8 @@ class BU_Navigation_Plugin {
 	 * @return void
 	 */
 	public function init() {
+
+		load_plugin_textdomain( BU_NAV_TEXTDOMAIN, false, plugin_basename( dirname( __FILE__ ) ) . '/languages/' );
 
 		if( is_admin() ) {
 			$this->load_admin();

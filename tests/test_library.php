@@ -337,6 +337,8 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 	 */
 	public function test_bu_navigation_get_urls() {
 
+		remove_filter( 'bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude' );
+
 		// Get test page ids
 		$parent 		 = $this->posts['parent'];
 		$grandchild_one  = $this->posts['grandchild_one'];
@@ -368,6 +370,8 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 	 *  Covers bu_navigation_get_pages()
 	 */
 	public function test_bu_navigation_get_pages() {
+
+		remove_filter( 'bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude' );
 
 		/*
 		* 	Test No Pages Return

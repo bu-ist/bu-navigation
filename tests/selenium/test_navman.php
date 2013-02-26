@@ -1,10 +1,10 @@
 <?php
 
-require_once dirname( __FILE__ ) . '/navigation_selenium_testcase.php';
 require_once dirname( __FILE__ ) . '/page-objects/navman.php';
 
 /**
  * @group selenium
+ * @group bu-navigation
  * @group bu-navigation-manager
  */
  class BU_Navigation_Manager_Test extends BU_Navigation_Selenium_Test_Case {

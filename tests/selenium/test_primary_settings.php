@@ -1,10 +1,10 @@
 <?php
 
-require_once dirname( __FILE__ ) . '/navigation_selenium_testcase.php';
 require_once dirname( __FILE__ ) . '/page-objects/primary-navigation-settings.php';
 
 /**
  * @group selenium
+ * @group bu-navigation
  * @group bu-navigation-settings
  *
  * @todo

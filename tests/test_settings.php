@@ -1,7 +1,5 @@
 <?php
 
-require_once dirname( __FILE__ ) . '/bu_navigation_test.php';
-
 /**
  * Coverage for the BU_Navigation_Settings class
  *

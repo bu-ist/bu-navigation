@@ -12,6 +12,10 @@
 /*jslint browser: true, todo: true */
 /*global bu: true, bu_navman_settings: false, jQuery: false, console: false, window: false, document: false */
 
+
+// @todo remove Link Manager if links are disabled (?)
+// @todo remove hard coded post->post_type = 'link', read from server
+
 // Check prerequisites
 if ((typeof bu === 'undefined') ||
 		(typeof bu.plugins.navigation === 'undefined') ||
@@ -207,7 +211,7 @@ if ((typeof bu === 'undefined') ||
 			$(this.ui.movesField).attr("value", JSON.stringify(moves));
 
 			// Notify user that save is in progress
-			var $msg = $('<span>Saving navigation changes...</span>')
+			var $msg = $('<span>' + bu_navman_settings.saveNotice + '</span>')
 			$(this.ui.saveBtn).prev('img').css('visibility', 'visible');
 			this.notice( $msg.html(), 'message');
 
@@ -269,13 +273,14 @@ if ((typeof bu === 'undefined') ||
 
 			this.$form = $(this.ui.form);
 
+			var buttons = {};
+			buttons[bu_navman_settings.confirmLinkBtn] = $.proxy(this.save, this);
+			buttons[bu_navman_settings.cancelLinkBtn] = $.proxy(this.cancel, this);
+
 			// Edit link dialog
 			this.$el.dialog({
 				autoOpen: false,
-				buttons: {
-					"Ok": $.proxy(this.save, this),
-					"Cancel": $.proxy(this.cancel, this)
-				},
+				buttons: buttons,
 				minWidth: 400,
 				width: 500,
 				modal: true,
@@ -300,44 +305,35 @@ if ((typeof bu === 'undefined') ||
 			e.stopPropagation();
 			var msg = '';
 			var selected;
-			
+
 			if ($(e.currentTarget).parent('li').hasClass('disabled')) {
 				selected = Navtree.getSelectedPost();
-				msg = "You are not allowed to add links";
+				msg = bu_navman_settings.noLinksNotice;
 
 				// User is attempting to add a link below a link
 				if (selected && 'link' === selected.post_type ) {
-					msg = "Links are not permitted to have children.\n\n\
-Select a page that you can edit and click \"Add a Link\" \
-to create a new link below the selected page.";
-					
+					msg = bu_navman_settings.noChildLinkNotice + "\n\n" + bu_navman_settings.createLinkNotice;
+
 				} else {
 					// User is a section editor attempting to add a top level link
 					if (Navman.settings.isSectionEditor) {
-						msg = "You do not have permission to create top level published content.\n\n\
-Select a page that you can edit and click \"Add a Link\" \
-to create a new link below the selected page.";
-						
+						msg = bu_navman_settings.noTopLevelNotice + "\n\n" + bu_navman_settings.createLinkNotice;
 					} else {
 						// User is not a section editor, but not allowed to add top level pages due to allow top setting
 						if (!Navman.settings.allowTop) {
-							msg = "You are not allowed to create top level published content. \
-Select a page that you can edit and click \"Add a Link\" \
-to create a new link below the selected page.\n\n\
-Site administrators can change this behavior by visiting Site Design > Primary Navigation \
-and enabling the \"Allow Top-Level Pages\" setting.";
+							msg = bu_navman_settings.noTopLevelNotice + "\n\n" + bu_navman_settings.createLinkNotice + "\n\n" + bu_navman_settings.allowTopNotice;
 						}
 					}
 				}
-				
+
 				alert(msg);
-				
+
 			} else {
 				// Setup new link
 				this.data.currentLink = { "post_status": "new", "post_type": "link", "post_meta": {} };
-				this.$el.dialog('option', 'title', 'Add a Link').dialog('open');	
+				this.$el.dialog('option', 'title', bu_navman_settings.addLinkDialogTitle).dialog('open');
 			}
-			
+
 		},
 
 		edit: function (link) {
@@ -353,7 +349,7 @@ and enabling the \"Allow Top-Level Pages\" setting.";
 
 			this.data.currentLink = link;
 
-			this.$el.dialog('option', 'title', 'Edit a Link').dialog('open');
+			this.$el.dialog('option', 'title', bu_navman_settings.editLinkDialogTitle).dialog('open');
 		},
 
 		save: function (e) {
@@ -425,11 +421,11 @@ and enabling the \"Allow Top-Level Pages\" setting.";
 
 		onPostSelected: function (post) {
 			var canAdd = true;
-			
+
 			if (post.post_type == 'link') {
 				canAdd = false;
 			}
-			
+
 			canAdd = bu.hooks.applyFilters('navmanCanAddLink', canAdd, post, Navtree);
 
 			if (canAdd) {
@@ -459,7 +455,7 @@ and enabling the \"Allow Top-Level Pages\" setting.";
 
 	window.onbeforeunload = function () {
 		if (Navman.data.dirty) {
-			return 'You have made changes to your navigation that have not yet been saved.';
+			return bu_navman_settings.unloadWarning;
 		}
 
 		return;

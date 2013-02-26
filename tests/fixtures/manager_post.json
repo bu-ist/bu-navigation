@@ -1,0 +1,69 @@
+{
+  "navman-moves": {
+    "%grandchild_one%":{
+      "ID": "%grandchild_one%",
+      "post_status":"publish",
+      "post_type":"page",
+      "post_parent": 0,
+      "menu_order": 1
+    },
+    "%edit%":{
+      "ID": "%edit%",
+      "post_status":"publish",
+      "post_type":"page",
+      "post_parent": "%child%",
+      "menu_order": 1
+    }
+  },
+  "navman-inserts": {
+    "post-new-0":{
+      "post_title":"New Link",
+      "post_content":"http://newlink.com",
+      "post_status":"new",
+      "post_type":"bu_link",
+      "post_parent": "%last_page%",
+      "menu_order": 1,
+      "post_meta":{
+        "bu_link_target":"new"
+      },
+      "url":"http://newlink.com",
+      "ID":"post-new-0",
+      "originalParent":null,
+      "originalOrder":null
+    },
+    "post-new-1":{
+      "post_title":"Top Level Link",
+      "post_content":"http://toplevel.com",
+      "post_status":"new",
+      "post_type":"bu_link",
+      "post_parent": 0,
+      "menu_order": 4,
+      "post_meta":{
+        "bu_link_target":""
+      },
+      "url":"http://newlink.com",
+      "ID":"post-new-1",
+      "originalParent":null,
+      "originalOrder":null
+    }
+  },
+  "navman-updates": {
+    "%google%":{
+      "post_status":"publish",
+      "post_type":"bu_link",
+      "post_parent": 0,
+      "menu_order": 4,
+      "post_meta":{
+        "bu_link_target":""
+      },
+      "url":"http://www.bing.com",
+      "originalParent": 0,
+      "originalOrder": 4,
+      "originalExclude": false,
+      "post_content":"http://www.bing.com",
+      "ID": "%google%",
+      "post_title":"Bing"
+    }
+  },
+  "navman-deletions": ["%hidden%"]
+}

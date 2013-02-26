@@ -27,7 +27,7 @@ function bu_navigation_breadcrumbs($args = '')
 		'suffix' => '',
 		'include_statuses' => 'publish',
 		'include_hidden' => false,
-		'show_links' => true
+		'show_links' => true // @todo change to "include_links"
 		);
 	$r = wp_parse_args($args, $defaults);
 
@@ -85,6 +85,7 @@ function bu_navigation_breadcrumbs($args = '')
 				$anchor_open = sprintf('<a href="%s" class="%s">', get_bloginfo('url'), $r['anchor_class'] );
 				$anchor_close = '</a>';
 
+				// @todo change to "include_links"
 				if( $r['show_links'] ) {
 					$crumb = $anchor_open . $r['home_label'] . $anchor_close;
 				} else {

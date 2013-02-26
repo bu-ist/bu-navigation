@@ -1,0 +1,12 @@
+<phpunit
+    bootstrap="./tests/bootstrap.php"
+    backupGlobals="false"
+    colors="true"
+>
+    <testsuites>
+        <testsuite name="UnitTests">
+            <directory prefix="test_" suffix=".php">./tests</directory>
+            <exclude>./tests/selenium</exclude>
+        </testsuite>
+    </testsuites>
+</phpunit>

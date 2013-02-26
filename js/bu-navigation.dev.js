@@ -162,8 +162,8 @@ bu.plugins.navigation = {};
 				var allowed = true;
 
 				var isTopLevelMove = m.cr === -1;
-				var isVisible = post.post_meta['excluded'] === false || post.post_type === 'link';
-				var wasTop = !post.originalExclude && (post.originalParent === 0 || (post.post_status === 'new' && post.post_type !== 'link'));
+				var isVisible = post.post_meta['excluded'] === false || post.post_type === c.linksPostType;
+				var wasTop = !post.originalExclude && (post.originalParent === 0 || (post.post_status === 'new' && post.post_type !== c.linksPostType));
 
 				// Don't allow top level posts if global option prohibits it
 				if (isTopLevelMove && !wasTop && isVisible && !c.allowTop) {
@@ -266,7 +266,8 @@ bu.plugins.navigation = {};
 								post_types : c.postTypes,
 								post_statuses : c.postStatuses,
 								instance : c.instance,
-								prefix : c.nodePrefix
+								prefix : c.nodePrefix,
+								include_links: c.includeLinks
 							};
 						}
 					},
@@ -302,16 +303,17 @@ bu.plugins.navigation = {};
 				return that;
 			};
 
-			that.openPost = function (post) {
+			that.openPost = function (post, callback) {
 				var $node = my.getNodeForPost(post);
+				callback = callback || $.noop;
 
 				if ($node) {
-					$tree.jstree('open_node', $node, $.noop, true);
+					$tree.jstree('open_node', $node, callback, true);
 				} else {
 					return false;
 				}
 			}
-			
+
 			that.selectPost = function( post, deselect_all ) {
 				deselect_all = deselect_all || true;
 				var $node = my.getNodeForPost(post);
@@ -574,7 +576,6 @@ bu.plugins.navigation = {};
 				post.post_parent = parseInt(post.post_parent, 10);
 				post.originalParent = parseInt(post.originalParent, 10);
 				post.originalOrder = parseInt(post.originalOrder, 10);
-				post.inheritedRestriction = node.data('inheritedRestriction') || false;
 
 				post.post_meta = post.post_meta || {};
 
@@ -694,66 +695,78 @@ bu.plugins.navigation = {};
 				}
 			};
 
+			// List of status badges
+			var getStatusBadges = function (inherited) {
+				var defaults, _builtins, badges, status, results;
+
+				inherited = inherited || false;
+				_builtins = {
+					'excluded': { 'class': 'excluded', 'label': c.statusBadgeExcluded, 'inherited': false },
+					'protected': { 'class': 'protected', 'label': c.statusBadgeProtected, 'inherited': false }
+				};
+
+				badges = bu.hooks.applyFilters( 'navStatusBadges', _builtins );
+				results = badges;
+
+				if (inherited) {
+					results = {};
+					for (status in badges) {
+						if (badges[status].hasOwnProperty('inherited') && badges[status].inherited)
+							results[status] = badges[status];
+					}
+				}
+				return results;
+			}
+
 			// Update post meta that may change depending on ancestors
 			var calculateInheritedStatuses = function ($node) {
+				var post, badges, status, inheriting_status;
 
-				var post = my.nodeToPost($node), excluded, restricted, inheritedExclusion, inheritedRestriction;
+				post = my.nodeToPost($node);
+				badges = getStatusBadges({'inherited': true});
 
-				// Check for inherited exclusions based on current position in hierarchy
-//				inheritedExclusion = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () {
-//					return $(this).data('post_meta')['excluded'] || $(this).data('inheritedExclusion');
-//				}).length;
-//
-//				if (inheritedExclusion) {
-//					$node.data('inheritedExclusion', true);
-//				} else {
-//					$node.data('inheritedExclusion', false);
-//				}
+				for (status in badges) {
+					inheriting_status = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () {
+						return $(this).data('post')['post_meta'][status] || $(this).data('inherited_'+status);
+					}).length;
 
-				// Check for inherited restrictions based on current position in hierarchy
-				inheritedRestriction = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () {
-					return $(this).data('post')['post_meta']['restricted'] || $(this).data('inheritedRestriction');
-				}).length;
-
-				if (inheritedRestriction) {
-					$node.data('inheritedRestriction', true);
-				} else {
-					$node.data('inheritedRestriction', false);
+					// Cache inherited statuses on DOM node
+					if (inheriting_status) {
+						$node.data('inherited_'+status, true);
+					} else {
+						$node.removeData('inherited_'+status);
+					}
 				}
-
 			};
 
 			// Convert post meta data in to status badges
 			var setStatusBadges = function ($node) {
-				var $a = $node.children('a');
+				var $a, post, $statuses, statuses, badges, status, val, i;
+
+				// Prep the DOM
+				$a = $node.children('a');
 				if ($a.children('.post-statuses').length === 0) {
 					$a.append('<span class="post-statuses"></span>');
 				}
-
-				var post = my.nodeToPost( $node ), $statuses, statuses, excluded, restricted, pass_protected, i;
-
-				// Re-calculate statuses that might depend on ancestors
-				calculateInheritedStatuses($node);
-				
-				// Default metadata badges
-				excluded = post.post_meta['excluded'] || false;
-				restricted = post.post_meta['restricted'] || $node.data('inheritedRestriction') || false;
-				pass_protected = post.post_meta['protected'] || false;
-
 				$statuses = $a.children('.post-statuses').empty();
+
+				post = my.nodeToPost( $node );
 				statuses = [];
 
+				// Calculate statuses that can be inherited from ancestors
+				calculateInheritedStatuses($node);
+
+				// Push actual post statuses first
 				if (post.post_status != 'publish')
 					statuses.push({ "class": post.post_status, "label": post.post_status });
-				if (excluded)
-					statuses.push({ "class": 'excluded', "label": 'not in nav' });
-				if (restricted)
-					statuses.push({ "class": 'restricted', "label": 'restricted' });
-				if (pass_protected)
-					statuses.push({ "class": 'protected', "label": 'protected' });
 
-				// @todo implement this behavior through hooks for extensibility
-				// statuses = bu.hooks.applyFilters( 'navPostStatuses', statuses, post );
+				// Push any additional status badges
+				badges = getStatusBadges();
+				for (status in badges) {
+					val = post.post_meta[status] || $node.data('inherited_'+status);
+					if (val)
+						statuses.push({ "class": badges[status]['class'], "label": badges[status]['label'] });
+				}
 
 				// Append markup
 				for (i = 0; i < statuses.length; i = i + 1) {
@@ -1002,21 +1015,22 @@ bu.plugins.navigation = {};
 
 			var $tree = that.$el;
 			var d = that.data;
+			var c = that.config;
 
 			var showOptionsMenu = function (node) {
 				var post = my.nodeToPost(node);
 
 				var options = {
 					"edit" : {
-						"label" : "Edit",
+						"label" : c.optionsEditLabel,
 						"action" : editPost
 					},
 					"view" : {
-						"label" : "View",
+						"label" : c.optionsViewLabel,
 						"action" : viewPost
 					},
 					"remove" : {
-						"label" : "Move to Trash",
+						"label" : c.optionsTrashLabel,
 						"action" : removePost
 					}
 				};
@@ -1027,9 +1041,9 @@ bu.plugins.navigation = {};
 				}
 
 				// Special behavior for links
-				if (post.post_type === 'link') {
+				if (post.post_type === c.linksPostType) {
 					// Links are permanently deleted -- "Move To Trash" is misleading
-					options['remove']['label'] = 'Delete';
+					options['remove']['label'] = c.optionsDeleteLabel;
 				}
 
 				return bu.hooks.applyFilters('navmanOptionsMenuItems', options, node);
@@ -1078,7 +1092,7 @@ bu.plugins.navigation = {};
 
 						if( $a.children('.edit-options').length ) return;
 
-						var $button = $('<button class="edit-options"><ins class="jstree-icon">&#160;</ins>options</button>');
+						var $button = $('<button class="edit-options"><ins class="jstree-icon">&#160;</ins>' + c.optionsLabel + '</button>');
 						var $statuses = $a.children('.post-statuses');
 
 						// Button should appear before statuses
@@ -1101,7 +1115,7 @@ bu.plugins.navigation = {};
 				e.stopPropagation();
 
 				var pos, width, height, top, left, obj;
-				
+
 				// Calculate location
 				pos = $(this).offset();
 				width = $(this).outerWidth();
@@ -1110,7 +1124,7 @@ bu.plugins.navigation = {};
 				left = pos.left;
 				top = top + height;
 				left = (left + width) - 180;
-				
+
 				obj = $(this).closest('li');
 
 				$tree.jstree('deselect_all');
@@ -1178,11 +1192,11 @@ bu.plugins.navigation = {};
 //					"initially_open": toOpen
 //				};
 //			}
-	
+
 			extraTreeConfig['dnd'] = {
-				"drag_container": c.treeDragContainer	
+				"drag_container": c.treeDragContainer
 			};
-			
+
 			// Merge base tree config with extras
 			$.extend( true, d.treeConfig, extraTreeConfig );
 
@@ -1197,84 +1211,66 @@ bu.plugins.navigation = {};
 			bu.hooks.addFilter( 'canSelectNode', assertCurrentPost );
 			bu.hooks.addFilter( 'canHoverNode', assertCurrentPost );
 			bu.hooks.addFilter( 'canDragNode', assertCurrentPost );
-	
+
 			// The following logic will be simplified once we don't have
 			// to handled unpublished content as special cases.
 			// For right now, they are excluded from the AJAX calls to
 			// list posts, which means we have to create any unpublished
 			// ancestors as well as the current post (if it is new or unpublished)
 			// client side to make sure they are represented in the tree.
-			
+
 			$tree.bind('loaded.jstree', function (e, data) {
 				var ancestors, i;
-				
+
 				// Need to load and open ancestors before we can select current post
 				if (c.ancestors && c.ancestors.length) {
-					
+
 					// We want old -> young, which is not how they're passed
 					ancestors = c.ancestors.reverse();
 
-					var $root = my.getNodeForPost(ancestors[0].ID);
+					// Handles opening (and possibly inserting) post ancestors one by one
+					openNextChild(0, ancestors);
 
-					if ($root) {
-
-						// Remove root post
-						ancestors.shift();
-						
-						// Wait for root node to load and open before continuing
-						$tree.jstree('open_node', $root, function() {
-							
-							// Open ancestors first
-							revealCurrentPost(ancestors);
-
-						}, true );
-
-					} else {
-						
-							// Open ancestors first
-							revealCurrentPost(ancestors);
-							
-					}
-					
 				} else {
-					
+
 						// Current post is top level -- select or insert
 						selectCurrentPost();
-						
+
 				}
 
 			});
 
-			var revealCurrentPost = function (ancestors) {
-				ancestors = ancestors || [];
-				
-				var current, i;
-				
-				// Root node does not exist, no nead to load
-				for (i = 0; i < ancestors.length; i = i + 1) {
-					current = c.ancestors[i];
-						
-					// Attempt to open, insert and open on failure
-					if (that.openPost(current.ID) === false) {
-						that.insertPost(current);
-						that.openPost(current.ID);
+			/**
+			 * Recursively load ancestors, opening and possibly inserting along the way.
+			 *
+			 * For now, unpublished content will not be represented in the tree passed to us
+			 * from the server, so we need to enter this recursive callback waterfall to make
+			 * sure all ancestors exist and are open before selecting the current post.
+			 */
+			var openNextChild = function (current, all) {
+				var post = all[current];
+
+				if (post) {
+					if (that.openPost(post, function() { openNextChild( current + 1, all) }) === false ) {
+						that.insertPost(post, function($node) { openNextChild(current + 1, all); });
 					}
-						
+				} else {
+					// No more ancestors ... we're safe to select the current post now
+					selectCurrentPost();
 				}
+			}
 
-				// Select or insert current post
-				selectCurrentPost();
-
-			};
-
+			/**
+			 * Select the current post, inserting if it does not already exist in the tree (i.e. new post, or unpublished post)
+			 */
 			var selectCurrentPost = function () {
-				
+
 				// Insert post if it isn't already represented in the tree (new, draft, or pending posts)
 				var $current = my.getNodeForPost(currentPost);
 
 				if (!$current) {
 					// Insert and select self, then save tree state
-					that.insertPost(currentPost, function($node) { 
+					that.insertPost(currentPost, function($node) {
 						that.selectPost(currentPost);
 						that.save();
 					});

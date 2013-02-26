@@ -1,0 +1,14 @@
+<phpunit
+    bootstrap="./tests/bootstrap.php"
+    backupGlobals="false"
+    colors="true"
+>
+    <php>
+        <const name="WP_TESTS_SELENIUM" value="1" />
+    </php>
+    <testsuites>
+        <testsuite name="SeleniumTests">
+            <directory prefix="test_" suffix=".php">./tests/selenium</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

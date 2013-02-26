@@ -39,6 +39,7 @@
 
 #bunavattrsdiv .inside {
 	margin: 0;
+	padding: 0;
 }
 
 #bunavattrsdiv .container {
@@ -59,7 +60,7 @@
 }
 
 #bu-post-breadcrumbs {
-	margin: 0 0 15px 0;	
+	margin: 0 0 15px 0;
 	font-size: 11px;
 }
 

@@ -1,10 +1,13 @@
 <?php
 /*
-Plugin Name: Page Navigation
-Version: 1.0.1
-Author URI: http://www.bu.edu/tech/help/
-Description: Provides alternative navigation elements designed for blogs with large page counts
+Plugin Name: BU Navigation
+Plugin URI: http://developer.bu.edu/bu-navigation/
 Author: Boston University (IS&T)
+Author URI: http://blogs.bu.edu/web/
+Description: Provides alternative navigation elements designed for blogs with large page counts
+Version: 1.0.1
+Text Domain: bu-navigation
+Domain Path: /languages
 */
 
 /**
@@ -28,49 +31,39 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 /*
 @author Niall Kavanagh <ntk@bu.edu>
-@author Gregory Cornelius <gcorne@bu.edu>
+@author Gregory Cornelius <gcorne@gmail.com>
 @author Mike Burns <mgburns@bu.edu>
 */
 
-/**
- * Components:
- *
- * Navigation Management Screens ("Edit Order" and "Primary Navigation")
- * Navigation Attributes Meta Box
- * Content navigation widget
- * Filter for drilling into a particular section when view the edit pages screen
- */
+// Absolute server path to this plugin dir and file for use by included files
+define( 'BU_NAV_PLUGIN', __FILE__ );
+define( 'BU_NAV_PLUGIN_DIR', dirname( __FILE__ ) );
+define( 'BU_NAV_TEXTDOMAIN', 'bu-navigation' );
 
-/* BU Navigation constants */
-define('BU_NAV_PLUGIN_DIR', dirname(__FILE__));
+// Primary navigation max items to display per level
+define( 'BU_NAVIGATION_PRIMARY_MAX', 6 );
 
-/* Load navigation library */
-if (!defined('BU_INCLUDES_PATH')) {
-    if(!defined('BU_NAVIGATION_LIB_LOADED')) {
-        require_once('lib/bu-navigation/bu-navigation.php');
-        define('BU_NAVIGATION_LIB_LOADED', true);
-    }
-} else {
-    require_once(BU_INCLUDES_PATH . '/bu-navigation/bu-navigation.php');
-}
+// Primary navigation maxium depth
+define( 'BU_NAVIGATION_PRIMARY_DEPTH', 1 );
+
+require_once BU_NAV_PLUGIN_DIR . '/includes/settings.php';
+require_once BU_NAV_PLUGIN_DIR . '/includes/library.php';
+require_once BU_NAV_PLUGIN_DIR . '/includes/class-tree-view.php';
+require_once BU_NAV_PLUGIN_DIR . '/includes/class-reorder.php';
 
 class BU_Navigation_Plugin {
 
+	// Admin object
 	public $admin;
 
 	// Plugin settings
-	private $settings = array();
-
-	// Plugin settings option names
-	const OPTION_DISPLAY = 'bu_navigation_primarynav';
-	const OPTION_MAX_ITEMS = 'bu_navigation_primarynav_max';
-	const OPTION_DIVE = 'bu_navigation_primarynav_dive';
-	const OPTION_DEPTH = 'bu_navigation_primarynav_depth';
-	const OPTION_ALLOW_TOP = 'bu_allow_top_level_page';
+	public $settings;
 
 	const VERSION = '1.0.1';
 
 	public function __construct() {
+
+		$this->settings = new BU_Navigation_Settings( $this );
 
 		$this->register_hooks();
 
@@ -83,9 +76,6 @@ class BU_Navigation_Plugin {
 
 		add_action( 'init', array( $this, 'init' ), 1 );
 
-		// Filter plugin settings utilized by bu_navigation_display_primary function
-		add_filter('bu_filter_primarynav_defaults', array( $this, 'filter_primary_nav_defaults' ) );
-
 	}
 
 	/**
@@ -96,13 +86,16 @@ class BU_Navigation_Plugin {
 	 */
 	public function init() {
 
+		load_plugin_textdomain( BU_NAV_TEXTDOMAIN, false, plugin_basename( dirname( __FILE__ ) ) . '/languages/' );
+
 		if( is_admin() ) {
 			$this->load_admin();
 		}
 
 		$this->load_extras();
 
-		$this->load_widget();
+		if ( $this->supports( 'widget' ) )
+			$this->load_widget();
 
 		do_action('bu_navigation_init');
 
@@ -110,7 +103,7 @@ class BU_Navigation_Plugin {
 
 	public function load_admin() {
 
-		require_once(dirname(__FILE__) . '/bu-navigation-admin.php');
+		require_once(dirname(__FILE__) . '/admin/admin.php');
 		$this->admin = new BU_Navigation_Admin( $this );
 
 	}
@@ -148,169 +141,88 @@ class BU_Navigation_Plugin {
 
 	}
 
-	// Plugin settings
-
 	/**
-	 * Get a single plugin setting by slug
-	 */
-	public function get_setting( $name ) {
-
-		$settings = $this->get_settings();
-
-		if( array_key_exists( $name, $settings ) )
-			return $settings[$name];
-
-		return false;
-
-	}
-
-	/**
-	 * Get all plugin settings
-	 */
-	public function get_settings() {
-
-		if( empty( $this->settings ) ) {
-
-			$settings = array();
-
-			$settings['display'] = (bool) get_option( self::OPTION_DISPLAY, true );
-			$settings['max_items'] = (int) get_option( self::OPTION_MAX_ITEMS, BU_NAVIGATION_PRIMARY_MAX );
-			$settings['dive'] = (bool) get_option( self::OPTION_DIVE, true );
-			$settings['depth'] = (int) get_option( self::OPTION_DEPTH, BU_NAVIGATION_PRIMARY_DEPTH );
-			$settings['allow_top'] = (bool) get_option( self::OPTION_ALLOW_TOP, true );
-
-			$this->settings = $settings;
-
-		}
-
-		return $this->settings;
-
-	}
-
-	/**
-	 * Update plugin settings
-	 */
-	public function update_settings( $updates ) {
-
-		$settings = $this->get_settings();
-
-		foreach( $updates as $key => $val ) {
-
-			if( array_key_exists( $key, $settings ) ) {
-
-				// Prevent depth setting from exceeding theme limit (BU_NAVIGATION_SUPPORTED_DEPTH)
-				if( $key == 'depth' )
-					$val = $this->depth_fix( $val );
-
-				// Cooerce booleans into ints for update_option
-				if( is_bool( $val ) ) $val = intval( $val );
-
-				// Commit to db
-				$option = constant( 'self::OPTION_' . strtoupper( $key ) );
-				$result = update_option( $option, $val );
-
-				// Update internal settings on successful commit
-				if( $result ) {
-
-					// Update internal settings property
-					$this->settings[$key] = $val;
-
-				}
-
-			}
-
-		}
-
-	}
-
-	/**
-	 * Clear internal settings object
+	 * Navigation plugin features
 	 *
-	 * Useful for unit tests that want to check actual DB values
-	 */
-	public function clear_settings() {
-
-		$this->settings = array();
-
-	}
-
-	/**
-	 * Filter the navigation settings used by bu_navigation_display_primary to
-	 * utilize plugin settings
-	 */
-	public function filter_primary_nav_defaults( $defaults ) {
-
-		$defaults['echo'] = $this->get_setting('display');
-		$defaults['depth'] = $this->get_setting('depth');
-		$defaults['max_items'] = $this->get_setting('max_items');
-		$defaults['dive'] = $this->get_setting('dive');
-
-		return $defaults;
-
-	}
-
-	/**
-	 * Assure that current max depth is below the threshold set by the current themes BU_NAVIGATION_SUPPORTED_DEPTH constant
-	 */
-	public function depth_fix( $curr_depth = 0 ) {
-
-		if ( defined('BU_NAVIGATION_SUPPORTED_DEPTH') && $curr_depth > BU_NAVIGATION_SUPPORTED_DEPTH ) {
-			return BU_NAVIGATION_SUPPORTED_DEPTH;
-		}
-
-		if ( !$curr_depth ) $curr_depth = BU_NAVIGATION_PRIMARY_DEPTH;
-
-		return $curr_depth;
-
-	}
-
-	/**
-	 * Returns the original post type for an existing post
+	 * @todo discuss these open source defaults with BU
 	 *
-	 * @param mixed $post post ID, object, or post type string
-	 * @return string $post_type post type name
-	 */
-	public function get_post_type( $post ) {
-
-		// Default arg -- post type string
-		$post_type = $post;
-
-		if( is_numeric( $post ) ) {
-			$post = get_post( $post );
-			if( $post === false )
-				return false;
-
-			$post_type = $post->post_type;
-
-		} else if ( is_object( $post ) ) {
-
-			$post_type = $post->post_type;
-
-		}
-
-		// @todo add BU Versions logic here
-
-		return $post_type;
-
-	}
-
-	/**
-	 * Helper for creating a post type labels arrays
+	 * The navigation plugin is configurable in a few different regards.  This function returns an associative array
+	 * of features, with the key representing the feature name and the value holding the default.
 	 *
-	 * @param $post_type name of a registered post type to get labels for
+	 * bu-navigation-manager (on by default)
+	 * 	- turn on or off the navigation management interfaces ("Edit Order" pages, "Navigation Attributes" metabox)
+	 *
+	 * bu-navigation-widget (on by default)
+	 * 	- turn on or off the "Content Navigation" widget (on by default)
+	 *
+	 * bu-navigation-primary (off by default -- theme authors, use add_theme_support( 'bu-navigation-primary' ))
+	 *  - turn on or off the "Primary Navigation" appearance menu item
+	 *
+	 * bu-navigation-links
+	 *  - turn on or off the external link feature, include with 'page' post type nav menus (on by default)
 	 */
-	public function get_post_type_labels( $post_type ) {
-
-		$pt_obj = get_post_type_object($post_type);
-
-		if( ! is_object( $pt_obj ) )
-			return false;
+	public function features() {
 
 		return array(
-			'post_type' => $post_type,
-			'singular' => $pt_obj->labels->singular_name,
-			'plural' => $pt_obj->labels->name,
-		);
+			'manager' => true,
+			'widget' => true,
+			'links' => true,
+			'primary' => false,
+			);
+
+	}
+
+	/**
+	 * Does the current install or theme support a navigation feature?
+	 *
+	 * There are two different ways to configure navigation features -- with PHP constants, or through the Theme Features API.
+	 *
+	 * These work as follows:
+	 * 1. Define `BU_NAVIGATION_SUPPORTS_*` constant as true or false in wp-config.php or your theme's functions.php (highest priority)
+	 * 2. Call add_theme_support( 'bu-navigation-*' ) within your theme's functions.php file (recommended for theme authors)
+	 */
+	public function supports( $feature ) {
+
+		$feature = strtolower( $feature );
+		$defaults = $this->features();
+
+		if ( ! in_array( $feature, array_keys( $defaults ) ) ) {
+			error_log( "[bu-navigation] Unknown feature: $feature" );
+			return false;
+		}
+
+		$supported_const = 'BU_NAVIGATION_SUPPORTS_' . strtoupper( $feature );
+
+		$disabled = ( defined( $supported_const ) && constant( $supported_const ) == false );
+		$supported = ( defined( $supported_const ) && constant( $supported_const ) == true ) || $defaults[$feature];
+		$theme_supported = current_theme_supports( 'bu-navigation-' . $feature );
+
+		return ( ! $disabled && ( $supported || $theme_supported ) );
+
+	}
+
+	/**
+	 * Gets the supported post_types by the bu-navigation plugin.
+	 *
+	 * @todo needs-unit-test
+	 *
+	 * @param boolean $include_link true|false link post_type is something special, so we don't always need it
+	 * @param string $output type of output (names|objects)
+	 * @return array of post_type strings or objects depending on $output param
+	 */
+	public function supported_post_types( $include_link = false, $output = 'names' ) {
+
+		$post_types = get_post_types( array( 'show_ui' => true, 'hierarchical' => true ), $output );
+		$post_types = apply_filters( 'bu_navigation_post_types', $post_types );
+
+		if ( $this->supports( 'links' ) && $include_link ) {
+			if ( 'names' == $output )
+				$post_types[ BU_NAVIGATION_LINK_POST_TYPE ] = BU_NAVIGATION_LINK_POST_TYPE;
+			else
+				$post_types[ BU_NAVIGATION_LINK_POST_TYPE ] = get_post_type_object( BU_NAVIGATION_LINK_POST_TYPE );
+		}
+
+		return $post_types;
 
 	}
 
@@ -320,5 +232,3 @@ class BU_Navigation_Plugin {
 if( ! isset( $bu_navigation_plugin ) ) {
 	$bu_navigation_plugin = new BU_Navigation_Plugin();
 }
-
-?>

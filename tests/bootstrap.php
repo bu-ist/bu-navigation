@@ -8,8 +8,8 @@
  *  3. Configure wp-tests-config.php, install WordPress and create a clean DB
  *  4. Set the WP_TESTS_DIR environment variable to point at the WP Unit Testing Framework
  *
- * $ cd bu-navigation/tests
- * $ phpunit --group bu-navigation
+ * $ cd wp-content/plugins/bu-navigation
+ * $ phpunit
  */
 
 $GLOBALS['wp_tests_options'] = array(

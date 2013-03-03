@@ -35,7 +35,7 @@ class BU_Navigation_Admin_Post {
 		// Determine current post and post type
 		if ( 'add' == $screen->action ) {
 			$this->post_id = 0;
-			$this->post_type = $_GET['post_type'];
+			$this->post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : 'post';
 		} else if ( isset( $_GET['post'] ) ) {
 			$this->post_id = $_GET['post'];
 		} else if ( isset( $_POST['post_ID'] ) ) {

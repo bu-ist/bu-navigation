@@ -5,6 +5,9 @@
  * ntk@bu.edu
  */
 
+if ( defined( 'BU_NAVIGATION_LIB_LOADED' ) && BU_NAVIGATION_LIB_LOADED )
+	return;
+
 define( 'BU_NAVIGATION_LIB_LOADED', TRUE );
 
 define( 'GROUP_CONCAT_MAX_LEN', 20480 );

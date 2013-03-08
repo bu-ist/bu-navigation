@@ -40,7 +40,7 @@ function bu_navigation_register_link() {
 		'can_export'          => true,
 		'has_archive'         => false,
 		'exclude_from_search' => true,
-		'publicly_queryable'  => true,
+		'publicly_queryable'  => false,
 		'rewrite'             => false,
 		'capability_type'     => 'post',
 		'map_meta_cap'        => true

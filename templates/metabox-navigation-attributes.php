@@ -9,7 +9,7 @@ if( version_compare( $wp_version, '3.2', '>=' ) ): ?>
 <input type="hidden" name="menu_order" value="<?php echo $post->menu_order; ?>" />
 <div id="bu-move-post" class="container">
 	<?php echo $breadcrumbs; ?>
-	<a id="move-post-button" href="#TB_inline?width=640&inlineId=edit-post-placement" title="<?php printf( __( '%s Location', BU_NAV_TEXTDOMAIN ), $post_type->labels->singular_name  ); ?>" class="button" >
+	<a id="move-post-button" href="#TB_inline?width=640&inlineId=edit-post-placement" title="<?php printf( __( '%s Location', BU_NAV_TEXTDOMAIN ), $post_type->labels->singular_name  ); ?>" class="thickbox button" >
 		<?php printf( __( 'Move %s', BU_NAV_TEXTDOMAIN ), strtolower( $post_type->labels->singular_name ) ); ?>
 	</a>
 </div>
@@ -22,7 +22,7 @@ if( version_compare( $wp_version, '3.2', '>=' ) ): ?>
 	<input id="bu-post-nav-display" name="nav_display" type="checkbox" value="yes" <?php checked( $nav_display, true ); ?> />
 	<label for="bu-post-nav-display" class="hint"><?php _e( 'Display in navigation lists.', BU_NAV_TEXTDOMAIN ); ?></label>
 </div>
-<div id="edit-post-placement" style="display:none;">
+<div id="edit-post-placement" style="display: none">
 	<div class="post-placement-toolbar">
 		<div class="edit-buttons">
 			<a href="#" id="bu-post-placement-cancel" class="button"><?php _e( 'Cancel', BU_NAV_TEXTDOMAIN ); ?></a>

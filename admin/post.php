@@ -80,7 +80,7 @@ class BU_Navigation_Admin_Post {
 		$styles_url = plugins_url( 'css', BU_NAV_PLUGIN );
 
 		// Scripts
-		wp_register_script( 'bu-navigation-metabox', $scripts_url . '/navigation-metabox' . $suffix . '.js', array('bu-navigation'), BU_Navigation_Plugin::VERSION, true );
+		wp_register_script( 'bu-navigation-metabox', $scripts_url . '/navigation-metabox' . $suffix . '.js', array('bu-navigation', 'thickbox', 'media-upload'), BU_Navigation_Plugin::VERSION, true );
 
 		// Setup dynamic script context for navigation-metabox.js
 		$post_type = get_post_type_object( $this->post_type );

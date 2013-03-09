@@ -3,7 +3,7 @@
 Plugin Name: BU Navigation
 Plugin URI: http://developer.bu.edu/bu-navigation/
 Author: Boston University (IS&T)
-Author URI: http://blogs.bu.edu/web/
+Author URI: http://sites.bu.edu/web/
 Description: Provides alternative navigation elements designed for blogs with large page counts
 Version: 1.1
 Text Domain: bu-navigation

@@ -287,9 +287,7 @@ class BU_Navigation_Tree_View {
 
 		if( BU_NAVIGATION_LINK_POST_TYPE == $post->post_type ) {
 			$p['metadata']['post']['post_content'] = $post->post_content;
-			$p['metadata']['post']['post_meta'] = array(
-				BU_NAV_META_TARGET => $post->target
-				);
+			$p['metadata']['post']['post_meta'][BU_NAV_META_TARGET] = $post->target;
 		}
 
 		if( $has_children ) {
@@ -412,25 +410,24 @@ class BU_Navigation_Tree_Query {
 
 		$filtered = array();
 
-		if( is_array( $posts ) && count( $posts ) > 0 ) {
+		if ( is_array( $posts ) && count( $posts ) > 0 ) {
 
-			// Bulk fetch navigation exclusions data for passed posts
 			$ids = array_keys( $posts );
-			$query = sprintf("SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value = '0'",
+			$query = sprintf( "SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value != '0'",
 				$wpdb->postmeta,
 				BU_NAV_META_PAGE_EXCLUDE,
 				implode( ',', $ids )
 				);
-			$visible = $wpdb->get_results( $query, OBJECT_K );
+			$exclusions = $wpdb->get_results( $query, OBJECT_K );
 
-			if ( ! is_array( $visible ) ) {
-				$visible = array();
-			}
-
+			if ( ! is_array( $exclusions ) )
+				$exclusions = array();
+			
 			foreach ( $posts as $post ) {
-				$post->excluded = ( array_key_exists( $post->ID, $visible ) ) ? false : true;
+				$post->excluded = ( array_key_exists( $post->ID, $exclusions ) ) ? true : false;
 				$filtered[ $post->ID ] = $post;
 			}
+			
 		}
 
 		return apply_filters( 'bu_nav_tree_view_filter_posts', $filtered );

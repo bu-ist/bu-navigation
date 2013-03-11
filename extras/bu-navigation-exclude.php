@@ -18,19 +18,21 @@ function bu_navigation_filter_pages_exclude( $pages ) {
 	if ( is_array( $pages ) && count( $pages ) > 0 ) {
 
 		$ids = array_keys( $pages );
-		$query = sprintf( "SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value = '0'",
+		$query = sprintf( "SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value != '0'",
 			$wpdb->postmeta,
 			BU_NAV_META_PAGE_EXCLUDE,
 			implode( ',', $ids )
 			);
-		$visible = $wpdb->get_results( $query, OBJECT_K );
+		$exclusions = $wpdb->get_results( $query, OBJECT_K );
 
-		if ( is_array( $visible ) && count( $visible ) > 0 ) {
+		if ( is_array( $exclusions ) && count( $exclusions ) > 0 ) {
 			foreach ( $pages as $page ) {
-				if ( array_key_exists( $page->ID, $visible ) ) {
+				if ( ! array_key_exists( $page->ID, $exclusions ) ) {
 					$filtered[ $page->ID ] = $page;
 				}
 			}
+		} else {
+			$filtered = $pages;
 		}
 	}
 

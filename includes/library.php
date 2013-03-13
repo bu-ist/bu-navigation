@@ -446,20 +446,18 @@ function bu_navigation_get_pages( $args = '' ) {
  * @param $pages array Array of page objects (usually indexed by the post.ID)
  * @return array Array of arrays indexed on post.ID with second-level array containing the immediate children of that post
  */
-function bu_navigation_pages_by_parent($pages)
-{
+function bu_navigation_pages_by_parent( $pages ) {
 	$pages_by_parent = array();
 
-	if ((is_array($pages)) && (count($pages) > 0))
-	{
-		foreach ($pages as $page)
-		{
-			if (!array_key_exists($page->post_parent, $pages_by_parent)) $pages_by_parent[$page->post_parent] = array();
-			array_push($pages_by_parent[$page->post_parent], $page);
+	if ( is_array($pages) && count($pages) > 0 ) {
+		foreach ( $pages as $page ) {
+			if ( ! array_key_exists( $page->post_parent, $pages_by_parent ) )
+				$pages_by_parent[$page->post_parent] = array();
+			array_push( $pages_by_parent[$page->post_parent], $page );
 		}
 	}
 
-	$pages_by_parent = apply_filters('bu_navigation_filter_pages_by_parent', $pages_by_parent);
+	$pages_by_parent = apply_filters( 'bu_navigation_filter_pages_by_parent', $pages_by_parent );
 
 	return $pages_by_parent;
 }
@@ -467,13 +465,10 @@ function bu_navigation_pages_by_parent($pages)
 /**
  * Add this filter before calling bu_navigation_pages_by_parent to sort each sub-array by menu order.
  */
-function bu_navigation_pages_by_parent_menu_sort($pages)
-{
-	if (is_array($pages))
-	{
-		foreach ($pages as $parent_id => &$children)
-		{
-			usort($children, 'bu_navigation_pages_by_parent_menu_sort_cb');
+function bu_navigation_pages_by_parent_menu_sort( $pages ) {
+	if ( is_array( $pages ) ) {
+		foreach ( $pages as $parent_id => &$children ) {
+			usort( $children, 'bu_navigation_pages_by_parent_menu_sort_cb' );
 		}
 	}
 
@@ -483,9 +478,8 @@ function bu_navigation_pages_by_parent_menu_sort($pages)
 /**
  * Callback for bu_navigation_pages_by_parent_menu_sort.
  */
-function bu_navigation_pages_by_parent_menu_sort_cb($a, $b)
-{
-	return ($a->menu_order - $b->menu_order);
+function bu_navigation_pages_by_parent_menu_sort_cb( $a, $b ) {
+	return ( $a->menu_order - $b->menu_order );
 }
 
 /**
@@ -495,80 +489,94 @@ function bu_navigation_pages_by_parent_menu_sort_cb($a, $b)
  * @param $html string Option HTML to place inside the list item after the page
  * @return string HTML fragment containing list item
  */
-function bu_navigation_format_page($page, $args = '')
-{
+function bu_navigation_format_page( $page, $args = '' ) {
 	$defaults = array(
 		'item_tag' => 'li',
-		'item_id' => NULL,
+		'item_id' => null,
 		'html' => '',
-		'depth' => NULL,
-		'position' => NULL,
-		'siblings' => NULL,
+		'depth' => null,
+		'position' => null,
+		'siblings' => null,
 		'anchor_class' => '',
-		'anchor' => TRUE,
-		'section_ids' => NULL
+		'anchor' => true,
+		'section_ids' => null
 		);
+	$r = wp_parse_args( $args, $defaults );
 
-	$r = wp_parse_args($args, $defaults);
+	if ( ! isset( $page->navigation_label ) )
+		$page->navigation_label = apply_filters( 'the_title', $page->post_title );
 
-	if (!isset($page->navigation_label)) $page->navigation_label = apply_filters('the_title', $page->post_title);
-
-	$title = esc_attr($page->navigation_label);
-
+	$title = esc_attr( $page->navigation_label );
 	$href = $page->url;
+	$anchor_class = $r['anchor_class'];
 
-	$anchorClass = $r['anchor_class'];
-
-	if (is_numeric($r['depth'])) $anchorClass .= sprintf(' level_%d', intval($r['depth']));
+	if ( is_numeric( $r['depth'] ) )
+		$anchor_class .= sprintf( ' level_%d', intval( $r['depth'] ) );
 
 	$attrs = array(
-		'title' => esc_attr($title),
-		'href' => $page->url,
-		'class' => trim($anchorClass)
+		'title' => esc_attr( $title ),
+		'class' => trim( $anchor_class )
 		);
 
-	if (isset($page->target) && $page->target == 'new') $attrs['target'] = '_blank';
+	if ( isset( $page->url ) && ! empty( $page->url ) )
+		$attrs['href'] = $page->url;
 
-	$attrs = apply_filters('bu_navigation_filter_anchor_attrs', $attrs, $page);
+	if ( isset( $page->target ) && $page->target == 'new' )
+		$attrs['target'] = '_blank';
+
+	$attrs = apply_filters( 'bu_navigation_filter_anchor_attrs', $attrs, $page );
 
 	$attributes = '';
 
-	if ((is_array($attrs)) && (count($attrs) > 0))
-	{
-		foreach ($attrs as $attr => $val)
-		{
-			if ($val) $attributes .= sprintf(' %s="%s"', $attr, $val);
+	if ( is_array( $attrs ) && count( $attrs ) > 0 ) {
+		foreach ( $attrs as $attr => $val ) {
+			if ( $val )
+				$attributes .= sprintf( ' %s="%s"', $attr, $val );
 		}
 	}
 
-	$item_classes = array('page_item', 'page-item-' . $page->ID);
+	$item_classes = array( 'page_item', 'page-item-' . $page->ID );
 
-	if ((is_array($r['section_ids'])) && (in_array($page->ID, $r['section_ids']))) array_push($item_classes, 'has_children');
+	if ( is_array( $r['section_ids'] ) && in_array( $page->ID, $r['section_ids'] ) )
+		array_push( $item_classes, 'has_children' );
 
-
-	if ((is_numeric($r['position'])) && (is_numeric($r['siblings'])))
-	{
-		if ($r['position'] == 1) array_push($item_classes, 'first_item');
-		if ($r['position'] == $r['siblings']) array_push($item_classes, 'last_item');
+	if ( is_numeric( $r['position'] ) && is_numeric( $r['siblings'] ) ) {
+		if ( $r['position'] == 1 )
+			array_push( $item_classes, 'first_item' );
+		if ( $r['position'] == $r['siblings'] )
+			array_push( $item_classes, 'last_item' );
 	}
 
-	$item_classes = apply_filters('bu_navigation_filter_item_attrs', $item_classes, $page);
-	$item_classes = apply_filters('page_css_class', $item_classes, $page);
+	$item_classes = apply_filters( 'bu_navigation_filter_item_attrs', $item_classes, $page );
+	$item_classes = apply_filters( 'page_css_class', $item_classes, $page );
 
-	$title = apply_filters('bu_page_title', $title);
+	$title = apply_filters( 'bu_page_title', $title );
 
-	$anchor = $r['anchor'] ? sprintf('<a%s>%s</a>', $attributes, $title) : $title;
-	$html = sprintf("<%s class=\"%s\">\n%s\n %s</%s>\n", $r['item_tag'], implode(' ', $item_classes), $anchor, $r['html'], $r['item_tag']);
+	$anchor = $r['anchor'] ? sprintf( '<a%s>%s</a>', $attributes, $title ) : $title;
 
-	if ($r['item_id'])
-	{
-		$html = sprintf("<%s id=\"%s\" class=\"%s\">\n%s\n %s</%s>\n", $r['item_tag'], $r['item_id'], implode(' ', $item_classes), $anchor, $r['html'], $r['item_tag']);
+	$html = sprintf( "<%s class=\"%s\">\n%s\n %s</%s>\n",
+		$r['item_tag'],
+		implode( ' ', $item_classes ),
+		$anchor,
+		$r['html'],
+		$r['item_tag']
+		);
+
+	if ( $r['item_id'] ) {
+		$html = sprintf( "<%s id=\"%s\" class=\"%s\">\n%s\n %s</%s>\n",
+			$r['item_tag'],
+			$r['item_id'],
+			implode( ' ', $item_classes ),
+			$anchor,
+			$r['html'],
+			$r['item_tag']
+			);
 	}
 
 	$args = $r;
 	$args['attributes'] = $attrs;
 
-	$html = apply_filters('bu_navigation_filter_item_html', $html, $page, $args);
+	$html = apply_filters( 'bu_navigation_filter_item_html', $html, $page, $args );
 
 	return $html;
 }
@@ -582,22 +590,25 @@ function bu_navigation_format_page($page, $args = '')
  * @param $page object Page object
  * @return array Array of classes
  */
-function bu_navigation_filter_item_attrs($classes, $page)
-{
+function bu_navigation_filter_item_attrs( $classes, $page ) {
 	global $wp_query;
-	if ( is_singular() || $wp_query->is_posts_page )
-	{
+
+	if ( is_singular() || $wp_query->is_posts_page ) {
 		$current_page = $wp_query->get_queried_object();
 
-		if ($current_page->ID == $page->ID) array_push($classes, 'current_page_item');
+		if ( $current_page->ID == $page->ID )
+			array_push( $classes, 'current_page_item' );
 
-		if ($page->active_section) array_push($classes, 'current_page_ancestor');
+		if ( isset( $page->active_section ) && $page->active_section )
+			array_push( $classes, 'current_page_ancestor' );
 
-		if ($page->ID == $current_page->post_parent) array_push($classes, 'current_page_parent');
+		if ( $page->ID == $current_page->post_parent )
+			array_push( $classes, 'current_page_parent' );
 	}
 
 	return $classes;
 }
+
 add_filter('bu_navigation_filter_item_attrs', 'bu_navigation_filter_item_attrs', 10, 2);
 
 /**
@@ -608,21 +619,22 @@ add_filter('bu_navigation_filter_item_attrs', 'bu_navigation_filter_item_attrs',
  * @param $attributes array Associative array of anchor attributes
  * @param $page object Page object
  */
-function bu_navigation_filter_item_active_page($attributes, $page)
-{
+function bu_navigation_filter_item_active_page( $attributes, $page ) {
 	global $wp_query;
 
-	if ( is_singular() || $wp_query->is_posts_page )
-	{
+	if ( is_singular() || $wp_query->is_posts_page ) {
 		$current_page = $wp_query->get_queried_object();
 
-		if ($current_page->ID == $page->ID) $attributes['class'] .= ' active';
+		if ( $current_page->ID == $page->ID )
+			$attributes['class'] .= ' active';
 
-		if ($page->active_section) $attributes['class'] .= ' active_section';
+		if ( isset( $page->active_section ) && $page->active_section )
+			$attributes['class'] .= ' active_section';
 	}
 
 	return $attributes;
 }
+
 add_filter('bu_navigation_filter_anchor_attrs', 'bu_navigation_filter_item_active_page', 10, 2);
 
 /**
@@ -811,8 +823,6 @@ function bu_navigation_list_pages( $args = '' ) {
 /**
  * Displays a primary navigation bar
  *
- * @todo add a "include_links" arg, remove logic from post_types arg
- *
  * @return void
  */
 function bu_navigation_display_primary( $args = '' ) {
@@ -922,8 +932,6 @@ function bu_navigation_display_primary( $args = '' ) {
 
 /**
  * Generate page parent select menu
- *
- * @todo should this have an "include_links" argument as well?
  *
  * @uses bu_filter_pages_parent_dropdown().
  *

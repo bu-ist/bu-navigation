@@ -401,7 +401,7 @@ class BU_Navigation_Tree_Query {
 	}
 
 	/**
-	 * Default navigation manager page filter
+	 * Default navigation manager post filter
 	 *
 	 * Appends extra post meta properties to each post object
 	 */
@@ -412,20 +412,37 @@ class BU_Navigation_Tree_Query {
 
 		if ( is_array( $posts ) && count( $posts ) > 0 ) {
 
+			// Fetch posts that have been explicitly excluded from navigation lists
 			$ids = array_keys( $posts );
-			$query = sprintf( "SELECT post_id, meta_value, p.post_type FROM %s INNER JOIN %s AS p ON post_id = p.ID WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value = '0'",
+			$query = sprintf( "SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s)",
 				$wpdb->postmeta,
-				$wpdb->posts,
 				BU_NAV_META_PAGE_EXCLUDE,
 				implode( ',', $ids )
 				);
-			$visible = $wpdb->get_results( $query, OBJECT_K );
+			$exclude_meta = $wpdb->get_results( $query, OBJECT_K );
 
-			if ( ! is_array( $visible ) )
-				$visible = array();
+			if ( false === $exclude_meta ) {
+				error_log( __FUNCTION__ . " - Error querying navigation exclusions: {$wpdb->last_error}" );
+				return apply_filters( 'bu_nav_tree_view_filter_posts', $posts );
+			}
 
 			foreach ( $posts as $post ) {
-				$post->excluded = ( array_key_exists( $post->ID, $visible ) || BU_NAVIGATION_LINK_POST_TYPE == $post->post_type ) ? false : true;
+
+				// Post meta row exists, determine exclusion based on meta_value
+				if ( array_key_exists( $post->ID, $exclude_meta ) ) {
+					$excluded = (bool) $exclude_meta[ $post->ID ]->meta_value;
+				} else {
+					// No post meta row has been inserted yet
+					if ( isset( $post->post_type ) && BU_NAVIGATION_LINK_POST_TYPE == $post->post_type ) {
+						// Navigation links get special treatment since they will always be visible
+						$excluded = false;
+					} else {
+						// Otherwise fall back to default constant
+						$excluded = BU_NAVIGATION_POST_EXCLUDE_DEFAULT;
+					}
+				}
+				$post->excluded = $excluded;
+
 				$filtered[ $post->ID ] = $post;
 			}
 

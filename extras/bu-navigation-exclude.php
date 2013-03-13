@@ -1,6 +1,11 @@
 <?php
+
 // Name of meta_key used to exclude pages from navigation
 define( 'BU_NAV_META_PAGE_EXCLUDE', '_bu_cms_navigation_exclude' );
+
+// Default post exclusion value for posts that don't have a post meta row yet
+if ( ! defined( 'BU_NAVIGATION_POST_EXCLUDE_DEFAULT' ) )
+	define( 'BU_NAVIGATION_POST_EXCLUDE_DEFAULT', false );
 
 /**
  * Built-in filter for bu_navigation_get_pages
@@ -17,24 +22,41 @@ function bu_navigation_filter_pages_exclude( $pages ) {
 
 	if ( is_array( $pages ) && count( $pages ) > 0 ) {
 
+		// Fetch pages that have been explicitly excluded from navigation lists
 		$ids = array_keys( $pages );
-		$query = sprintf( "SELECT post_id, meta_value, p.post_type FROM %s INNER JOIN %s AS p ON post_id = p.ID WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value = '0'",
+		$query = sprintf( "SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s)",
 			$wpdb->postmeta,
-			$wpdb->posts,
 			BU_NAV_META_PAGE_EXCLUDE,
 			implode( ',', $ids )
 			);
-		$visible = $wpdb->get_results( $query, OBJECT_K );
+		$exclude_meta = $wpdb->get_results( $query, OBJECT_K );
 
-		if ( empty ( $visible ) )
-			$visible = array();
+		if ( false === $exclude_meta ) {
+			error_log( __FUNCTION__ . " - Error querying navigation exclusions: {$wpdb->last_error}" );
+			return $pages;
+		}
 
 		foreach ( $pages as $page ) {
-			// Navigation links will not have excluded post meta, but will always be visible in nav lists so make a special case for them
-			if ( array_key_exists( $page->ID, $visible ) || BU_NAVIGATION_LINK_POST_TYPE == $page->post_type ) {
-				$filtered[ $page->ID ] = $page;
+
+			// Post meta row exists, determine exclusion based on meta_value
+			if ( array_key_exists( $page->ID, $exclude_meta ) ) {
+				$excluded = (bool) $exclude_meta[ $page->ID ]->meta_value;
+			} else {
+
+				// No post meta row has been inserted yet
+				if ( isset( $page->post_type ) && BU_NAVIGATION_LINK_POST_TYPE == $page->post_type ) {
+					// Navigation links get special treatment since they will always be visible
+					$excluded = false;
+				} else {
+					// Otherwise fall back to default constant
+					$excluded = BU_NAVIGATION_POST_EXCLUDE_DEFAULT;
+				}
 			}
+
+			if ( ! $excluded )
+				$filtered[ $page->ID ] = $page;
 		}
+
 	}
 
 	return $filtered;
@@ -62,9 +84,9 @@ function bu_navigation_post_excluded( $post ) {
 
 	$excluded = get_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE, true );
 
-	// No value set yet, default to excluded
+	// No value set yet, fall back to default
 	if ( $excluded === '' )
-		$excluded = true;
+		$excluded = BU_NAVIGATION_POST_EXCLUDE_DEFAULT;
 
 	return (bool) $excluded;
 

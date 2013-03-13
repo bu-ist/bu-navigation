@@ -413,21 +413,22 @@ class BU_Navigation_Tree_Query {
 		if ( is_array( $posts ) && count( $posts ) > 0 ) {
 
 			$ids = array_keys( $posts );
-			$query = sprintf( "SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value != '0'",
+			$query = sprintf( "SELECT post_id, meta_value, p.post_type FROM %s INNER JOIN %s AS p ON post_id = p.ID WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value = '0'",
 				$wpdb->postmeta,
+				$wpdb->posts,
 				BU_NAV_META_PAGE_EXCLUDE,
 				implode( ',', $ids )
 				);
-			$exclusions = $wpdb->get_results( $query, OBJECT_K );
+			$visible = $wpdb->get_results( $query, OBJECT_K );
 
-			if ( ! is_array( $exclusions ) )
-				$exclusions = array();
-			
+			if ( ! is_array( $visible ) )
+				$visible = array();
+
 			foreach ( $posts as $post ) {
-				$post->excluded = ( array_key_exists( $post->ID, $exclusions ) ) ? true : false;
+				$post->excluded = ( array_key_exists( $post->ID, $visible ) || BU_NAVIGATION_LINK_POST_TYPE == $post->post_type ) ? false : true;
 				$filtered[ $post->ID ] = $post;
 			}
-			
+
 		}
 
 		return apply_filters( 'bu_nav_tree_view_filter_posts', $filtered );

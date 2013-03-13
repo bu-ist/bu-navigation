@@ -27,7 +27,7 @@ function bu_navigation_filter_pages_exclude( $pages ) {
 		$visible = $wpdb->get_results( $query, OBJECT_K );
 
 		if ( empty ( $visible ) )
-			$vislbe = array();
+			$visible = array();
 
 		foreach ( $pages as $page ) {
 			// Navigation links will not have excluded post meta, but will always be visible in nav lists so make a special case for them

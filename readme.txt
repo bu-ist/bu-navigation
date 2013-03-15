@@ -3,7 +3,7 @@ Contributors: ntk, mgburns, gcorne
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
 Tested up to: 3.5
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,13 +76,18 @@ Please see this page for the details:
 
 == Changelog ==
 
+= 1.1.2 =
+
+* Initial WP.org release
+* Increased test coverage
+* Added constant for setting default post exclude value
+
 = 1.1.1 =
 
 * Fix for navigation exclude filter
 
 = 1.1 =
 
-* Initial WP.org release
 * Added localization support
 * Added feature configuration through the Theme Features API and PHP constants
 * Added navigation links as a true custom post type

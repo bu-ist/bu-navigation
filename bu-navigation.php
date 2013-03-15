@@ -5,7 +5,7 @@ Plugin URI: http://developer.bu.edu/bu-navigation/
 Author: Boston University (IS&T)
 Author URI: http://sites.bu.edu/web/
 Description: Provides alternative navigation elements designed for blogs with large page counts
-Version: 1.1.1
+Version: 1.1.2
 Text Domain: bu-navigation
 Domain Path: /languages
 */
@@ -59,7 +59,7 @@ class BU_Navigation_Plugin {
 	// Plugin settings
 	public $settings;
 
-	const VERSION = '1.1.1';
+	const VERSION = '1.1.2';
 
 	public function __construct() {
 

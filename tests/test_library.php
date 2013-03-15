@@ -337,8 +337,6 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 	 */
 	public function test_bu_navigation_get_urls() {
 
-		remove_filter( 'bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude' );
-
 		// Get test page ids
 		$parent 		 = $this->posts['parent'];
 		$grandchild_one  = $this->posts['grandchild_one'];
@@ -370,15 +368,6 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 	 *  Covers bu_navigation_get_pages()
 	 */
 	public function test_bu_navigation_get_pages() {
-
-		remove_filter( 'bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude' );
-
-		/*
-		* 	Test No Pages Return
-		*/
-
-		// $pages = bu_navigation_get_pages();
-		// $this->assertEquals( $pages, false );
 
 		/*
 		* 	Test Custom Post Type argument
@@ -582,43 +571,114 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 	 */
 	public function test_bu_navigation_pages_by_parent() {
 
-		$parent = $this->posts['parent'];
-		$child = $this->posts['child'];
+		$parent 		 = $this->posts['parent'];
+		$child 			 = $this->posts['child'];
+		$parent_two 	 = $this->posts['parent_two'];
+		$edit 			 = $this->posts['edit'];
+		$google 		 = $this->posts['google'];
+		$last_page		 = $this->posts['last_page'];
+		$grandchild_one  = $this->posts['grandchild_one'];
+		$grandchild_two  = $this->posts['grandchild_two'];
+		$greatgrandchild = $this->posts['greatgrandchild'];
 
-		$args = array( 'post_types' => array( 'test' ));
-		$pages_array = bu_navigation_get_pages( $args );
+		$all_pages = bu_navigation_get_pages();
 
-		$pages = bu_navigation_pages_by_parent( $pages_array );
+		$parent_value 		= array( $all_pages[ $child ] );
+		$child_value 		= array(
+								$all_pages[ $grandchild_one ],
+								$all_pages[ $grandchild_two ],
+								);
+		$grandchild_value 	= array( $all_pages[ $greatgrandchild ]);
 
-/*
-		foreach( $pages as $page ) {
-			foreach ( $page as $p ) {
-				$p->post_title . "\n";
+		$pages_results = bu_navigation_pages_by_parent( $all_pages );
 
-			}
-		}
-*/
+		// Check all of the key values exist
+		$this->assertArrayHasKey( 0, $pages_results );
+		$this->assertArrayHasKey( $parent, $pages_results );
+		$this->assertArrayHasKey( $child, $pages_results );
+		$this->assertArrayHasKey( $grandchild_one, $pages_results );
 
-		// var_dump( $pages );
-
-		$this->markTestIncomplete();
+		// Check all of the Values exist -> The order of $page_results[0] varies so test each value is present
+		$this->assertContains( $all_pages[ $parent ], $pages_results[0] );
+		$this->assertContains( $all_pages[ $parent_two ], $pages_results[0] );
+		$this->assertContains( $all_pages[ $edit ], $pages_results[0] );
+		$this->assertContains( $all_pages[ $google ], $pages_results[0] );
+		$this->assertContains( $all_pages[ $parent ], $pages_results[0] );
+		$this->assertContains( $all_pages[ $last_page ], $pages_results[0] );
+		$this->assertContains( $parent_value, $pages_results );
+		$this->assertContains( $child_value, $pages_results );
+		$this->assertContains( $grandchild_value, $pages_results );
 
 	}
 
 	/**
 	 * Covers bu_navigation_pages_by_parent_menu_sort()
-	 * @todo implement
 	 */
 	public function test_bu_navigation_pages_by_parent_menu_sort() {
-		$this->markTestIncomplete();
+
+		$parent 		 = $this->posts['parent'];
+		$child 			 = $this->posts['child'];
+		$parent_two 	 = $this->posts['parent_two'];
+		$edit 			 = $this->posts['edit'];
+		$hidden 		 = $this->posts['hidden'];
+		$google 		 = $this->posts['google'];
+		$last_page		 = $this->posts['last_page'];
+		$grandchild_one  = $this->posts['grandchild_one'];
+		$grandchild_two  = $this->posts['grandchild_two'];
+		$greatgrandchild = $this->posts['greatgrandchild'];
+		$test   		 = $this->posts['test'];
+		$test_child		 = $this->posts['test_child'];
+		$test_grandchild = $this->posts['test_grandchild'];
+
+		$all_pages 	   = bu_navigation_get_pages();
+		$page_results = bu_navigation_pages_by_parent( $all_pages );
+
+		// Reorder the pages
+		$page_results[0][4]->menu_order = "1"; // Last
+		$page_results[0][2]->menu_order = "2"; // Edit
+		$page_results[0][1]->menu_order = "3"; // Parent Two
+		$page_results[0][0]->menu_order = "4"; // Parent One
+		$page_results[0][3]->menu_order = "5"; // Google
+
+		$sorted_expected = array(
+					(string)$last_page,
+					(string)$edit,
+					(string)$parent_two,
+					(string)$parent,
+					(string)$google,
+					(string)$child,
+					(string)$grandchild_one,
+					(string)$grandchild_two,
+					(string)$greatgrandchild
+				);
+
+		$all_pages_sorted = bu_navigation_pages_by_parent_menu_sort( $page_results );
+		$sorted_results = array();
+
+		foreach( $all_pages_sorted as $page ) {
+			foreach( $page as $p ) {
+				array_push( $sorted_results, $p->ID );
+			}
+		}
+
+		$this->assertEquals( $sorted_expected, $sorted_results );
+
 	}
 
 	/**
 	 * Covers bu_navigation_pages_by_parent_menu_sort_cb()
-	 * @todo implement
 	 */
 	public function test_bu_navigation_pages_by_parent_menu_sort_cb() {
-		$this->markTestIncomplete();
+
+		$a = (object)array( 'menu_order' => 1 );
+		$b = (object)array( 'menu_order' => 4 );
+
+		$sorted_val_one = bu_navigation_pages_by_parent_menu_sort_cb( $a, $b );
+		$sorted_val_two = bu_navigation_pages_by_parent_menu_sort_cb( $b, $a );
+
+		$this->assertEquals( $sorted_val_one, -3 );
+		$this->assertEquals( $sorted_val_two, 3 );
+
 	}
 
 	/**
@@ -644,7 +704,7 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$formatted_page = bu_navigation_format_page( $page );
 
 		// Test the page formating worked
-		$this->assertEquals( $formatted_page, $expected_formatted_page );
+		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
 		/*
 		*	Test Item Tag Functionaltiy
@@ -652,9 +712,9 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$args = array( 'item_tag' => 'td' );
 		$formatted_page = bu_navigation_format_page( $page, $args );
-		$expected_formatted_page = '<td class="page_item page-item-' . $parent . '">' . "\n" . '<a title="' . $title . '" href="' . $url . '">' . $title . '</a>' . "\n" . ' </td>' . "\n";
+		$expected_formatted_page = sprintf("<td class=\"page_item page-item-%s\">\n<a title=\"%s\" href=\"%s\">%s</a>\n </td>\n", $parent, $title, $url, $title );
 
-		$this->assertEquals( $formatted_page, $expected_formatted_page );
+		$this->assertEquals( $expected_formatted_page, $formatted_page);
 
 		/*
 		*	Test Anchor Class Functionaltiy
@@ -662,9 +722,9 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$args = array( 'anchor_class' => 'test_class' );
 		$formatted_page = bu_navigation_format_page( $page, $args );
-		$expected_formatted_page = '<li class="page_item page-item-' . $parent . '">' . "\n" . '<a title="' . $title . '" href="' . $url . '" class="test_class">' . $title . '</a>' . "\n" . ' </li>' . "\n";
+		$expected_formatted_page = sprintf("<li class=\"page_item page-item-%s\">\n<a title=\"%s\" class=\"test_class\" href=\"%s\">%s</a>\n </li>\n", $parent, $title, $url, $title );
 
-		$this->assertEquals( $formatted_page, $expected_formatted_page );
+		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
 		/*
 		*	Test Depth Class Functionaltiy
@@ -672,9 +732,9 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$args = array( 'depth' => 5 );
 		$formatted_page = bu_navigation_format_page( $page, $args );
-		$expected_formatted_page = '<li class="page_item page-item-' . $parent . '">' . "\n" . '<a title="' . $title . '" href="' . $url . '" class="level_5">' . $title . '</a>' . "\n" . ' </li>' . "\n";
+		$expected_formatted_page = sprintf("<li class=\"page_item page-item-%s\">\n<a title=\"%s\" class=\"level_5\" href=\"%s\">%s</a>\n </li>\n", $parent, $title, $url, $title );
 
-		$this->assertEquals( $formatted_page, $expected_formatted_page );
+		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
 		/*
 		*	Test Section ID Functionaltiy
@@ -689,7 +749,7 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$formatted_page = bu_navigation_format_page( $page_child, $args );
 		$expected_formatted_page = '<li class="page_item page-item-' . $child . ' has_children">' . "\n" . '<a title="' . $title_child . '" href="' . $url_child . '">' . $title_child . '</a>' . "\n" . ' </li>' . "\n";
 
-		$this->assertEquals( $formatted_page, $expected_formatted_page );
+		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
 		/*
 		*	Test Position Functionaltiy
@@ -700,14 +760,14 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$formatted_page = bu_navigation_format_page( $page, $args );
 		$expected_formatted_page = '<li class="page_item page-item-' . $parent . ' first_item">' . "\n" . '<a title="' . $title . '" href="' . $url . '">' . $title . '</a>' . "\n" . ' </li>' . "\n";
 
-		$this->assertEquals( $formatted_page, $expected_formatted_page );
+		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
 		// Last Item
 		$args = array( 'position' => 3, 'siblings' => 3 );
 		$formatted_page = bu_navigation_format_page( $page, $args );
 		$expected_formatted_page = '<li class="page_item page-item-' . $parent . ' last_item">' . "\n" . '<a title="' . $title . '" href="' . $url . '">' . $title . '</a>' . "\n" . ' </li>' . "\n";
 
-		$this->assertEquals( $formatted_page, $expected_formatted_page );
+		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
 		/*
 		*	Test HTML Functionaltiy
@@ -717,7 +777,7 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$formatted_page = bu_navigation_format_page( $page, $args );
 		$expected_formatted_page = '<li class="page_item page-item-' . $parent . '">' . "\n" . '<a title="' . $title . '" href="' . $url . '">' . $title . '</a>' . "\n" . ' some html</li>' . "\n";
 
-		$this->assertEquals( $formatted_page, $expected_formatted_page );
+		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
 		/*
 		*	Test ID Functionaltiy
@@ -727,43 +787,854 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$formatted_page = bu_navigation_format_page( $page, $args );
 		$expected_formatted_page = '<li id="test_item_id" class="page_item page-item-' . $parent . '">' . "\n" . '<a title="' . $title . '" href="' . $url . '">' . $title . '</a>' . "\n" . ' </li>' . "\n";
 
-		$this->assertEquals( $formatted_page, $expected_formatted_page );
+		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
 	}
 
 	/**
 	 * Covers bu_navigation_filter_item_attrs()
-	 * @todo implement
 	 */
 	public function test_bu_navigation_filter_item_attrs() {
-		$this->markTestIncomplete();
+
+		$parent = $this->posts['parent'];
+		$child = $this->posts['child'];
+		$grandchild_one = $this->posts['grandchild_one'];
+		$parent_two = $this->posts['parent_two'];
+
+		/**
+		* 	 Parent Page link on the Parent Page
+		*/
+
+		$this->go_to( get_permalink( $parent ));
+
+		$pages = bu_navigation_get_pages();
+		$page = $pages[ $parent ];
+		$item_classes = array('page_item', 'page-item-' . $page->ID);
+
+		$parent_expected = array('page_item', 'page-item-' . $page->ID, "current_page_item");
+		$parent_results = apply_filters( 'bu_navigation_filter_item_attrs', $item_classes, $page );
+		$this->assertEquals( $parent_results, $parent_expected );
+
+		/**
+		* 	 Parent Page Link on the Child Page
+		*/
+
+		$this->go_to( get_permalink( $child ));
+
+		$pages = bu_navigation_get_pages();
+		$page = $pages[ $parent ];
+		$item_classes = array('page_item', 'page-item-' . $page->ID);
+
+		$child_expected = array('page_item', 'page-item-' . $page->ID, "current_page_ancestor", "current_page_parent");
+		$child_results = apply_filters( 'bu_navigation_filter_item_attrs', $item_classes, $page );
+
+		$this->assertEquals( $child_results, $child_expected );
+
+		/**
+		* 	 Parent Page Link on the Grandchild Page
+		*/
+
+		$this->go_to( get_permalink( $grandchild_one ));
+
+		$pages = bu_navigation_get_pages();
+		$page = $pages[ $parent ];
+		$item_classes = array('page_item', 'page-item-' . $page->ID);
+
+		$grandchild_expected = array('page_item', 'page-item-' . $page->ID, "current_page_ancestor");
+		$grandchild_results = apply_filters( 'bu_navigation_filter_item_attrs', $item_classes, $page );
+
+		$this->assertEquals( $grandchild_results, $grandchild_expected );
+
+		/**
+		* 	 Child Page Link on the Parent Page Two (unrelated page)
+		*/
+
+		$this->go_to( get_permalink( $parent_two ));
+
+		$pages = bu_navigation_get_pages();
+		$page = $pages[ $child ];
+		$item_classes = array('page_item', 'page-item-' . $page->ID);
+
+		$parent_two_expected = array('page_item', 'page-item-' . $page->ID );
+		$parent_two_results = apply_filters( 'bu_navigation_filter_item_attrs', $item_classes, $page );
+
+		$this->assertEquals( $parent_two_expected, $parent_two_results );
+
+		/**
+		* 	 Flush all of the Gloabl Vars away
+		*/
+
+		$this->flush_global_cache();
+
 	}
 
 	/**
 	 * Covers bu_navigation_filter_item_active_page()
-	 * @todo implement
 	 */
 	public function test_bu_navigation_filter_item_active_page() {
-		$this->markTestIncomplete();
+
+		$parent = $this->posts['parent'];
+		$child = $this->posts['child'];
+		$grandchild_one = $this->posts['grandchild_one'];
+		$parent_two = $this->posts['parent_two'];
+
+		/**
+		* 	 Parent Page Link on the Parent Page
+		*/
+
+		$this->go_to( get_permalink( $parent ));
+
+		$pages = bu_navigation_get_pages();
+		$page = $pages[ $parent ];
+		$parent_expected = array( 'class' => '' );
+
+		$parent_results = apply_filters( 'bu_navigation_filter_anchor_attrs', $parent_expected, $page );
+		$parent_expected['class'] = ' active';
+
+		$this->assertEquals( $parent_expected, $parent_results );
+
+		/**
+		* 	 Parent Page Link on the Child Page
+		*/
+
+		$this->go_to( get_permalink( $child ));
+
+		$pages = bu_navigation_get_pages();
+		$page = $pages[ $parent ];
+		$child_expected = array( 'class' => '' );
+
+		$child_results = apply_filters( 'bu_navigation_filter_anchor_attrs', $child_expected, $page );
+		$child_expected['class'] = ' active_section';
+
+		$this->assertEquals( $child_expected, $child_results );
+
+		/**
+		* 	 Parent Page Two Link on the Child Page (Unrelated)
+		*/
+
+		$this->go_to( get_permalink( $child ));
+
+		$pages = bu_navigation_get_pages();
+		$page = $pages[ $parent_two ];
+		$parent_two_expected = array( 'class' => '' );
+
+		$parent_two_results = apply_filters( 'bu_navigation_filter_anchor_attrs', $parent_two_expected, $page );
+
+		$this->assertEquals( $parent_two_expected, $parent_two_results );
+
+		/**
+		* 	 Flush all of the Gloabl Vars away
+		*/
+
+		$this->flush_global_cache();
+
 	}
 
 	/**
 	 * Covers bu_navigation_list_section()
-	 * @todo implement
 	 */
 	public function test_bu_navigation_list_section() {
-		$parent = $this->posts['parent'];
-		$all_sections = bu_navigation_load_sections();
-		$sections = $all_sections['sections'];
 
-		$this->markTestIncomplete();
+		$parent			 = $this->posts['parent'];
+		$child 			 = $this->posts['child'];
+		$grandchild_one  = $this->posts['grandchild_one'];
+		$grandchild_two  = $this->posts['grandchild_two'];
+		$greatgrandchild = $this->posts['greatgrandchild'];
+		$pages 			 = bu_navigation_get_pages();
+		$pages_by_parent = bu_navigation_pages_by_parent( $pages );
 
-		/*
-		var_dump( $sections[$parent] );
-		var_dump( bu_navigation_list_section( $parent, $sections[ $parent ]));
+		// Generate Expected Results - Child Section
+		$child_section_expected = "\n<ul>\n" .
+				'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
+				'<a title="' . $pages[$grandchild_one]->post_title . '" class="level_1" href="' . $pages[$grandchild_one]->url . '">'. $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
+				"<ul>\n" .
+				'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
+				'<a title="' . $pages[$greatgrandchild]->post_title . '" class="level_2" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
+				" </li>\n\n" .
+				"</ul>\n" .
+				"</li>\n" .
+				'<li class="page_item page-item-' . $grandchild_two . '">' . "\n" .
+				'<a title="' . $pages[$grandchild_two]->post_title . '" class="level_1" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
+				" </li>\n\n" .
+				"</ul>\n";
+
+		// Generate Expected Results - Parent Section
+		$parent_section_expected = "\n<ul>\n" .
+				'<li class="page_item page-item-' . $child . '">' . "\n" .
+				'<a title="' . $pages[$child]->post_title . '" class="level_1" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
+				"<ul>\n" .
+				'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
+				'<a title="' . $pages[$grandchild_one]->post_title . '" class="level_2" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
+				"<ul>\n" .
+				'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
+				'<a title="' . $pages[$greatgrandchild]->post_title . '" class="level_3" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
+				" </li>\n\n" .
+				"</ul>\n" .
+				"</li>\n" .
+				'<li class="page_item page-item-' . $grandchild_two . '">' . "\n" .
+				'<a title="' . $pages[$grandchild_two]->post_title . '" class="level_2" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
+				" </li>\n\n" .
+				"</ul>\n</li>\n\n" .
+				"</ul>\n";
+
+		// Get Results
+		$child_section_results = bu_navigation_list_section( $child, $pages_by_parent );
+		$parent_section_results = bu_navigation_list_section( $parent, $pages_by_parent );
+
+		// Test Results
+		$this->assertEquals( $child_section_expected, $child_section_results );
+		$this->assertEquals( $parent_section_expected, $parent_section_results );
+
+		/**
+		* 	Test Depth Functionaltiy
 		*/
+
+		$parent_section_depth_expected = "\n<ul>\n" .
+				'<li class="page_item page-item-' . $child . '">' . "\n" .
+				'<a title="' . $pages[$child]->post_title . '" class="level_3" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
+				"<ul>\n" .
+				'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
+				'<a title="' . $pages[$grandchild_one]->post_title . '" class="level_4" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
+				"<ul>\n" .
+				'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
+				'<a title="' . $pages[$greatgrandchild]->post_title . '" class="level_5" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
+				" </li>\n\n" .
+				"</ul>\n" .
+				"</li>\n" .
+				'<li class="page_item page-item-' . $grandchild_two . '">' . "\n" .
+				'<a title="' . $pages[$grandchild_two]->post_title . '" class="level_4" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
+				" </li>\n\n" .
+				"</ul>\n</li>\n\n" .
+				"</ul>\n";
+
+		$args = array( 'depth' => 3 );
+		$parent_section_depth_results = bu_navigation_list_section( $parent, $pages_by_parent, $args );
+		$this->assertEquals( $parent_section_depth_expected, $parent_section_depth_results );
+
+		/**
+		* 	Test Container Tag Functionaltiy
+		*/
+
+		$parent_section_container_tag_expected = "\n<ol>\n" .
+				'<li class="page_item page-item-' . $child . '">' . "\n" .
+				'<a title="' . $pages[$child]->post_title . '" class="level_1" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
+				"<ol>\n" .
+				'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
+				'<a title="' . $pages[$grandchild_one]->post_title . '" class="level_2" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
+				"<ol>\n" .
+				'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
+				'<a title="' . $pages[$greatgrandchild]->post_title . '" class="level_3" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
+				" </li>\n\n" .
+				"</ol>\n" .
+				"</li>\n" .
+				'<li class="page_item page-item-' . $grandchild_two . '">' . "\n" .
+				'<a title="' . $pages[$grandchild_two]->post_title . '" class="level_2" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
+				" </li>\n\n" .
+				"</ol>\n</li>\n\n" .
+				"</ol>\n";
+
+		$args = array( 'container_tag' => 'ol' );
+		$parent_section_container_tag_results = bu_navigation_list_section( $parent, $pages_by_parent, $args );
+		$this->assertEquals( $parent_section_container_tag_expected, $parent_section_container_tag_results );
+
+		/**
+		* 	Test Item Tag Functionaltiy
+		*/
+
+		$parent_section_item_tag_expected = "\n<ul>\n" .
+				'<test class="page_item page-item-' . $child . '">' . "\n" .
+				'<a title="' . $pages[$child]->post_title . '" class="level_1" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
+				"<ul>\n" .
+				'<test class="page_item page-item-' . $grandchild_one . '">' . "\n" .
+				'<a title="' . $pages[$grandchild_one]->post_title . '" class="level_2" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
+				"<ul>\n" .
+				'<test class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
+				'<a title="' . $pages[$greatgrandchild]->post_title . '" class="level_3" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
+				" </test>\n\n" .
+				"</ul>\n" .
+				"</test>\n" .
+				'<test class="page_item page-item-' . $grandchild_two . '">' . "\n" .
+				'<a title="' . $pages[$grandchild_two]->post_title . '" class="level_2" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
+				" </test>\n\n" .
+				"</ul>\n</test>\n\n" .
+				"</ul>\n";
+
+		$args = array( 'item_tag' => 'test' );
+		$parent_section_item_tag_results = bu_navigation_list_section( $parent, $pages_by_parent, $args );
+		$this->assertEquals( $parent_section_item_tag_expected, $parent_section_item_tag_results );
+
+		/**
+		* 	Test Section Ids Functionaltiy
+		*/
+
+		$parent_section_section_id_expected = "\n<ul>\n" .
+				'<li class="page_item page-item-' . $child . ' has_children">' . "\n" .
+				'<a title="' . $pages[$child]->post_title . '" class="level_1" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
+				"<ul>\n" .
+				'<li class="page_item page-item-' . $grandchild_one . ' has_children">' . "\n" .
+				'<a title="' . $pages[$grandchild_one]->post_title . '" class="level_2" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
+				"<ul>\n" .
+				'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
+				'<a title="' . $pages[$greatgrandchild]->post_title . '" class="level_3" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
+				" </li>\n\n" .
+				"</ul>\n" .
+				"</li>\n" .
+				'<li class="page_item page-item-' . $grandchild_two . '">' . "\n" .
+				'<a title="' . $pages[$grandchild_two]->post_title . '" class="level_2" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
+				" </li>\n\n" .
+				"</ul>\n</li>\n\n" .
+				"</ul>\n";
+
+		$args = array( 'section_ids' => array( $child, $grandchild_one ));
+		$parent_section_section_id_results = bu_navigation_list_section( $parent, $pages_by_parent, $args );
+		$this->assertEquals( $parent_section_section_id_expected, $parent_section_section_id_results );
+
 	}
 
+	/**
+	 * Covers bu_navigation_list_pages()
+	 */
+	public function test_bu_navigation_list_pages() {
+
+		$parent 		 = $this->posts['parent'];
+		$child 			 = $this->posts['child'];
+		$parent_two 	 = $this->posts['parent_two'];
+		$hidden 		 = $this->posts['hidden'];
+		$edit 			 = $this->posts['edit'];
+		$google 		 = $this->posts['google'];
+		$last_page		 = $this->posts['last_page'];
+		$grandchild_one  = $this->posts['grandchild_one'];
+		$grandchild_two  = $this->posts['grandchild_two'];
+		$greatgrandchild = $this->posts['greatgrandchild'];
+		$test   		 = $this->posts['test'];
+		$test_child		 = $this->posts['test_child'];
+		$test_grandchild = $this->posts['test_grandchild'];
+
+		$list_pages_expected = "<ul >\n" .
+			'<li class="page_item page-item-' . $parent . ' first_item">' . "\n" .
+			'<a title="Parent Page" class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $child . '">' . "\n" .
+			'<a title="Child Page" class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
+			'<a title="Grand Child Page 1" class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
+			'<a title="Great Grand Child" class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
+			" </li>\n\n" .
+			"</ul>\n" .
+			"</li>\n" .
+			'<li class="page_item page-item-' . $grandchild_two . '">' . "\n".
+			'<a title="Grand Child Page 2" class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			" </li>\n\n" .
+			"</ul>\n" .
+			"</li>\n\n" .
+			"</ul>\n" .
+			"</li>\n" .
+			'<li class="page_item page-item-' . $parent_two . '">' . "\n" .
+			'<a title="Parent Page Two" class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $edit . '">' . "\n" .
+			'<a title="Edit and Delete Me" class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $google . '">' . "\n" .
+			'<a title="Google" class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $last_page . ' last_item">' . "\n" .
+			'<a title="Last Page" class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
+			" </li>\n" .
+			"</ul>\n";
+
+		$list_pages_results = bu_navigation_list_pages();
+		$this->assertEquals( $list_pages_expected, $list_pages_results );
+
+		/**
+		* 	Test Page ID Function
+		*/
+
+		$list_pages_page_id_expected = "<ul >\n" .
+			'<li class="page_item page-item-' . $parent . ' has_children first_item">' . "\n" .
+			'<a title="Parent Page" class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $child . ' has_children">' . "\n" .
+			'<a title="Child Page" class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n" .
+			" </li>\n\n" .
+			"</ul>\n" .
+			"</li>\n" .
+			'<li class="page_item page-item-' . $parent_two . '">' . "\n" .
+			'<a title="Parent Page Two" class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $edit . '">' . "\n" .
+			'<a title="Edit and Delete Me" class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $google . '">' . "\n" .
+			'<a title="Google" class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $last_page . ' last_item">' . "\n" .
+			'<a title="Last Page" class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
+			" </li>\n" .
+			"</ul>\n";
+
+		$args = array( 'page_id' => $parent );
+		$list_pages_page_id_results = bu_navigation_list_pages( $args );
+		$this->assertEquals( $list_pages_page_id_expected, $list_pages_page_id_results );
+
+		/**
+		* 	Test Echo Function
+		*/
+
+		ob_start();
+		$args = array( 'echo' => 1 );
+		bu_navigation_list_pages( $args );
+		$list_pages_echo_results = ob_get_contents();
+		ob_end_clean();
+
+		$this->assertEquals( $list_pages_expected, $list_pages_echo_results );
+
+		/**
+		* 	Test Navigate in Section Function
+		*/
+
+		$list_pages_navigate_in_section_expected = "<ul >\n" .
+			'<li class="page_item page-item-' . $child . ' first_item last_item">' . "\n" .
+			'<a title="Child Page" class="level_1" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
+			'<a title="Grand Child Page 1" class="level_2" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
+			'<a title="Great Grand Child" class="level_3" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
+			" </li>\n\n" .
+			"</ul>\n" .
+			"</li>\n" .
+			'<li class="page_item page-item-' . $grandchild_two . '">' . "\n".
+			'<a title="Grand Child Page 2" class="level_2" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			" </li>\n\n" .
+			"</ul>\n" .
+			"</li>\n" .
+			"</ul>\n";
+
+		$args = array( 'navigate_in_section' => true );
+		$list_pages_navigate_in_section_results = bu_navigation_list_pages( $args );
+		$this->assertEquals( $list_pages_navigate_in_section_expected, $list_pages_navigate_in_section_results );
+
+		/**
+		* 	Test Container Tag Function
+		*/
+
+		$list_pages_container_tag_expected = "<ol >\n" .
+			'<li class="page_item page-item-' . $parent . ' first_item">' . "\n" .
+			'<a title="Parent Page" class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
+			"<ol>\n" .
+			'<li class="page_item page-item-' . $child . '">' . "\n" .
+			'<a title="Child Page" class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			"<ol>\n" .
+			'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
+			'<a title="Grand Child Page 1" class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
+			"<ol>\n" .
+			'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
+			'<a title="Great Grand Child" class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
+			" </li>\n\n" .
+			"</ol>\n" .
+			"</li>\n" .
+			'<li class="page_item page-item-' . $grandchild_two . '">' . "\n".
+			'<a title="Grand Child Page 2" class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			" </li>\n\n" .
+			"</ol>\n" .
+			"</li>\n\n" .
+			"</ol>\n" .
+			"</li>\n" .
+			'<li class="page_item page-item-' . $parent_two . '">' . "\n" .
+			'<a title="Parent Page Two" class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $edit . '">' . "\n" .
+			'<a title="Edit and Delete Me" class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $google . '">' . "\n" .
+			'<a title="Google" class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $last_page . ' last_item">' . "\n" .
+			'<a title="Last Page" class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
+			" </li>\n" .
+			"</ol>\n";
+
+		$args = array( 'container_tag' => 'ol' );
+		$list_pages_container_tag_results = bu_navigation_list_pages( $args );
+		$this->assertEquals( $list_pages_container_tag_expected, $list_pages_container_tag_results );
+
+		/**
+		* 	Test Container ID Function
+		*/
+
+		$list_pages_container_id_expected = '<ul  id="test_container_id">' . "\n" .
+			'<li class="page_item page-item-' . $parent . ' first_item">' . "\n" .
+			'<a title="Parent Page" class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $child . '">' . "\n" .
+			'<a title="Child Page" class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
+			'<a title="Grand Child Page 1" class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
+			'<a title="Great Grand Child" class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
+			" </li>\n\n" .
+			"</ul>\n" .
+			"</li>\n" .
+			'<li class="page_item page-item-' . $grandchild_two . '">' . "\n".
+			'<a title="Grand Child Page 2" class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			" </li>\n\n" .
+			"</ul>\n" .
+			"</li>\n\n" .
+			"</ul>\n" .
+			"</li>\n" .
+			'<li class="page_item page-item-' . $parent_two . '">' . "\n" .
+			'<a title="Parent Page Two" class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $edit . '">' . "\n" .
+			'<a title="Edit and Delete Me" class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $google . '">' . "\n" .
+			'<a title="Google" class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $last_page . ' last_item">' . "\n" .
+			'<a title="Last Page" class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
+			" </li>\n" .
+			"</ul>\n";
+
+		$args = array( 'container_id' => 'test_container_id' );
+		$list_pages_container_id_results = bu_navigation_list_pages( $args );
+		$this->assertEquals( $list_pages_container_id_expected, $list_pages_container_id_results );
+
+
+		/**
+		* 	Test Container Class Function
+		*/
+
+		$list_pages_container_class_expected = '<ul  class="test_container_class">' . "\n" .
+			'<li class="page_item page-item-' . $parent . ' first_item">' . "\n" .
+			'<a title="Parent Page" class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $child . '">' . "\n" .
+			'<a title="Child Page" class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
+			'<a title="Grand Child Page 1" class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
+			'<a title="Great Grand Child" class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
+			" </li>\n\n" .
+			"</ul>\n" .
+			"</li>\n" .
+			'<li class="page_item page-item-' . $grandchild_two . '">' . "\n".
+			'<a title="Grand Child Page 2" class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			" </li>\n\n" .
+			"</ul>\n" .
+			"</li>\n\n" .
+			"</ul>\n" .
+			"</li>\n" .
+			'<li class="page_item page-item-' . $parent_two . '">' . "\n" .
+			'<a title="Parent Page Two" class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $edit . '">' . "\n" .
+			'<a title="Edit and Delete Me" class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $google . '">' . "\n" .
+			'<a title="Google" class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $last_page . ' last_item">' . "\n" .
+			'<a title="Last Page" class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
+			" </li>\n" .
+			"</ul>\n";
+
+		$args = array( 'container_class' => 'test_container_class' );
+		$list_pages_container_class_results = bu_navigation_list_pages( $args );
+		$this->assertEquals( $list_pages_container_class_expected, $list_pages_container_class_results );
+
+		/**
+		* 	Test Item Tag Function
+		*/
+
+		$list_pages_item_tag_expected = "<ul >\n" .
+			'<ll class="page_item page-item-' . $parent . ' first_item">' . "\n" .
+			'<a title="Parent Page" class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
+			"<ul>\n" .
+			'<ll class="page_item page-item-' . $child . '">' . "\n" .
+			'<a title="Child Page" class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			"<ul>\n" .
+			'<ll class="page_item page-item-' . $grandchild_one . '">' . "\n" .
+			'<a title="Grand Child Page 1" class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
+			"<ul>\n" .
+			'<ll class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
+			'<a title="Great Grand Child" class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
+			" </ll>\n\n" .
+			"</ul>\n" .
+			"</ll>\n" .
+			'<ll class="page_item page-item-' . $grandchild_two . '">' . "\n".
+			'<a title="Grand Child Page 2" class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			" </ll>\n\n" .
+			"</ul>\n" .
+			"</ll>\n\n" .
+			"</ul>\n" .
+			"</ll>\n" .
+			'<ll class="page_item page-item-' . $parent_two . '">' . "\n" .
+			'<a title="Parent Page Two" class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
+			" </ll>\n" .
+			'<ll class="page_item page-item-' . $edit . '">' . "\n" .
+			'<a title="Edit and Delete Me" class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
+			" </ll>\n" .
+			'<ll class="page_item page-item-' . $google . '">' . "\n" .
+			'<a title="Google" class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
+			" </ll>\n" .
+			'<ll class="page_item page-item-' . $last_page . ' last_item">' . "\n" .
+			'<a title="Last Page" class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
+			" </ll>\n" .
+			"</ul>\n";
+
+		$args = array( 'item_tag' => 'll' );
+		$list_pages_item_tag_results = bu_navigation_list_pages( $args );
+		$this->assertEquals( $list_pages_item_tag_expected, $list_pages_item_tag_results );
+
+		/**
+		* 	Test Style (Adaptive) Function
+		*/
+
+		$list_pages_style_expected = "<ul >\n" .
+			'<li class="page_item page-item-' . $child . ' has_children first_item last_item">' . "\n" .
+			'<a title="Child Page" class="level_1" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $grandchild_one . ' has_children">' . "\n" .
+			'<a title="Grand Child Page 1" class="level_2" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n" .
+			" </li>\n" .
+			'<li class="page_item page-item-' . $grandchild_two . '">' . "\n".
+			'<a title="Grand Child Page 2" class="level_2" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			" </li>\n\n" .
+			"</ul>\n" .
+			"</li>\n" .
+			"</ul>\n";
+
+		$args = array( 'page_id' => $child, 'style' => 'adaptive' );
+		$list_pages_style_results = bu_navigation_list_pages( $args );
+		$this->assertEquals( $list_pages_style_expected, $list_pages_style_results );
+
+		/**
+		* 	Test Post Types Function
+		*/
+		$list_pages_post_type_expected = "<ul >\n" .
+			'<li class="page_item page-item-' . $test . ' first_item last_item">' . "\n" .
+			'<a title="Test Type Page" class="level_1" href="' . get_permalink( $test ) . '">Test Type Page</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $test_child . '">' . "\n" .
+			'<a title="Test Child" class="level_2" href="' . get_permalink( $test_child ) . '">Test Child</a>' . "\n \n" .
+			"<ul>\n" .
+			'<li class="page_item page-item-' . $test_grandchild . '">' . "\n".
+			'<a title="Test Grandchild" class="level_3" href="' . get_permalink( $test_grandchild ) . '">Test Grandchild</a>' . "\n" .
+			" </li>\n\n" .
+			"</ul>\n" .
+			"</li>\n\n" .
+			"</ul>\n" .
+			"</li>\n" .
+			"</ul>\n";
+
+		$args = array( 'post_types' => array( 'test' ));
+		$list_pages_post_type_results = bu_navigation_list_pages( $args );
+		$this->assertEquals( $list_pages_post_type_expected, $list_pages_post_type_results );
+
+	}
+
+	/**
+	 * Covers bu_navigation_page_parent_dropdown()
+	 */
+	public function test_bu_navigation_page_parent_dropdown() {
+
+		$parent = $this->posts['parent'];
+		$child = $this->posts['child'];
+		$test = $this->posts['test'];
+		$post_types = 'page';
+
+		$dropdown_expected = "<select id=\"bu_filter_pages\" name=\"post_parent\">\r" .
+				"\n\t<option value=\"0\">Show all sections</option>\r" .
+				"\n\t<option value=\"" . $parent . "\" >" . __('Parent Page') . "</option>\r" .
+				"\r</select>\r";
+
+		ob_start();
+		bu_navigation_page_parent_dropdown( $post_types );
+		$dropdown_results = ob_get_contents();
+		ob_end_clean();
+
+		$this->assertEquals( $dropdown_expected, $dropdown_results );
+
+		/**
+		*	Test Post Type Function
+		*/
+
+		$post_types_test = 'test';
+		$dropdown_posttype_expected = "<select id=\"bu_filter_pages\" name=\"post_parent\">\r" .
+				"\n\t<option value=\"" . $test . "\" >" . __('Test Type Page') . "</option>\r" .
+				"\r</select>\r";
+
+		ob_start();
+		bu_navigation_page_parent_dropdown( $post_types_test );
+		$dropdown_posttype_results = ob_get_contents();
+		ob_end_clean();
+
+		$this->assertEquals( $dropdown_posttype_expected, $dropdown_posttype_expected );
+
+		/**
+		*	Test Selected Function
+		*/
+
+		$selected = $parent;
+		$dropdown_selected_expected = "<select id=\"bu_filter_pages\" name=\"post_parent\">\r" .
+				"\n\t<option value=\"0\">Show all sections</option>\r" .
+				"\n\t<option value=\"" . $parent . "\" selected=\"selected\">" . __('Parent Page') . "</option>\r" .
+				"\r</select>\r";
+
+		ob_start();
+		bu_navigation_page_parent_dropdown( $post_types, $selected );
+		$dropdown_selected_results = ob_get_contents();
+		ob_end_clean();
+
+		$this->assertEquals( $dropdown_selected_expected, $dropdown_selected_results );
+
+		/**
+		*	Test Echo Function
+		*/
+
+		$dropdown_echo_expected = "<select id=\"bu_filter_pages\" name=\"post_parent\">\r" .
+				"\n\t<option value=\"0\">Show all sections</option>\r" .
+				"\n\t<option value=\"" . $parent . "\" >" . __('Parent Page') . "</option>\r" .
+				"\r</select>\r";
+
+		$args = array( 'echo' => 0 );
+		$dropdown_echo_results = bu_navigation_page_parent_dropdown( $post_types, 0, $args );
+
+		$this->assertEquals( $dropdown_echo_expected, $dropdown_echo_results );
+
+		/**
+		*	Test Select ID Function
+		*/
+
+		$dropdown_select_id_expected = "<select id=\"test_select_id\" name=\"post_parent\">\r" .
+				"\n\t<option value=\"0\">Show all sections</option>\r" .
+				"\n\t<option value=\"" . $parent . "\" >" . __('Parent Page') . "</option>\r" .
+				"\r</select>\r";
+
+		$args = array( 'echo' => 0, 'select_id' => 'test_select_id' );
+		$dropdown_select_id_results = bu_navigation_page_parent_dropdown( $post_types, 0, $args );
+
+		$this->assertEquals( $dropdown_select_id_expected, $dropdown_select_id_results );
+
+		/**
+		*	Test Select Name Function
+		*/
+
+		$dropdown_select_name_expected = "<select id=\"bu_filter_pages\" name=\"test_name\">\r" .
+				"\n\t<option value=\"0\">Show all sections</option>\r" .
+				"\n\t<option value=\"" . $parent . "\" >" . __('Parent Page') . "</option>\r" .
+				"\r</select>\r";
+
+		$args = array( 'echo' => 0, 'select_name' => 'test_name' );
+		$dropdown_select_name_results = bu_navigation_page_parent_dropdown( $post_types, 0, $args );
+
+		$this->assertEquals( $dropdown_select_name_expected, $dropdown_select_name_results );
+
+		/**
+		*	Test Select Classes Function
+		*/
+
+		$dropdown_classes_expected = "<select id=\"bu_filter_pages\" name=\"post_parent\" class=\"test_class\">\r" .
+				"\n\t<option value=\"0\">Show all sections</option>\r" .
+				"\n\t<option value=\"" . $parent . "\" >" . __('Parent Page') . "</option>\r" .
+				"\r</select>\r";
+
+		$args = array( 'echo' => 0, 'select_classes' => 'test_class' );
+		$dropdown_classes_results = bu_navigation_page_parent_dropdown( $post_types, 0, $args );
+
+		$this->assertEquals( $dropdown_classes_expected, $dropdown_classes_results );
+
+	}
+
+	/**
+	 * Covers bu_filter_pages_parent_dropdown()
+	 */
+	public function test_bu_filter_pages_parent_dropdown() {
+		$parent = $this->posts['parent'];
+		$child = $this->posts['child'];
+		$grandchild_one = $this->posts['grandchild_one'];
+
+		$pages = bu_navigation_get_pages();
+		$pages_by_parent = bu_navigation_pages_by_parent($pages);
+
+		$page_options_expected = "\n\t" . '<option value="' . $child . '" >Child Page</option>' . "\r" .
+			"\n\t" . '<option value="' . $grandchild_one .  '" >&nbsp;&nbsp;&nbsp;Grand Child Page 1</option>' . "\r";
+
+		ob_start();
+		bu_filter_pages_parent_dropdown( $pages_by_parent, 0, $parent );
+		$page_options_results = ob_get_contents();
+		ob_end_clean();
+
+		$this->assertEquals( $page_options_results, $page_options_expected );
+
+		/**
+		* 	Test Default Function
+		*/
+
+		$page_options_default_expected = "\n\t" . '<option value="' . $child . '" selected="selected">Child Page</option>' . "\r" .
+			"\n\t" . '<option value="' . $grandchild_one .  '" >&nbsp;&nbsp;&nbsp;Grand Child Page 1</option>' . "\r";
+
+		ob_start();
+		bu_filter_pages_parent_dropdown( $pages_by_parent, $child, $parent );
+		$page_options_default_results = ob_get_contents();
+		ob_end_clean();
+
+		$this->assertEquals( $page_options_default_expected, $page_options_default_results );
+
+		/**
+		* 	Test Parent Function
+		*/
+
+		$page_options_parent_expected = "\n\t" . '<option value="' . $grandchild_one .  '" >Grand Child Page 1</option>' . "\r";
+
+		ob_start();
+		bu_filter_pages_parent_dropdown( $pages_by_parent, 0, $child );
+		$page_options_parent_results = ob_get_contents();
+		ob_end_clean();
+
+		$this->assertEquals( $page_options_parent_expected, $page_options_parent_results );
+
+		/**
+		* 	Test Level Function
+		*/
+
+		$page_options_level_expected = "\n\t" . '<option value="' . $child . '" selected="selected">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Child Page</option>' . "\r" .
+			"\n\t" . '<option value="' . $grandchild_one .  '" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Grand Child Page 1</option>' . "\r";
+
+		ob_start();
+		bu_filter_pages_parent_dropdown( $pages_by_parent, $child, $parent, 2 );
+		$page_options_level_results = ob_get_contents();
+		ob_end_clean();
+
+		$this->assertEquals( $page_options_level_expected, $page_options_level_results );
+
+	}
+
+	function flush_global_cache() {
+		$this->flush_cache();
+		unset($GLOBALS['wp_query'], $GLOBALS['wp_the_query']);
+		$GLOBALS['wp_the_query'] =& new WP_Query();
+		$GLOBALS['wp_query'] =& $GLOBALS['wp_the_query'];
+		$GLOBALS['wp'] =& new WP();
+
+		// clean out globals to stop them polluting wp and wp_query
+		foreach ($GLOBALS['wp']->public_query_vars as $v) {
+			unset($GLOBALS[$v]);
+		}
+		foreach ($GLOBALS['wp']->private_query_vars as $v) {
+			unset($GLOBALS[$v]);
+		}
+	}
 
 }
 

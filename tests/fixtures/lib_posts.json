@@ -1,48 +1,51 @@
 {
     "parent": {
         "data": {
-                "post_title": "Parent Page",
-                "post_type": "page"
+            "post_title": "Parent Page",
+            "post_type": "page",
+            "menu_order": 1
             },
         "metadata": {},
         "children": {
 
             "child": {
                 "data": {
-                        "post_title": "Child Page",
-                        "post_type": "page"
+                    "post_title": "Child Page",
+                    "post_type": "page",
+                    "menu_order": 1
                     },
                 "metadata": {},
                 "children": {
 
                     "grandchild_one": {
                         "data": {
-                                "post_title": "Grand Child Page 1",
-                                "post_type": "page"
+                            "post_title": "Grand Child Page 1",
+                            "post_type": "page",
+                            "menu_order": 1
                             },
                         "metadata": {},
                         "children": {
 
-	                        "greatgrandchild": {
-		                        "data": {
-			                        "post_title": "Great Grand Child",
-			                        "post_type": "page"
-			                        },
-			                    "metadata": {},
-			                    "children": {}
-	                        }
+                            "greatgrandchild": {
+                                "data": {
+                                    "post_title": "Great Grand Child",
+                                    "post_type": "page",
+                                    "menu_order": 1
+                                    },
+                                "metadata": {},
+                                "children": {}
+                            }
                         }
-
                     },
 
                     "grandchild_two": {
                         "data": {
-                                "post_title": "Grand Child Page 2",
-                                "post_type": "page"
+                            "post_title": "Grand Child Page 2",
+                            "post_type": "page",
+                            "menu_order": 2
                             },
                         "metadata": {},
                         "children": {}
-
                     }
                 }
             }
@@ -50,39 +53,43 @@
     },
 
     "parent_two": {
-	    "data": {
-		    "post_title": "Parent Page Two",
-		    "post_type": "page"
-		    },
-	    "metadata": {},
-	    "children": {}
+        "data": {
+            "post_title": "Parent Page Two",
+            "post_type": "page",
+            "menu_order": 2
+            },
+        "metadata": {},
+        "children": {}
     },
 
     "test": {
         "data": {
-                "post_title": "Test Type Page",
-                "post_type": "test"
+            "post_title": "Test Type Page",
+            "post_type": "test",
+            "menu_order": 3
             },
         "metadata": {},
         "children": {
 
-			"test_child": {
+            "test_child": {
                 "data": {
-                        "post_title": "Test Child",
-                        "post_type": "test"
+                    "post_title": "Test Child",
+                    "post_type": "test",
+                "menu_order": 1
                     },
                 "metadata": {},
                 "children": {
 
-	                "test_grandchild": {
-		                "data": {
-		                        "post_title": "Test Grandchild",
-		                        "post_type": "test"
-		                    },
-		                "metadata": {},
-		                "children": {}
-		                }
-		        }
+                    "test_grandchild": {
+                        "data": {
+                            "post_title": "Test Grandchild",
+                            "post_type": "test",
+                            "menu_order": 1
+                            },
+                        "metadata": {},
+                        "children": {}
+                        }
+                }
 
             }
 
@@ -91,8 +98,9 @@
 
     "hidden": {
         "data": {
-                "post_title": "Hidden Page",
-                "post_type": "page"
+            "post_title": "Hidden Page",
+            "post_type": "page",
+            "menu_order": 4
             },
         "metadata": { "_bu_cms_navigation_exclude": "1" },
         "children": {}
@@ -100,8 +108,9 @@
 
     "edit": {
         "data": {
-                "post_title": "Edit and Delete Me",
-                "post_type": "page"
+            "post_title": "Edit and Delete Me",
+            "post_type": "page",
+            "menu_order": 5
             },
         "metadata": {},
         "children": {}
@@ -109,9 +118,10 @@
 
     "draft": {
         "data": {
-                "post_title": "Draft Page",
-                "post_type": "page",
-                "post_status": "draft"
+            "post_title": "Draft Page",
+            "post_type": "page",
+            "post_status": "draft",
+            "menu_order": 5
             },
         "metadata": {},
         "children": {}
@@ -119,9 +129,10 @@
 
     "pending": {
         "data": {
-                "post_title": "Pending Page",
-                "post_type": "page",
-                "post_status": "pending"
+            "post_title": "Pending Page",
+            "post_type": "page",
+            "post_status": "pending",
+            "menu_order": 6
             },
         "metadata": {},
         "children": {}
@@ -129,9 +140,10 @@
 
     "google": {
         "data": {
-                "post_title": "Google",
-                "post_content": "http://www.google.com",
-                "post_type": "bu_link"
+            "post_title": "Google",
+            "post_content": "http://www.google.com",
+            "post_type": "bu_link",
+            "menu_order": 7
             },
         "metadata": {
             "bu_link_target": "new"
@@ -141,8 +153,9 @@
 
     "last_page": {
         "data": {
-                "post_title": "Last Page",
-                "post_type": "page"
+            "post_title": "Last Page",
+            "post_type": "page",
+            "menu_order": 8
             },
         "metadata": {},
         "children": {}

@@ -1,5 +1,6 @@
 <?php
 
+require_once dirname( __FILE__ ) . '/nav-selenium-testcase.php';
 require_once dirname( __FILE__ ) . '/page-objects/navigation-metabox.php';
 
 /**

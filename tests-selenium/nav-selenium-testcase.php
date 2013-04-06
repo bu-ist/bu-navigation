@@ -30,7 +30,7 @@ class BU_Navigation_Selenium_Test_Case extends WP_SeleniumTestCase {
 		if ( is_null( $filename ) )
 			$filename = $type . '.json';
 
-		$path = dirname( __FILE__ ) . '/../fixtures/' . $filename;
+		$path = dirname( __FILE__ ) . '/../tests/fixtures/' . $filename;
 		$data = array();
 
 		if ( is_readable( $path ) ) {

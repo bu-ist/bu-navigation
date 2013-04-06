@@ -17,9 +17,3 @@ $GLOBALS['wp_tests_options'] = array(
 );
 
 require getenv( 'WP_TESTS_DIR' ) . '/includes/bootstrap.php';
-
-if ( defined( 'WP_TESTS_SELENIUM' ) && WP_TESTS_SELENIUM ) {
-	require dirname( __FILE__ ) . '/selenium/nav_selenium_testcase.php';
-} else {
-	require dirname( __FILE__ ) . '/nav_testcase.php';
-}

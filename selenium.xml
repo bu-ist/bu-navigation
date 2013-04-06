@@ -8,7 +8,7 @@
     </php>
     <testsuites>
         <testsuite name="SeleniumTests">
-            <directory prefix="test_" suffix=".php">./tests/selenium</directory>
+            <directory prefix="test_" suffix=".php">./tests-selenium</directory>
         </testsuite>
     </testsuites>
 </phpunit>

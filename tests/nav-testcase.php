@@ -89,14 +89,6 @@ class BU_Navigation_UnitTestCase extends WP_UnitTestCase {
 
 	}
 
-	public function load_test_users( $data ) {
-
-		foreach( (array) $data as $user ) {
-
-		}
-
-	}
-
 	/**
 	 * Helper to generate test section editing group
 	 *
@@ -106,7 +98,7 @@ class BU_Navigation_UnitTestCase extends WP_UnitTestCase {
 		if ( ! is_plugin_active( 'bu-section-editing/bu-section-editing.php' ) )
 			return;
 
-		$section_editor = $this->factory->user->create(array('role'=>'section_editor','user_email'=>'wptest3@bu.edu'));
+		$section_editor = $this->factory->user->create(array('role'=>'section_editor'));
 		$this->users['section_editor'] = $section_editor;
 
 		$allowed = array( $this->posts['child'], $this->posts['grandchild_one'], $this->posts['grandchild_two'] );

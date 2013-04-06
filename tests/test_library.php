@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname( __FILE__ ) . '/nav-testcase.php';
+
 /**
  * Coverage for functions in the BU Navigation library
  *

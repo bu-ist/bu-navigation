@@ -154,6 +154,7 @@ class BU_Navigation_Admin_Manager {
 			// Setup dynamic script context for manage.js
 			$script_context = array(
 				'postTypes' => $this->post_type,
+				'postStatuses' => array( 'publish', 'private' ),
 				'nodePrefix' => 'nm',
 				'lazyLoad' => true,
 				'showCounts' => true

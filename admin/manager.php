@@ -602,9 +602,14 @@ class BU_Navigation_Admin_Manager {
 					// Update post parent and menu order
 					$updated = wp_update_post(array('ID'=>$post->ID,'post_parent'=>$post->post_parent,'menu_order'=>$post->menu_order), true );
 
+					// Edge case detection ... this error appears even though the post has actually been updated
+					if ( is_wp_error( $updated ) && in_array( 'invalid_page_template', $updated->get_error_codes() ) ) {
+						if ( 1 == count( $updated->errors ) )
+							$updated = true;
+					}
+
 				}
 
-				// @todo handle ugly case where wp_update_post returns failure but has actually updated the post (i.e. invalid_page_template error)
 				if( false == $updated || is_wp_error( $updated ) ) {
 
 					error_log(sprintf('[BU Navigation Navman] Could not move post: %s', print_r($post, true)));

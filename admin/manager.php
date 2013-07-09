@@ -709,11 +709,8 @@ class BU_Navigation_Admin_Manager {
 				// Move under another post -- check if parent is editable
 				$allowed = current_user_can( 'edit_post', $parent->ID );
 
-				// Don't allow movement of published posts under non-published posts
-				if( $post->post_status == 'publish') {
-					$allowed = $allowed && $parent->post_status == 'publish';
-				}
 
+				// Links can't have children
 				if ( BU_NAVIGATION_LINK_POST_TYPE == $parent->post_type ) {
 					$allowed = false;
 				}

@@ -230,8 +230,8 @@ html[xmlns] .jstree-bu li {
 }
 
 .jstree-bu .post-statuses .post_status.excluded {
-	/*background: #f0ac7b;*/
-	background: #bfbfbf;
+	background: #f0ac7b;
+	/*background: #bfbfbf;*/
 	color: #fff;
 }
 

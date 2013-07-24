@@ -218,25 +218,22 @@ html[xmlns] .jstree-bu li {
 }
 
 .jstree-bu .post-statuses .post_status.restricted {
-	/*background: #f0ac7b;*/
 	background: #bfbfbf;
 	color: #fff;
 }
 
 .jstree-bu .post-statuses .post_status.protected {
-	/*background: #f0ac7b;*/
 	background: #bfbfbf;
 	color: #fff;
 }
 
 .jstree-bu .post-statuses .post_status.private {
-	background: #e2cf3f;
+	background: #bfbfbf;
 	color: #fff;
 }
 
 .jstree-bu .post-statuses .post_status.excluded {
 	background: #f0ac7b;
-	/*background: #bfbfbf;*/
 	color: #fff;
 }
 

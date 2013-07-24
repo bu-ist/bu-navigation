@@ -14,7 +14,6 @@
 
 
 // @todo remove Link Manager if links are disabled (?)
-// @todo remove hard coded post->post_type = 'link', read from server
 
 // Check prerequisites
 if ((typeof bu === 'undefined') ||
@@ -96,7 +95,7 @@ if ((typeof bu === 'undefined') ||
 		},
 
 		editPost: function (post) {
-			if ('link' === post.post_type) {
+			if (bu_navman_settings.linksPostType === post.post_type) {
 				Linkman.edit(post);
 			} else {
 				var url = "post.php?action=edit&post=" + post.ID;
@@ -311,7 +310,7 @@ if ((typeof bu === 'undefined') ||
 				msg = bu_navman_settings.noLinksNotice;
 
 				// User is attempting to add a link below a link
-				if (selected && 'link' === selected.post_type ) {
+				if (selected && bu_navman_settings.linksPostType === selected.post_type ) {
 					msg = bu_navman_settings.noChildLinkNotice + "\n\n" + bu_navman_settings.createLinkNotice;
 
 				} else {
@@ -330,7 +329,7 @@ if ((typeof bu === 'undefined') ||
 
 			} else {
 				// Setup new link
-				this.data.currentLink = { "post_status": "new", "post_type": "link", "post_meta": {} };
+				this.data.currentLink = { "post_status": "new", "post_type": bu_navman_settings.linksPostType, "post_meta": {} };
 				this.$el.dialog('option', 'title', bu_navman_settings.addLinkDialogTitle).dialog('open');
 			}
 
@@ -422,7 +421,7 @@ if ((typeof bu === 'undefined') ||
 		onPostSelected: function (post) {
 			var canAdd = true;
 
-			if (post.post_type == 'link') {
+			if (post.post_type == bu_navman_settings.linksPostType) {
 				canAdd = false;
 			}
 

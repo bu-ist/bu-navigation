@@ -9,14 +9,14 @@ class BUN_Settings_Page {
 	const URL = '/wp-admin/themes.php?page=bu-navigation-settings';
 	const PAGE_HEADING_XPATH = "//h2[contains(text(),'Primary Navigation')]";
 
-	const FORM_ID = 'bu_navigation_primary_navigation';
+	const FORM_ID = 'bu-nav-primary-settings';
 	private $form;
 	private $option_fields = array(
-		'display' => array( 'name' => 'bu_navigation_primarynav', 'type' => 'checkbox' ),
-		'max_items' => array( 'name' => 'bu_navigation_primarynav_max', 'type' => 'text' ),
-		'dive' => array( 'name' => 'bu_navigation_primarynav_dive', 'type' => 'checkbox' ),
-		'depth' => array( 'name' => 'bu_navigation_primarynav_depth', 'type' => 'select' ),
-		'allow_top' => array( 'name' => 'bu_allow_top_level_page', 'type' => 'checkbox' ),
+		'display' => array( 'name' => 'bu-nav-settings[display]', 'type' => 'checkbox' ),
+		'max_items' => array( 'name' => 'bu-nav-settings[max_items]', 'type' => 'text' ),
+		'dive' => array( 'name' => 'bu-nav-settings[dive]', 'type' => 'checkbox' ),
+		'depth' => array( 'name' => 'bu-nav-settings[depth]', 'type' => 'select' ),
+		'allow_top' => array( 'name' => 'bu-nav-settings[allow_top]', 'type' => 'checkbox' ),
 		);
 
 	// Xpath templates

@@ -947,19 +947,25 @@ function bu_navigation_page_parent_dropdown( $post_type, $selected = 0, $args = 
 		'echo' => 1,
 		'select_id' => 'bu_filter_pages',
 		'select_name' => 'post_parent',
-		'select_classes' => ''
+		'select_classes' => '',
+		'post_status' => array( 'publish', 'private' )
 		);
-	extract( wp_parse_args( $args, $defaults) );
+	$r = wp_parse_args( $args, $defaults);
 
 	// Grab top level pages for current post type
-	$section_args = array('direction' => 'down', 'depth' => 1, 'post_types' => array($post_type));
+	$args = array(
+		'direction' => 'down',
+		'depth' => 1,
+		'post_types' => (array) $post_type
+		);
+	$sections = bu_navigation_gather_sections(0, $args);
 
 	$args = array(
 		'suppress_filter_pages' => TRUE,
-		'sections' => bu_navigation_gather_sections(0, $section_args),
-		'post_types' => array($post_type),
+		'sections' => $sections,
+		'post_types' => (array) $post_type,
+		'post_status' => (array) $r['post_status']
 		);
-
 	$pages = bu_navigation_get_pages($args);
 	$pages_by_parent = bu_navigation_pages_by_parent($pages);
 
@@ -971,11 +977,11 @@ function bu_navigation_page_parent_dropdown( $post_type, $selected = 0, $args = 
 	$options .= ob_get_contents();
 	ob_end_clean();
 
-	$classes = ! empty( $select_classes ) ? " class=\"$select_classes\"" : '';
+	$classes = ! empty( $r['select_classes'] ) ? " class=\"{$r['select_classes']}\"" : '';
 
-	$dropdown = sprintf( "<select id=\"%s\" name=\"%s\"%s>\r%s\r</select>\r", $select_id, $select_name, $classes, $options );
+	$dropdown = sprintf( "<select id=\"%s\" name=\"%s\"%s>\r%s\r</select>\r", $r['select_id'], $r['select_name'], $classes, $options );
 
-	if( $echo ) echo $dropdown;
+	if( $r['echo'] ) echo $dropdown;
 
 	return $dropdown;
 

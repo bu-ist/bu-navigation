@@ -582,11 +582,12 @@ bu.plugins.navigation = {};
 				return bu.hooks.applyFilters('nodeToPost', post, node);
 			};
 
-			my.postToNode = function( post ) {
+			my.postToNode = function( post, hasChildren ) {
 				if (typeof post === 'undefined')
 					throw new TypeError('Invalid post!');
 
-				var default_post, p, node, post_id;
+				var default_post, p, node, post_id,
+					hasChildren = hasChildren || false;
 
 				// @todo refactor to getDefaultPost method
 				default_post = {
@@ -608,7 +609,7 @@ bu.plugins.navigation = {};
 				node = {
 					"attr": {
 						"id": post_id,
-						"rel" : p.post_type
+						"rel" : my.getRelAttrForPost(post, hasChildren)
 					},
 					"data": {
 						"title": p.post_title
@@ -658,6 +659,17 @@ bu.plugins.navigation = {};
 			my.stripNodePrefix = function( str ) {
 				return str.replace( c.nodePrefix, '');
 			};
+
+			my.getRelAttrForPost = function(post, hasChildren) {
+				var rel;
+				
+				if (hasChildren) {
+					rel = 'section';
+				} else {
+					rel = post.post_type == c.linksPostType ? 'link' : 'page';
+				}
+				return rel;
+			}
 
 			// ======= Private ======= //
 

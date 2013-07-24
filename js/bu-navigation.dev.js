@@ -158,26 +158,19 @@ bu.plugins.navigation = {};
 
 			// Allow clients to stop certain actions and UI interactions via filters
 			var checkMove = function( m ) {
-				var post = my.nodeToPost( m.o ), parent;
-				var allowed = true;
+				var post, parent, isTopLevelMove, isVisible, wasTop;
 
-				var isTopLevelMove = m.cr === -1;
-				var isVisible = post.post_meta['excluded'] === false || post.post_type === c.linksPostType;
-				var wasTop = !post.originalExclude && (post.originalParent === 0 || (post.post_status === 'new' && post.post_type !== c.linksPostType));
+				post = my.nodeToPost(m.o);
+				isTopLevelMove = m.cr === -1;
+				isVisible = post.post_meta['excluded'] === false || post.post_type === c.linksPostType;
+
+				allowed = true;
 
 				// Don't allow top level posts if global option prohibits it
-				if (isTopLevelMove && !wasTop && isVisible && !c.allowTop) {
+				if (isTopLevelMove && isVisible && !wasTop && !c.allowTop) {
 					// console.log('Move denied, top level posts cannot be created!');
 					// @todo pop up a friendlier notice explaining this
 					allowed = false;
-				}
-
-				// Don't allow published posts to be moved under unpublished posts
-				if (m.np.length && m.np.attr('id') !== $tree.attr('id'))  {
-					parent = my.nodeToPost( m.np );
-					if (post.post_status == 'publish' && parent.post_status != 'publish') {
-						allowed = false;
-					}
 				}
 
 				return bu.hooks.applyFilters( 'moveAllowed', allowed, m, that );

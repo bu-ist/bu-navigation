@@ -100,6 +100,7 @@ class BU_Navigation_Admin_Post {
 
 		$script_context = array(
 			'postTypes' => $this->post_type,
+			'postStatuses' => array( 'publish', 'private' ),
 			'currentPost' => $this->post_id,
 			'ancestors' => $ancestors,
 			'lazyLoad' => false,

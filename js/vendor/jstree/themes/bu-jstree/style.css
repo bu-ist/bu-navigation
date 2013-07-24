@@ -229,6 +229,11 @@ html[xmlns] .jstree-bu li {
 	color: #fff;
 }
 
+.jstree-bu .post-statuses .post_status.private {
+	background: #e2cf3f;
+	color: #fff;
+}
+
 .jstree-bu .post-statuses .post_status.excluded {
 	background: #f0ac7b;
 	/*background: #bfbfbf;*/

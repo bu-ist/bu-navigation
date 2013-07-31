@@ -688,6 +688,8 @@ function bu_navigation_list_section($parent_id, $pages_by_parent, $args = '')
 
 /**
  * Alternative to WordPress' wp_list_pages function
+ * 
+ * @todo refactor to decouple widget-specific logic
  *
  * @param $args mixed Array or string of WP-style arguments
  * @return string HTML fragment containing navigation list
@@ -733,7 +735,7 @@ function bu_navigation_list_pages( $args = '' ) {
 		'include_links' => $r['include_links'],
 		);
 	$pages = bu_navigation_get_pages( $page_args );
-	$pages_by_parent = bu_navigation_pages_by_parent($pages);
+	$pages_by_parent = bu_navigation_pages_by_parent( $pages );
 
 	$sections = ! empty( $r['sections'] ) ? $r['sections'] : array_keys( $pages_by_parent );
 
@@ -771,10 +773,11 @@ function bu_navigation_list_pages( $args = '' ) {
 
 	// Sectional navigation requires at least two levels
 	if ( $r['navigate_in_section'] ) {
-		if ( isset( $sections[1] ) )
+		if ( isset( $sections[1] ) ) {
 			$section = $sections[1];
-		else
+		} else {
 			$section = null;
+		}
 	}
 
 	// Loop over top section
@@ -809,7 +812,7 @@ function bu_navigation_list_pages( $args = '' ) {
 		}
 
 	} else {
-		return ''; // nothing to display, return nothing
+		return '';
 	}
 
 	$html .= sprintf( "</%s>\n", $r['container_tag'] );

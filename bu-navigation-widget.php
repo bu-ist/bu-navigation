@@ -190,9 +190,6 @@ class BU_Widget_Pages extends WP_Widget {
 		$instance['navigation_title_url'] = ( $instance['navigation_title'] == 'static' ) ? sanitize_text_field( $new_instance['navigation_title_url'] ) : '';
 		$instance['navigation_style'] = ( in_array( $new_instance['navigation_style'], $this->styles ) ) ? $new_instance['navigation_style'] : 'site';
 
-		if ( function_exists( 'invalidate_blog_cache' ) )
-			invalidate_blog_cache();
-
 		return $instance;
 	}
 

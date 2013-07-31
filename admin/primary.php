@@ -145,11 +145,7 @@ class BU_Navigation_Admin_Primary {
 
 			// Update
 			if( $success && empty( $errors ) ) {
-
 				$this->plugin->settings->update( $updates );
-
-				if (function_exists('invalidate_blog_cache')) invalidate_blog_cache();
-
 			}
 
 			return array( 'success' => $success, 'errors' => $errors );

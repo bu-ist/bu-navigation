@@ -383,8 +383,6 @@ class BU_Navigation_Admin_Manager {
 				array_merge( $errors, $this->reorder_tracker->errors );
 			}
 
-			if (function_exists('invalidate_blog_cache')) invalidate_blog_cache();
-
 			if( 0 == count( $errors ) ) {
 				$saved = true;
 			} else {

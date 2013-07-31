@@ -50,46 +50,39 @@ class BU_Widget_Pages extends WP_Widget {
 			// Adaptive navigation style uses the grandparent of current post
 			if ( $instance['navigation_style'] == 'adaptive' ) {
 				$grandparent_offset = count( $sections ) - 2;
-				if ( isset( $sections[$grandparent_offset] ) )
+				if ( isset( $sections[$grandparent_offset] ) ) {
 					$section_id = $sections[$grandparent_offset];
+				}
 			} else {
 				// Default to top level post (if we have one)
-				if ( isset( $sections[1] ) )
+				if ( isset( $sections[1] ) ) {
 					$section_id = $sections[1];
+				}
 			}
 
 		}
 
-		// Display title, depending on whether or not a valid section post exists
+		// Use section post for title
 		if ( $section_id ) {
-
 			$section = get_post( $section_id );
 
-			// Run section through page label filter first (which expects an array of posts keyed on post ID)
-			$sections = apply_filters( 'bu_navigation_filter_page_labels', array( $section->ID => $section ) );
-			$section = array_shift( $sections );
-
-			// Fallback to post title if no label was set
-			if ( ! isset( $section->navigation_label ) )
-				$section->navigation_label = apply_filters( 'the_title', $section->post_title );
-
-			// Prepare for display
-			$title = esc_attr( $section->navigation_label );
-			$href = get_permalink( $section->ID );
-
-		} else {
-
-			/* Use site name as title */
-			/* Note: I consider this a bug; we should use the navigation label of the homepage */
-			/* Note 2: It's kind of pompous and/or passive-agressive to note my objections to this */
-			/* here as nobody will ever read it. */
-
-			$title = get_bloginfo( 'name' );
-			$href = get_bloginfo( 'url' ) . '/';
-
+			// Prevent usage of non-published posts as titles
+			if ( 'publish' === $section->post_status ) {
+				// Second argument prevents usage of default (no title) label
+				$title = bu_navigation_get_label( $section, '' );
+				$href = get_permalink( $section->ID );
+			}
 		}
 
-		$html = sprintf( "<a class=\"content_nav_header\" href=\"%s\">%s</a>\n", $href, $title );
+		// Fallback to site title if we're still empty
+		if ( empty( $title ) ) {
+			$title = get_bloginfo( 'name' );
+			$href = trailingslashit( get_bloginfo( 'url' ) );
+		}
+
+		if ( $title && $href ) {
+			$html =  sprintf( "<a class=\"content_nav_header\" href=\"%s\">%s</a>\n", esc_attr( $href ), $title );
+		}
 
 		return $html;
 

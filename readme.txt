@@ -76,6 +76,12 @@ Please see this page for the details:
 
 == Changelog ==
 
+= 1.1.3 =
+
+* Add support for privately published posts in navigation management views
+* Fix for bug that was preventing links from saving
+* Assorted cleanup
+
 = 1.1.2 =
 
 * Initial WP.org release

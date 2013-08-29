@@ -1,9 +1,9 @@
 === BU Navigation ===
-Contributors: ntk, mgburns, gcorne
+Contributors: ntk, mgburns, gcorne, jtwiest
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
 Tested up to: 3.5
-Stable tag: 1.1.2
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,10 @@ Please see this page for the details:
 5. The same drag and drop view is available to move pages while editing them
 
 == Changelog ==
+
+= 1.1.4 =
+
+* WP.org release
 
 = 1.1.3 =
 

@@ -1,9 +1,9 @@
 # BU Navigation #
-**Contributors:** ntk, mgburns, gcorne
+**Contributors:** ntk, mgburns, gcorne, jtwiest
 **Tags:** navigation, hierarchical, post type, boston university, bu
 **Requires at least:** 3.1
 **Tested up to:** 3.5
-**Stable tag:** 1.1.2
+**Stable tag:** 1.1.4
 **License:** GPLv2 or later
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -69,22 +69,26 @@ Please see this page for the details:
 ## Screenshots ##
 
 ### 1. Manage your site’s page hierarchy with an easy to use drag and drop interface ###
-![1. Manage your site’s page hierarchy with an easy to use drag and drop interface](http://s.wordpress.org/extend/plugins/bu-navigation/assets/screenshot-1.png)
+![1. Manage your site’s page hierarchy with an easy to use drag and drop interface](http://s-plugins.wordpress.org/bu-navigation/assets/screenshot-1.png)
 
 ### 2. The “Add a Link” tool allows you to add external links to your navigation lists ###
-![2. The “Add a Link” tool allows you to add external links to your navigation lists](http://s.wordpress.org/extend/plugins/bu-navigation/assets/screenshot-2.png)
+![2. The “Add a Link” tool allows you to add external links to your navigation lists](http://s-plugins.wordpress.org/bu-navigation/assets/screenshot-2.png)
 
 ### 3. The “Content Navigation” widget presents a configurable sidebar navigation list ###
-![3. The “Content Navigation” widget presents a configurable sidebar navigation list](http://s.wordpress.org/extend/plugins/bu-navigation/assets/screenshot-3.png)
+![3. The “Content Navigation” widget presents a configurable sidebar navigation list](http://s-plugins.wordpress.org/bu-navigation/assets/screenshot-3.png)
 
 ### 4. The “Navigation Attributes” metabox replaces the built-in “Page Parent” and “Menu Order” dropdowns ###
-![4. The “Navigation Attributes” metabox replaces the built-in “Page Parent” and “Menu Order” dropdowns](http://s.wordpress.org/extend/plugins/bu-navigation/assets/screenshot-4.png)
+![4. The “Navigation Attributes” metabox replaces the built-in “Page Parent” and “Menu Order” dropdowns](http://s-plugins.wordpress.org/bu-navigation/assets/screenshot-4.png)
 
 ### 5. The same drag and drop view is available to move pages while editing them ###
-![5. The same drag and drop view is available to move pages while editing them](http://s.wordpress.org/extend/plugins/bu-navigation/assets/screenshot-5.png)
+![5. The same drag and drop view is available to move pages while editing them](http://s-plugins.wordpress.org/bu-navigation/assets/screenshot-5.png)
 
 
 ## Changelog ##
+
+## 1.1.4 ##
+
+* WP.org release
 
 ### 1.1.3 ###
 

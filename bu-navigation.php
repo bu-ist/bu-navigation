@@ -89,11 +89,11 @@ class BU_Navigation_Plugin {
 
 		load_plugin_textdomain( BU_NAV_TEXTDOMAIN, false, plugin_basename( dirname( __FILE__ ) ) . '/languages/' );
 
+		$this->load_extras();
+
 		if( is_admin() ) {
 			$this->load_admin();
 		}
-
-		$this->load_extras();
 
 		if ( $this->supports( 'widget' ) )
 			$this->load_widget();

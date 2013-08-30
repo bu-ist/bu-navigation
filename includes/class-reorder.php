@@ -83,7 +83,7 @@ class BU_Navigation_Reorder_Tracker {
 		$posts = bu_navigation_get_pages( array(
 			'sections' => $sections,
 			'suppress_filter_pages' => true,
-			'post_status' => array('publish'),
+			'post_status' => array('publish', 'private'),
 			'post_types' => $this->post_types
 			)
 		);

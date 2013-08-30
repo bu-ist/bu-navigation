@@ -371,9 +371,10 @@ class WP_Test_BU_Navigation_Admin_Manager extends BU_Navigation_UnitTestCase {
 		// Reordering
 		$this->assertEquals( 1, get_post($this->posts['grandchild_one'])->menu_order);
 		$this->assertEquals( 2, get_post($this->posts['parent'])->menu_order);
-		$this->assertEquals( 3, get_post($this->posts['google'])->menu_order);
+		$this->assertEquals( 3, get_post($this->posts['private'])->menu_order);
 		/* new link two should be 4 */
-		$this->assertEquals( 5, get_post($this->posts['last_page'])->menu_order);
+		$this->assertEquals( 5, get_post($this->posts['google'])->menu_order);
+		$this->assertEquals( 6, get_post($this->posts['last_page'])->menu_order);
 
 		$this->assertEquals( 1, get_post($this->posts['edit'])->menu_order);
 		$this->assertEquals( 2, get_post($this->posts['grandchild_two'])->menu_order);

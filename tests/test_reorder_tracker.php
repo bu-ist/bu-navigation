@@ -130,24 +130,28 @@ class WP_Test_Reorder_Tracker extends BU_Navigation_UnitTestCase {
 		$this->assertEquals( 2, get_post($this->posts['grandchild_two'])->menu_order );
 
 		$this->assertEquals( 0, get_post($this->posts['hidden'])->post_parent );
-		$this->assertEquals( 1, get_post($this->posts['parent'])->menu_order ); // should have been reordered
+		$this->assertEquals( 1, get_post($this->posts['parent'])->menu_order );
 		$this->assertEquals( 2, get_post($this->posts['hidden'])->menu_order );
-		$this->assertEquals( 3, get_post($this->posts['edit'])->menu_order ); // should have been reordered
-		$this->assertEquals( 4, get_post($this->posts['google'])->menu_order ); // should have been reordered
-		$this->assertEquals( 5, get_post($this->posts['last_page'])->menu_order ); // should have been reordered
+		$this->assertEquals( 3, get_post($this->posts['edit'])->menu_order );
+		$this->assertEquals( 4, get_post($this->posts['private'])->menu_order );
+		$this->assertEquals( 5, get_post($this->posts['google'])->menu_order );
+		$this->assertEquals( 6, get_post($this->posts['last_page'])->menu_order );
 
 		$tracker = new BU_Navigation_Reorder_Tracker('page');
 
 		wp_update_post(array('ID'=>$this->posts['hidden'],'post_parent'=>$this->posts['child'],'menu_order'=>1));
 		wp_update_post(array('ID'=>$this->posts['child'],'post_parent'=>0,'menu_order'=>1));
 		wp_delete_post($this->posts['grandchild_two'], true);
+		wp_update_post(array('ID'=>$this->posts['private'],'menu_order'=>5));
 
 		$move_one = get_post($this->posts['hidden']);
 		$move_two = get_post($this->posts['child']);
+		$move_three = get_post($this->posts['private']);
 
 		// Mark two posts as moved, reorder section that contained deleted child
 		$tracker->mark_post_as_moved($move_one);
 		$tracker->mark_post_as_moved($move_two);
+		$tracker->mark_post_as_moved($move_three);
 		$tracker->mark_section_for_reordering( $this->posts['child'] );
 
 		// Perform reordering
@@ -155,13 +159,14 @@ class WP_Test_Reorder_Tracker extends BU_Navigation_UnitTestCase {
 
 		$this->assertEquals( $this->posts['child'], get_post($this->posts['hidden'])->post_parent );
 		$this->assertEquals( 1, get_post($this->posts['hidden'])->menu_order );
-		$this->assertEquals( 2, get_post($this->posts['grandchild_one'])->menu_order ); // should have been reordered
+		$this->assertEquals( 2, get_post($this->posts['grandchild_one'])->menu_order );
 		$this->assertEquals( 0, get_post($this->posts['child'])->post_parent );
 		$this->assertEquals( 1, get_post($this->posts['child'])->menu_order );
-		$this->assertEquals( 2, get_post($this->posts['parent'])->menu_order ); // should have been reordered
-		$this->assertEquals( 3, get_post($this->posts['edit'])->menu_order ); // should have been reordered
-		$this->assertEquals( 4, get_post($this->posts['google'])->menu_order ); // should have been reordered
-		$this->assertEquals( 5, get_post($this->posts['last_page'])->menu_order ); // should have been reordered
+		$this->assertEquals( 2, get_post($this->posts['parent'])->menu_order );
+		$this->assertEquals( 3, get_post($this->posts['edit'])->menu_order );
+		$this->assertEquals( 4, get_post($this->posts['google'])->menu_order );
+		$this->assertEquals( 5, get_post($this->posts['private'])->menu_order );
+		$this->assertEquals( 6, get_post($this->posts['last_page'])->menu_order );
 
 	}
 

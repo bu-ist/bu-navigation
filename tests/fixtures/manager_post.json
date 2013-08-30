@@ -52,13 +52,13 @@
       "post_status":"publish",
       "post_type":"bu_link",
       "post_parent": 0,
-      "menu_order": 4,
+      "menu_order": 5,
       "post_meta":{
         "bu_link_target":""
       },
       "url":"http://www.bing.com",
       "originalParent": 0,
-      "originalOrder": 4,
+      "originalOrder": 5,
       "originalExclude": false,
       "post_content":"http://www.bing.com",
       "ID": "%google%",

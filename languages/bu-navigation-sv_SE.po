@@ -1,0 +1,514 @@
+# Copyright (C) 2013 BU Navigation
+# This file is distributed under the same license as the BU Navigation package.
+msgid ""
+msgstr ""
+"Project-Id-Version: BU Navigation 1.1.4\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/bu-navigation\n"
+"POT-Creation-Date: 2013-08-29 15:08:14+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2013-09-17 13:47+0100\n"
+"Last-Translator: \n"
+"Language-Team: IVEO <info@iveo.se>\n"
+"X-Generator: Poedit 1.5.7\n"
+"Language: sv_SE\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"Plural-Forms: nplurals=2; plural=n == 1 ? 0 : 1;\n"
+
+#: admin/admin.php:82
+msgid "Are you sure you want to delete this %s?"
+msgstr "Är du säker på att du vill ta bort denna %s?"
+
+#: admin/admin.php:83
+msgid "Are you sure you want to delete these %s?"
+msgstr "Är du säker på att du vill ta bort dessa %s?"
+
+#: admin/admin.php:229
+msgid "\"%s\" is a hidden %s with "
+msgstr "\"%s\" är en dold %s med"
+
+#: admin/admin.php:233
+msgid "a child "
+msgid_plural "%d child "
+msgstr[0] "en undersida"
+msgstr[1] "undersidor"
+
+#: admin/admin.php:238
+msgid "a child link"
+msgid_plural "%d child links"
+msgstr[0] "en underlänk"
+msgstr[1] "underlänkar"
+
+#: admin/admin.php:242
+msgid " and "
+msgstr "och"
+
+#: admin/admin.php:246
+msgid ""
+" If you delete this %1$s, %2$s will move up one node in the %1$s hierarchy, "
+"and will automatically be marked as hidden."
+msgstr ""
+"Om du tar bort denna %1$s så kommer %2$s flyttas upp en nod i %1$s hierarkin "
+"och automatiskt markeras som dold."
+
+#: admin/admin.php:252
+msgid ""
+" If you delete this %1$s, %2$s will move up one node in the %1$s hierarchy, "
+"and will be displayed in navigation menus."
+msgstr ""
+"Om du tar bort denna %1$s så kommer %2$s flyttas upp en nod i %1$s hierarkin "
+"och automatiskt visas i navigeringen."
+
+#: admin/manager.php:95 admin/manager.php:96
+msgid "Edit Order"
+msgstr "Redigera ordning"
+
+#: admin/manager.php:131 admin/post.php:91
+msgid "Site Design > Primary Navigation"
+msgstr "Anpassa > Primary Navigation"
+
+#: admin/manager.php:133 admin/post.php:93
+msgid "Appearance > Primary Navigation"
+msgstr "Appearance > Primary Navigation"
+
+#: admin/manager.php:136
+msgid "options"
+msgstr "alternativ"
+
+#: admin/manager.php:137
+msgid "Edit"
+msgstr "Redigera"
+
+#: admin/manager.php:138
+msgid "View"
+msgstr "Visa"
+
+#: admin/manager.php:139
+msgid "Delete"
+msgstr "Ta bort"
+
+#: admin/manager.php:140
+msgid "Move to Trash"
+msgstr "Flytta till papperskorgen"
+
+#: admin/manager.php:141 templates/edit-order.php:17
+msgid "Add a Link"
+msgstr "Lägg till en länk"
+
+#: admin/manager.php:142 extras/bu-navigation-external-links.php:23
+msgid "Edit Link"
+msgstr "Redigera länk"
+
+#: admin/manager.php:143 templates/metabox-navigation-attributes.php:28
+msgid "Cancel"
+msgstr "Avbryt"
+
+#: admin/manager.php:144
+msgid "Ok"
+msgstr "Ok"
+
+#: admin/manager.php:145
+msgid "You are not allowed to create top level published content."
+msgstr "Du har inte rättigheter att skapa innehåll på toppnivå"
+
+#: admin/manager.php:146
+msgid "You are not allowed to add links"
+msgstr "Du har inte rättigheter att skapa länkar"
+
+#: admin/manager.php:147
+msgid ""
+"Select a page that you can edit and click \"Add a Link\" to create a new "
+"link below the selected page."
+msgstr ""
+"Välj en sida som du kan redigera och klicka på \"Add a Link\"  för att skapa "
+"en ny länk under markerad sida"
+
+#: admin/manager.php:148
+msgid ""
+"Site administrators can change this behavior by visiting %s and enabling the "
+"\"Allow Top-Level Pages\" setting."
+msgstr ""
+"Administratörer kan ändra detta beteende genom att besöka %s och aktivera "
+"inställningen för \"Allow Top-Level Pages\" "
+
+#: admin/manager.php:149
+msgid "Links are not permitted to have children."
+msgstr "Det är inte tillåten för länkar att ha undersidor"
+
+#: admin/manager.php:150
+msgid "You have made changes to your navigation that have not yet been saved."
+msgstr "Du har gjort ändringar av navigationen som ännu inte sparats."
+
+#: admin/manager.php:151
+msgid "Saving navigation changes..."
+msgstr "Sparar ändringar i navigationen..."
+
+#: admin/manager.php:241
+msgid "Your navigation changes have been saved"
+msgstr "Dina ändringar har sparats"
+
+#: admin/manager.php:245
+msgid "Errors occurred while saving your navigation changes."
+msgstr "Ett fel uppstod när navigeringen skulle sparas"
+
+#: admin/manager.php:246
+msgid "Warning: %s is currently editing this site's navigation."
+msgstr "Varning: %s ändrar för närvarande denna sidas navigation."
+
+#: admin/post.php:96
+msgid "Displaying top-level %s in navigation lists is currently disabled."
+msgstr "Visning av toppnoder i navigationslistor är för närvarande avstängt"
+
+#: admin/post.php:97
+msgid ""
+"To change this behavior, visit %s and enable the \"Allow Top-Level Pages\" "
+"setting."
+msgstr ""
+"För att ändra detta beteende, besök %s och sätt på \"Allow Top-Level Pages\""
+
+#: admin/post.php:98
+msgid "Top level %s"
+msgstr "Toppnod %s"
+
+#: admin/post.php:136 templates/metabox-custom-template.php:2
+msgid "%s Template"
+msgstr "Sidmall"
+
+#: admin/post.php:146
+msgid "Placement in Navigation"
+msgstr "Placering i navigationen"
+
+#: admin/post.php:310
+msgid "Top level page"
+msgstr "Sida i toppnivå"
+
+#: admin/primary.php:42 admin/primary.php:43
+#: templates/primary-navigation.php:3
+msgid "Primary Navigation"
+msgstr "Primär navigation"
+
+#: admin/primary.php:127
+msgid "The \"Maximum Items\" setting most be a positive value."
+msgstr "Inställningen för \"Maximum Items\" måste vara ett positivt värde."
+
+#: admin/primary.php:139
+msgid "The current theme only supports %s level of children."
+msgid_plural "The current theme only supports up to %s levels of children."
+msgstr[0] "Detta tema stödjer endast %s nivå av undersidor"
+msgstr[1] "Detta tema stödjer endast %s nivåer av undersidor"
+
+#: bu-navigation-widget.php:27
+msgid "Navigation list of your site's pages"
+msgstr "Navigeringen för din webbplats sidor"
+
+#: bu-navigation-widget.php:28
+msgid "Content Navigation"
+msgstr "Innehållsnavigering"
+
+#: extras/bu-navigation-external-links.php:15
+msgctxt "Post Type General Name"
+msgid "BU Navigation Links"
+msgstr "BU Navigationslänkar"
+
+#: extras/bu-navigation-external-links.php:16
+msgctxt "Post Type Singular Name"
+msgid "BU Navigation Link"
+msgstr "BU Navigationslänk"
+
+#: extras/bu-navigation-external-links.php:17
+msgid "Link"
+msgstr "Länk"
+
+#: extras/bu-navigation-external-links.php:18
+msgid "Parent Link:"
+msgstr "Förälderns länk:"
+
+#: extras/bu-navigation-external-links.php:19
+msgid "All Links"
+msgstr "Alla länkar"
+
+#: extras/bu-navigation-external-links.php:20
+msgid "View Link"
+msgstr "Visa länk"
+
+#: extras/bu-navigation-external-links.php:21
+msgid "Add New Link"
+msgstr "Lägg till ny länk"
+
+#: extras/bu-navigation-external-links.php:22
+msgid "New Link"
+msgstr "Ny länk"
+
+#: extras/bu-navigation-external-links.php:24
+msgid "Update Link"
+msgstr "Uppdatera länk"
+
+#: extras/bu-navigation-external-links.php:25
+msgid "Search links"
+msgstr "Sök länkar"
+
+#: extras/bu-navigation-external-links.php:26
+msgid "No links found"
+msgstr "Inga länkar hittades"
+
+#: extras/bu-navigation-external-links.php:27
+msgid "No links found in Trash"
+msgstr "Inga länkar hittades i papperskorgen"
+
+#: extras/bu-navigation-external-links.php:31
+msgid "BU Navigation Link"
+msgstr "BU Navigationslänk"
+
+#: extras/bu-navigation-external-links.php:32
+msgid "External links used by BU Navigation plugin"
+msgstr "Externa länkar som används av pluginet BU Navigation"
+
+#: includes/class-tree-view.php:26
+msgid "(no title)"
+msgstr "(ingen titel)"
+
+#: includes/class-tree-view.php:46
+msgid "not in nav"
+msgstr "inte i navigering"
+
+#: includes/class-tree-view.php:47
+msgid "protected"
+msgstr "skyddad"
+
+#: includes/library.php:975
+msgid "Show all sections"
+msgstr "Visa alla sektioner"
+
+#: templates/edit-order.php:3
+msgid "%s Order"
+msgstr "Sidordning"
+
+#: templates/edit-order.php:14
+msgid "Expand All"
+msgstr "Expandera alla"
+
+#: templates/edit-order.php:15
+msgid "Collapse All"
+msgstr "Fäll ihop alla"
+
+#: templates/edit-order.php:25
+msgid "Publish"
+msgstr "Spara"
+
+#: templates/edit-order.php:27
+msgid "Note"
+msgstr "Notis"
+
+#: templates/edit-order.php:27
+msgid "You must publish changes to navigation, or all changes will be lost."
+msgstr ""
+"Du måste spara dina ändringar i navigationen, annars kommer alla ändringar "
+"gå förlorade."
+
+#: templates/edit-order.php:30
+msgid "Publish Changes"
+msgstr "Spara ändringar"
+
+#: templates/edit-order.php:43
+msgid "Link URL"
+msgstr "Länk URL"
+
+#: templates/edit-order.php:47
+msgid "Link Label"
+msgstr "Länketikett"
+
+#: templates/edit-order.php:52
+msgid "Open Link in Same Window"
+msgstr "Öppna länk i samma fönster"
+
+#: templates/edit-order.php:56
+msgid "Open Link in New Window"
+msgstr "Öppna länk i nytt fönster"
+
+#: templates/metabox-custom-template.php:1
+msgid "Template"
+msgstr "Sidmall"
+
+#: templates/metabox-custom-template.php:4
+msgid "Default Template"
+msgstr "Standardmall"
+
+#: templates/metabox-custom-template.php:7
+msgid ""
+"Some themes have custom templates you can use for certain %s that might have "
+"additional features or custom layouts."
+msgstr ""
+"Vissa teman har sidmallar som du kan använda för sidor för att få extra "
+"inställningar eller annan layout"
+
+#: templates/metabox-navigation-attributes.php:12
+msgid "%s Location"
+msgstr "%s Plats"
+
+#: templates/metabox-navigation-attributes.php:13
+msgid "Move %s"
+msgstr "Flytta %s"
+
+#: templates/metabox-navigation-attributes.php:17
+msgid "Label"
+msgstr "Etikett"
+
+#: templates/metabox-navigation-attributes.php:21
+msgid "Visibility"
+msgstr "Synlighet"
+
+#: templates/metabox-navigation-attributes.php:23
+msgid "Display in navigation lists."
+msgstr "Visa i navigering"
+
+#: templates/metabox-navigation-attributes.php:29
+msgid "Update Location"
+msgstr "Uppdatera plats"
+
+#: templates/metabox-navigation-attributes.php:31
+msgid "Drag %s to change the %s location in the hierarchy."
+msgstr "Drag %s för att ändra plats i hierarkin"
+
+#: templates/metabox-navigation-attributes.php:34
+msgid ""
+"Note: The page that you are moving is not published. You can move it to a "
+"new location, but you do not have permission to publish in sections marked "
+"as denied "
+msgstr ""
+"Notis: Sidan du flyttar är inte publicerad. Du kan flytta den till en ny "
+"plats men du måste ha rättigheter att publicera i sektionerna markerade som "
+"nekade"
+
+#: templates/primary-navigation.php:6
+msgid "Primary navigation settings saved."
+msgstr "Inställningarna för primära navigationen sparades."
+
+#: templates/primary-navigation.php:10
+msgid "Error"
+msgstr "Fel"
+
+#: templates/primary-navigation.php:10
+msgid ""
+"The following error(s) occurred while attempting to save your primary "
+"navigation settings."
+msgstr "Följande fel uppstod när din primära navigation skulle sparas."
+
+#: templates/primary-navigation.php:16
+msgid ""
+"Your primary navigation bar is the horizontal bar at the top of every page "
+"which shows users your top-level navigation no matter where they are."
+msgstr ""
+"Din primära navigation är den horisontella navigeringen på varje sida som "
+"visar toppnoderna oavsett var användaren befinner sig. "
+
+#: templates/primary-navigation.php:22
+msgid "Display primary navigation bar"
+msgstr "Visa primär navigation"
+
+#: templates/primary-navigation.php:24
+msgid "Toggles the primary navigation bar on and off."
+msgstr "Stänger av/sätter på primära navigationen"
+
+#: templates/primary-navigation.php:29
+msgid "Maximum items"
+msgstr "Max element"
+
+#: templates/primary-navigation.php:31
+msgid ""
+"Maximum number of top-level items to display in the primary navigation bar. "
+"(Must be a positive number)"
+msgstr ""
+"Maximalt antal av toppnoderna som ska visas i den primära navigationen. "
+"(Måste vara ett positivt nummer)"
+
+#: templates/primary-navigation.php:36
+msgid "Use drop-down menus"
+msgstr "Använd drop-down-menyer"
+
+#: templates/primary-navigation.php:38
+msgid ""
+"If checked, any top-level pages with children will expand to display those "
+"children when somebody moves their mouse over the link."
+msgstr ""
+"Om markerad kommer varje sida som är en toppnod och har undersidor expandera "
+"för att visa undersidorna när någon håller musen över länken"
+
+#: templates/primary-navigation.php:43
+msgid ""
+"The theme your site is currently using supports displaying %s level of "
+"children in the primary navigation bar."
+msgid_plural ""
+"The theme your site is currently using supports displaying %s levels of "
+"children in the primary navigation bar."
+msgstr[0] ""
+"Denna webbplats har support för att visa %s nivåer av undersidor i den "
+"primära navigationen"
+msgstr[1] ""
+"Denna webbplats har support för att visa %s nivåer av undersidor i den "
+"primära navigationen"
+
+#: templates/primary-navigation.php:52
+msgid "Display"
+msgstr "Visa"
+
+#: templates/primary-navigation.php:60
+msgid "level(s) of children"
+msgstr "nivå(er) av undersidor"
+
+#: templates/primary-navigation.php:66
+msgid "Allow Top-Level Pages"
+msgstr "Tillåt toppnoder"
+
+#: templates/primary-navigation.php:67
+msgid ""
+"If checked, users will be allowed to add top-level pages to the navigation."
+msgstr ""
+"Om markerad kommer användare har rättigheter att lägga till toppnoder till "
+"navigeringen"
+
+#: templates/primary-navigation.php:70
+msgid "Save Changes"
+msgstr "Spara ändringar"
+
+#: templates/widget-form.php:6 templates/widget-form.php:63
+msgid "Use the site name as the title"
+msgstr "Använd webbplatsens namn som titel"
+
+#: templates/widget-form.php:67
+msgid "Use the section name as the title"
+msgstr "Använd sektionsnamn som titel"
+
+#: tests/test_library.php:1460 tests/test_library.php:1493
+#: tests/test_library.php:1509 tests/test_library.php:1523
+#: tests/test_library.php:1537 tests/test_library.php:1551
+msgid "Parent Page"
+msgstr "Toppsida"
+
+#: tests/test_library.php:1476
+msgid "Test Type Page"
+msgstr "Test Type PAge"
+
+#. Plugin Name of the plugin/theme
+msgid "BU Navigation"
+msgstr "BU Navigation"
+
+#. Plugin URI of the plugin/theme
+msgid "http://developer.bu.edu/bu-navigation/"
+msgstr "http://developer.bu.edu/bu-navigation/"
+
+#. Description of the plugin/theme
+msgid ""
+"Provides alternative navigation elements designed for blogs with large page "
+"counts"
+msgstr ""
+"Tillhandahåller alternativ navigering designad för bloggar/webbplatser med "
+"många sidor"
+
+#. Author of the plugin/theme
+msgid "Boston University (IS&T)"
+msgstr "Boston University (IS&T)"
+
+#. Author URI of the plugin/theme
+msgid "http://sites.bu.edu/web/"
+msgstr "http://sites.bu.edu/web/"

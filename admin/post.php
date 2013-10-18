@@ -130,7 +130,7 @@ class BU_Navigation_Admin_Post {
 
 		$templates = get_page_templates();
 
-		if ( is_array( $templates ) && ( count( $templates ) > 0 ) ) {
+		if ( 'page' === $post_type && is_array( $templates ) && ( count( $templates ) > 0 ) ) {
 			add_meta_box(
 				'bupagetemplatediv',
 				sprintf( __( "%s Template", BU_NAV_TEXTDOMAIN  ), $post_type_object->labels->singular_name ),

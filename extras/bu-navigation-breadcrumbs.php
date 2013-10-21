@@ -66,14 +66,16 @@ function bu_navigation_breadcrumbs($args = '')
 	// @todo suppress was misspelled here, which was consequently excluding navigation excluded pages
 	// while it looks like this was the intended behavior, it is NOT how it has been operating, so
 	// need to investigate the ramifications of this changes
-
-	if( $r['include_hidden'] && has_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude') )
-		remove_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
+	$exclude_filter_removed = false;
+	if( $r['include_hidden'] && has_filter( 'bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude' ) ) {
+		$exclude_filter_removed = remove_filter( 'bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude' );
+	}
 
 	$pages = bu_navigation_get_pages(array('pages' => $ancestors, 'post_types' => $post_types, 'post_status' => $r['include_statuses']));
 
-	if( $r['include_hidden'] && has_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude') )
-		add_filter('bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude');
+	if( $r['include_hidden'] && $exclude_filter_removed ) {
+		add_filter( 'bu_navigation_filter_pages', 'bu_navigation_filter_pages_exclude' );
+	}
 
 	$crumbs = array(); // array of HTML fragments for each crumb
 

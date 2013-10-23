@@ -3,7 +3,7 @@
 **Tags:** navigation, hierarchical, post type, boston university, bu
 **Requires at least:** 3.1
 **Tested up to:** 3.5
-**Stable tag:** 1.1.4
+**Stable tag:** 1.1.5
 **License:** GPLv2 or later
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -85,6 +85,13 @@ Please see this page for the details:
 
 
 ## Changelog ##
+
+## 1.1.5 ##
+
+* Added Swedish translation (props almhorn)
+* Bug Fix: Fix issue where `bu_navigation_breadcrumbs()` was not restoring excluded post filter
+* Bug Fix: Only display replacement page template metabox for pages
+* Bug Fix: jQuery UI-related issues in 3.6+
 
 ## 1.1.4 ##
 

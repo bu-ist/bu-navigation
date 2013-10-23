@@ -40,11 +40,7 @@ function bu_navigation_breadcrumbs( $args = '' ) {
 	}
 
 	// Grab ancestors
-	$post_types = array( $p->post_type );
-	if ( $p->post_type == 'page' ) {
-		$post_types = array( 'page', 'link' );
-	}
-	$ancestors = bu_navigation_gather_sections( $p->ID, array( 'post_types' => $post_types ) );
+	$ancestors = bu_navigation_gather_sections( $p->ID, array( 'post_types' => $p->post_type ) );
 	if ( ! in_array( $p->ID, $ancestors ) ) {
 		array_push( $ancestors, $p->ID );
 	}
@@ -55,7 +51,7 @@ function bu_navigation_breadcrumbs( $args = '' ) {
 	}
 	$pages = bu_navigation_get_pages( array(
 		'pages' => $ancestors,
-		'post_types' => $post_types,
+		'post_types' => $p->post_type,
 		'post_status' => $r['include_statuses']
 		)
 	);

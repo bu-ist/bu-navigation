@@ -4,7 +4,7 @@
 // We are looking at the current version here to decide whether or not it is needed.
 global $wp_version;
 if( version_compare( $wp_version, '3.2', '>=' ) ): ?>
-<input type="hidden" name="parent_id" value="<?php echo $post->post_parent; ?>" />
+<input type="hidden" id="parent_id" name="parent_id" value="<?php echo $post->post_parent; ?>" />
 <?php endif; ?>
 <input type="hidden" name="menu_order" value="<?php echo $post->menu_order; ?>" />
 <div id="bu-move-post" class="container">

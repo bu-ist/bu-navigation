@@ -163,14 +163,16 @@ class BU_Navigation_Admin_Manager {
 			$treeview = new BU_Navigation_Tree_View( 'bu_navman', array_merge( $script_context, $strings ) );
 			$treeview->enqueue_script( 'bu-navman' );
 
-			// Styles
-			if ( 'classic' == get_user_option( 'admin_color') ) {
-				wp_enqueue_style ( 'bu-jquery-ui-css', $styles_url . '/jquery-ui-classic.css', array(), BU_Navigation_Plugin::VERSION );
-			} else {
-				wp_enqueue_style ( 'bu-jquery-ui-css', $styles_url . '/jquery-ui-fresh.css', array(), BU_Navigation_Plugin::VERSION );
+			// Register custom jQuery UI stylesheet if it isn't already
+			if ( ! wp_style_is( 'bu-jquery-ui', 'registered' ) ) {
+				if ( 'classic' == get_user_option( 'admin_color') ) {
+					wp_register_style( 'bu-jquery-ui', $styles_url . '/jquery-ui-classic.css', array(), BU_Navigation_Plugin::VERSION );
+				} else {
+					wp_register_style( 'bu-jquery-ui', $styles_url . '/jquery-ui-fresh.css', array(), BU_Navigation_Plugin::VERSION );
+				}
 			}
 
-			wp_enqueue_style( 'bu-navman', $styles_url . '/manage.css', array(), BU_Navigation_Plugin::VERSION );
+			wp_enqueue_style( 'bu-navman', $styles_url . '/manage.css', array( 'bu-jquery-ui' ), BU_Navigation_Plugin::VERSION );
 
 		}
 

@@ -208,11 +208,12 @@ function bu_navigation_pull_page($page_id, $pages)
 function bu_navigation_get_urls( $pages ) {
 	global $wp_rewrite;
 
-	$pages_with_urls = $pages;
+	// Temporary storage for missing ancestors in case $pages is not a complete branch.
+	$missing = array();
 
-	if ( ( is_array( $pages ) ) && ( count($pages) > 0 ) ) {
+	if ( ( is_array( $pages ) ) && ( count( $pages ) > 0 ) ) {
 		foreach ( $pages as $page ) {
-
+			$url = '';
 			$slug = $page->post_name;
 			$draft_or_pending = in_array( $page->post_status, array( 'draft', 'pending', 'auto-draft' ) );
 			$permastruct = ( 'page' == $page->post_type ) ? $wp_rewrite->get_page_permastruct() : $wp_rewrite->get_extra_permastruct($page->post_type);
@@ -224,7 +225,7 @@ function bu_navigation_get_urls( $pages ) {
 					if ( 'page' == get_option( 'show_on_front' ) && $page->ID == get_option( 'page_on_front' ) ) {
 						$url = '/';
 					} else if ( ! empty( $permastruct ) && isset( $page->post_status ) && ! $draft_or_pending ) {
-						$url = str_replace( '%pagename%', bu_navigation_get_page_uri( $page, $pages ), $permastruct );
+						$url = str_replace( '%pagename%', bu_navigation_get_page_uri( $page, $pages, $missing ), $permastruct );
 						$url = user_trailingslashit( $url, $page->post_type );
 					} else {
 						$url = sprintf( "?page_id=%d", $page->ID );
@@ -242,7 +243,7 @@ function bu_navigation_get_urls( $pages ) {
 
 					if ( ! empty( $permastruct ) && isset( $page->post_status ) && ! $draft_or_pending ) {
 						if ( $post_type->hierarchical ) {
-							$slug = bu_navigation_get_page_uri( $page, $pages );
+							$slug = bu_navigation_get_page_uri( $page, $pages, $missing );
 						}
 						$url = str_replace( "%$page->post_type%", $slug, $permastruct );
 						$url = user_trailingslashit( $url );
@@ -258,14 +259,12 @@ function bu_navigation_get_urls( $pages ) {
 			}
 
 			$page->url = $url;
-			$pages_with_urls[$page->ID] = $page;
 		}
 	}
-	return $pages_with_urls;
+	return $pages;
 }
 
-function bu_navigation_get_page_uri( $page, $ancestors ) {
-
+function bu_navigation_get_page_uri( $page, $ancestors, &$missing = array() ) {
 	if ( $page->post_parent == $page->ID ) {
 		error_log(sprintf("%s - Page %d is its own parent", __FUNCTION__, $page->ID ));
 		return false;
@@ -273,14 +272,76 @@ function bu_navigation_get_page_uri( $page, $ancestors ) {
 
 	$uri = $page->post_name;
 
-	while( isset( $page->post_parent ) && $page->post_parent != 0 ) {
-		$parent = bu_navigation_pull_page( $page->post_parent, $ancestors );
-		if ( is_object( $parent ) && isset( $parent->post_name ) )
+	while ( isset( $page->post_parent ) && $page->post_parent != 0 ) {
+
+		// Force load ancestors if the post parent does exist
+		if ( ! array_key_exists( $page->post_parent, $ancestors ) ) {
+			// Cache any ancestors we load here in a separate data structure.
+			if ( ! array_key_exists( $page->post_parent, $missing ) ) {
+				$missing = $missing + _bu_navigation_page_uri_ancestors( $page );
+			}
+			$ancestors = $ancestors + $missing;
+		}
+
+		// Bail with un-pretty permalink if we still couldn't locate ancestors.
+		if ( ! array_key_exists( $page->post_parent, $ancestors ) ) {
+			$uri = home_url( add_query_arg( 'p', $page->ID, '' ) );
+			break;
+		}
+
+		$parent = $ancestors[ $page->post_parent ];
+		if ( is_object( $parent ) && isset( $parent->post_name ) ) {
 			$uri = $parent->post_name . '/' . $uri;
+		}
+
 		$page = $parent;
 	}
 
 	return $uri;
+}
+
+function _bu_navigation_page_uri_ancestors( $post ) {
+
+	// Cache results of bu_navigation_load_sections for repeated usage
+	static $all_sections = NULL;
+
+	// Load all sections
+	if ( is_null( $all_sections ) ) {
+		$all_sections = bu_navigation_load_sections( $post->post_type );
+	}
+
+	$ancestors = array();
+
+	// Load ancestors post IDs
+	$section_ids = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ), $all_sections );
+	$section_ids = array_filter( $section_ids );
+
+	// Fetch ancestor posts, with only the columns we need to determine permalinks
+	if ( ! empty( $section_ids ) ) {
+		$args =  array(
+			'post__in' => $section_ids,
+			'post_types' => 'any',
+			'post_status' => array( 'publish', 'private' ),
+			'suppress_urls' => true,
+			'suppress_filter_posts' => true
+			);
+
+		// Only need the post name to determine the correct URL.
+		add_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields' );
+		$ancestors = bu_navigation_get_posts( $args );
+		remove_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields' );
+
+		// This could happen if non-published posts became parents.
+		if ( false === $ancestors ) {
+			$ancestors = array();
+		}
+	}
+
+	return $ancestors;
+}
+
+function _bu_navigation_page_uri_ancestors_fields() {
+	return array( 'ID', 'post_name' );
 }
 
 /**

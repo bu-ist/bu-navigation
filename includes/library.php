@@ -261,14 +261,16 @@ function bu_navigation_get_urls( $pages ) {
 }
 
 function bu_navigation_get_page_uri( $page, $ancestors, &$missing = array() ) {
-	if ( $page->post_parent == $page->ID ) {
-		error_log(sprintf("%s - Page %d is its own parent", __FUNCTION__, $page->ID ));
-		return false;
-	}
 
 	$uri = $page->post_name;
 
 	while ( isset( $page->post_parent ) && $page->post_parent != 0 ) {
+
+		// Avoid infinite loops
+		if ( $page->post_parent == $page->ID ) {
+			$uri = home_url( add_query_arg( 'p', $page->ID, '' ) );
+			break;
+		}
 
 		// Force load ancestors if the post parent does exist
 		if ( ! array_key_exists( $page->post_parent, $ancestors ) ) {
@@ -285,6 +287,7 @@ function bu_navigation_get_page_uri( $page, $ancestors, &$missing = array() ) {
 			break;
 		}
 
+		// Append parent post name and keep looping backwards
 		$parent = $ancestors[ $page->post_parent ];
 		if ( is_object( $parent ) && isset( $parent->post_name ) ) {
 			$uri = $parent->post_name . '/' . $uri;
@@ -331,7 +334,7 @@ function _bu_navigation_page_uri_ancestors( $post ) {
 }
 
 function _bu_navigation_page_uri_ancestors_fields() {
-	return array( 'ID', 'post_name' );
+	return array( 'ID', 'post_name', 'post_parent' );
 }
 
 /**

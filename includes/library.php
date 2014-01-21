@@ -36,8 +36,6 @@ function bu_navigation_supported_post_types( $include_link = false, $output = 'n
 function bu_navigation_load_sections( $post_types = array(), $include_links = true ) {
 	global $wpdb, $bu_navigation_plugin;
 
-	$wpdb->query('SET SESSION group_concat_max_len = ' . GROUP_CONCAT_MAX_LEN);
-
 	// Setup target post type(s)
 	if ( empty( $post_types ) ) {
 		$post_types = array( 'page' );
@@ -58,9 +56,15 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 			unset( $post_types[ $index ] );
 		}
 	}
-
 	$in_post_types = implode( "','", $post_types );
 
+	// Try the cache first
+	$cache_key = 'all_sections:' . md5( serialize( $post_types ) );
+	if ( $all_sections = wp_cache_get( $cache_key, 'bu-navigation' ) ) {
+		return $all_sections;
+	}
+
+	$wpdb->query('SET SESSION group_concat_max_len = ' . GROUP_CONCAT_MAX_LEN);
 	$query = sprintf("
 		SELECT DISTINCT(post_parent) AS section, GROUP_CONCAT(ID) AS children
 		  FROM %s
@@ -84,7 +88,11 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 		}
 	}
 
-	return array( 'sections' => $sections, 'pages' => $pages );
+	// Cache results
+	$all_sections = array( 'sections' => $sections, 'pages' => $pages );
+	wp_cache_set( $cache_key, $all_sections, 'bu-navigation' );
+
+	return $all_sections;
 }
 
 /**
@@ -290,13 +298,7 @@ function bu_navigation_get_page_uri( $page, $ancestors, &$missing = array() ) {
 
 function _bu_navigation_page_uri_ancestors( $post ) {
 
-	// Cache results of bu_navigation_load_sections for repeated usage
-	static $all_sections = NULL;
-
-	// Load all sections
-	if ( is_null( $all_sections ) ) {
-		$all_sections = bu_navigation_load_sections( $post->post_type );
-	}
+	$all_sections = bu_navigation_load_sections( $post->post_type );
 
 	$ancestors = array();
 

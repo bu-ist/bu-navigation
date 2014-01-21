@@ -75,8 +75,15 @@ class BU_Navigation_Plugin {
 	 */
 	public function register_hooks() {
 
+		add_action( 'plugins_loaded', array( $this, 'add_cache_groups' ) );
 		add_action( 'init', array( $this, 'init' ), 1 );
 
+	}
+
+	public function add_cache_groups() {
+		if ( function_exists( 'wp_cache_add_non_persistent_groups' ) ) {
+			wp_cache_add_non_persistent_groups( array( 'bu-navigation' ) );
+		}
 	}
 
 	/**

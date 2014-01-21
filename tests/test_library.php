@@ -367,6 +367,23 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 	}
 
 	/**
+	 * @see https://github.com/bu-ist/bu-navigation/issues/5
+	 * @group bu-navigation-issues
+	 */
+	public function test_bu_navigation_get_urls_without_ancestors() {
+
+		// Fetch all posts in "parent" section
+		$parent = $this->posts['parent'];
+		$sections = bu_navigation_gather_sections( $parent, array( 'direction' => 'down' ) );
+		$args = array( 'sections' => $sections, 'post_types' => array( 'page', 'bu_link', 'test' ));
+		$pages  = bu_navigation_get_pages( $args );
+
+		foreach ( $pages as $page ) {
+			$this->assertEquals( get_permalink( $page->ID ), $page->url );
+		}
+	}
+
+	/**
 	 *  Covers bu_navigation_get_pages()
 	 */
 	public function test_bu_navigation_get_pages() {

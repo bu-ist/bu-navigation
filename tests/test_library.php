@@ -316,25 +316,6 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 	}
 
 	/**
-	 *  Covers bu_navigation_pull_page()
-	 */
-	public function test_bu_navigation_pull_page() {
-
-		$child = $this->posts['child'];
-		$parent = $this->posts['parent'];
-
-		$sections = bu_navigation_load_sections();
-		$pages = $sections['pages'];
-
-		$child_results = bu_navigation_pull_page( $child, $pages );
-		$parent_results = bu_navigation_pull_page( $parent, $pages );
-
-		$this->assertEquals( $child_results, $parent );
-		$this->assertEquals( $parent_results, "0" );
-
-	}
-
-	/**
 	 *  Covers bu_navigation_get_urls()
 	 */
 	public function test_bu_navigation_get_urls() {

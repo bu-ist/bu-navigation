@@ -183,18 +183,6 @@ function bu_navigation_get_page_depth($page_id, $all_sections = NULL)
 }
 
 /**
- * @todo needs docblock
- */
-function bu_navigation_pull_page($page_id, $pages)
-{
-	$page = FALSE;
-
-	if (array_key_exists($page_id, $pages)) $page = $pages[$page_id];
-
-	return $page;
-}
-
-/**
  * Add the post permalink as a property on the post object (efficiently)
  *
  * Goes against every DRY bone in my body, but get_permalink is to query / memory

@@ -193,74 +193,96 @@ function bu_navigation_get_page_depth($page_id, $all_sections = NULL)
 /**
  * Add the post permalink as a property on the post object (efficiently)
  *
- * Goes against every DRY bone in my body, but get_permalink is to query / memory
- * intensive to run with 2000+ posts
+ * Goes against every DRY bone in my body, but `get_permalink` is too resource
+ * intensive to run with 2000+ posts.
  *
- * Most of this logic is borrowed from _get_page_link and get_post_link
+ * @see get_post_permalink()
+ * @see _get_page_link()
  *
- * @args array $pages an array of post objects
+ * @param array $pages an array of post objects
  * @return array $pages an array of post objects with, $post->url set to the permalink
  */
 function bu_navigation_get_urls( $pages ) {
-	global $wp_rewrite;
-
-	// Temporary storage for missing ancestors in case $pages is not a complete branch.
-	$missing = array();
-
 	if ( ( is_array( $pages ) ) && ( count( $pages ) > 0 ) ) {
 		foreach ( $pages as $page ) {
 			$url = '';
-			$slug = $page->post_name;
-			$draft_or_pending = in_array( $page->post_status, array( 'draft', 'pending', 'auto-draft' ) );
-			$permastruct = ( 'page' == $page->post_type ) ? $wp_rewrite->get_page_permastruct() : $wp_rewrite->get_extra_permastruct($page->post_type);
-
-			// Handle all post types
-			switch( $page->post_type ) {
-
-				case 'page':
-					if ( 'page' == get_option( 'show_on_front' ) && $page->ID == get_option( 'page_on_front' ) ) {
-						$url = '/';
-					} else if ( ! empty( $permastruct ) && isset( $page->post_status ) && ! $draft_or_pending ) {
-						$url = str_replace( '%pagename%', bu_navigation_get_page_uri( $page, $pages, $missing ), $permastruct );
-						$url = user_trailingslashit( $url, $page->post_type );
-					} else {
-						$url = sprintf( "?page_id=%d", $page->ID );
-					}
-					$url = home_url( $url );
-					break;
-
-				case BU_NAVIGATION_LINK_POST_TYPE:
-					$url = $page->post_content;
-					break;
-
-				case 'post':
-					default:
-					$post_type = get_post_type_object( $page->post_type );
-
-					if ( ! empty( $permastruct ) && isset( $page->post_status ) && ! $draft_or_pending ) {
-						if ( $post_type->hierarchical ) {
-							$slug = bu_navigation_get_page_uri( $page, $pages, $missing );
-						}
-						$url = str_replace( "%$page->post_type%", $slug, $permastruct );
-						$url = user_trailingslashit( $url );
-					} else {
-						if ( $post_type->query_var && ( isset( $page->post_status ) && ! $draft_or_pending ) ) {
-							$url = add_query_arg( $post_type->query_var, $slug, '' );
-						} else {
-							$url = add_query_arg( array('post_type' => $page->post_type, 'p' => $page->ID), '');
-						}
-					}
-					$url = home_url( $url );
-					break;
+			if ( 'page' === $page->post_type ) {
+				$url = bu_navigation_get_page_link( $page, $pages );
+			} else if ( BU_NAVIGATION_LINK_POST_TYPE === $page->post_type ) {
+				$url = $page->post_content;
+			} else {
+				$url = bu_navigation_get_post_link( $page, $pages );
 			}
-
 			$page->url = $url;
 		}
 	}
 	return $pages;
 }
 
-function bu_navigation_get_page_uri( $page, $ancestors, &$missing = array() ) {
+function bu_navigation_get_page_link( $page, $pages, $sample = false ) {
+	global $wp_rewrite;
+
+	$page_link = $wp_rewrite->get_page_permastruct();
+	$draft_or_pending = true;
+	if ( isset( $page->post_status ) ) {
+		$draft_or_pending = in_array( $page->post_status, array( 'draft', 'pending', 'auto-draft' ) );
+	}
+	$use_permastruct = ( ! empty( $page_link ) && ( ! $draft_or_pending || $sample ) );
+
+	if ( 'page' == get_option( 'show_on_front' ) && $page->ID == get_option( 'page_on_front' ) ) {
+		$page_link = home_url( '/' );
+	} else if ( $use_permastruct ) {
+		$slug = bu_navigation_get_page_uri( $page, $pages );
+		if ( $slug ) {
+			$page_link = str_replace( '%pagename%', $slug, $page_link );
+			$page_link = home_url( user_trailingslashit( $page_link, 'page' ) );
+		} else {
+			$page_link = home_url( "?page_id=%d", $page->ID );
+		}
+	} else {
+		$page_link = home_url( "?page_id=%d", $page->ID );
+	}
+
+	return $page_link;
+}
+
+function bu_navigation_get_post_link( $post, $posts, $sample = false ) {
+	global $wp_rewrite;
+
+	$post_link = $wp_rewrite->get_extra_permastruct( $post->post_type );
+	$draft_or_pending = true;
+	if ( isset( $post->post_status ) ) {
+		$draft_or_pending = in_array( $post->post_status, array( 'draft', 'pending', 'auto-draft' ) );
+	}
+	$use_permastruct = ( ! empty( $post_link ) && ( ! $draft_or_pending || $sample ) );
+	$post_type = get_post_type_object( $post->post_type );
+	$slug = $post->post_name;
+
+	if ( $use_permastruct && $post_type->hierarchical ) {
+		$slug = bu_navigation_get_page_uri( $post, $posts );
+	}
+
+	if ( $use_permastruct && $slug ) {
+		$post_link = str_replace( "%$post->post_type%", $slug, $post_link );
+		$post_link = home_url( user_trailingslashit( $post_link ) );
+	} else {
+		if ( $post_type->query_var && ! $draft_or_pending ) {
+			$post_link = add_query_arg( $post_type->query_var, $post->post_name, '' );
+		} else {
+			$post_link = add_query_arg( array( 'post_type' => $post->post_type, 'p' => $post->ID ), '' );
+		}
+		$post_link = home_url( $post_link );
+	}
+
+	return $post_link;
+}
+
+
+function bu_navigation_get_page_uri( $page, $ancestors ) {
+
+	// Temporary caching for any pages we attempt to load here to keep queries down on repeated calls.
+	static $extra_pages = array();
+	static $missing_pages = array();
 
 	$uri = $page->post_name;
 
@@ -268,22 +290,30 @@ function bu_navigation_get_page_uri( $page, $ancestors, &$missing = array() ) {
 
 		// Avoid infinite loops
 		if ( $page->post_parent == $page->ID ) {
-			$uri = home_url( add_query_arg( 'p', $page->ID, '' ) );
+			$uri = false;
 			break;
 		}
 
-		// Force load ancestors if the post parent does exist
+		// Attempt to load missing ancestors.
 		if ( ! array_key_exists( $page->post_parent, $ancestors ) ) {
-			// Cache any ancestors we load here in a separate data structure.
-			if ( ! array_key_exists( $page->post_parent, $missing ) ) {
-				$missing = $missing + _bu_navigation_page_uri_ancestors( $page );
+			if ( ! array_key_exists( $page->post_parent, $extra_pages ) && ! in_array( $page->post_parent, $missing_pages ) ) {
+				$missing_ancestors = _bu_navigation_page_uri_ancestors( $page );
+				// Cache any ancestors we load here or can't find in separate data structures.
+				if ( ! empty( $missing_ancestors ) ) {
+					$extra_pages = $extra_pages + $missing_ancestors;
+				} else {
+					// Add to our tracking list of pages we've already looked for.
+					$missing_pages[] = $page->post_parent;
+				}
 			}
-			$ancestors = $ancestors + $missing;
+
+			// Merge passed in ancestors with extras we've loaded along the way.
+			$ancestors = $ancestors + $extra_pages;
 		}
 
 		// Bail with un-pretty permalink if we still couldn't locate ancestors.
 		if ( ! array_key_exists( $page->post_parent, $ancestors ) ) {
-			$uri = home_url( add_query_arg( 'p', $page->ID, '' ) );
+			$uri = false;
 			break;
 		}
 

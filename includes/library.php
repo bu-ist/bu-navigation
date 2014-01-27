@@ -386,10 +386,10 @@ function _bu_navigation_page_uri_ancestors( $post ) {
 			'suppress_filter_posts' => true
 			);
 
-		// Only need the post name to determine the correct URL.
-		add_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields' );
+		// Only need a few fields to determine the correct URL.
+		add_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields', 9999 );
 		$ancestors = bu_navigation_get_posts( $args );
-		remove_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields' );
+		remove_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields', 9999 );
 
 		// This could happen if non-published posts became parents.
 		if ( false === $ancestors ) {
@@ -400,7 +400,7 @@ function _bu_navigation_page_uri_ancestors( $post ) {
 	return $ancestors;
 }
 
-function _bu_navigation_page_uri_ancestors_fields() {
+function _bu_navigation_page_uri_ancestors_fields( $fields ) {
 	return array( 'ID', 'post_name', 'post_parent' );
 }
 

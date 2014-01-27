@@ -191,16 +191,17 @@ function bu_navigation_get_page_depth($page_id, $all_sections = NULL)
 }
 
 /**
- * Add the post permalink as a property on the post object (efficiently)
+ * Add the post permalink as a property on the post object.
  *
- * Goes against every DRY bone in my body, but `get_permalink` is too resource
- * intensive to run with 2000+ posts.
+ * Helpful when you need URLs for a large number of posts and don't want to
+ * melt your server with 3000 calls to `get_permalink()`.
  *
- * @see get_post_permalink()
- * @see _get_page_link()
+ * This is most efficient when $pages contains the complete ancestry for each post. If any post
+ * ancestors are missing when calculating hierarchical post names it will load them,
+ * at the expensive of a few extra queries.
  *
- * @param array $pages an array of post objects
- * @return array $pages an array of post objects with, $post->url set to the permalink
+ * @param  array $pages An array of post objects keyed on post ID. Works with all post types.
+ * @return array $pages The input array with $post->url set to the permalink for each post.
  */
 function bu_navigation_get_urls( $pages ) {
 	if ( ( is_array( $pages ) ) && ( count( $pages ) > 0 ) ) {
@@ -219,7 +220,20 @@ function bu_navigation_get_urls( $pages ) {
 	return $pages;
 }
 
-function bu_navigation_get_page_link( $page, $pages, $sample = false ) {
+/**
+ * Retrieve the page permalink.
+ *
+ * Intended as an efficient alternative to `get_page_link()` / `_get_page_link()`.
+ * Allows you to provide an array of post ancestors for use calculating post name path.
+ *
+ * @see `_get_page_link()`
+ *
+ * @param  object  $page       Post object to calculate permalink for.
+ * @param  array   $ancestors  An array of post objects keyed on post ID. Should contain all ancestors of $page.
+ * @param  boolean $sample     Optional. Sample permalink. Don't replace permastruct with slug.
+ * @return string              Post permalink.
+ */
+function bu_navigation_get_page_link( $page, $ancestors, $sample = false ) {
 	global $wp_rewrite;
 
 	$page_link = $wp_rewrite->get_page_permastruct();
@@ -232,7 +246,7 @@ function bu_navigation_get_page_link( $page, $pages, $sample = false ) {
 	if ( 'page' == get_option( 'show_on_front' ) && $page->ID == get_option( 'page_on_front' ) ) {
 		$page_link = home_url( '/' );
 	} else if ( $use_permastruct ) {
-		$slug = bu_navigation_get_page_uri( $page, $pages );
+		$slug = bu_navigation_get_page_uri( $page, $ancestors );
 		if ( $slug ) {
 			$page_link = str_replace( '%pagename%', $slug, $page_link );
 			$page_link = home_url( user_trailingslashit( $page_link, 'page' ) );
@@ -246,7 +260,20 @@ function bu_navigation_get_page_link( $page, $pages, $sample = false ) {
 	return $page_link;
 }
 
-function bu_navigation_get_post_link( $post, $posts, $sample = false ) {
+/**
+ * Retrieve the permalink for a post with a custom post type.
+ *
+ * Intended as an efficient alternative to `get_post_permalink()`.
+ * Allows you to provide an array of post ancestors for use calculating post name path.
+ *
+ * @see `get_post_permalink()`
+ *
+ * @param  object  $post       Post object to calculate permalink for.
+ * @param  array   $ancestors  An array of post objects keyed on post ID. Should contain all ancestors of $post.
+ * @param  boolean $sample     Optional. Sample permalink. Don't replace permastruct with slug.
+ * @return string              Post permalink.
+ */
+function bu_navigation_get_post_link( $post, $ancestors, $sample = false ) {
 	global $wp_rewrite;
 
 	$post_link = $wp_rewrite->get_extra_permastruct( $post->post_type );
@@ -259,7 +286,7 @@ function bu_navigation_get_post_link( $post, $posts, $sample = false ) {
 	$slug = $post->post_name;
 
 	if ( $use_permastruct && $post_type->hierarchical ) {
-		$slug = bu_navigation_get_page_uri( $post, $posts );
+		$slug = bu_navigation_get_page_uri( $post, $ancestors );
 	}
 
 	if ( $use_permastruct && $slug ) {
@@ -277,10 +304,21 @@ function bu_navigation_get_post_link( $post, $posts, $sample = false ) {
 	return $post_link;
 }
 
-
+/**
+ * Calculate the post path for a post.
+ *
+ * Loops backwards from $page through $ancestors to determine full post path.
+ * If any ancestor is not present in $ancestors it will attempt to load them on demand.
+ * Utilizes static caching to minimize repeat queries across calls.
+ *
+ * @param  object $page      Post object to query path for. Must contain ID, post_name and post_parent fields.
+ * @param  array  $ancestors An array of post objects keyed on post ID.  Should contain ancestors of $page,
+ *                           with ID, post_name and post_parent fields for each.
+ * @return string            Page path.
+ */
 function bu_navigation_get_page_uri( $page, $ancestors ) {
 
-	// Temporary caching for any pages we attempt to load here to keep queries down on repeated calls.
+	// Used to cache pages we load that aren't contained in $ancestors.
 	static $extra_pages = array();
 	static $missing_pages = array();
 
@@ -311,13 +349,13 @@ function bu_navigation_get_page_uri( $page, $ancestors ) {
 			$ancestors = $ancestors + $extra_pages;
 		}
 
-		// Bail with un-pretty permalink if we still couldn't locate ancestors.
+		// We can't return an incomplete path -- bail with indication of failure.
 		if ( ! array_key_exists( $page->post_parent, $ancestors ) ) {
 			$uri = false;
 			break;
 		}
 
-		// Append parent post name and keep looping backwards
+		// Append parent post name and keep looping backwards.
 		$parent = $ancestors[ $page->post_parent ];
 		if ( is_object( $parent ) && isset( $parent->post_name ) ) {
 			$uri = $parent->post_name . '/' . $uri;
@@ -331,9 +369,8 @@ function bu_navigation_get_page_uri( $page, $ancestors ) {
 
 function _bu_navigation_page_uri_ancestors( $post ) {
 
-	$all_sections = bu_navigation_load_sections( $post->post_type );
-
 	$ancestors = array();
+	$all_sections = bu_navigation_load_sections( $post->post_type );
 
 	// Load ancestors post IDs
 	$section_ids = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ), $all_sections );

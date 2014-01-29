@@ -620,7 +620,7 @@ function bu_navigation_format_page( $page, $args = '' ) {
 	if ( ! isset( $page->navigation_label ) )
 		$page->navigation_label = apply_filters( 'the_title', $page->post_title );
 
-	$title = esc_attr( $page->navigation_label );
+	$title = $page->navigation_label;
 	$href = $page->url;
 	$anchor_class = $r['anchor_class'];
 

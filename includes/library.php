@@ -36,8 +36,6 @@ function bu_navigation_supported_post_types( $include_link = false, $output = 'n
 function bu_navigation_load_sections( $post_types = array(), $include_links = true ) {
 	global $wpdb, $bu_navigation_plugin;
 
-	$wpdb->query('SET SESSION group_concat_max_len = ' . GROUP_CONCAT_MAX_LEN);
-
 	// Setup target post type(s)
 	if ( empty( $post_types ) ) {
 		$post_types = array( 'page' );
@@ -58,9 +56,15 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 			unset( $post_types[ $index ] );
 		}
 	}
-
 	$in_post_types = implode( "','", $post_types );
 
+	// Try the cache first
+	$cache_key = 'all_sections:' . md5( serialize( $post_types ) );
+	if ( $all_sections = wp_cache_get( $cache_key, 'bu-navigation' ) ) {
+		return $all_sections;
+	}
+
+	$wpdb->query('SET SESSION group_concat_max_len = ' . GROUP_CONCAT_MAX_LEN);
 	$query = sprintf("
 		SELECT DISTINCT(post_parent) AS section, GROUP_CONCAT(ID) AS children
 		  FROM %s
@@ -84,7 +88,11 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 		}
 	}
 
-	return array( 'sections' => $sections, 'pages' => $pages );
+	// Cache results
+	$all_sections = array( 'sections' => $sections, 'pages' => $pages );
+	wp_cache_set( $cache_key, $all_sections, 'bu-navigation' );
+
+	return $all_sections;
 }
 
 /**
@@ -183,104 +191,209 @@ function bu_navigation_get_page_depth($page_id, $all_sections = NULL)
 }
 
 /**
- * @todo needs docblock
+ * Add the post permalink as a property on the post object.
+ *
+ * Helpful when you need URLs for a large number of posts and don't want to
+ * melt your server with 3000 calls to `get_permalink()`.
+ *
+ * This is most efficient when $pages contains the complete ancestry for each post. If any post
+ * ancestors are missing when calculating hierarchical post names it will load them,
+ * at the expensive of a few extra queries.
+ *
+ * @param  array $pages An array of post objects keyed on post ID. Works with all post types.
+ * @return array $pages The input array with $post->url set to the permalink for each post.
  */
-function bu_navigation_pull_page($page_id, $pages)
-{
-	$page = FALSE;
-
-	if (array_key_exists($page_id, $pages)) $page = $pages[$page_id];
-
-	return $page;
+function bu_navigation_get_urls( $pages ) {
+	if ( ( is_array( $pages ) ) && ( count( $pages ) > 0 ) ) {
+		foreach ( $pages as $page ) {
+			$url = '';
+			if ( 'page' === $page->post_type ) {
+				$url = bu_navigation_get_page_link( $page, $pages );
+			} else if ( BU_NAVIGATION_LINK_POST_TYPE === $page->post_type ) {
+				$url = $page->post_content;
+			} else {
+				$url = bu_navigation_get_post_link( $page, $pages );
+			}
+			$page->url = $url;
+		}
+	}
+	return $pages;
 }
 
 /**
- * Add the post permalink as a property on the post object (efficiently)
+ * Retrieve the page permalink.
  *
- * Goes against every DRY bone in my body, but get_permalink is to query / memory
- * intensive to run with 2000+ posts
+ * Intended as an efficient alternative to `get_page_link()` / `_get_page_link()`.
+ * Allows you to provide an array of post ancestors for use calculating post name path.
  *
- * Most of this logic is borrowed from _get_page_link and get_post_link
+ * @see `_get_page_link()`
  *
- * @args array $pages an array of post objects
- * @return array $pages an array of post objects with, $post->url set to the permalink
+ * @param  object  $page       Post object to calculate permalink for.
+ * @param  array   $ancestors  Optional. An array of post objects keyed on post ID. Should contain all ancestors of $page.
+ * @param  boolean $sample     Optional. Is it a sample permalink.
+ * @return string              Post permalink.
  */
-function bu_navigation_get_urls( $pages ) {
+function bu_navigation_get_page_link( $page, $ancestors = array(), $sample = false ) {
 	global $wp_rewrite;
 
-	$pages_with_urls = $pages;
-
-	if ( ( is_array( $pages ) ) && ( count($pages) > 0 ) ) {
-		foreach ( $pages as $page ) {
-
-			$slug = $page->post_name;
-			$draft_or_pending = in_array( $page->post_status, array( 'draft', 'pending', 'auto-draft' ) );
-			$permastruct = ( 'page' == $page->post_type ) ? $wp_rewrite->get_page_permastruct() : $wp_rewrite->get_extra_permastruct($page->post_type);
-
-			// Handle all post types
-			switch( $page->post_type ) {
-
-				case 'page':
-					if ( 'page' == get_option( 'show_on_front' ) && $page->ID == get_option( 'page_on_front' ) ) {
-						$url = '/';
-					} else if ( ! empty( $permastruct ) && isset( $page->post_status ) && ! $draft_or_pending ) {
-						$url = str_replace( '%pagename%', bu_navigation_get_page_uri( $page, $pages ), $permastruct );
-						$url = user_trailingslashit( $url, $page->post_type );
-					} else {
-						$url = sprintf( "?page_id=%d", $page->ID );
-					}
-					$url = home_url( $url );
-					break;
-
-				case BU_NAVIGATION_LINK_POST_TYPE:
-					$url = $page->post_content;
-					break;
-
-				case 'post':
-					default:
-					$post_type = get_post_type_object( $page->post_type );
-
-					if ( ! empty( $permastruct ) && isset( $page->post_status ) && ! $draft_or_pending ) {
-						if ( $post_type->hierarchical ) {
-							$slug = bu_navigation_get_page_uri( $page, $pages );
-						}
-						$url = str_replace( "%$page->post_type%", $slug, $permastruct );
-						$url = user_trailingslashit( $url );
-					} else {
-						if ( $post_type->query_var && ( isset( $page->post_status ) && ! $draft_or_pending ) ) {
-							$url = add_query_arg( $post_type->query_var, $slug, '' );
-						} else {
-							$url = add_query_arg( array('post_type' => $page->post_type, 'p' => $page->ID), '');
-						}
-					}
-					$url = home_url( $url );
-					break;
-			}
-
-			$page->url = $url;
-			$pages_with_urls[$page->ID] = $page;
-		}
+	$page_link = $wp_rewrite->get_page_permastruct();
+	$draft_or_pending = true;
+	if ( isset( $page->post_status ) ) {
+		$draft_or_pending = in_array( $page->post_status, array( 'draft', 'pending', 'auto-draft' ) );
 	}
-	return $pages_with_urls;
+	$use_permastruct = ( ! empty( $page_link ) && ( ! $draft_or_pending || $sample ) );
+
+	if ( 'page' == get_option( 'show_on_front' ) && $page->ID == get_option( 'page_on_front' ) ) {
+		$page_link = home_url( '/' );
+	} else if ( $use_permastruct ) {
+		$slug = bu_navigation_get_page_uri( $page, $ancestors );
+		$page_link = str_replace( '%pagename%', $slug, $page_link );
+		$page_link = home_url( user_trailingslashit( $page_link, 'page' ) );
+	} else {
+		$page_link = home_url( "?page_id=" . $page->ID );
+	}
+
+	return $page_link;
 }
 
+/**
+ * Retrieve the permalink for a post with a custom post type.
+ *
+ * Intended as an efficient alternative to `get_post_permalink()`.
+ * Allows you to provide an array of post ancestors for use calculating post name path.
+ *
+ * @see `get_post_permalink()`
+ *
+ * @param  object  $post       Post object to calculate permalink for.
+ * @param  array   $ancestors  Optional. An array of post objects keyed on post ID. Should contain all ancestors of $post.
+ * @param  boolean $sample     Optional. Is it a sample permalink.
+ * @return string              Post permalink.
+ */
+function bu_navigation_get_post_link( $post, $ancestors = array(), $sample = false ) {
+	global $wp_rewrite;
+
+	$post_link = $wp_rewrite->get_extra_permastruct( $post->post_type );
+	$draft_or_pending = true;
+	if ( isset( $post->post_status ) ) {
+		$draft_or_pending = in_array( $post->post_status, array( 'draft', 'pending', 'auto-draft' ) );
+	}
+	$use_permastruct = ( ! empty( $post_link ) && ( ! $draft_or_pending || $sample ) );
+	$post_type = get_post_type_object( $post->post_type );
+	$slug = $post->post_name;
+
+	if ( $use_permastruct ) {
+		if ( $post_type->hierarchical ) {
+			$slug = bu_navigation_get_page_uri( $post, $ancestors );
+		}
+		$post_link = str_replace( "%$post->post_type%", $slug, $post_link );
+		$post_link = home_url( user_trailingslashit( $post_link ) );
+	} else {
+		if ( $post_type->query_var && ! $draft_or_pending ) {
+			$post_link = add_query_arg( $post_type->query_var, $post->post_name, '' );
+		} else {
+			$post_link = add_query_arg( array( 'post_type' => $post->post_type, 'p' => $post->ID ), '' );
+		}
+		$post_link = home_url( $post_link );
+	}
+
+	return $post_link;
+}
+
+/**
+ * Calculate the post path for a post.
+ *
+ * Loops backwards from $page through $ancestors to determine full post path.
+ * If any ancestor is not present in $ancestors it will attempt to load them on demand.
+ * Utilizes static caching to minimize repeat queries across calls.
+ *
+ * @param  object $page      Post object to query path for. Must contain ID, post_name and post_parent fields.
+ * @param  array  $ancestors An array of post objects keyed on post ID.  Should contain ancestors of $page,
+ *                           with ID, post_name and post_parent fields for each.
+ * @return string            Page path.
+ */
 function bu_navigation_get_page_uri( $page, $ancestors ) {
 
-	if ( $page->post_parent == $page->ID ) {
-		error_log(sprintf("%s - Page %d is its own parent", __FUNCTION__, $page->ID ));
-		return false;
-	}
+	// Used to cache pages we load that aren't contained in $ancestors.
+	static $extra_pages = array();
+	static $missing_pages = array();
 
 	$uri = $page->post_name;
 
-	while( isset( $page->post_parent ) && $page->post_parent != 0 ) {
-		$parent = bu_navigation_pull_page( $page->post_parent, $ancestors );
-		if ( is_object( $parent ) && isset( $parent->post_name ) )
+	while ( isset( $page->post_parent ) && $page->post_parent != 0 ) {
+
+		// Avoid infinite loops
+		if ( $page->post_parent == $page->ID ) {
+			break;
+		}
+
+		// Attempt to load missing ancestors.
+		if ( ! array_key_exists( $page->post_parent, $ancestors ) ) {
+			if ( ! array_key_exists( $page->post_parent, $extra_pages ) && ! in_array( $page->post_parent, $missing_pages ) ) {
+				$missing_ancestors = _bu_navigation_page_uri_ancestors( $page );
+				// Cache any ancestors we load here or can't find in separate data structures.
+				if ( ! empty( $missing_ancestors ) ) {
+					$extra_pages = $extra_pages + $missing_ancestors;
+				} else {
+					// Add to our tracking list of pages we've already looked for.
+					$missing_pages[] = $page->post_parent;
+				}
+			}
+
+			// Merge passed in ancestors with extras we've loaded along the way.
+			$ancestors = $ancestors + $extra_pages;
+		}
+
+		// We can't return an incomplete path -- bail with indication of failure.
+		if ( ! array_key_exists( $page->post_parent, $ancestors ) ) {
+			break;
+		}
+
+		// Append parent post name and keep looping backwards.
+		$parent = $ancestors[ $page->post_parent ];
+		if ( is_object( $parent ) && isset( $parent->post_name ) ) {
 			$uri = $parent->post_name . '/' . $uri;
+		}
+
 		$page = $parent;
 	}
 
 	return $uri;
+}
+
+function _bu_navigation_page_uri_ancestors( $post ) {
+
+	$ancestors = array();
+	$all_sections = bu_navigation_load_sections( $post->post_type );
+
+	// Load ancestors post IDs
+	$section_ids = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ), $all_sections );
+	$section_ids = array_filter( $section_ids );
+
+	// Fetch ancestor posts, with only the columns we need to determine permalinks
+	if ( ! empty( $section_ids ) ) {
+		$args =  array(
+			'post__in' => $section_ids,
+			'post_types' => 'any',
+			'post_status' => 'any',
+			'suppress_urls' => true,
+			'suppress_filter_posts' => true
+			);
+
+		// Only need a few fields to determine the correct URL.
+		add_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields', 9999 );
+		$ancestors = bu_navigation_get_posts( $args );
+		remove_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields', 9999 );
+
+		if ( false === $ancestors ) {
+			$ancestors = array();
+		}
+	}
+
+	return $ancestors;
+}
+
+function _bu_navigation_page_uri_ancestors_fields( $fields ) {
+	return array( 'ID', 'post_name', 'post_parent' );
 }
 
 /**
@@ -506,7 +619,7 @@ function bu_navigation_format_page( $page, $args = '' ) {
 	if ( ! isset( $page->navigation_label ) )
 		$page->navigation_label = apply_filters( 'the_title', $page->post_title );
 
-	$title = esc_attr( $page->navigation_label );
+	$title = $page->navigation_label;
 	$href = $page->url;
 	$anchor_class = $r['anchor_class'];
 

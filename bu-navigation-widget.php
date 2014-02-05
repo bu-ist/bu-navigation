@@ -24,8 +24,8 @@ class BU_Widget_Pages extends WP_Widget {
 			);
 
 	function BU_Widget_Pages() {
-		$widget_ops = array( 'classname' => 'widget_bu_pages', 'description' => __( "Navigation list of your site's pages", BU_NAV_TEXTDOMAIN ) );
-		$this->WP_Widget( 'bu_pages', __('Content Navigation', BU_NAV_TEXTDOMAIN ), $widget_ops );
+		$widget_ops = array( 'classname' => 'widget_bu_pages', 'description' => __( "Navigation list of your site's pages", 'bu-navigation' ) );
+		$this->WP_Widget( 'bu_pages', __('Content Navigation', 'bu-navigation' ), $widget_ops );
 	}
 
 	/**

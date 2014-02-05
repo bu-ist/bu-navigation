@@ -5,7 +5,7 @@ Plugin URI: http://developer.bu.edu/bu-navigation/
 Author: Boston University (IS&T)
 Author URI: http://sites.bu.edu/web/
 Description: Provides alternative navigation elements designed for blogs with large page counts
-Version: 1.1.5
+Version: 1.2
 Text Domain: bu-navigation
 Domain Path: /languages
 */
@@ -39,7 +39,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // Absolute server path to this plugin dir and file for use by included files
 define( 'BU_NAV_PLUGIN', __FILE__ );
 define( 'BU_NAV_PLUGIN_DIR', dirname( __FILE__ ) );
-define( 'BU_NAV_TEXTDOMAIN', 'bu-navigation' );
 
 // Primary navigation max items to display per level
 define( 'BU_NAVIGATION_PRIMARY_MAX', 6 );
@@ -60,7 +59,7 @@ class BU_Navigation_Plugin {
 	// Plugin settings
 	public $settings;
 
-	const VERSION = '1.1.5';
+	const VERSION = '1.2';
 
 	public function __construct() {
 
@@ -75,8 +74,15 @@ class BU_Navigation_Plugin {
 	 */
 	public function register_hooks() {
 
+		add_action( 'plugins_loaded', array( $this, 'add_cache_groups' ) );
 		add_action( 'init', array( $this, 'init' ), 1 );
 
+	}
+
+	public function add_cache_groups() {
+		if ( function_exists( 'wp_cache_add_non_persistent_groups' ) ) {
+			wp_cache_add_non_persistent_groups( array( 'bu-navigation' ) );
+		}
 	}
 
 	/**
@@ -87,7 +93,7 @@ class BU_Navigation_Plugin {
 	 */
 	public function init() {
 
-		load_plugin_textdomain( BU_NAV_TEXTDOMAIN, false, plugin_basename( dirname( __FILE__ ) ) . '/languages/' );
+		load_plugin_textdomain( 'bu-navigation', false, plugin_basename( dirname( __FILE__ ) ) . '/languages/' );
 
 		$this->load_extras();
 

@@ -79,8 +79,8 @@ class BU_Navigation_Admin {
 
 			$post_type = get_post_type_object( $screen->post_type );
 			$strings = array(
-				'confirmDeleteSingular' => sprintf( __( 'Are you sure you want to delete this %s?', BU_NAV_TEXTDOMAIN ), strtolower( $post_type->labels->singular_name ) ),
-				'confirmDeletePlural' => sprintf( __( 'Are you sure you want to delete these %s?', BU_NAV_TEXTDOMAIN ), strtolower( $post_type->labels->name ) )
+				'confirmDeleteSingular' => sprintf( __( 'Are you sure you want to delete this %s?', 'bu-navigation' ), strtolower( $post_type->labels->singular_name ) ),
+				'confirmDeletePlural' => sprintf( __( 'Are you sure you want to delete these %s?', 'bu-navigation' ), strtolower( $post_type->labels->name ) )
 				);
 
 			wp_enqueue_script( 'bu-page-parent-deletion', $scripts_url . '/deletion' . $suffix . '.js', array('jquery'), BU_Navigation_Plugin::VERSION, true );
@@ -226,30 +226,30 @@ class BU_Navigation_Admin {
 
 		// case: child pages and/or links exist
 		// construct output msg based on how many child pages/links exist
-		$msg = sprintf( __( '"%s" is a hidden %s with ', BU_NAV_TEXTDOMAIN ), $post->post_title, strtolower( $post_type->labels->singular_name ) );
+		$msg = sprintf( __( '"%s" is a hidden %s with ', 'bu-navigation' ), $post->post_title, strtolower( $post_type->labels->singular_name ) );
 		$children_msgs = array();
 
 		if ( count( $page_children ) >= 1 ) {
-			$children_msgs['page'] = sprintf( _n( 'a child ', '%d child ', count( $page_children ), BU_NAV_TEXTDOMAIN ), count( $page_children ) );
+			$children_msgs['page'] = sprintf( _n( 'a child ', '%d child ', count( $page_children ), 'bu-navigation' ), count( $page_children ) );
 			$children_msgs['page'] .= ( count( $page_children ) == 1 ) ? strtolower( $post_type->labels->singular_name ) : strtolower( $post_type->labels->name );
 		}
 
 		if ( count( $link_children ) >= 1 ) {
-			$children_msgs['link'] = sprintf( _n( 'a child link', '%d child links', count( $link_children ), BU_NAV_TEXTDOMAIN ), count( $link_children ) );
+			$children_msgs['link'] = sprintf( _n( 'a child link', '%d child links', count( $link_children ), 'bu-navigation' ), count( $link_children ) );
 		}
 
 		$children_msgs_vals = array_values( $children_msgs );
-		$children_msg = count( $children_msgs ) > 1 ? implode( __( ' and ', BU_NAV_TEXTDOMAIN ), $children_msgs_vals ) : current( $children_msgs );
+		$children_msg = count( $children_msgs ) > 1 ? implode( __( ' and ', 'bu-navigation' ), $children_msgs_vals ) : current( $children_msgs );
 		$msg .= $children_msg . ".";
 
 		if ( isset( $children_msgs['page'] ) )
-			$msg .= sprintf( __(' If you delete this %1$s, %2$s will move up one node in the %1$s hierarchy, and will automatically be marked as hidden.', BU_NAV_TEXTDOMAIN ),
+			$msg .= sprintf( __(' If you delete this %1$s, %2$s will move up one node in the %1$s hierarchy, and will automatically be marked as hidden.', 'bu-navigation' ),
 				strtolower( $post_type->labels->singular_name ),
 				$children_msgs['page']
 				);
 
 		if ( isset( $children_msgs['link'] ) )
-			$msg .= sprintf( __(' If you delete this %1$s, %2$s will move up one node in the %1$s hierarchy, and will be displayed in navigation menus.', BU_NAV_TEXTDOMAIN ),
+			$msg .= sprintf( __(' If you delete this %1$s, %2$s will move up one node in the %1$s hierarchy, and will be displayed in navigation menus.', 'bu-navigation' ),
 				strtolower( $post_type->labels->singular_name ),
 				$children_msgs['link']
 				);

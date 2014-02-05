@@ -92,8 +92,8 @@ class BU_Navigation_Admin_Manager {
 
 			$page = add_submenu_page(
 				$parent_slug,
-				__('Edit Order', BU_NAV_TEXTDOMAIN ),
-				__('Edit Order', BU_NAV_TEXTDOMAIN ),
+				__('Edit Order', 'bu-navigation' ),
+				__('Edit Order', 'bu-navigation' ),
 				$this->get_menu_cap_for_post_type( $pt ),
 				'bu-navigation-manager',
 				array( $this, 'render' )
@@ -127,28 +127,24 @@ class BU_Navigation_Admin_Manager {
 			wp_register_script( 'bu-navman', $scripts_url . '/manage' . $suffix . '.js', array('bu-navigation','jquery-ui-dialog','bu-jquery-validate'), BU_Navigation_Plugin::VERSION, true );
 
 			// Strings for localization
-			if ( defined( 'BU_CMS' ) && BU_CMS ) {
-				$nav_menu_txt = __( 'Site Design > Primary Navigation', BU_NAV_TEXTDOMAIN );
-			} else {
-				$nav_menu_txt = __( 'Appearance > Primary Navigation', BU_NAV_TEXTDOMAIN );
-			}
+			$nav_menu_label = __( 'Appearance > Primary Navigation', 'bu-navigation' );
 			$strings = array(
-				'optionsLabel' => __( 'options', BU_NAV_TEXTDOMAIN ),
-				'optionsEditLabel' => __( 'Edit', BU_NAV_TEXTDOMAIN ),
-				'optionsViewLabel' => __( 'View', BU_NAV_TEXTDOMAIN ),
-				'optionsDeleteLabel' => __( 'Delete', BU_NAV_TEXTDOMAIN ),
-				'optionsTrashLabel' => __( 'Move to Trash', BU_NAV_TEXTDOMAIN ),
-				'addLinkDialogTitle' => __( 'Add a Link', BU_NAV_TEXTDOMAIN ),
-				'editLinkDialogTitle' => __( 'Edit Link', BU_NAV_TEXTDOMAIN ),
-				'cancelLinkBtn' => __( 'Cancel', BU_NAV_TEXTDOMAIN ),
-				'confirmLinkBtn' => __( 'Ok', BU_NAV_TEXTDOMAIN ),
-				'noTopLevelNotice' => __( 'You are not allowed to create top level published content.', BU_NAV_TEXTDOMAIN ),
-				'noLinksNotice' => __( 'You are not allowed to add links', BU_NAV_TEXTDOMAIN ),
-				'createLinkNotice' => __( 'Select a page that you can edit and click "Add a Link" to create a new link below the selected page.', BU_NAV_TEXTDOMAIN ),
-				'allowTopNotice' => sprintf( __( 'Site administrators can change this behavior by visiting %s and enabling the "Allow Top-Level Pages" setting.', BU_NAV_TEXTDOMAIN ), $nav_menu_txt ),
-				'noChildLinkNotice' => __( 'Links are not permitted to have children.', BU_NAV_TEXTDOMAIN ),
-				'unloadWarning' => __( 'You have made changes to your navigation that have not yet been saved.', BU_NAV_TEXTDOMAIN ),
-				'saveNotice' => __( 'Saving navigation changes...', BU_NAV_TEXTDOMAIN ),
+				'optionsLabel' => __( 'options', 'bu-navigation' ),
+				'optionsEditLabel' => __( 'Edit', 'bu-navigation' ),
+				'optionsViewLabel' => __( 'View', 'bu-navigation' ),
+				'optionsDeleteLabel' => __( 'Delete', 'bu-navigation' ),
+				'optionsTrashLabel' => __( 'Move to Trash', 'bu-navigation' ),
+				'addLinkDialogTitle' => __( 'Add a Link', 'bu-navigation' ),
+				'editLinkDialogTitle' => __( 'Edit Link', 'bu-navigation' ),
+				'cancelLinkBtn' => __( 'Cancel', 'bu-navigation' ),
+				'confirmLinkBtn' => __( 'Ok', 'bu-navigation' ),
+				'noTopLevelNotice' => __( 'You are not allowed to create top level published content.', 'bu-navigation' ),
+				'noLinksNotice' => __( 'You are not allowed to add links', 'bu-navigation' ),
+				'createLinkNotice' => __( 'Select a page that you can edit and click "Add a Link" to create a new link below the selected page.', 'bu-navigation' ),
+				'allowTopNotice' => sprintf( __( 'Site administrators can change this behavior by visiting %s and enabling the "Allow Top-Level Pages" setting.', 'bu-navigation' ), $nav_menu_label ),
+				'noChildLinkNotice' => __( 'Links are not permitted to have children.', 'bu-navigation' ),
+				'unloadWarning' => __( 'You have made changes to your navigation that have not yet been saved.', 'bu-navigation' ),
+				'saveNotice' => __( 'Saving navigation changes...', 'bu-navigation' ),
 				);
 
 			// Setup dynamic script context for manage.js
@@ -240,12 +236,12 @@ class BU_Navigation_Admin_Manager {
 		$notices = array(
 			'message' => array(
 				0 => '', // Unused. Messages start at index 1.
-				1 => __( 'Your navigation changes have been saved', BU_NAV_TEXTDOMAIN )
+				1 => __( 'Your navigation changes have been saved', 'bu-navigation' )
 			),
 			'notice' => array(
 				0 => '',
-				1 => __( 'Errors occurred while saving your navigation changes.', BU_NAV_TEXTDOMAIN ),
-				2 => sprintf( __( "Warning: %s is currently editing this site's navigation.", BU_NAV_TEXTDOMAIN ), $user_markup )
+				1 => __( 'Errors occurred while saving your navigation changes.', 'bu-navigation' ),
+				2 => sprintf( __( "Warning: %s is currently editing this site's navigation.", 'bu-navigation' ), $user_markup )
 			)
 		);
 

@@ -87,14 +87,10 @@ class BU_Navigation_Admin_Post {
 		$ancestors = $this->get_formatted_ancestors();
 
 		// Strings for localization
-		if ( defined( 'BU_CMS' ) && BU_CMS ) {
-			$nav_menu_path = __( 'Site Design > Primary Navigation', 'bu-navigation' );
-		} else {
-			$nav_menu_path = __( 'Appearance > Primary Navigation', 'bu-navigation' );
-		}
+		$nav_menu_label = __( 'Appearance > Primary Navigation', 'bu-navigation' );
 		$strings = array(
 			'topLevelDisabled' => sprintf( __( 'Displaying top-level %s in navigation lists is currently disabled.', 'bu-navigation' ), strtolower( $post_type->labels->name ) ),
-			'topLevelNotice' => sprintf( __( 'To change this behavior, visit %s and enable the "Allow Top-Level Pages" setting.', 'bu-navigation' ), $nav_menu_path ),
+			'topLevelNotice' => sprintf( __( 'To change this behavior, visit %s and enable the "Allow Top-Level Pages" setting.', 'bu-navigation' ), $nav_menu_label ),
 			'topLevelLabel' => sprintf( __( 'Top level %s', 'bu-navigation' ), strtolower( $post_type->labels->singular_name ) )
 			);
 

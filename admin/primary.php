@@ -33,7 +33,7 @@ class BU_Navigation_Admin_Primary {
 	}
 
 	/**
-	 * Add "Primary Navigation" settings page to "Appearance" or "Site Design" menu
+	 * Add "Primary Navigation" settings page to "Appearance" menu
 	 */
 	public function register_menu() {
 

@@ -127,11 +127,7 @@ class BU_Navigation_Admin_Manager {
 			wp_register_script( 'bu-navman', $scripts_url . '/manage' . $suffix . '.js', array('bu-navigation','jquery-ui-dialog','bu-jquery-validate'), BU_Navigation_Plugin::VERSION, true );
 
 			// Strings for localization
-			if ( defined( 'BU_CMS' ) && BU_CMS ) {
-				$nav_menu_txt = __( 'Site Design > Primary Navigation', 'bu-navigation' );
-			} else {
-				$nav_menu_txt = __( 'Appearance > Primary Navigation', 'bu-navigation' );
-			}
+			$nav_menu_label = __( 'Appearance > Primary Navigation', 'bu-navigation' );
 			$strings = array(
 				'optionsLabel' => __( 'options', 'bu-navigation' ),
 				'optionsEditLabel' => __( 'Edit', 'bu-navigation' ),
@@ -145,7 +141,7 @@ class BU_Navigation_Admin_Manager {
 				'noTopLevelNotice' => __( 'You are not allowed to create top level published content.', 'bu-navigation' ),
 				'noLinksNotice' => __( 'You are not allowed to add links', 'bu-navigation' ),
 				'createLinkNotice' => __( 'Select a page that you can edit and click "Add a Link" to create a new link below the selected page.', 'bu-navigation' ),
-				'allowTopNotice' => sprintf( __( 'Site administrators can change this behavior by visiting %s and enabling the "Allow Top-Level Pages" setting.', 'bu-navigation' ), $nav_menu_txt ),
+				'allowTopNotice' => sprintf( __( 'Site administrators can change this behavior by visiting %s and enabling the "Allow Top-Level Pages" setting.', 'bu-navigation' ), $nav_menu_label ),
 				'noChildLinkNotice' => __( 'Links are not permitted to have children.', 'bu-navigation' ),
 				'unloadWarning' => __( 'You have made changes to your navigation that have not yet been saved.', 'bu-navigation' ),
 				'saveNotice' => __( 'Saving navigation changes...', 'bu-navigation' ),

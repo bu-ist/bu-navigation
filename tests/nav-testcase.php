@@ -18,20 +18,22 @@ class BU_Navigation_UnitTestCase extends WP_UnitTestCase {
 	 */
 	public function load_fixture( $type, $filename = null ) {
 
-		if ( is_null( $filename ) )
+		if ( is_null( $filename ) ) {
 			$filename = $type . '.json';
+		}
 
 		$path = dirname( __FILE__ ) . '/fixtures/' . $filename;
 		$data = array();
 
 		if ( is_readable( $path ) ) {
 			$data = json_decode( file_get_contents( $path ), true );
-			if ( is_array( $data ) && ! empty( $data ) )
+			if ( is_array( $data ) && ! empty( $data ) ) {
 				return call_user_func( array( $this, "load_test_$type" ), $data );
+			}
 
 		}
 
-		$this->markTestError("Error loading fixture: $path");
+		$this->fail("Error loading fixture: $path");
 
 	}
 

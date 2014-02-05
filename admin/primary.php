@@ -39,8 +39,8 @@ class BU_Navigation_Admin_Primary {
 
 		$this->page = add_submenu_page(
 			'themes.php',
-			__( 'Primary Navigation', BU_NAV_TEXTDOMAIN ),
-			__( 'Primary Navigation', BU_NAV_TEXTDOMAIN ),
+			__( 'Primary Navigation', 'bu-navigation' ),
+			__( 'Primary Navigation', 'bu-navigation' ),
 			$this->get_cap(),
 			'bu-navigation-settings',
 			array( $this, 'render' )
@@ -124,7 +124,7 @@ class BU_Navigation_Admin_Primary {
 
 			// Force positive values for max items
 			if( array_key_exists( 'max_items', $_POST['bu-nav-settings'] ) && $updates['max_items'] !== (int) $_POST['bu-nav-settings']['max_items'] ) {
-				$errors[] = __( 'The "Maximum Items" setting most be a positive value.', BU_NAV_TEXTDOMAIN );
+				$errors[] = __( 'The "Maximum Items" setting most be a positive value.', 'bu-navigation' );
 				$success = false;
 			}
 
@@ -138,7 +138,7 @@ class BU_Navigation_Admin_Primary {
 				$errors[] = sprintf(
 					_n( 'The current theme only supports %s level of children.',
 						'The current theme only supports up to %s levels of children.',
-						$max_depth, BU_NAV_TEXTDOMAIN  ),
+						$max_depth, 'bu-navigation'  ),
 					$max_depth );
 				$success = false;
 			}

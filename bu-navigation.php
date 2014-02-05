@@ -39,7 +39,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // Absolute server path to this plugin dir and file for use by included files
 define( 'BU_NAV_PLUGIN', __FILE__ );
 define( 'BU_NAV_PLUGIN_DIR', dirname( __FILE__ ) );
-define( 'BU_NAV_TEXTDOMAIN', 'bu-navigation' );
 
 // Primary navigation max items to display per level
 define( 'BU_NAVIGATION_PRIMARY_MAX', 6 );
@@ -94,7 +93,7 @@ class BU_Navigation_Plugin {
 	 */
 	public function init() {
 
-		load_plugin_textdomain( BU_NAV_TEXTDOMAIN, false, plugin_basename( dirname( __FILE__ ) ) . '/languages/' );
+		load_plugin_textdomain( 'bu-navigation', false, plugin_basename( dirname( __FILE__ ) ) . '/languages/' );
 
 		$this->load_extras();
 

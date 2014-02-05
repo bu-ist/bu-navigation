@@ -1,14 +1,14 @@
-# Copyright (C) 2013 BU Navigation
+# Copyright (C) 2014 BU Navigation
 # This file is distributed under the same license as the BU Navigation package.
 msgid ""
 msgstr ""
-"Project-Id-Version: BU Navigation 1.1.4\n"
-"Report-Msgid-Bugs-To: http://wordpress.org/tag/bu-navigation\n"
-"POT-Creation-Date: 2013-08-29 15:08:14+00:00\n"
+"Project-Id-Version: BU Navigation 1.2\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/bu-navigation\n"
+"POT-Creation-Date: 2014-02-05 15:28:36+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2013-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
@@ -56,117 +56,113 @@ msgstr ""
 msgid "Edit Order"
 msgstr ""
 
-#: admin/manager.php:131 admin/post.php:91
-msgid "Site Design > Primary Navigation"
-msgstr ""
-
-#: admin/manager.php:133 admin/post.php:93
+#: admin/manager.php:130 admin/post.php:90
 msgid "Appearance > Primary Navigation"
 msgstr ""
 
-#: admin/manager.php:136
+#: admin/manager.php:132
 msgid "options"
 msgstr ""
 
-#: admin/manager.php:137
+#: admin/manager.php:133
 msgid "Edit"
 msgstr ""
 
-#: admin/manager.php:138
+#: admin/manager.php:134
 msgid "View"
 msgstr ""
 
-#: admin/manager.php:139
+#: admin/manager.php:135
 msgid "Delete"
 msgstr ""
 
-#: admin/manager.php:140
+#: admin/manager.php:136
 msgid "Move to Trash"
 msgstr ""
 
-#: admin/manager.php:141 templates/edit-order.php:17
+#: admin/manager.php:137 templates/edit-order.php:17
 msgid "Add a Link"
 msgstr ""
 
-#: admin/manager.php:142 extras/bu-navigation-external-links.php:23
+#: admin/manager.php:138 extras/bu-navigation-external-links.php:23
 msgid "Edit Link"
 msgstr ""
 
-#: admin/manager.php:143 templates/metabox-navigation-attributes.php:28
+#: admin/manager.php:139 templates/metabox-navigation-attributes.php:28
 msgid "Cancel"
 msgstr ""
 
-#: admin/manager.php:144
+#: admin/manager.php:140
 msgid "Ok"
 msgstr ""
 
-#: admin/manager.php:145
+#: admin/manager.php:141
 msgid "You are not allowed to create top level published content."
 msgstr ""
 
-#: admin/manager.php:146
+#: admin/manager.php:142
 msgid "You are not allowed to add links"
 msgstr ""
 
-#: admin/manager.php:147
+#: admin/manager.php:143
 msgid ""
 "Select a page that you can edit and click \"Add a Link\" to create a new "
 "link below the selected page."
 msgstr ""
 
-#: admin/manager.php:148
+#: admin/manager.php:144
 msgid ""
 "Site administrators can change this behavior by visiting %s and enabling the "
 "\"Allow Top-Level Pages\" setting."
 msgstr ""
 
-#: admin/manager.php:149
+#: admin/manager.php:145
 msgid "Links are not permitted to have children."
 msgstr ""
 
-#: admin/manager.php:150
+#: admin/manager.php:146
 msgid "You have made changes to your navigation that have not yet been saved."
 msgstr ""
 
-#: admin/manager.php:151
+#: admin/manager.php:147
 msgid "Saving navigation changes..."
 msgstr ""
 
-#: admin/manager.php:241
+#: admin/manager.php:239
 msgid "Your navigation changes have been saved"
 msgstr ""
 
-#: admin/manager.php:245
+#: admin/manager.php:243
 msgid "Errors occurred while saving your navigation changes."
 msgstr ""
 
-#: admin/manager.php:246
+#: admin/manager.php:244
 msgid "Warning: %s is currently editing this site's navigation."
 msgstr ""
 
-#: admin/post.php:96
+#: admin/post.php:92
 msgid "Displaying top-level %s in navigation lists is currently disabled."
 msgstr ""
 
-#: admin/post.php:97
+#: admin/post.php:93
 msgid ""
 "To change this behavior, visit %s and enable the \"Allow Top-Level Pages\" "
 "setting."
 msgstr ""
 
-#: admin/post.php:98
+#: admin/post.php:94
 msgid "Top level %s"
 msgstr ""
 
-#: admin/post.php:136 templates/metabox-custom-template.php:2
+#: admin/post.php:132 templates/metabox-custom-template.php:2
 msgid "%s Template"
 msgstr ""
 
-#: admin/post.php:146
+#: admin/post.php:142
 msgid "Placement in Navigation"
 msgstr ""
 
-#: admin/post.php:310
+#: admin/post.php:306
 msgid "Top level page"
 msgstr ""
 
@@ -263,7 +259,7 @@ msgstr ""
 msgid "protected"
 msgstr ""
 
-#: includes/library.php:975
+#: includes/library.php:1089
 msgid "Show all sections"
 msgstr ""
 
@@ -445,16 +441,6 @@ msgstr ""
 
 #: templates/widget-form.php:67
 msgid "Use the section name as the title"
-msgstr ""
-
-#: tests/test_library.php:1460 tests/test_library.php:1493
-#: tests/test_library.php:1509 tests/test_library.php:1523
-#: tests/test_library.php:1537 tests/test_library.php:1551
-msgid "Parent Page"
-msgstr ""
-
-#: tests/test_library.php:1476
-msgid "Test Type Page"
 msgstr ""
 
 #. Plugin Name of the plugin/theme

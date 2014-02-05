@@ -229,11 +229,11 @@ function bu_navigation_get_urls( $pages ) {
  * @see `_get_page_link()`
  *
  * @param  object  $page       Post object to calculate permalink for.
- * @param  array   $ancestors  An array of post objects keyed on post ID. Should contain all ancestors of $page.
+ * @param  array   $ancestors  Optional. An array of post objects keyed on post ID. Should contain all ancestors of $page.
  * @param  boolean $sample     Optional. Sample permalink. Don't replace permastruct with slug.
  * @return string              Post permalink.
  */
-function bu_navigation_get_page_link( $page, $ancestors, $sample = false ) {
+function bu_navigation_get_page_link( $page, $ancestors = array(), $sample = false ) {
 	global $wp_rewrite;
 
 	$page_link = $wp_rewrite->get_page_permastruct();
@@ -247,14 +247,10 @@ function bu_navigation_get_page_link( $page, $ancestors, $sample = false ) {
 		$page_link = home_url( '/' );
 	} else if ( $use_permastruct ) {
 		$slug = bu_navigation_get_page_uri( $page, $ancestors );
-		if ( $slug ) {
-			$page_link = str_replace( '%pagename%', $slug, $page_link );
-			$page_link = home_url( user_trailingslashit( $page_link, 'page' ) );
-		} else {
-			$page_link = home_url( "?page_id=%d", $page->ID );
-		}
+		$page_link = str_replace( '%pagename%', $slug, $page_link );
+		$page_link = home_url( user_trailingslashit( $page_link, 'page' ) );
 	} else {
-		$page_link = home_url( "?page_id=%d", $page->ID );
+		$page_link = home_url( "?page_id=" . $page->ID );
 	}
 
 	return $page_link;
@@ -269,11 +265,11 @@ function bu_navigation_get_page_link( $page, $ancestors, $sample = false ) {
  * @see `get_post_permalink()`
  *
  * @param  object  $post       Post object to calculate permalink for.
- * @param  array   $ancestors  An array of post objects keyed on post ID. Should contain all ancestors of $post.
+ * @param  array   $ancestors  Optional. An array of post objects keyed on post ID. Should contain all ancestors of $post.
  * @param  boolean $sample     Optional. Sample permalink. Don't replace permastruct with slug.
  * @return string              Post permalink.
  */
-function bu_navigation_get_post_link( $post, $ancestors, $sample = false ) {
+function bu_navigation_get_post_link( $post, $ancestors = array(), $sample = false ) {
 	global $wp_rewrite;
 
 	$post_link = $wp_rewrite->get_extra_permastruct( $post->post_type );
@@ -285,11 +281,10 @@ function bu_navigation_get_post_link( $post, $ancestors, $sample = false ) {
 	$post_type = get_post_type_object( $post->post_type );
 	$slug = $post->post_name;
 
-	if ( $use_permastruct && $post_type->hierarchical ) {
-		$slug = bu_navigation_get_page_uri( $post, $ancestors );
-	}
-
-	if ( $use_permastruct && $slug ) {
+	if ( $use_permastruct ) {
+		if ( $post_type->hierarchical ) {
+			$slug = bu_navigation_get_page_uri( $post, $ancestors );
+		}
 		$post_link = str_replace( "%$post->post_type%", $slug, $post_link );
 		$post_link = home_url( user_trailingslashit( $post_link ) );
 	} else {
@@ -328,7 +323,6 @@ function bu_navigation_get_page_uri( $page, $ancestors ) {
 
 		// Avoid infinite loops
 		if ( $page->post_parent == $page->ID ) {
-			$uri = false;
 			break;
 		}
 
@@ -351,7 +345,6 @@ function bu_navigation_get_page_uri( $page, $ancestors ) {
 
 		// We can't return an incomplete path -- bail with indication of failure.
 		if ( ! array_key_exists( $page->post_parent, $ancestors ) ) {
-			$uri = false;
 			break;
 		}
 
@@ -381,7 +374,7 @@ function _bu_navigation_page_uri_ancestors( $post ) {
 		$args =  array(
 			'post__in' => $section_ids,
 			'post_types' => 'any',
-			'post_status' => array( 'publish', 'private' ),
+			'post_status' => 'any',
 			'suppress_urls' => true,
 			'suppress_filter_posts' => true
 			);

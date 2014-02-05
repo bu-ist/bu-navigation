@@ -364,6 +364,149 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 		}
 	}
 
+	public function test_bu_navigation_get_page_link() {
+		$grandchild = $this->posts['grandchild_one'];
+		$grandchild = get_post( $grandchild );
+
+		// With ancestors
+		$ancestors = bu_navigation_gather_sections( $grandchild->ID, array( 'direction' => 'up' ) );
+		$this->assertEquals( get_page_link( $grandchild ), bu_navigation_get_page_link( $grandchild, $ancestors ) );
+
+		// Without ancestors
+		$this->assertEquals( get_page_link( $grandchild ), bu_navigation_get_page_link( $grandchild ) );
+
+		// Page on front
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $grandchild->ID );
+		$this->assertEquals( get_page_link( $grandchild ), bu_navigation_get_page_link( $grandchild ) );
+	}
+
+	public function test_bu_navigation_get_page_link_unpublished() {
+		$public = $this->factory->post->create(array('post_type' => 'page', 'post_status' => 'publish'));
+		$draft_child = $this->factory->post->create(array('post_type' => 'page', 'post_status' => 'draft', 'post_parent' => $public));
+		$pending_child = $this->factory->post->create(array('post_type' => 'page', 'post_status' => 'pending', 'post_parent' => $public));
+		$draft = $this->factory->post->create(array('post_type' => 'page', 'post_status' => 'draft'));
+		$public_draft_child = $this->factory->post->create(array('post_type' => 'page', 'post_status' => 'publish', 'post_parent' => $draft));
+		$pending = $this->factory->post->create(array('post_type' => 'page', 'post_status' => 'pending'));
+		$public_pending_child = $this->factory->post->create(array('post_type' => 'page', 'post_status' => 'publish', 'post_parent' => $pending));
+
+		// Our functions require post objects
+		$draft = get_post( $draft );
+		$draft_child = get_post( $draft_child );
+		$pending = get_post( $draft_child );
+		$pending_child = get_post( $pending_child );
+		$public_draft_child = get_post( $public_draft_child );
+		$public_pending_child = get_post( $public_pending_child );
+
+		// Root unpublished
+		$this->assertEquals( get_page_link( $draft ), bu_navigation_get_page_link( $draft ) );
+		$this->assertEquals( get_page_link( $pending ), bu_navigation_get_page_link( $pending ) );
+
+		// Public parent, unpublished children
+		$this->assertEquals( get_page_link( $draft_child ), bu_navigation_get_page_link( $draft_child ) );
+		$this->assertEquals( get_page_link( $pending_child ), bu_navigation_get_page_link( $pending_child ) );
+
+		// Draft parent, public children
+		$this->assertEquals( get_page_link( $public_draft_child ), bu_navigation_get_page_link( $public_draft_child ) );
+		$this->assertEquals( get_page_link( $public_pending_child ), bu_navigation_get_page_link( $public_pending_child ) );
+
+		// Sample permalinks for unpublished pages
+		$this->assertEquals( get_page_link( $draft, false, true ), bu_navigation_get_page_link( $draft, array(), true ) );
+		$this->assertEquals( get_page_link( $draft_child, false, true ), bu_navigation_get_page_link( $draft_child, array(), true ) );
+		$this->assertEquals( get_page_link( $pending, false, true ), bu_navigation_get_page_link( $pending, array(), true ) );
+		$this->assertEquals( get_page_link( $pending_child, false, true ), bu_navigation_get_page_link( $pending_child, array(), true ) );
+	}
+
+	public function test_bu_navigation_get_page_link_no_permalinks() {
+		global $wp_rewrite;
+		$wp_rewrite->set_permalink_structure( '' );
+		delete_option( 'rewrite_rules' );
+
+		// Re-run previous tests, but without pretty permalinks
+		$this->test_bu_navigation_get_page_link();
+		$this->test_bu_navigation_get_page_link_unpublished();
+	}
+
+	public function test_bu_navigation_get_post_link() {
+		$grandchild = $this->posts['test_grandchild'];
+		$grandchild = get_post( $grandchild );
+
+		// With ancestors
+		$ancestors = bu_navigation_gather_sections( $grandchild->ID, array( 'direction' => 'up' ) );
+		$this->assertEquals( get_post_permalink( $grandchild ), bu_navigation_get_post_link( $grandchild, $ancestors ) );
+
+		// Without ancestors
+		$this->assertEquals( get_post_permalink( $grandchild ), bu_navigation_get_post_link( $grandchild ) );
+	}
+
+	public function test_bu_navigation_get_post_link_unpublished() {
+		$public = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'publish'));
+		$draft_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'draft', 'post_parent' => $public));
+		$pending_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'pending', 'post_parent' => $public));
+		$draft = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'draft'));
+		$public_draft_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'publish', 'post_parent' => $draft));
+		$pending = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'pending'));
+		$public_pending_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'publish', 'post_parent' => $pending));
+
+		// Our functions require post objects
+		$draft = get_post( $draft );
+		$draft_child = get_post( $draft_child );
+		$pending = get_post( $draft_child );
+		$pending_child = get_post( $pending_child );
+		$public_draft_child = get_post( $public_draft_child );
+		$public_pending_child = get_post( $public_pending_child );
+
+		// Root unpublished
+		$this->assertEquals( get_post_permalink( $draft ), bu_navigation_get_post_link( $draft ) );
+		$this->assertEquals( get_post_permalink( $pending ), bu_navigation_get_post_link( $pending ) );
+
+		// Public parent, unpublished children
+		$this->assertEquals( get_post_permalink( $draft_child ), bu_navigation_get_post_link( $draft_child ) );
+		$this->assertEquals( get_post_permalink( $pending_child ), bu_navigation_get_post_link( $pending_child ) );
+
+		// Draft parent, public children
+		$this->assertEquals( get_post_permalink( $public_draft_child ), bu_navigation_get_post_link( $public_draft_child ) );
+		$this->assertEquals( get_post_permalink( $public_pending_child ), bu_navigation_get_post_link( $public_pending_child ) );
+
+		// Sample permalinks for unpublished posts
+		$this->assertEquals( get_post_permalink( $draft, false, true ), bu_navigation_get_post_link( $draft, array(), true ) );
+		$this->assertEquals( get_post_permalink( $draft_child, false, true ), bu_navigation_get_post_link( $draft_child, array(), true ) );
+		$this->assertEquals( get_post_permalink( $pending, false, true ), bu_navigation_get_post_link( $pending, array(), true ) );
+		$this->assertEquals( get_post_permalink( $pending_child, false, true ), bu_navigation_get_post_link( $pending_child, array(), true ) );
+	}
+
+	public function test_bu_navigation_get_post_link_no_permalinks() {
+		global $wp_rewrite;
+		$wp_rewrite->set_permalink_structure( '' );
+		delete_option( 'rewrite_rules' );
+
+		// Re-run previous tests, but without pretty permalinks
+		$this->test_bu_navigation_get_post_link();
+		$this->test_bu_navigation_get_post_link_unpublished();
+	}
+
+	public function test_bu_navigation_get_post_link_query_var() {
+		global $wp_rewrite;
+		$wp_rewrite->set_permalink_structure( '' );
+		delete_option( 'rewrite_rules' );
+
+		register_post_type( 'cpt_one', array( 'public' => true, 'hierarchical' => true, 'query_var' => false ) );
+		register_post_type( 'cpt_two', array( 'public' => true, 'hierarchical' => true, 'query_var' => true ) );
+		register_post_type( 'cpt_three', array( 'public' => true, 'hierarchical' => true, 'query_var' => 'foo' ) );
+
+		$cpt_one = $this->factory->post->create(array('post_type' => 'cpt_one', 'post_status' => 'publish'));
+		$cpt_two = $this->factory->post->create(array('post_type' => 'cpt_two', 'post_status' => 'publish'));
+		$cpt_three = $this->factory->post->create(array('post_type' => 'cpt_three', 'post_status' => 'publish'));
+
+		$cpt_one = get_post( $cpt_one );
+		$cpt_two = get_post( $cpt_two );
+		$cpt_three = get_post( $cpt_three );
+
+		$this->assertEquals( get_post_permalink( $cpt_one ), bu_navigation_get_post_link( $cpt_one ) );
+		$this->assertEquals( get_post_permalink( $cpt_two ), bu_navigation_get_post_link( $cpt_two ) );
+		$this->assertEquals( get_post_permalink( $cpt_three ), bu_navigation_get_post_link( $cpt_three ) );
+	}
+
 	/**
 	 *  Covers bu_navigation_get_pages()
 	 */

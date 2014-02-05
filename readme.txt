@@ -2,8 +2,8 @@
 Contributors: ntk, mgburns, gcorne, jtwiest
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
-Tested up to: 3.5
-Stable tag: 1.1.5
+Tested up to: 3.8.1
+Stable tag: 1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,13 @@ Please see this page for the details:
 5. The same drag and drop view is available to move pages while editing them
 
 == Changelog ==
+
+= 1.2 =
+* Added support for HTML in navigation labels
+* Bug Fix: "View" links on "Edit Order" screen corrected for non-root posts
+* Added caching to optimize loading of navigation sections
+* For Developers: Added several functions for calculating permalinks efficiently for hierarchical post types
+* For Developers: Removed the `bu_navigation_pull_page()` function from the navigation library
 
 = 1.1.5 =
 

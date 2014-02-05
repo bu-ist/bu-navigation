@@ -1598,7 +1598,7 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$dropdown_expected = "<select id=\"bu_filter_pages\" name=\"post_parent\">\r" .
 				"\n\t<option value=\"0\">Show all sections</option>\r" .
-				"\n\t<option value=\"" . $parent . "\" >" . __('Parent Page') . "</option>\r" .
+				"\n\t<option value=\"" . $parent . "\" >Parent Page</option>\r" .
 				"\r</select>\r";
 
 		ob_start();
@@ -1614,7 +1614,7 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$post_types_test = 'test';
 		$dropdown_posttype_expected = "<select id=\"bu_filter_pages\" name=\"post_parent\">\r" .
-				"\n\t<option value=\"" . $test . "\" >" . __('Test Type Page') . "</option>\r" .
+				"\n\t<option value=\"" . $test . "\" >Test Type Page</option>\r" .
 				"\r</select>\r";
 
 		ob_start();
@@ -1631,7 +1631,7 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$selected = $parent;
 		$dropdown_selected_expected = "<select id=\"bu_filter_pages\" name=\"post_parent\">\r" .
 				"\n\t<option value=\"0\">Show all sections</option>\r" .
-				"\n\t<option value=\"" . $parent . "\" selected=\"selected\">" . __('Parent Page') . "</option>\r" .
+				"\n\t<option value=\"" . $parent . "\" selected=\"selected\">Parent Page</option>\r" .
 				"\r</select>\r";
 
 		ob_start();
@@ -1647,7 +1647,7 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$dropdown_echo_expected = "<select id=\"bu_filter_pages\" name=\"post_parent\">\r" .
 				"\n\t<option value=\"0\">Show all sections</option>\r" .
-				"\n\t<option value=\"" . $parent . "\" >" . __('Parent Page') . "</option>\r" .
+				"\n\t<option value=\"" . $parent . "\" >Parent Page</option>\r" .
 				"\r</select>\r";
 
 		$args = array( 'echo' => 0 );
@@ -1661,7 +1661,7 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$dropdown_select_id_expected = "<select id=\"test_select_id\" name=\"post_parent\">\r" .
 				"\n\t<option value=\"0\">Show all sections</option>\r" .
-				"\n\t<option value=\"" . $parent . "\" >" . __('Parent Page') . "</option>\r" .
+				"\n\t<option value=\"" . $parent . "\" >Parent Page</option>\r" .
 				"\r</select>\r";
 
 		$args = array( 'echo' => 0, 'select_id' => 'test_select_id' );
@@ -1675,7 +1675,7 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$dropdown_select_name_expected = "<select id=\"bu_filter_pages\" name=\"test_name\">\r" .
 				"\n\t<option value=\"0\">Show all sections</option>\r" .
-				"\n\t<option value=\"" . $parent . "\" >" . __('Parent Page') . "</option>\r" .
+				"\n\t<option value=\"" . $parent . "\" >Parent Page</option>\r" .
 				"\r</select>\r";
 
 		$args = array( 'echo' => 0, 'select_name' => 'test_name' );
@@ -1689,7 +1689,7 @@ class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$dropdown_classes_expected = "<select id=\"bu_filter_pages\" name=\"post_parent\" class=\"test_class\">\r" .
 				"\n\t<option value=\"0\">Show all sections</option>\r" .
-				"\n\t<option value=\"" . $parent . "\" >" . __('Parent Page') . "</option>\r" .
+				"\n\t<option value=\"" . $parent . "\" >Parent Page</option>\r" .
 				"\r</select>\r";
 
 		$args = array( 'echo' => 0, 'select_classes' => 'test_class' );

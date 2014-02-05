@@ -23,7 +23,7 @@ class BU_Navigation_Tree_View {
 
 		$this->plugin = $GLOBALS['bu_navigation_plugin'];
 		$this->instance = $instance;
-		$this->no_title_text = __('(no title)', BU_NAV_TEXTDOMAIN );
+		$this->no_title_text = __('(no title)', 'bu-navigation' );
 
 		// Merge default script context with arg
 		$defaults = array(
@@ -43,8 +43,8 @@ class BU_Navigation_Tree_View {
 			'showCounts' => true,
 			'showStatuses' => true,
 			'nodePrefix' => 'p',
-			'statusBadgeExcluded' => __( 'not in nav', BU_NAV_TEXTDOMAIN ),
-			'statusBadgeProtected' => __( 'protected', BU_NAV_TEXTDOMAIN ),
+			'statusBadgeExcluded' => __( 'not in nav', 'bu-navigation' ),
+			'statusBadgeProtected' => __( 'protected', 'bu-navigation' ),
 			);
 		$this->settings = wp_parse_args( $script_context, $defaults );
 

@@ -230,7 +230,7 @@ function bu_navigation_get_urls( $pages ) {
  *
  * @param  object  $page       Post object to calculate permalink for.
  * @param  array   $ancestors  Optional. An array of post objects keyed on post ID. Should contain all ancestors of $page.
- * @param  boolean $sample     Optional. Sample permalink. Don't replace permastruct with slug.
+ * @param  boolean $sample     Optional. Is it a sample permalink.
  * @return string              Post permalink.
  */
 function bu_navigation_get_page_link( $page, $ancestors = array(), $sample = false ) {
@@ -266,7 +266,7 @@ function bu_navigation_get_page_link( $page, $ancestors = array(), $sample = fal
  *
  * @param  object  $post       Post object to calculate permalink for.
  * @param  array   $ancestors  Optional. An array of post objects keyed on post ID. Should contain all ancestors of $post.
- * @param  boolean $sample     Optional. Sample permalink. Don't replace permastruct with slug.
+ * @param  boolean $sample     Optional. Is it a sample permalink.
  * @return string              Post permalink.
  */
 function bu_navigation_get_post_link( $post, $ancestors = array(), $sample = false ) {
@@ -384,7 +384,6 @@ function _bu_navigation_page_uri_ancestors( $post ) {
 		$ancestors = bu_navigation_get_posts( $args );
 		remove_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields', 9999 );
 
-		// This could happen if non-published posts became parents.
 		if ( false === $ancestors ) {
 			$ancestors = array();
 		}

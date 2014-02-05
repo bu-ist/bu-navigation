@@ -87,15 +87,11 @@ class BU_Navigation_Admin_Post {
 		$ancestors = $this->get_formatted_ancestors();
 
 		// Strings for localization
-		if ( defined( 'BU_CMS' ) && BU_CMS ) {
-			$nav_menu_path = __( 'Site Design > Primary Navigation', BU_NAV_TEXTDOMAIN );
-		} else {
-			$nav_menu_path = __( 'Appearance > Primary Navigation', BU_NAV_TEXTDOMAIN );
-		}
+		$nav_menu_label = __( 'Appearance > Primary Navigation', 'bu-navigation' );
 		$strings = array(
-			'topLevelDisabled' => sprintf( __( 'Displaying top-level %s in navigation lists is currently disabled.', BU_NAV_TEXTDOMAIN ), strtolower( $post_type->labels->name ) ),
-			'topLevelNotice' => sprintf( __( 'To change this behavior, visit %s and enable the "Allow Top-Level Pages" setting.', BU_NAV_TEXTDOMAIN ), $nav_menu_path ),
-			'topLevelLabel' => sprintf( __( 'Top level %s', BU_NAV_TEXTDOMAIN ), strtolower( $post_type->labels->singular_name ) )
+			'topLevelDisabled' => sprintf( __( 'Displaying top-level %s in navigation lists is currently disabled.', 'bu-navigation' ), strtolower( $post_type->labels->name ) ),
+			'topLevelNotice' => sprintf( __( 'To change this behavior, visit %s and enable the "Allow Top-Level Pages" setting.', 'bu-navigation' ), $nav_menu_label ),
+			'topLevelLabel' => sprintf( __( 'Top level %s', 'bu-navigation' ), strtolower( $post_type->labels->singular_name ) )
 			);
 
 		$script_context = array(
@@ -133,7 +129,7 @@ class BU_Navigation_Admin_Post {
 		if ( 'page' === $post_type && is_array( $templates ) && ( count( $templates ) > 0 ) ) {
 			add_meta_box(
 				'bupagetemplatediv',
-				sprintf( __( "%s Template", BU_NAV_TEXTDOMAIN  ), $post_type_object->labels->singular_name ),
+				sprintf( __( "%s Template", 'bu-navigation'  ), $post_type_object->labels->singular_name ),
 				array($this, 'display_custom_template'),
 				$post_type,
 				'side',
@@ -143,7 +139,7 @@ class BU_Navigation_Admin_Post {
 
 		add_meta_box(
 			'bunavattrsdiv',
-			__( 'Placement in Navigation', BU_NAV_TEXTDOMAIN ),
+			__( 'Placement in Navigation', 'bu-navigation' ),
 			array( $this, 'display_nav_attributes' ),
 			$post_type,
 			'side',
@@ -307,7 +303,7 @@ class BU_Navigation_Admin_Post {
 		if( $post->post_parent ) {
 			$output = $this->get_post_breadcrumbs( $post );
 		} else {
-			$output = "<ul id=\"bu-post-breadcrumbs\"><li class=\"current\">" . __('Top level page', BU_NAV_TEXTDOMAIN ) . "</li></ul>\n";
+			$output = "<ul id=\"bu-post-breadcrumbs\"><li class=\"current\">" . __('Top level page', 'bu-navigation' ) . "</li></ul>\n";
 		}
 
 		return $output;

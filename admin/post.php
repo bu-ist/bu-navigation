@@ -163,9 +163,22 @@ class BU_Navigation_Admin_Post {
 
 		// Template context
 		$post_type = get_post_type_object( $post->post_type );
-		$nav_label = esc_attr( bu_navigation_get_label( $post, '' ) );
+
+		// By default the post object passed to meta boxes is formatted for editing.
+		// We need to make sure a *raw* post title is used if no navigation label is set.
+		// This prevents us from storing double escaped HTML entities in the database.
+		$raw_post = get_post( $post->ID );
+		if ( 'auto-draft' === $post->post_status ) {
+			// Special handling for new posts -- The version stored in the database
+			// has "Auto Draft" as a title at this point, which we don't want.
+			// @see `get_default_post_to_edit`
+			$raw_post->post_title = '';
+		}
+
+		$nav_label = bu_navigation_get_label( $raw_post, '' );
+		$breadcrumbs = $this->get_post_breadcrumbs_label( $raw_post );
+
 		$nav_display = ! bu_navigation_post_excluded( $post );
-		$breadcrumbs = $this->get_post_breadcrumbs_label( $post );
 		$images_url = plugins_url( 'images', BU_NAV_PLUGIN );
 		$pub_cap = $post_type->cap->publish_posts;
 		$user_cannot_publish = ( $post->post_status != 'publish' && ! current_user_can( $pub_cap ) );

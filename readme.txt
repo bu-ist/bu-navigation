@@ -3,7 +3,7 @@ Contributors: ntk, mgburns, gcorne, jtwiest
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 1.2
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,7 +76,14 @@ Please see this page for the details:
 
 == Changelog ==
 
+= 1.2.1 =
+
+* Added support for editing of HTML entities in navigation label input field
+* Added filter: bu_navigation_format_page_label
+* Added WP title filters to bu_navigation_format_page_label
+
 = 1.2 =
+
 * Added support for HTML in navigation labels
 * Bug Fix: "View" links on "Edit Order" screen corrected for non-root posts
 * Added caching to optimize loading of navigation sections

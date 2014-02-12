@@ -664,8 +664,9 @@ function bu_navigation_format_page( $page, $args = '' ) {
 	$item_classes = apply_filters( 'page_css_class', $item_classes, $page );
 
 	$title = apply_filters( 'bu_page_title', $title );
+	$label = apply_filters( 'bu_navigation_format_page_label', $title, $page );
 
-	$anchor = $r['anchor'] ? sprintf( '<a%s>%s</a>', $attributes, $title ) : $title;
+	$anchor = $r['anchor'] ? sprintf( '<a%s>%s</a>', $attributes, $label ) : $label;
 
 	$html = sprintf( "<%s class=\"%s\">\n%s\n %s</%s>\n",
 		$r['item_tag'],
@@ -748,7 +749,12 @@ function bu_navigation_filter_item_active_page( $attributes, $page ) {
 	return $attributes;
 }
 
-add_filter('bu_navigation_filter_anchor_attrs', 'bu_navigation_filter_item_active_page', 10, 2);
+add_filter( 'bu_navigation_filter_anchor_attrs', 'bu_navigation_filter_item_active_page', 10, 2 );
+
+// Add default filters from "the_title" when displaying navigation label
+add_filter( 'bu_navigation_format_page_label', 'wptexturize' );
+add_filter( 'bu_navigation_format_page_label', 'convert_chars' );
+add_filter( 'bu_navigation_format_page_label', 'trim' );
 
 /**
  * Generates an unordered list tree of pages in a particular section

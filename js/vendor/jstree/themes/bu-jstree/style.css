@@ -556,12 +556,14 @@ html[xmlns] .jstree-bu li {
 }
 
 #jstree-marker.jstree-bu {
+	z-index: 100100;
 	text-indent: -100px;
 	margin-left: -20px;
 	background: none;
 }
 
 #jstree-marker-line.jstree-bu {
+	z-index: 100101;
 	background: #6da73d;
 	height: 3px;
 	border: 0px;
@@ -579,6 +581,7 @@ html[xmlns] .jstree-bu li {
 }
 
 #vakata-dragged.jstree-bu {
+	z-index: 100100;
 	width: 768px;
 	padding: 8px 8px 8px 24px;
 	border: 1px solid #508a21;

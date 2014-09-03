@@ -2,8 +2,8 @@
 **Contributors:** ntk, mgburns, gcorne, jtwiest
 **Tags:** navigation, hierarchical, post type, boston university, bu
 **Requires at least:** 3.1
-**Tested up to:** 3.9
-**Stable tag:** 1.2.3
+**Tested up to:** 4.0
+**Stable tag:** 1.2.4
 **License:** GPLv2 or later
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -85,6 +85,11 @@ Please see this page for the details:
 
 
 ## Changelog ##
+
+### 1.2.4 ###
+
+* 4.0 Compatibility - Fixes style conflicts
+* IE8 style fixes
 
 ### 1.2.3 ###
 

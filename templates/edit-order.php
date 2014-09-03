@@ -12,9 +12,9 @@
 
 			<ul class="navman-toolbar">
 				<li><a href="#nav-tree-container" id="navman_expand_all"><?php _e( 'Expand All', 'bu-navigation' ); ?></a></li>
-				<li>| <a href="#nav-tree-container" id="navman_collapse_all"><?php _e( 'Collapse All', 'bu-navigation' ); ?></a></li>
+				<li><a href="#nav-tree-container" id="navman_collapse_all"><?php _e( 'Collapse All', 'bu-navigation' ); ?></a></li>
 				<?php if ( $include_links ): ?>
-				<li <?php if( $disable_add_link ) echo 'class="disabled"'; ?>>| <a href="#" id="navman_add_link"><?php _e( 'Add a Link', 'bu-navigation' ); ?></a></li>
+				<li <?php if( $disable_add_link ) echo 'class="disabled"'; ?>><a href="#" id="navman_add_link"><?php _e( 'Add a Link', 'bu-navigation' ); ?></a></li>
 				<?php endif; ?>
 			</ul>
 			<div class="navman-body">

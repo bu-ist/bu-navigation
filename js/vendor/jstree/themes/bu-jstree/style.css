@@ -76,11 +76,11 @@ html[xmlns] .jstree-bu li {
 
 /* Workaround for style conflicts introduced in WP 4.0 */
 .jstree-bu .title-count {
-	display: initial;
-	position: initial;
-	padding: initial;
-	margin: initial;
-	background: initial;
+	display: inline;
+	position: static;
+	padding: 0;
+	margin: 0;
+	background: none;
 	border-radius: 0;
 	color: inherit;
 	font-size: inherit;

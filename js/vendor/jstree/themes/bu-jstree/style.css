@@ -74,6 +74,19 @@ html[xmlns] .jstree-bu li {
 	font-weight: 100;
 }
 
+/* Workaround for style conflicts introduced in WP 4.0 */
+.jstree-bu .title-count {
+	display: initial;
+	position: initial;
+	padding: initial;
+	margin: initial;
+	background: initial;
+	border-radius: 0;
+	color: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+}
+
 .jstree-bu .count {
 	font-weight: 100;
 	color: #999;

@@ -88,9 +88,20 @@
 }
 
 .navman-toolbar li {
-		display: inline-block;
-		zoom: 1;
-		*display: inline;
+	display: inline-block;
+}
+
+.ie8 .navman-toolbar li {
+	display: inline;
+}
+
+.navman-toolbar li:before {
+	content: "|";
+	padding-right: 2px
+}
+
+.navman-toolbar li:first-child:before {
+	content: "";
 }
 
 .navman-toolbar a {

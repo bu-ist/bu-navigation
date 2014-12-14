@@ -96,7 +96,7 @@ class BU_Navigation_Plugin {
 		load_plugin_textdomain( 'bu-navigation', false, plugin_basename( dirname( __FILE__ ) ) . '/languages/' );
 
 		if( defined( 'BU_TS_IS_LOADED' ) ) {
-			require_once BU_NAV_PLUGIN_DIR . '/lettuce/sandbox-setup.php';
+			require_once BU_NAV_PLUGIN_DIR . '/tests/lettuce/sandbox-setup.php';
 		}
 
 		$this->load_extras();

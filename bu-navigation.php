@@ -11,7 +11,7 @@ Domain Path: /languages
 */
 
 /**
-Copyright 2012 by Boston University
+Copyright 2014 by Boston University
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

@@ -1001,12 +1001,6 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$this->assertEquals( $parent_two_expected, $parent_two_results );
 
-		/**
-		* 	 Flush all of the Gloabl Vars away
-		*/
-
-		$this->flush_global_cache();
-
 	}
 
 	/**
@@ -1062,12 +1056,6 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$parent_two_results = apply_filters( 'bu_navigation_filter_anchor_attrs', $parent_two_expected, $page );
 
 		$this->assertEquals( $parent_two_expected, $parent_two_results );
-
-		/**
-		* 	 Flush all of the Gloabl Vars away
-		*/
-
-		$this->flush_global_cache();
 
 	}
 
@@ -1759,22 +1747,6 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$this->assertEquals( $page_options_level_expected, $page_options_level_results );
 
-	}
-
-	function flush_global_cache() {
-		$this->flush_cache();
-		unset($GLOBALS['wp_query'], $GLOBALS['wp_the_query']);
-		$GLOBALS['wp_the_query'] =& new WP_Query();
-		$GLOBALS['wp_query'] =& $GLOBALS['wp_the_query'];
-		$GLOBALS['wp'] =& new WP();
-
-		// clean out globals to stop them polluting wp and wp_query
-		foreach ($GLOBALS['wp']->public_query_vars as $v) {
-			unset($GLOBALS[$v]);
-		}
-		foreach ($GLOBALS['wp']->private_query_vars as $v) {
-			unset($GLOBALS[$v]);
-		}
 	}
 
 }

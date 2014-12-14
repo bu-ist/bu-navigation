@@ -14,3 +14,12 @@ $ npm install
 $ grunt
 $ grunt watch
 ```
+
+# Testing
+
+Unit tests for this plugin live in the `tests/phpunit` directory. To run:
+
+1. Install [Composer](https://getcomposer.org/)
+2. Install [PHPUnit](https://phpunit.de/) (`composer install`)
+3. Install the core [WP Unit Test library](https://develop.svn.wordpress.org/trunk/tests/phpunit/includes/) and configure a test install (`bin/install-wp-tests`)
+4. Run the tests (`phpunit`)

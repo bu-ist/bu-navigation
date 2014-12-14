@@ -240,6 +240,6 @@ class BU_Navigation_Plugin {
 }
 
 // Instantiate plugin (only once)
-if( ! isset( $bu_navigation_plugin ) ) {
-	$bu_navigation_plugin = new BU_Navigation_Plugin();
+if( ! isset( $GLOBALS['bu_navigation_plugin'] ) ) {
+	$GLOBALS['bu_navigation_plugin'] = new BU_Navigation_Plugin();
 }

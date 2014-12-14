@@ -75,7 +75,7 @@ class BU_Navigation_Admin_Post {
 	 */
 	public function add_scripts( $page ) {
 
-		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		$scripts_url = plugins_url( 'js', BU_NAV_PLUGIN );
 		$styles_url = plugins_url( 'css', BU_NAV_PLUGIN );
 

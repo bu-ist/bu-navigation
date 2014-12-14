@@ -117,7 +117,7 @@ class BU_Navigation_Admin_Manager {
 
 		if( is_array( $this->pages ) && in_array( $page, $this->pages ) ) {
 
-			$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
+			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 			$scripts_url = plugins_url( 'js', BU_NAV_PLUGIN );
 			$vendor_url = plugins_url( 'js/vendor', BU_NAV_PLUGIN );
 			$styles_url = plugins_url( 'css', BU_NAV_PLUGIN );

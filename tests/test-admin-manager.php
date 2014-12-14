@@ -1,7 +1,5 @@
 <?php
 
-require_once dirname( __FILE__ ) . '/nav-testcase.php';
-
 /**
  * Coverage for the BU_Navigation_Admin_Manager class
  *
@@ -12,7 +10,7 @@ require_once dirname( __FILE__ ) . '/nav-testcase.php';
  * @group bu-navigation-admin
  * @group bu-navigation-admin-manager
  */
-class WP_Test_BU_Navigation_Admin_Manager extends BU_Navigation_UnitTestCase {
+class Test_BU_Navigation_Admin_Manager extends BU_Navigation_UnitTestCase {
 
 	public $navman;
 

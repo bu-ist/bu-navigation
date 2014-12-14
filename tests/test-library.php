@@ -1,14 +1,12 @@
 <?php
 
-require_once dirname( __FILE__ ) . '/nav-testcase.php';
-
 /**
  * Coverage for functions in the BU Navigation library
  *
  * @group bu-navigation
  * @group bu-navigation-library
  */
-class WP_Test_Navigation_Library extends BU_Navigation_UnitTestCase {
+class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 	public $posts;
 

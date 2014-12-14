@@ -3,17 +3,28 @@
  * PHPUnit Bootstrap
  *
  * To run these tests:
- * 	1. Install PHPUnit (http://www.phpunit.de)
- *  2. Install the WordPress Unit Testing Framework (http://unit-test.svn.wordpress.org/trunk)
- *  3. Configure wp-tests-config.php, install WordPress and create a clean DB
- *  4. Set the WP_TESTS_DIR environment variable to point at the WP Unit Testing Framework
- *
- * $ cd wp-content/plugins/bu-navigation
- * $ phpunit
+ * 	1. Install Composer (https://getcomposer.org/)
+ *  2. Install plugin development dependencies (`composer install`)
+ *  3. Install WordPress unit tests library (`bin/install-wp-tests.sh`)
+ *  4. Run `./vendor/bin/phpunit` from the root directory of this plugin
  */
 
-$GLOBALS['wp_tests_options'] = array(
-	'active_plugins' => array( 'bu-navigation/bu-navigation.php' ),
-);
+$_tests_dir = getenv( 'WP_TESTS_DIR' );
+if ( ! $_tests_dir ) {
+	$_tests_dir = '/tmp/wordpress-tests-lib';
+}
 
-require getenv( 'WP_TESTS_DIR' ) . '/includes/bootstrap.php';
+// Load plugin files from this directory manually (as mu-plugin)
+require_once $_tests_dir . '/includes/functions.php';
+
+function _manually_load_plugin() {
+	require dirname( __FILE__ ) . '/../bu-navigation.php';
+}
+
+tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
+
+// Import WordPress unit test bootstrap
+require $_tests_dir . '/includes/bootstrap.php';
+
+// Custom WP_UnitTestCase extension
+require dirname( __FILE__ ) . '/nav-testcase.php';

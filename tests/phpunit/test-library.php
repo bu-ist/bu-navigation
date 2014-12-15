@@ -426,18 +426,26 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 	}
 
 	public function test_bu_navigation_get_post_link() {
-		$grandchild = $this->posts['test_grandchild'];
-		$grandchild = get_post( $grandchild );
+		global $wp_rewrite;
 
-		// With ancestors
-		$ancestors = bu_navigation_gather_sections( $grandchild->ID, array( 'direction' => 'up' ) );
-		$this->assertEquals( get_post_permalink( $grandchild ), bu_navigation_get_post_link( $grandchild, $ancestors ) );
+		// Non-Page Hierarchical Post Type 'Default Permalinks' do not work for child posts prior to 4.0
+		// @see https://core.trac.wordpress.org/ticket/29615
+		if ( $wp_rewrite->using_permalinks() || version_compare( $GLOBALS['wp_version'], '4.0', '>' ) ) {
+			$grandchild = $this->posts['test_grandchild'];
+			$grandchild = get_post( $grandchild );
 
-		// Without ancestors
-		$this->assertEquals( get_post_permalink( $grandchild ), bu_navigation_get_post_link( $grandchild ) );
+			// With ancestors
+			$ancestors = bu_navigation_gather_sections( $grandchild->ID, array( 'direction' => 'up' ) );
+			$this->assertEquals( get_post_permalink( $grandchild ), bu_navigation_get_post_link( $grandchild, $ancestors ) );
+
+			// Without ancestors
+			$this->assertEquals( get_post_permalink( $grandchild ), bu_navigation_get_post_link( $grandchild ) );
+		}
 	}
 
 	public function test_bu_navigation_get_post_link_unpublished() {
+		global $wp_rewrite;
+
 		$public = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'publish'));
 		$draft_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'draft', 'post_parent' => $public));
 		$pending_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'pending', 'post_parent' => $public));
@@ -462,9 +470,13 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$this->assertEquals( get_post_permalink( $draft_child ), bu_navigation_get_post_link( $draft_child ) );
 		$this->assertEquals( get_post_permalink( $pending_child ), bu_navigation_get_post_link( $pending_child ) );
 
-		// Draft parent, public children
-		$this->assertEquals( get_post_permalink( $public_draft_child ), bu_navigation_get_post_link( $public_draft_child ) );
-		$this->assertEquals( get_post_permalink( $public_pending_child ), bu_navigation_get_post_link( $public_pending_child ) );
+		// Non-Page Hierarchical Post Type 'Default Permalinks' do not work for child posts prior to 4.0
+		// @see https://core.trac.wordpress.org/ticket/29615
+		if ( $wp_rewrite->using_permalinks() || version_compare( $GLOBALS['wp_version'], '4.0', '>' ) ) {
+			// Draft parent, public children
+			$this->assertEquals( get_post_permalink( $public_draft_child ), bu_navigation_get_post_link( $public_draft_child ) );
+			$this->assertEquals( get_post_permalink( $public_pending_child ), bu_navigation_get_post_link( $public_pending_child ) );
+		}
 
 		// Sample permalinks for unpublished posts
 		$this->assertEquals( get_post_permalink( $draft, false, true ), bu_navigation_get_post_link( $draft, array(), true ) );

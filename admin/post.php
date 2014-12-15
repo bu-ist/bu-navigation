@@ -223,7 +223,7 @@ class BU_Navigation_Admin_Post {
 		if( array_key_exists( 'nav_label', $_POST ) ) {
 
 			// update the navigation meta data
-			$nav_label = $_POST['nav_label'];
+			$nav_label = wp_kses_post( $_POST['nav_label'] );
 			$exclude = ( array_key_exists( 'nav_display', $_POST ) ? 0 : 1 );
 
 			update_post_meta( $post_id, BU_NAV_META_PAGE_LABEL, $nav_label );

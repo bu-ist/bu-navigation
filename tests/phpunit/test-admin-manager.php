@@ -338,14 +338,16 @@ class Test_BU_Navigation_Admin_Manager extends BU_Navigation_UnitTestCase {
 		$this->navman->save();
 
 		// Inserts
-		$new_link = array_pop(get_posts(array('s'=>'New Link','post_type'=>'bu_link')));
+		$links = get_posts(array('s'=>'New Link','post_type'=>'bu_link'));
+		$new_link = array_pop($links);
 		$this->assertEquals( 'New Link', $new_link->post_title );
 		$this->assertEquals( 'http://newlink.com', $new_link->post_content );
 		$this->assertEquals( $this->posts['last_page'], $new_link->post_parent );
 		$this->assertEquals( 1, $new_link->menu_order );
 		$this->assertEquals( 'new', get_post_meta( $new_link->ID, 'bu_link_target', true ) );
 
-		$new_link_two = array_pop(get_posts(array('s'=>'Top Level Link','post_type'=>'bu_link')));
+		$links = get_posts(array('s'=>'Top Level Link','post_type'=>'bu_link'));
+		$new_link_two = array_pop($links);
 		$this->assertEquals( 'Top Level Link', $new_link_two->post_title );
 		$this->assertEquals( 'http://toplevel.com', $new_link_two->post_content );
 		$this->assertEquals( 0, $new_link_two->post_parent );

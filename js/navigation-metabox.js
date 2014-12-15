@@ -162,7 +162,15 @@ if((typeof bu === 'undefined' ) ||
 		// Methods
 		updateBreadcrumbs: function( post ) {
 			var ancestors, crumbs, $crumbs, $crumb;
+
+			// Load post titles for current post and ancestors
 			ancestors = Navtree.getAncestors( post.ID );
+			if (ancestors === false) {
+				// No ancestors likily means post section
+				// has not yet loaded
+				return;
+			}
+
 			$crumbs = $(this.ui.breadcrumbs).clone().empty();
 
 			$.each(ancestors, function(index, label) {

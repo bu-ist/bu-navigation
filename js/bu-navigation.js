@@ -503,6 +503,10 @@ bu.plugins.navigation = {};
 			// Get post ancestors (by title)
 			that.getAncestors = function( postID ) {
 				var $node = my.getNodeForPost( postID );
+				if ($node === false) {
+					return false;
+				}
+
 				return $tree.jstree('get_path', $node);
 			};
 

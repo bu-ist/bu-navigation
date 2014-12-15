@@ -1,7 +1,5 @@
 <?php
 
-require_once dirname( __FILE__ ) . '/nav-testcase.php';
-
 /**
  * Coverage for the BU_Navigation_Reorder_Tracker class
  *
@@ -9,7 +7,7 @@ require_once dirname( __FILE__ ) . '/nav-testcase.php';
  * @group bu-navigation
  * @group bu-navigation-reorder
  */
-class WP_Test_Reorder_Tracker extends BU_Navigation_UnitTestCase {
+class Test_BU_Navigation_Reorder_Tracker extends BU_Navigation_UnitTestCase {
 
 	public $posts;
 

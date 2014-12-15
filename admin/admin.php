@@ -74,7 +74,7 @@ class BU_Navigation_Admin {
 		// Intended for edit.php, post.php and post-new.php
 		if( in_array( $screen->base, array( 'edit', 'post' ) ) ) {
 
-			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '.dev' : '';
+			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 			$scripts_url = plugins_url( 'js', BU_NAV_PLUGIN );
 
 			$post_type = get_post_type_object( $screen->post_type );

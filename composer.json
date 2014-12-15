@@ -1,0 +1,27 @@
+{
+    "name": "bu-ist/bu-navigation",
+    "description": "Provides alternative navigation elements designed for blogs with large page counts",
+    "license": "GPLv2",
+    "authors": [
+        {
+            "name": "Niall Kavanagh",
+            "email": "ntk@bu.edu"
+        },
+        {
+            "name": "Gregory Cornelius",
+            "email": "gcorne@gmail.com"
+        },
+        {
+            "name": "Mike Burns",
+            "email": "mgburns@bu.edu"
+        },
+        {
+            "name": "Tyler Wiest",
+            "email": "jtwiest@gmail.com"
+        }
+    ],
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "4.3.*"
+    }
+}

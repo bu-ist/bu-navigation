@@ -1,7 +1,5 @@
 <?php
 
-require_once dirname( __FILE__ ) . '/nav-testcase.php';
-
 /**
  * Coverage functionaly privided in the extras directory
  *
@@ -9,7 +7,7 @@ require_once dirname( __FILE__ ) . '/nav-testcase.php';
  * @group bu-navigation
  * @group bu-navigation-extras
  */
-class WP_Test_BU_Navigation_Extras extends BU_Navigation_UnitTestCase {
+class Test_BU_Navigation_Extras extends BU_Navigation_UnitTestCase {
 
 	/**
 	 * Ensure that excluded posts and links behave as expected

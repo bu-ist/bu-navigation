@@ -59,7 +59,16 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 	$in_post_types = implode( "','", $post_types );
 
 	// Try the cache first
-	$cache_key = 'all_sections:' . md5( serialize( $post_types ) );
+
+	// Cache is timestamped for maximum freshness (see `get_pages`)
+	// The `last_changed` key is updated by core in `clean_post_cache`
+	$last_changed = wp_cache_get( 'last_changed', 'posts' );
+	if ( ! $last_changed ) {
+		$last_changed = microtime();
+		wp_cache_set( 'last_changed', $last_changed, 'posts' );
+	}
+
+	$cache_key = 'all_sections:' . md5( serialize( $post_types ) . ":$last_changed" );
 	if ( $all_sections = wp_cache_get( $cache_key, 'bu-navigation' ) ) {
 		return $all_sections;
 	}
@@ -281,15 +290,16 @@ function bu_navigation_get_post_link( $post, $ancestors = array(), $sample = fal
 	$post_type = get_post_type_object( $post->post_type );
 	$slug = $post->post_name;
 
+	if ( $post_type->hierarchical ) {
+		$slug = bu_navigation_get_page_uri( $post, $ancestors );
+	}
+
 	if ( $use_permastruct ) {
-		if ( $post_type->hierarchical ) {
-			$slug = bu_navigation_get_page_uri( $post, $ancestors );
-		}
 		$post_link = str_replace( "%$post->post_type%", $slug, $post_link );
 		$post_link = home_url( user_trailingslashit( $post_link ) );
 	} else {
 		if ( $post_type->query_var && ! $draft_or_pending ) {
-			$post_link = add_query_arg( $post_type->query_var, $post->post_name, '' );
+			$post_link = add_query_arg( $post_type->query_var, $slug, '' );
 		} else {
 			$post_link = add_query_arg( array( 'post_type' => $post->post_type, 'p' => $post->ID ), '' );
 		}

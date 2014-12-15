@@ -1,14 +1,12 @@
 <?php
 
-require_once dirname( __FILE__ ) . '/nav-testcase.php';
-
 /**
  * Coverage for the BU_Navigation_Plugin class
  *
  * @group bu
  * @group bu-navigation
  */
-class WP_Test_BU_Navigation_Plugin extends BU_Navigation_UnitTestCase {
+class Test_BU_Navigation_Plugin extends BU_Navigation_UnitTestCase {
 
 	/**
 	 * @group bu-navigation-features

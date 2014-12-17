@@ -1,28 +1,1316 @@
-var bu=bu||{};bu.plugins=bu.plugins||{};bu.plugins.navigation={};
-(function(e){bu.signals=function(){var s={listenFor:function(e,g){var b=this._listeners;void 0===b[e]&&(b[e]=[]);b[e].push(g)},broadcast:function(e,g){var b,h=this._listeners;if(h[e])for(b=0;b<h[e].length;b+=1)h[e][b].apply(this,g||[])}};return{register:function(m){m._listeners={};e.extend(!0,m,s)}}}();bu.hooks=function(){var e={};return{addFilter:function(m,g){void 0===e[m]&&(e[m]=[]);e[m].push(g);return this},applyFilters:function(m,g){if(void 0===e[m])return g;var b=Array.prototype.slice.apply(arguments).slice(1),
-h=g,k;for(k=0;k<e[m].length;k+=1)h=e[m][k].apply(this,b);return h}}}()})(jQuery);
-(function(e){var s=bu.plugins.navigation;s.settings={lazyLoad:!0,showCounts:!0,showStatuses:!0,deselectOnDocumentClick:!0};e(document).ready(function(){!0===e.browser.msie&&7==parseInt(e.browser.version,10)&&e(document.body).addClass("ie7");!0===e.browser.msie&&8==parseInt(e.browser.version,10)&&e(document.body).addClass("ie8");!0===e.browser.msie&&9==parseInt(e.browser.version,10)&&e(document.body).addClass("ie9")});s.tree=function(e,g){"undefined"===typeof e&&(e="base");return s.trees[e](g).initialize()};
-s.trees={base:function(m,g){var b={};g=g||{};bu.signals.register(b);b.config=e.extend({},s.settings,m||{});b.data={treeConfig:{},rollback:void 0};var h=b.config,k=b.data,d=b.$el=e(h.el);if(h.themePath&&document.images){var l=new Image,q=new Image;l.src=h.themePath+"/sprite.png";q.src=h.themePath+"/throbber.gif"}var l=function(a){return bu.hooks.applyFilters("canSelectNode",a,b)},q=function(a){return bu.hooks.applyFilters("canHoverNode",a,b)},r=function(a){return bu.hooks.applyFilters("canDragNode",
-a,b)};k.treeConfig={plugins:"themes types json_data ui dnd crrm bu".split(" "),core:{animation:0,html_titles:!0},ui:{selected_parent_close:!1},themes:{theme:"bu",load_css:!1},dnd:{drag_container:document},types:{types:{"default":{max_children:-1,max_depth:-1,valid_children:"all",select_node:l,hover_node:q,start_drag:r},page:{max_children:-1,max_depth:-1,valid_children:"all",select_node:l,hover_node:q,start_drag:r},section:{max_children:-1,max_depth:-1,valid_children:"all",select_node:l,hover_node:q,
-start_drag:r},link:{max_children:0,max_depth:0,valid_children:"none",select_node:l,hover_node:q,start_drag:r}}},json_data:{ajax:{url:h.rpcUrl,type:"POST",data:function(a){return{child_of:(-1===a?{ID:0}:g.nodeToPost(a)).ID,post_types:h.postTypes,post_statuses:h.postStatuses,instance:h.instance,prefix:h.nodePrefix,include_links:h.includeLinks}}},progressive_render:!0},crrm:{move:{default_position:"first",check_move:function(a){var f,c;f=g.nodeToPost(a.o);c=-1===a.cr;f=!1===f.post_meta.excluded||f.post_type===
-h.linksPostType;allowed=!0;c&&(f&&!h.allowTop)&&(allowed=!1);return bu.hooks.applyFilters("moveAllowed",allowed,a,b)}}},bu:{lazy_load:h.lazyLoad}};h.showCounts&&(k.treeConfig.json_data.progressive_render=!1);h.initialTreeData&&(k.treeConfig.json_data.data=h.initialTreeData);k.treeConfig=bu.hooks.applyFilters("buNavTreeSettings",k.treeConfig,d);b.initialize=function(){d.jstree(k.treeConfig);return b};b.openPost=function(a,f){var c=g.getNodeForPost(a);f=f||e.noop;if(c)d.jstree("open_node",c,f,!0);else return!1};
-b.selectPost=function(a,f){f=f||!0;var c=g.getNodeForPost(a);f&&d.jstree("deselect_all");d.jstree("select_node",c)};b.getSelectedPost=function(){var a=d.jstree("get_selected");return a.length?g.nodeToPost(a):!1};b.deselectAll=function(){d.jstree("deselect_all")};b.getPost=function(a){return(a=g.getNodeForPost(a))?g.nodeToPost(a):!1};b.getPosts=function(a){var f=[],c={};(a?e.jstree._reference(d)._get_node("#"+a):d).find("> ul > li").each(function(a,d){d=e(d);c=g.nodeToPost(d);d.find("> ul > li").length&&
-(c.children=b.getPosts(d.attr("id")));f.push(c)});return f};b.showAll=function(){d.jstree("open_all")};b.hideAll=function(){d.jstree("close_all")};b.getPostLabel=function(a){a=g.getNodeForPost(a);return d.jstree("get_text",a)};b.setPostLabel=function(a,f){var c=g.getNodeForPost(a);d.jstree("set_text",c,f)};b.insertPost=function(a,f){var c,e,h;if("undefined"===typeof a)throw new TypeError("Post argument for insertPost must be defined!");var n,k;a.post_parent=a.post_parent||0;a.menu_order=a.menu_order||
-1;a.post_parent?(c=g.getNodeForPost(a.post_parent),n=b.getPost(a.post_parent)):c=d;1==a.menu_order?(h=c.find("> ul > li").get(0),e="before"):(k=a.menu_order-2,0<=k&&(h=c.find("> ul > li").get(k),e="after"));h||(h=c,e="inside");c=h;h=f||function(a){d.jstree("deselect_all");d.jstree("select_node",a)};a=bu.hooks.applyFilters("preInsertPost",a,n);n=g.postToNode(a);n=d.jstree("create_node",c,e,n,h);a.ID||(a.ID=n.attr("id"));return a};b.updatePost=function(a){var f=g.getNodeForPost(a),c;return f?(c=g.nodeToPost(f),
-a=e.extend(!0,{},c,a),d.jstree("set_text",f,a.post_title),a.post_parent=parseInt(a.post_parent,10),a.menu_order=parseInt(a.menu_order,10),f.data("post",a),h.showStatuses&&f.find("li").andSelf().each(function(){u(e(this))}),b.broadcast("postUpdated",[a]),a):!1};b.removePost=function(a){a&&"undefined"===typeof a?(a=d.jstree("get_selected"),g.nodeToPost(a)):a=g.getNodeForPost(a);d.jstree("remove",a)};b.getAncestors=function(a){a=g.getNodeForPost(a);return d.jstree("get_path",a)};b.save=function(){k.rollback=
-d.jstree("get_rollback")};b.restore=function(){"undefined"!==typeof k.rollback&&(k.rollback.d.ui.selected=e([]),e.jstree.rollback(k.rollback),k.rollback=d.jstree("get_rollback"))};b.lock=function(){d.jstree("lock")};b.unlock=function(){d.jstree("unlock")};g.nodeToPost=function(a){if("undefined"===typeof a)throw new TypeError("Invalid node!");var f,c;f=a.attr("id");c=e.extend({},!0,a.data("post"));-1===f.indexOf("post-new")&&(f=parseInt(g.stripNodePrefix(f),10));c.ID=f;c.post_title=d.jstree("get_text",
-a);c.menu_order=a.index()+1;c.post_parent=parseInt(c.post_parent,10);c.originalParent=parseInt(c.originalParent,10);c.originalOrder=parseInt(c.originalOrder,10);c.post_meta=c.post_meta||{};return bu.hooks.applyFilters("nodeToPost",c,a)};g.postToNode=function(a,f){if("undefined"===typeof a)throw new TypeError("Invalid post!");var c,b;f=f||!1;c=e.extend({},{post_title:"(no title)",post_content:"",post_status:"new",post_type:"page",post_parent:0,menu_order:1,post_meta:{},url:""},a);b={attr:{id:c.ID?
-h.nodePrefix+c.ID:"post-new-"+g.getNextPostID(),rel:g.getRelAttrForPost(a,f)},data:{title:c.post_title},metadata:{post:c}};return bu.hooks.applyFilters("postToNode",b,c)};g.getNodeForPost=function(a){if("undefined"===typeof a)return!1;a=a&&"object"===typeof a?a.ID.toString():a.toString();-1===a.indexOf("post-new")&&(a=h.nodePrefix+a);a=e.jstree._reference(d)._get_node("#"+a);return a.length?a:!1};g.getNextPostID=function(){return e('[id*="post-new-"]').length};g.stripNodePrefix=function(a){return a.replace(h.nodePrefix,
-"")};g.getRelAttrForPost=function(a,f){return f?"section":a.post_type==h.linksPostType?"link":"page"};var p=function(a,f){var c;c=a.find("li").length;v(a,c);f&&a.find("li").each(function(){p(e(this))})},v=function(a,f){var c=a.children("a");0===c.children(".title-count").children(".count").length&&c.children(".title-count").append('<span class="count"></span>');c=c.find("> .title-count > .count").empty();f?c.text("("+f+")"):c.text("")},n=function(a){var f,c,b;a=a||!1;b=f=bu.hooks.applyFilters("navStatusBadges",
-{excluded:{"class":"excluded",label:h.statusBadgeExcluded,inherited:!1},"protected":{"class":"protected",label:h.statusBadgeProtected,inherited:!1}});if(a)for(c in b={},f)f[c].hasOwnProperty("inherited")&&f[c].inherited&&(b[c]=f[c]);return b},t=function(a){var f,c;g.nodeToPost(a);f=n({inherited:!0});for(c in f)(f=a.parentsUntil("#"+d.attr("id"),"li").filter(function(){return e(this).data("post").post_meta[c]||e(this).data("inherited_"+c)}).length)?a.data("inherited_"+c,!0):a.removeData("inherited_"+
-c)},u=function(a){var f,c,b,e,d,h;f=a.children("a");0===f.children(".post-statuses").length&&f.append('<span class="post-statuses"></span>');f=f.children(".post-statuses").empty();c=g.nodeToPost(a);b=[];t(a);"publish"!=c.post_status&&b.push({"class":c.post_status,label:c.post_status});e=n();for(d in e)(h=c.post_meta[d]||a.data("inherited_"+d))&&b.push({"class":e[d]["class"],label:e[d].label});for(a=0;a<b.length;a+=1)f.append('<span class="post_status '+b[a]["class"]+'">'+b[a].label+"</span>")},w=
-function(a){0===a.children("ul").length?a.attr("rel","page"):a.attr("rel","section");h.showCounts&&(a=a.parent("ul").parent("div").attr("id")!=d.attr("id")?a.parents("li:last"):a,p(a,!0))};d.bind("loaded.jstree",function(a,f){var c=d.find("> ul > li:first-child"),c=18<=c.height()?c.height():32;d.jstree("data").data.core.li_height=c;b.broadcast("postsLoaded")});d.bind("reselect.jstree",function(a,f){b.broadcast("postsSelected")});d.bind("lazy_loaded.jstree",function(a,f){b.broadcast("lazyLoadComplete")});
-d.bind("load_node.jstree",function(a,b){if(-1!==b.rslt.obj){var c=b.rslt.obj;h.showCounts&&p(c,!0)}});d.bind("clean_node.jstree",function(a,b){var c=b.rslt.obj;c&&-1!==c&&c.each(function(a,c){var b=e(c);b.data("buNavExtrasAdded")||(h.showStatuses&&u(b),b.data("buNavExtrasAdded",!0))})});d.bind("before.jstree",function(a,b){var c;switch(b.func){case "select_node":case "hover_node":case "start_drag":if((c=b.inst._get_node(b.args[0]))&&c.hasClass("denied"))return!1}});d.bind("create_node.jstree",function(a,
-f){var c=g.nodeToPost(f.rslt.obj);b.broadcast("postCreated",[c])});d.bind("select_node.jstree",function(a,f){var c=g.nodeToPost(f.rslt.obj);b.broadcast("postSelected",[c])});d.bind("create.jstree",function(a,f){var c=f.rslt.parent,e=f.rslt.position,d=g.nodeToPost(f.rslt.obj),h=null;-1!==c&&(h=g.nodeToPost(c),w(c));d.post_parent=h?h.ID:0;d.menu_order=e+1;b.broadcast("postInserted",[d])});d.bind("remove.jstree",function(a,f){var c=f.rslt.obj,d=g.nodeToPost(c),h=f.rslt.parent,n;-1!==h&&w(h);b.broadcast("postRemoved",
-[d]);c.find("li").each(function(){(n=g.nodeToPost(e(this)))&&b.broadcast("postRemoved",[n])})});d.bind("deselect_node.jstree",function(a,f){var c=g.nodeToPost(f.rslt.obj);b.broadcast("postDeselected",[c])});d.bind("deselect_all.jstree",function(a,f){b.broadcast("postsDeselected")});d.bind("move_node.jstree",function(a,f){f.rslt.o.each(function(a,h){var n=e(h),k=g.nodeToPost(n),t=f.rslt.np,u=f.rslt.op,n=n.index()+1,l=0,v=0,m=1;d.attr("id")!==t.attr("id")&&(w(t),l=parseInt(g.stripNodePrefix(t.attr("id")),
-10));d.attr("id")===u.attr("id")||t.is("#"+u.attr("id"))||(w(u),t=g.nodeToPost(u),v=t.ID);m=k.menu_order;k.post_parent=l;k.menu_order=n;b.updatePost(k);b.broadcast("postMoved",[k,v,m])})});l=function(a){if("undefined"!==typeof d[0]){var b=e.contains(d[0],a.target);a=e.contains(e("#vakata-contextmenu")[0],a.target);b||a||d.jstree("deselect_all")}};h.deselectOnDocumentClick&&e(document).bind("click",l);return b},navman:function(m,g){var b={};g=g||{};var b=s.trees.base(m,g),h=b.$el,k=b.data,d=b.config,
-l=function(d){d=g.nodeToPost(d);b.broadcast("editPost",[d])},q=function(b){b=g.nodeToPost(b);b.url&&window.open(b.url)},r=function(d){d=g.nodeToPost(d);b.removePost(d)};k.treeConfig.plugins.push("contextmenu");k.treeConfig.contextmenu={show_at_node:!1,items:function(b){var e=g.nodeToPost(b),h={edit:{label:d.optionsEditLabel,action:l},view:{label:d.optionsViewLabel,action:q},remove:{label:d.optionsTrashLabel,action:r}};e.url||delete h.view;e.post_type===d.linksPostType&&(h.remove.label=d.optionsDeleteLabel);
-return bu.hooks.applyFilters("navmanOptionsMenuItems",h,b)}};h.bind("loaded.jstree",function(b,d){h.undelegate("a","contextmenu.jstree")});h.bind("clean_node.jstree",function(b,h){var g=h.rslt.obj;g&&-1!=g&&g.each(function(b,a){var f=e(a).children("a");if(!f.children(".edit-options").length){var c=e('<button class="edit-options"><ins class="jstree-icon">&#160;</ins>'+d.optionsLabel+"</button>"),h=f.children(".post-statuses");h.length?h.before(c):f.append(c)}})});var p=null;h.delegate(".edit-options",
-"click",function(b){b.preventDefault();b.stopPropagation();var d,g,k;d=e(this).offset();g=e(this).outerWidth();k=e(this).outerHeight();b=d.top;d=d.left;b+=k;d=d+g-180;g=e(this).closest("li");h.jstree("deselect_all");h.jstree("select_node",g);h.jstree("show_contextmenu",g,d,b);e(this).addClass("clicked");p&&p.attr("id")!=g.attr("id")&&v(p);p=g});e(document).bind("context_hide.vakata",function(b,d){v(p)});var v=function(b){b&&b.find("> a > .edit-options").removeClass("clicked")};h.addClass("bu-navman");
-return b},edit_post:function(m,g){g=g||{};var b=s.trees.base(m,g),h=b.data,k=e.extend(b.config,m||{}),d=b.$el,l=k.currentPost,q={};q.dnd={drag_container:k.treeDragContainer};e.extend(!0,h.treeConfig,q);h=function(d,e){if(e.$el.is(b.$el.selector))return g.stripNodePrefix(d.attr("id"))==l.ID};bu.hooks.addFilter("canSelectNode",h);bu.hooks.addFilter("canHoverNode",h);bu.hooks.addFilter("canDragNode",h);d.bind("loaded.jstree",function(b,d){var e;k.ancestors&&k.ancestors.length?(e=k.ancestors.reverse(),
-r(0,e)):p()});var r=function(d,e){var g=e[d];g?!1===b.openPost(g,function(){r(d+1,e)})&&b.insertPost(g,function(b){r(d+1,e)}):p()},p=function(){g.getNodeForPost(l)?(b.selectPost(l),b.save()):b.insertPost(l,function(d){b.selectPost(l);b.save()})};b.getCurrentPost=function(){var b;return(b=g.getNodeForPost(l))?b=g.nodeToPost(b):!1};b.setCurrentPost=function(b){l=b};d.addClass("bu-edit-post");return b}}})(jQuery);
+/**
+ * ========================================================================
+ * BU Navigation plugin - main script
+ * ========================================================================
+ */
+
+/*jslint browser: true, todo: true */
+/*global bu: true, jQuery: false, console: false, window: false, document: false */
+
+var bu = bu || {};
+
+bu.plugins = bu.plugins || {};
+bu.plugins.navigation = {};
+
+(function ($) {
+	'use strict';
+
+	// Simple pub/sub pattern
+	bu.signals = (function () {
+		var api = {};
+
+		// Attach a callback function to respond for the given event
+		api.listenFor = function (event, callback) {
+			var listeners = this._listeners;
+			if (listeners[event] === undefined) {
+				listeners[event] = [];
+			}
+
+			listeners[event].push(callback);
+		};
+
+		// Broadcast a specific event, optionally providing context data
+		api.broadcast = function (event, data) {
+			var i, listeners = this._listeners;
+			if (listeners[event]) {
+				for (i = 0; i < listeners[event].length; i = i + 1) {
+					listeners[event][i].apply(this, data || []);
+				}
+			}
+		};
+
+		// Objects that wish to broadcast signals must register themselves first
+		return {
+			register: function (obj) {
+				obj._listeners = {};
+				$.extend(true, obj, api);
+			}
+		};
+
+	}());
+
+	// Simple filter mechanism, modeled after Plugins API
+	// @todo partially implemented
+	bu.hooks = (function () {
+		var filters = {};
+
+		return {
+			addFilter: function (name, func) {
+				if (filters[name] === undefined) {
+					filters[name] = [];
+				}
+
+				filters[name].push(func);
+				return this;
+
+			},
+			applyFilters: function (name, obj) {
+				if (filters[name] === undefined) {
+					return obj;
+				}
+
+				var args = Array.prototype.slice.apply(arguments),
+					extra = args.slice(1),
+					rslt = obj,
+					i;
+
+				for (i = 0; i < filters[name].length; i = i + 1) {
+					rslt = filters[name][i].apply(this, extra);
+				}
+
+				return rslt;
+			}
+		};
+	}());
+}(jQuery));
+
+// =============================================//
+// BU Navigation plugin settings & tree objects //
+// =============================================//
+(function ($) {
+
+	// Plugin alias
+	var Nav = bu.plugins.navigation;
+
+	// Default global settings
+	Nav.settings = {
+		'lazyLoad': true,
+		'showCounts': true,
+		'showStatuses': true,
+		'deselectOnDocumentClick': true
+	};
+
+	// DOM ready -- browser classes
+	$(document).ready(function () {
+		if( $.browser.msie === true && parseInt($.browser.version, 10) == 7 )
+			$(document.body).addClass('ie7');
+		if( $.browser.msie === true && parseInt($.browser.version, 10) == 8 )
+			$(document.body).addClass('ie8');
+		if( $.browser.msie === true && parseInt($.browser.version, 10) == 9 )
+			$(document.body).addClass('ie9');
+	});
+
+	// Tree constructor
+	Nav.tree = function( type, config ) {
+		if (typeof type === 'undefined') {
+			type = 'base';
+		}
+
+		return Nav.trees[type](config).initialize();
+	};
+
+	// Tree instances
+	Nav.trees = {
+
+		// ---------------------------------------//
+		// Base navigation tree type - extend me! //
+		// ---------------------------------------//
+		base: function( config, my ) {
+			var that = {};
+			my = my || {};
+
+			// Implement the signals interface
+			bu.signals.register(that);
+
+			// Instance settings
+			that.config = $.extend({}, Nav.settings, config || {} );
+
+			// Public data
+			that.data = {
+				treeConfig: {},
+				rollback: undefined
+			};
+
+			// Aliases
+			var c = that.config;
+			var d = that.data;
+
+			// Need valid tree element to continue
+			var $tree = that.$el = $(c.el);
+
+			// Prefetch tree assets
+			if (c.themePath && document.images) {
+				var themeSprite = new Image();
+				var themeLoader = new Image();
+				themeSprite.src = c.themePath + "/sprite.png";
+				themeLoader.src = c.themePath + "/throbber.gif";
+			}
+
+			// Allow clients to stop certain actions and UI interactions via filters
+			var checkMove = function( m ) {
+				var post, parent, isTopLevelMove, isVisible, wasTop;
+
+				post = my.nodeToPost(m.o);
+				isTopLevelMove = m.cr === -1;
+				isVisible = post.post_meta['excluded'] === false || post.post_type === c.linksPostType;
+
+				allowed = true;
+
+				// Don't allow top level posts if global option prohibits it
+				if (isTopLevelMove && isVisible && !wasTop && !c.allowTop) {
+					// console.log('Move denied, top level posts cannot be created!');
+					// @todo pop up a friendlier notice explaining this
+					allowed = false;
+				}
+
+				return bu.hooks.applyFilters( 'moveAllowed', allowed, m, that );
+			};
+
+			var canSelectNode = function( node ) {
+				return bu.hooks.applyFilters( 'canSelectNode', node, that );
+			};
+
+			var canHoverNode = function( node ) {
+				return bu.hooks.applyFilters( 'canHoverNode', node, that );
+			};
+
+			var canDragNode = function( node ) {
+				return bu.hooks.applyFilters( 'canDragNode', node, that );
+			};
+
+			// jsTree Settings object
+			d.treeConfig = {
+				"plugins" : ["themes", "types", "json_data", "ui", "dnd", "crrm", "bu"],
+				"core" : {
+					"animation" : 0,
+					"html_titles": true
+				},
+				"ui" : {
+					"selected_parent_close": false
+				},
+				"themes" : {
+					"theme": "bu",
+					"load_css": false
+				},
+				"dnd" : {
+					"drag_container": document
+				},
+				"types" : {
+					"types" : {
+						"default" : {
+							"max_children"		: -1,
+							"max_depth"			: -1,
+							"valid_children"	: "all",
+							"select_node"		: canSelectNode,
+							"hover_node"		: canHoverNode,
+							"start_drag"		: canDragNode
+						},
+						"page": {
+							"max_children"		: -1,
+							"max_depth"			: -1,
+							"valid_children"	: "all",
+							"select_node"		: canSelectNode,
+							"hover_node"		: canHoverNode,
+							"start_drag"		: canDragNode
+						},
+						"section": {
+							"max_children"		: -1,
+							"max_depth"			: -1,
+							"valid_children"	: "all",
+							"select_node"		: canSelectNode,
+							"hover_node"		: canHoverNode,
+							"start_drag"		: canDragNode
+						},
+						"link": {
+							"max_children"		: 0,
+							"max_depth"			: 0,
+							"valid_children"	: "none",
+							"select_node"		: canSelectNode,
+							"hover_node"		: canHoverNode,
+							"start_drag"		: canDragNode
+						}
+					}
+				},
+				"json_data": {
+					"ajax" : {
+						"url" : c.rpcUrl,
+						"type" : "POST",
+						"data" : function (n) {
+							var post;
+
+							if(n === -1) {
+								post = {ID: 0};
+							} else {
+								post = my.nodeToPost(n);
+							}
+
+							return {
+								child_of : post.ID,
+								post_types : c.postTypes,
+								post_statuses : c.postStatuses,
+								instance : c.instance,
+								prefix : c.nodePrefix,
+								include_links: c.includeLinks
+							};
+						}
+					},
+					"progressive_render" : true
+				},
+				"crrm": {
+					"move": {
+						"default_position" : "first",
+						"check_move": checkMove
+					}
+				},
+				"bu": {
+					"lazy_load": c.lazyLoad
+				}
+			};
+
+			if( c.showCounts ) {
+				// counting needs a fully loaded DOM
+				d.treeConfig['json_data']['progressive_render'] = false;
+			}
+
+			if( c.initialTreeData ) {
+				d.treeConfig['json_data']['data'] = c.initialTreeData;
+			}
+
+			// For meddlers
+			d.treeConfig = bu.hooks.applyFilters( 'buNavTreeSettings', d.treeConfig, $tree );
+
+			// ======= Public API ======= //
+
+			that.initialize = function() {
+				$tree.jstree( d.treeConfig );
+				return that;
+			};
+
+			that.openPost = function (post, callback) {
+				var $node = my.getNodeForPost(post);
+				callback = callback || $.noop;
+
+				if ($node) {
+					$tree.jstree('open_node', $node, callback, true);
+				} else {
+					return false;
+				}
+			}
+
+			that.selectPost = function( post, deselect_all ) {
+				deselect_all = deselect_all || true;
+				var $node = my.getNodeForPost(post);
+
+				if (deselect_all) {
+					$tree.jstree('deselect_all');
+				}
+
+				$tree.jstree('select_node', $node);
+			};
+
+			that.getSelectedPost = function() {
+				var $node = $tree.jstree('get_selected');
+				if ($node.length) {
+					return my.nodeToPost($node);
+				}
+				return false;
+			};
+
+			that.deselectAll = function () {
+				$tree.jstree('deselect_all');
+			};
+
+			that.getPost = function( id ) {
+				var $node = my.getNodeForPost(id);
+				if ($node) {
+					return my.nodeToPost($node);
+				}
+				return false;
+			};
+
+			// Custom version of jstree.get_json, optimized for our needs
+			that.getPosts = function( child_of ) {
+				var result = [], current_post = {}, parent, post_id, post_type;
+
+				if (child_of) {
+					parent = $.jstree._reference($tree)._get_node('#' + child_of);
+				} else {
+					parent = $tree;
+				}
+
+				// Iterate over children of current node
+				parent.find('> ul > li').each(function (i, child) {
+					child = $(child);
+
+					current_post = my.nodeToPost(child);
+
+					// Recurse through children if this post has any
+					if( child.find('> ul > li').length ) {
+						current_post.children = that.getPosts(child.attr('id'));
+					}
+
+					// Store post + descendents
+					result.push(current_post);
+				});
+
+				// Result = post tree starting with child_of
+				return result;
+			};
+
+			that.showAll = function() {
+				$tree.jstree('open_all');
+			};
+
+			that.hideAll = function() {
+				$tree.jstree('close_all');
+			};
+
+			that.getPostLabel = function( post ) {
+
+				var $node = my.getNodeForPost( post );
+				return $tree.jstree('get_text', $node );
+
+			};
+
+			that.setPostLabel = function( post, label ) {
+
+				var $node = my.getNodeForPost( post );
+				$tree.jstree('set_text', $node, label );
+
+			};
+
+			that.insertPost = function( post, after_insert ) {
+				if (typeof post === 'undefined') {
+					throw new TypeError('Post argument for insertPost must be defined!');
+				}
+
+				var $inserted, $parent, $which, parent, orderIndex, args, node, pos;
+
+				// Assert parent and menu order values exist and are valid
+				post.post_parent = post.post_parent || 0;
+				post.menu_order = post.menu_order || 1;
+
+				// Translate post parent field to node
+				if (post.post_parent) {
+					$parent = my.getNodeForPost( post.post_parent );
+					parent = that.getPost( post.post_parent );
+				} else {
+					$parent = $tree;
+				}
+
+				// Post will be first
+				if (1 == post.menu_order) {
+					$which = $parent.find('> ul > li').get(0);
+					pos = 'before';
+				} else {
+					// Translate menu order to list item index of sibling to insert post after
+					orderIndex = post.menu_order - 2;
+					if (orderIndex >= 0) {
+						$which = $parent.find('> ul > li').get(orderIndex);
+						pos = 'after';
+					}
+				}
+
+				// No siblings in destination
+				if (!$which) {
+					$which = $parent;
+					pos = 'inside';
+				}
+
+				// Setup create args based on values translated from parent/menu_order
+				args = {
+					which: $which,
+					position: pos,
+					callback: after_insert || function($node) { $tree.jstree('deselect_all'); $tree.jstree('select_node', $node); }
+				};
+
+				post = bu.hooks.applyFilters('preInsertPost', post, parent );
+
+				// Translate post object to node format for jstree consumption
+				node = my.postToNode( post );
+
+				// Create tree node and update with insertion ID if post ID was not previously set
+				$inserted = $tree.jstree('create_node', args.which, args.position, node, args.callback);
+				if (!post.ID) {
+					post.ID = $inserted.attr('id');
+				}
+
+				return post;
+			};
+
+			that.updatePost = function( post ) {
+				var $node = my.getNodeForPost( post ),
+					original, updated;
+
+				if ($node) {
+
+					// Merge original values with updates
+					original = my.nodeToPost($node);
+					updated = $.extend(true, {}, original, post);
+
+					// Set node text with navigation label
+					$tree.jstree('set_text', $node, updated.post_title);
+
+					// Type coercion
+					updated.post_parent = parseInt(updated.post_parent, 10);
+					updated.menu_order = parseInt(updated.menu_order, 10);
+
+					// Update DOM data attribute
+					$node.data('post', updated);
+
+					// Refresh post status badges (recursively)
+					// @todo move to callback
+					if (c.showStatuses) {
+						$node.find('li').andSelf().each(function (){
+							setStatusBadges($(this));
+						});
+					}
+
+					that.broadcast('postUpdated', [updated]) ;
+
+					return updated;
+
+				}
+
+				return false;
+			};
+
+			// Remove post
+			that.removePost = function( post ) {
+				var node;
+
+				if ( post && typeof post === 'undefined' ) {
+					node = $tree.jstree('get_selected');
+					post = my.nodeToPost(node);
+				} else {
+					node = my.getNodeForPost( post );
+				}
+
+				$tree.jstree('remove', node );
+
+			};
+
+			// Get post ancestors (by title)
+			that.getAncestors = function( postID ) {
+				var $node = my.getNodeForPost( postID );
+				if ($node === false) {
+					return false;
+				}
+
+				return $tree.jstree('get_path', $node);
+			};
+
+			// Save tree state
+			that.save = function() {
+
+				// Cache current rollback object
+				d.rollback = $tree.jstree( 'get_rollback' );
+
+			};
+
+			// Restore tree state
+			that.restore = function() {
+				if (typeof d.rollback === 'undefined')
+					return;
+
+				// HACK: Don't restore previous selections by removing them before rolling back
+				// jstree has some buggy behavior with the ui/dnd plugins and selections
+				// These bugs can be worked around by not attempting to restore selections
+				// on rollbacks.
+
+				// @todo fix the buggy behavior rather then hacking it here
+				// @todo look at 1.0 release of jstree to see if it has been fixed
+				d.rollback.d.ui.selected = $([]);
+
+				// Run rollback
+				$.jstree.rollback(d.rollback);
+
+				// Reset cached rollback
+				d.rollback = $tree.jstree('get_rollback');
+
+			};
+
+			that.lock = function() {
+				$tree.jstree('lock');
+			};
+
+			that.unlock = function() {
+				$tree.jstree('unlock');
+			};
+
+			// ======= Protected ======= //
+
+			my.nodeToPost = function( node ) {
+				if (typeof node === 'undefined')
+					throw new TypeError('Invalid node!');
+
+				var id, post;
+
+				id = node.attr('id');
+				post = $.extend({}, true, node.data('post'));
+
+				// ID processing
+				if (id.indexOf('post-new') === -1) {
+					id = parseInt(my.stripNodePrefix(id),10);
+				}
+
+				// Populate dynamic fields with tree state
+				post.ID = id;
+				post.post_title = $tree.jstree('get_text', node);
+				post.menu_order = node.index() + 1;
+
+				// Type coercion
+				post.post_parent = parseInt(post.post_parent, 10);
+				post.originalParent = parseInt(post.originalParent, 10);
+				post.originalOrder = parseInt(post.originalOrder, 10);
+
+				post.post_meta = post.post_meta || {};
+
+				return bu.hooks.applyFilters('nodeToPost', post, node);
+			};
+
+			my.postToNode = function( post, hasChildren ) {
+				if (typeof post === 'undefined')
+					throw new TypeError('Invalid post!');
+
+				var default_post, p, node, post_id,
+					hasChildren = hasChildren || false;
+
+				// @todo refactor to getDefaultPost method
+				default_post = {
+					post_title: '(no title)',
+					post_content: '',
+					post_status: 'new',
+					post_type: 'page',
+					post_parent: 0,
+					menu_order: 1,
+					post_meta: {},
+					url: ''
+				};
+
+				p = $.extend({}, default_post, post);
+
+				// Generate post ID if none previously existed
+				post_id = p.ID ? c.nodePrefix + p.ID : 'post-new-' + my.getNextPostID();
+
+				node = {
+					"attr": {
+						"id": post_id,
+						"rel" : my.getRelAttrForPost(post, hasChildren)
+					},
+					"data": {
+						"title": p.post_title
+					},
+					"metadata": {
+						"post": p
+					}
+				};
+
+				return bu.hooks.applyFilters('postToNode', node, p);
+			};
+
+			my.getNodeForPost = function( post ) {
+				if (typeof post === 'undefined')
+					return false;
+
+				var node_id, $node;
+
+				// Allow post object or ID
+				if (post && typeof post === 'object') {
+					node_id = post.ID.toString();
+					if (node_id.indexOf('post-new') === -1) {
+						node_id = c.nodePrefix + node_id;
+					}
+				} else {
+					node_id = post.toString();
+					if (node_id.indexOf('post-new') === -1) {
+						node_id = c.nodePrefix + node_id;
+					}
+				}
+
+				$node = $.jstree._reference($tree)._get_node('#' + node_id);
+
+				if ($node.length) {
+					return $node;
+				}
+
+				return false;
+			};
+
+			my.getNextPostID = function() {
+				var newPosts = $('[id*="post-new-"]');
+				return newPosts.length;
+
+			};
+
+			my.stripNodePrefix = function( str ) {
+				return str.replace( c.nodePrefix, '');
+			};
+
+			my.getRelAttrForPost = function(post, hasChildren) {
+				var rel;
+				
+				if (hasChildren) {
+					rel = 'section';
+				} else {
+					rel = post.post_type == c.linksPostType ? 'link' : 'page';
+				}
+				return rel;
+			}
+
+			// ======= Private ======= //
+
+			var calculateCounts = function($node, includeDescendents) {
+				var count;
+
+				// Use DOM to calculate descendent count
+				count = $node.find('li').length;
+
+				// Update markup
+				setCount($node, count);
+
+				if (includeDescendents) {
+					// Recurse to children
+					$node.find('li').each(function (){
+						calculateCounts($(this));
+					});
+				}
+			};
+
+			var setCount = function ($node, count) {
+				var $a = $node.children('a'), $count;
+				if ($a.children('.title-count').children('.count').length === 0) {
+					$a.children('.title-count').append('<span class="count"></span>');
+				}
+
+				$count = $a.find('> .title-count > .count').empty();
+
+				if (count) {
+					// Set current count
+					$count.text('(' + count + ')');
+				} else {
+					// Remove count if empty
+					$count.text('');
+				}
+			};
+
+			// List of status badges
+			var getStatusBadges = function (inherited) {
+				var defaults, _builtins, badges, status, results;
+
+				inherited = inherited || false;
+				_builtins = {
+					'excluded': { 'class': 'excluded', 'label': c.statusBadgeExcluded, 'inherited': false },
+					'protected': { 'class': 'protected', 'label': c.statusBadgeProtected, 'inherited': false }
+				};
+
+				badges = bu.hooks.applyFilters( 'navStatusBadges', _builtins );
+				results = badges;
+
+				if (inherited) {
+					results = {};
+					for (status in badges) {
+						if (badges[status].hasOwnProperty('inherited') && badges[status].inherited)
+							results[status] = badges[status];
+					}
+				}
+				return results;
+			}
+
+			// Update post meta that may change depending on ancestors
+			var calculateInheritedStatuses = function ($node) {
+				var post, badges, status, inheriting_status;
+
+				post = my.nodeToPost($node);
+				badges = getStatusBadges({'inherited': true});
+
+				for (status in badges) {
+					inheriting_status = $node.parentsUntil('#'+$tree.attr('id'), 'li').filter(function () {
+						return $(this).data('post')['post_meta'][status] || $(this).data('inherited_'+status);
+					}).length;
+
+					// Cache inherited statuses on DOM node
+					if (inheriting_status) {
+						$node.data('inherited_'+status, true);
+					} else {
+						$node.removeData('inherited_'+status);
+					}
+				}
+			};
+
+			// Convert post meta data in to status badges
+			var setStatusBadges = function ($node) {
+				var $a, post, $statuses, statuses, badges, status, val, i;
+
+				// Prep the DOM
+				$a = $node.children('a');
+				if ($a.children('.post-statuses').length === 0) {
+					$a.append('<span class="post-statuses"></span>');
+				}
+				$statuses = $a.children('.post-statuses').empty();
+
+				post = my.nodeToPost( $node );
+				statuses = [];
+
+				// Calculate statuses that can be inherited from ancestors
+				calculateInheritedStatuses($node);
+
+				// Push actual post statuses first
+				if (post.post_status != 'publish')
+					statuses.push({ "class": post.post_status, "label": post.post_status });
+
+				// Push any additional status badges
+				badges = getStatusBadges();
+				for (status in badges) {
+					val = post.post_meta[status] || $node.data('inherited_'+status);
+					if (val)
+						statuses.push({ "class": badges[status]['class'], "label": badges[status]['label'] });
+				}
+
+				// Append markup
+				for (i = 0; i < statuses.length; i = i + 1) {
+					$statuses.append('<span class="post_status ' + statuses[i]['class'] + '">' + statuses[i]['label'] + '</span>');
+				}
+
+			};
+
+			var updateBranch = function ( $post ) {
+				var $section;
+
+				// Maybe update rel attribute
+				if ($post.children('ul').length === 0) {
+					$post.attr('rel', 'page');
+				} else {
+					$post.attr('rel', 'section');
+				}
+
+				// Recalculate counts
+				if (c.showCounts) {
+
+					// Start from root
+					if ($post.parent('ul').parent('div').attr('id') != $tree.attr('id')) {
+						$section = $post.parents('li:last');
+					} else {
+						$section = $post;
+					}
+
+					calculateCounts($section, true);
+				}
+			};
+
+			// ======= jsTree Event Handlers ======= //
+
+			// Tree instance is loaded (before initial opens/selections are made)
+			$tree.bind('loaded.jstree', function( event, data ) {
+
+				// jstree breaks spectacularly if the stylesheet hasn't set an li height
+				// when the tree is created -- this is what they call a hack...
+				var $li = $tree.find("> ul > li:first-child");
+				var nodeHeight = $li.height() >= 18 ? $li.height() : 32;
+				$tree.jstree('data').data.core.li_height = nodeHeight;
+
+				that.broadcast('postsLoaded');
+			});
+
+			// Run after initial node openings and selections have completed
+			$tree.bind('reselect.jstree', function( event, data ) {
+
+				that.broadcast('postsSelected');
+
+			});
+
+			// Run after lazy load operation has completed
+			$tree.bind('lazy_loaded.jstree', function (event, data) {
+
+				that.broadcast('lazyLoadComplete');
+
+			});
+
+			// After node is loaded from server using json_data
+			$tree.bind('load_node.jstree', function( event, data ) {
+				if( data.rslt.obj !== -1 ) {
+					var $node = data.rslt.obj;
+
+					if (c.showCounts) {
+						calculateCounts($node, true);
+					}
+				}
+			});
+
+			// Append extra markup to each tree node
+			$tree.bind('clean_node.jstree', function( event, data ) {
+				var $nodes = data.rslt.obj;
+
+				// skip root node
+				if ($nodes && $nodes !== -1) {
+					$nodes.each(function(i, node) {
+						var $node = $(node);
+
+						// Only add once
+						if ($node.data('buNavExtrasAdded')) return;
+
+						// Status badges
+						if (c.showStatuses) {
+
+							// Append post statuses inside node anchor
+							setStatusBadges($node);
+
+						}
+
+						$node.data('buNavExtrasAdded', true);
+
+					});
+				}
+			});
+
+			$tree.bind('before.jstree', function (event, data) {
+				var $node;
+
+				switch (data.func) {
+					case 'select_node':
+					case 'hover_node':
+					case 'start_drag':
+						// Restrict select, hover and drag operations for denied posts
+						$node = data.inst._get_node(data.args[0]);
+						if ($node && $node.hasClass('denied')) {
+							return false;
+						}
+						break;
+				}
+
+			});
+
+			$tree.bind('create_node.jstree', function(event, data ) {
+				var $node = data.rslt.obj;
+				var post = my.nodeToPost( $node );
+				that.broadcast( 'postCreated', [ post ] );
+			});
+
+			$tree.bind('select_node.jstree', function(event, data ) {
+				var post = my.nodeToPost(data.rslt.obj);
+				that.broadcast('postSelected', [post]);
+			});
+
+			$tree.bind('create.jstree', function (event, data) {
+				var	$node = data.rslt.obj,
+					$parent = data.rslt.parent,
+					position = data.rslt.position,
+					post = my.nodeToPost($node),
+					postParent = null;
+
+				// Notify ancestors of our existence
+				if( $parent !== -1 ) {
+					postParent = my.nodeToPost($parent);
+					updateBranch($parent);
+				}
+
+				// Set parent and menu order
+				post['post_parent'] = postParent ? postParent.ID : 0;
+				post['menu_order'] = position + 1;
+
+				that.broadcast('postInserted', [post]);
+			});
+
+			$tree.bind('remove.jstree', function (event, data) {
+				var $node = data.rslt.obj,
+					post = my.nodeToPost($node),
+					$oldParent = data.rslt.parent,
+					child;
+
+				// Notify former ancestors of our removal
+				if( $oldParent !== -1 ) {
+					updateBranch($oldParent);
+				}
+
+				that.broadcast('postRemoved', [post]);
+
+				// Notify of descendent removals as well
+				$node.find('li').each(function () {
+					child = my.nodeToPost($(this));
+					if (child) {
+						that.broadcast('postRemoved', [child]);
+					}
+				});
+			});
+
+			$tree.bind('deselect_node.jstree', function(event, data ) {
+				var post = my.nodeToPost( data.rslt.obj );
+				that.broadcast('postDeselected', [post]);
+			});
+
+			$tree.bind('deselect_all.jstree', function (event, data) {
+				that.broadcast('postsDeselected');
+			});
+
+			$tree.bind('move_node.jstree', function (event, data ) {
+				var $moved = data.rslt.o;
+
+				// Repeat move behavior for each moved node (handles multi-select)
+				$moved.each(function (i, node) {
+					var $node = $(node),
+						post = my.nodeToPost( $node ),
+						$newParent = data.rslt.np,
+						$oldParent = data.rslt.op,
+						menu_order = $node.index() + 1,
+						parent_id = 0, oldParent, oldParentID = 0, oldOrder = 1;
+
+					// Set new parent ID
+					if( $tree.attr('id') !== $newParent.attr('id')) {
+						// Notify new ancestors of changes
+						updateBranch($newParent);
+						parent_id = parseInt(my.stripNodePrefix($newParent.attr('id')),10);
+					}
+
+					// If we've changed sections, notify former ancestors as well
+					if ($tree.attr('id') !== $oldParent.attr('id') &&
+						!$newParent.is('#' + $oldParent.attr('id')) ) {
+						updateBranch($oldParent);
+						oldParent = my.nodeToPost( $oldParent );
+						oldParentID = oldParent.ID;
+					}
+
+					oldOrder = post['menu_order'];
+
+					// Extra post parameters that may be helpful to consumers
+					post['post_parent'] = parent_id;
+					post['menu_order'] = menu_order;
+
+					that.updatePost(post);
+
+					that.broadcast( 'postMoved', [post, oldParentID, oldOrder]);
+				});
+			});
+
+			// Deselect all nodes on document clicks outside of a tree element or
+			// context menu item
+			var deselectOnDocumentClick = function (e) {
+				if (typeof $tree[0] === 'undefined') {
+					return;
+				}
+
+				var clickedTree = $.contains( $tree[0], e.target );
+				var clickedMenuItem = $.contains( $('#vakata-contextmenu')[0], e.target );
+
+				if (!clickedTree && !clickedMenuItem) {
+					$tree.jstree('deselect_all');
+				}
+			};
+
+			if (c.deselectOnDocumentClick) {
+				$(document).bind( "click", deselectOnDocumentClick );
+			}
+
+			return that;
+		},
+
+		// ----------------------------
+		// Edit order (Navigation manager) tree
+		// ----------------------------
+		navman: function( config, my ) {
+			var that = {};
+			my = my || {};
+
+			that = Nav.trees.base( config, my );
+
+			var $tree = that.$el;
+			var d = that.data;
+			var c = that.config;
+
+			var showOptionsMenu = function (node) {
+				var post = my.nodeToPost(node);
+
+				var options = {
+					"edit" : {
+						"label" : c.optionsEditLabel,
+						"action" : editPost
+					},
+					"view" : {
+						"label" : c.optionsViewLabel,
+						"action" : viewPost
+					},
+					"remove" : {
+						"label" : c.optionsTrashLabel,
+						"action" : removePost
+					}
+				};
+
+				// Can't view an item with no URL
+				if (!post.url) {
+					delete options['view'];
+				}
+
+				// Special behavior for links
+				if (post.post_type === c.linksPostType) {
+					// Links are permanently deleted -- "Move To Trash" is misleading
+					options['remove']['label'] = c.optionsDeleteLabel;
+				}
+
+				return bu.hooks.applyFilters('navmanOptionsMenuItems', options, node);
+			};
+
+			var editPost = function( node ) {
+				var post = my.nodeToPost(node);
+				that.broadcast('editPost', [post]);
+			};
+
+			var viewPost = function (node) {
+				var post = my.nodeToPost(node);
+				if (post.url) {
+					window.open(post.url);
+				}
+			};
+
+			var removePost = function( node ) {
+				var post = my.nodeToPost(node);
+				that.removePost(post);
+			};
+
+			// Add context menu plugin
+			d.treeConfig["plugins"].push("contextmenu");
+
+			d.treeConfig["contextmenu"] = {
+				'show_at_node': false,
+				"items": showOptionsMenu
+			};
+
+			// Prevent default right click behavior
+			$tree.bind('loaded.jstree', function(e,data) {
+
+				$tree.undelegate('a', 'contextmenu.jstree');
+
+			});
+
+			// Append options menu to each node
+			$tree.bind('clean_node.jstree', function( event, data ) {
+				var $nodes = data.rslt.obj;
+				// skip root node
+				if ($nodes && $nodes != -1) {
+					$nodes.each(function(i, node) {
+						var $node = $(node);
+						var $a = $node.children('a');
+
+						if( $a.children('.edit-options').length ) return;
+
+						var $button = $('<button class="edit-options"><ins class="jstree-icon">&#160;</ins>' + c.optionsLabel + '</button>');
+						var $statuses = $a.children('.post-statuses');
+
+						// Button should appear before statuses
+						if( $statuses.length ) {
+							$statuses.before($button);
+						} else {
+							$a.append($button);
+						}
+
+					});
+				}
+			});
+
+			// @todo move all of this custom contextmenu behavior to our fork of the
+			// jstree contextmenu plugin
+			var currentMenuTarget = null;
+
+			$tree.delegate(".edit-options", "click", function (e) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				var pos, width, height, top, left, obj;
+
+				// Calculate location
+				pos = $(this).offset();
+				width = $(this).outerWidth();
+				height = $(this).outerHeight();
+				top = pos.top;
+				left = pos.left;
+				top = top + height;
+				left = (left + width) - 180;
+
+				obj = $(this).closest('li');
+
+				$tree.jstree('deselect_all');
+				$tree.jstree('select_node', obj );
+				$tree.jstree('show_contextmenu', obj, left, top);
+
+				$(this).addClass('clicked');
+
+				if (currentMenuTarget && currentMenuTarget.attr('id') != obj.attr('id')) {
+					removeMenu(currentMenuTarget);
+				}
+				currentMenuTarget = obj;
+			});
+
+			// Remove active state on edit options button when the menu is removed
+			$(document).bind('context_hide.vakata', function(e, data){
+				removeMenu(currentMenuTarget);
+			});
+
+			var removeMenu = function ( target ) {
+				if (target) {
+					target.find('> a > .edit-options').removeClass('clicked');
+				}
+			};
+
+			$tree.addClass('bu-navman');
+
+			return that;
+		},
+
+		// ----------------------------
+		// Edit post tree
+		// ----------------------------
+		edit_post: function( config, my ) {
+			my = my || {};
+
+			// Functional inheritance
+			var that = Nav.trees.base( config, my );
+
+			// Aliases
+			var d = that.data;
+			var c = $.extend(that.config, config || {});	// instance configuration
+
+			var $tree = that.$el;
+			var currentPost = c.currentPost;
+
+			// Extra configuration
+			var extraTreeConfig = {};
+
+			// Build initial open and selection arrays from current post / ancestors
+			// Replaced by the loaded.jstreee callback below to handle cases where
+			// ancestors and current page are not published.
+
+//			var toOpen = [], i;
+//
+//			if (c.ancestors && c.ancestors.length) {
+//				// We want old -> young, which is not how they're passed
+//				var ancestors = c.ancestors.reverse();
+//				for (i = 0; i < ancestors.length; i = i + 1) {
+//					toOpen.push( '#' + c.nodePrefix + c.ancestors[i]['ID'] );
+//				}
+//			}
+//			if (toOpen.length) {
+//				extraTreeConfig['core'] = {
+//					"initially_open": toOpen
+//				};
+//			}
+
+			extraTreeConfig['dnd'] = {
+				"drag_container": c.treeDragContainer
+			};
+
+			// Merge base tree config with extras
+			$.extend( true, d.treeConfig, extraTreeConfig );
+
+			// Assert current post for select, hover and drag operations
+			var assertCurrentPost = function( node, inst ) {
+				if (inst.$el.is(that.$el.selector)) {
+					var postId = my.stripNodePrefix(node.attr('id'));
+					return postId == currentPost.ID;
+				}
+			};
+
+			bu.hooks.addFilter( 'canSelectNode', assertCurrentPost );
+			bu.hooks.addFilter( 'canHoverNode', assertCurrentPost );
+			bu.hooks.addFilter( 'canDragNode', assertCurrentPost );
+
+			// The following logic will be simplified once we don't have
+			// to handled unpublished content as special cases.
+			// For right now, they are excluded from the AJAX calls to
+			// list posts, which means we have to create any unpublished
+			// ancestors as well as the current post (if it is new or unpublished)
+			// client side to make sure they are represented in the tree.
+
+			$tree.bind('loaded.jstree', function (e, data) {
+				var ancestors, i;
+
+				// Need to load and open ancestors before we can select current post
+				if (c.ancestors && c.ancestors.length) {
+
+					// We want old -> young, which is not how they're passed
+					ancestors = c.ancestors.reverse();
+
+					// Handles opening (and possibly inserting) post ancestors one by one
+					openNextChild(0, ancestors);
+
+				} else {
+
+						// Current post is top level -- select or insert
+						selectCurrentPost();
+
+				}
+
+			});
+
+			/**
+			 * Recursively load ancestors, opening and possibly inserting along the way.
+			 *
+			 * For now, unpublished content will not be represented in the tree passed to us
+			 * from the server, so we need to enter this recursive callback waterfall to make
+			 * sure all ancestors exist and are open before selecting the current post.
+			 */
+			var openNextChild = function (current, all) {
+				var post = all[current];
+
+				if (post) {
+					if (that.openPost(post, function() { openNextChild( current + 1, all) }) === false ) {
+						that.insertPost(post, function($node) { openNextChild(current + 1, all); });
+					}
+				} else {
+					// No more ancestors ... we're safe to select the current post now
+					selectCurrentPost();
+				}
+			}
+
+			/**
+			 * Select the current post, inserting if it does not already exist in the tree (i.e. new post, or unpublished post)
+			 */
+			var selectCurrentPost = function () {
+
+				// Insert post if it isn't already represented in the tree (new, draft, or pending posts)
+				var $current = my.getNodeForPost(currentPost);
+
+				if (!$current) {
+					// Insert and select self, then save tree state
+					that.insertPost(currentPost, function($node) {
+						that.selectPost(currentPost);
+						that.save();
+					});
+				} else {
+					that.selectPost(currentPost);
+					that.save();
+				}
+
+			};
+
+			// Public
+			that.getCurrentPost = function() {
+				var $node, post;
+
+				$node = my.getNodeForPost(currentPost);
+
+				if ($node) {
+					post = my.nodeToPost( $node );
+					return post;
+				}
+
+				return false;
+			};
+
+			that.setCurrentPost = function( post ) {
+				currentPost = post;
+			};
+
+			$tree.addClass('bu-edit-post');
+
+			return that;
+		}
+	};
+})(jQuery);

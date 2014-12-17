@@ -5,13 +5,13 @@ Plugin URI: http://developer.bu.edu/bu-navigation/
 Author: Boston University (IS&T)
 Author URI: http://sites.bu.edu/web/
 Description: Provides alternative navigation elements designed for blogs with large page counts
-Version: 1.2.4
+Version: 1.2.5
 Text Domain: bu-navigation
 Domain Path: /languages
 */
 
 /**
-Copyright 2012 by Boston University
+Copyright 2014 by Boston University
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ class BU_Navigation_Plugin {
 	// Plugin settings
 	public $settings;
 
-	const VERSION = '1.2.4';
+	const VERSION = '1.2.5';
 
 	public function __construct() {
 
@@ -96,7 +96,7 @@ class BU_Navigation_Plugin {
 		load_plugin_textdomain( 'bu-navigation', false, plugin_basename( dirname( __FILE__ ) ) . '/languages/' );
 
 		if( defined( 'BU_TS_IS_LOADED' ) ) {
-			require_once BU_NAV_PLUGIN_DIR . '/lettuce/sandbox-setup.php';
+			require_once BU_NAV_PLUGIN_DIR . '/tests/lettuce/sandbox-setup.php';
 		}
 
 		$this->load_extras();
@@ -240,6 +240,6 @@ class BU_Navigation_Plugin {
 }
 
 // Instantiate plugin (only once)
-if( ! isset( $bu_navigation_plugin ) ) {
-	$bu_navigation_plugin = new BU_Navigation_Plugin();
+if( ! isset( $GLOBALS['bu_navigation_plugin'] ) ) {
+	$GLOBALS['bu_navigation_plugin'] = new BU_Navigation_Plugin();
 }

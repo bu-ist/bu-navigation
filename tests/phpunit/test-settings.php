@@ -1,7 +1,5 @@
 <?php
 
-require_once dirname( __FILE__ ) . '/nav-testcase.php';
-
 /**
  * Coverage for the BU_Navigation_Settings class
  *
@@ -9,7 +7,7 @@ require_once dirname( __FILE__ ) . '/nav-testcase.php';
  * @group bu-navigation
  * @group bu-navigation-settings
  */
-class WP_Test_BU_Navigation_Settings extends BU_Navigation_UnitTestCase {
+class Test_BU_Navigation_Settings extends BU_Navigation_UnitTestCase {
 
 	public function test_get() {
 

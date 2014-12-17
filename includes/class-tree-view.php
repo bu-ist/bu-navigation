@@ -75,7 +75,7 @@ class BU_Navigation_Tree_View {
 	public function register_scripts() {
 		global $wp_version;
 
-		$suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '.dev' : '';
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		$scripts_url = plugins_url( 'js', BU_NAV_PLUGIN );
 		$vendor_url = plugins_url( 'js/vendor', BU_NAV_PLUGIN );
 
@@ -476,8 +476,14 @@ function bu_navigation_ajax_get_navtree() {
 			)
 		);
 
-		echo json_encode( $tree_view->render() );
-		die();
+		// WP >= 3.5
+		if ( function_exists( 'wp_send_json' ) ) {
+			wp_send_json( $tree_view->render() );
+		} else {
+			@header( 'Content-Type: application/json; charset=' . get_option( 'blog_charset' ) );
+			echo json_encode( $tree_view->render() );
+			die;
+		}
 	}
 }
 
@@ -506,9 +512,14 @@ function bu_navigation_ajax_get_post() {
 			$post->url = get_permalink($post_id);
 		}
 
-		echo json_encode( $post );
-		die();
-
+		// WP >= 3.5
+		if ( function_exists( 'wp_send_json' ) ) {
+			wp_send_json( $post );
+		} else {
+			@header( 'Content-Type: application/json; charset=' . get_option( 'blog_charset' ) );
+			echo json_encode( $post );
+			die;
+		}
 	}
 }
 

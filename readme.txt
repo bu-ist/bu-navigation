@@ -2,8 +2,8 @@
 Contributors: ntk, mgburns, gcorne, jtwiest
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
-Tested up to: 4.1
-Stable tag: 1.2.5
+Tested up to: 4.2
+Stable tag: 1.2.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,10 @@ Please see this page for the details:
 5. The same drag and drop view is available to move pages while editing them
 
 == Changelog ==
+
+= 1.2.6 =
+
+* Confirmed 4.2 compatibility
 
 = 1.2.5 =
 

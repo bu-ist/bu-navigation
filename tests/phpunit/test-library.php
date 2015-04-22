@@ -697,7 +697,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		// With the filter, 'post_filter_example' -> 'test-filter' exists in each page
 		// Without 'post_filter_example' doesn't exist
-		add_action( 'bu_navigation_filter_pages', 'bu_navigation_test_filter' );
+		add_filter( 'bu_navigation_filter_pages', 'bu_navigation_test_filter' );
 		$pages = bu_navigation_get_pages();
 
 		$test_filter_present = false;
@@ -1766,12 +1766,11 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 /*
 *	Test Filter to work with test_bu_navigation_get_pages
-*	Filter will add 'test' to the end of each 'post_name'
 */
 function bu_navigation_test_filter( $pages ) {
 
 	foreach ( $pages as $page ) {
-		$page->post_filter_example .= 'test-filter';
+		$page->post_filter_example = 'test-filter';
 	}
 
 	return $pages;

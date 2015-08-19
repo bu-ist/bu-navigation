@@ -23,9 +23,9 @@ class BU_Widget_Pages extends WP_Widget {
 			'navigation_style' => 'site'
 			);
 
-	function BU_Widget_Pages() {
+	public function __construct() {
 		$widget_ops = array( 'classname' => 'widget_bu_pages', 'description' => __( "Navigation list of your site's pages", 'bu-navigation' ) );
-		$this->WP_Widget( 'bu_pages', __('Content Navigation', 'bu-navigation' ), $widget_ops );
+		parent::__construct( 'bu_pages', __('Content Navigation', 'bu-navigation' ), $widget_ops );
 	}
 
 	/**
@@ -35,7 +35,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 * @param array $instance widget instance args, as passed to WP_Widget::widget
 	 * @return string HTML fragment with title
 	 */
-	function section_title( $args, $instance ) {
+	public function section_title( $args, $instance ) {
 		global $post;
 
 		$html = $title = $href = '';
@@ -94,7 +94,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 * @param array $args widget args
 	 * @param array $instance widget instance args
 	 */
-	function widget( $args, $instance ) {
+	public function widget( $args, $instance ) {
 		global $post;
 
 		// Only display navigation widget for supported post types
@@ -173,7 +173,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 * @param array $new_instance updated widget parameters
 	 * @param array $old_instance original widget parameters
 	 */
-	function update( $new_instance, $old_instance ) {
+	public function update( $new_instance, $old_instance ) {
 
 		$instance = $old_instance;
 		$instance = wp_parse_args( $instance, $this->defaults );
@@ -191,7 +191,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * @param array $instance the specific widget instance being displayed
 	 */
-	function form( $instance ) {
+	public function form( $instance ) {
 
 		$instance = wp_parse_args( $instance, $this->defaults );
 

@@ -360,7 +360,7 @@ function bu_navigation_get_page_uri( $page, $ancestors ) {
 
 		// Append parent post name and keep looping backwards.
 		$parent = $ancestors[ $page->post_parent ];
-		if ( is_object( $parent ) && isset( $parent->post_name ) ) {
+		if ( is_object( $parent ) && ! empty( $parent->post_name ) ) {
 			$uri = $parent->post_name . '/' . $uri;
 		}
 

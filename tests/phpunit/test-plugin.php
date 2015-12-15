@@ -8,6 +8,12 @@
  */
 class Test_BU_Navigation_Plugin extends BU_Navigation_UnitTestCase {
 
+	public function setUp(){
+		parent::setUp();
+
+		$this->plugin->load_widget();
+	}
+
 	/**
 	 * @group bu-navigation-features
 	 */
@@ -79,11 +85,8 @@ class Test_BU_Navigation_Plugin extends BU_Navigation_UnitTestCase {
 		$posts = bu_navigation_get_posts();
 		$this->assertCount( 4, $posts );
 
-		$this->plugin->load_widget();
-
 		// load persepctive of page page1_A_1
 		$post = get_post( $page1_A_1 );
-
 		setup_postdata( $post );
 
 		$instance = array(

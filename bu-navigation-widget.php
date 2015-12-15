@@ -50,6 +50,12 @@ class BU_Widget_Pages extends WP_Widget {
 			// Adaptive navigation style uses the grandparent of current post
 			if ( $instance['navigation_style'] == 'adaptive' ) {
 				$grandparent_offset = count( $sections ) - 2;
+
+				// If the current page is the last item, go up one further
+				if( end( $sections ) == $post->ID ){
+					$grandparent_offset--;
+				}
+
 				if ( isset( $sections[$grandparent_offset] ) ) {
 					$section_id = $sections[$grandparent_offset];
 				}

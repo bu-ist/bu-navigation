@@ -430,7 +430,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		// Non-Page Hierarchical Post Type 'Default Permalinks' do not work for child posts prior to 4.0
 		// @see https://core.trac.wordpress.org/ticket/29615
-		if ( $wp_rewrite->using_permalinks() || version_compare( $GLOBALS['wp_version'], '4.0', '>' ) ) {
+		if ( $wp_rewrite->using_permalinks() && version_compare( $GLOBALS['wp_version'], '4.0', '>' ) ) {
 			$grandchild = $this->posts['test_grandchild'];
 			$grandchild = get_post( $grandchild );
 

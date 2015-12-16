@@ -430,7 +430,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		// Non-Page Hierarchical Post Type 'Default Permalinks' do not work for child posts prior to 4.0
 		// @see https://core.trac.wordpress.org/ticket/29615
-		if ( $wp_rewrite->using_permalinks() && version_compare( $GLOBALS['wp_version'], '4.0', '>' ) ) {
+		if ( $wp_rewrite->using_permalinks() && version_compare( $GLOBALS['wp_version'], '4.4', '>=' ) ) {
 			$grandchild = $this->posts['test_grandchild'];
 			$grandchild = get_post( $grandchild );
 
@@ -474,7 +474,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		// #23458: get_post_permalink() improved in v4.4 to fix incorrect URLs for pages when child of a draft (e.g. http://example.org/test//post-title-5/) 
 		// @see https://core.trac.wordpress.org/ticket/29615
 		// @see https://core.trac.wordpress.org/ticket/23458
-		if ( $wp_rewrite->using_permalinks() || version_compare( $GLOBALS['wp_version'], '4.4', '>=' ) ) {
+		if ( $wp_rewrite->using_permalinks() && version_compare( $GLOBALS['wp_version'], '4.4', '>=' ) ) {
 			// Draft parent, public children
 			$this->assertEquals( get_post_permalink( $public_draft_child ), bu_navigation_get_post_link( $public_draft_child ) );
 			$this->assertEquals( get_post_permalink( $public_pending_child ), bu_navigation_get_post_link( $public_pending_child ) );

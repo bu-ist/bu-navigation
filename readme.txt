@@ -2,8 +2,8 @@
 Contributors: ntk, mgburns, gcorne, jtwiest, awbauer
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
-Tested up to: 4.3
-Stable tag: 1.2.7
+Tested up to: 4.4
+Stable tag: 1.2.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,11 @@ Please see this page for the details:
 5. The same drag and drop view is available to move pages while editing them
 
 == Changelog ==
+
+= 1.2.8 =
+
+* Fixes an issue affecting section titles in the navigation widget when using Adaptive Mode 
+* Corrects invalid unit tests
 
 = 1.2.7 =
 

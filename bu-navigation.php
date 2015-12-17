@@ -5,7 +5,7 @@ Plugin URI: http://developer.bu.edu/bu-navigation/
 Author: Boston University (IS&T)
 Author URI: http://sites.bu.edu/web/
 Description: Provides alternative navigation elements designed for blogs with large page counts
-Version: 1.2.7
+Version: 1.2.8
 Text Domain: bu-navigation
 Domain Path: /languages
 */
@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 @author Gregory Cornelius <gcorne@gmail.com>
 @author Mike Burns <mgburns@bu.edu>
 @author Tyler Wiest <jtwiest@gmail.com>
+@author Andrew Bauer <awbauer@bu.edu>
 */
 
 // Absolute server path to this plugin dir and file for use by included files

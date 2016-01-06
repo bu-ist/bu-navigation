@@ -86,5 +86,3 @@ function bu_navigation_filter_pages_adaptive( $pages_by_parent ) {
 
 	return $filtered;
 }
-
-?>

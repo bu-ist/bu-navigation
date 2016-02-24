@@ -214,7 +214,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$test_grandchild = $this->posts['test_grandchild'];
 		$selective_section = bu_navigation_load_sections('test');
-		$selective_depth_results =  bu_navigation_get_page_depth( $test_grandchild, $selective_section );
+		$selective_depth_results = bu_navigation_get_page_depth( $test_grandchild, $selective_section );
 
 		// Test selective section functionality
 		$this->assertEquals( $selective_depth_results, 3 );
@@ -324,8 +324,8 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$test_child 	 = $this->posts['test_child'];
 
 		// Get all pages
-		$args = array( 'post_types' => array( 'page', 'bu_link', 'test' ));
-		$pages  = bu_navigation_get_pages( $args );
+		$args  = array( 'post_types' => array( 'page', 'bu_link', 'test' ));
+		$pages = bu_navigation_get_pages( $args );
 
 		// Get the base url
 		$base_url = trailingslashit( get_option( 'home' ) );
@@ -471,7 +471,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$this->assertEquals( get_post_permalink( $pending_child ), bu_navigation_get_post_link( $pending_child ) );
 
 		// #29615: Non-Page Hierarchical Post Type 'Default Permalinks' do not work for child posts prior to 4.0.
-		// #23458: get_post_permalink() improved in v4.4 to fix incorrect URLs for pages when child of a draft (e.g. http://example.org/test//post-title-5/) 
+		// #23458: get_post_permalink() improved in v4.4 to fix incorrect URLs for pages when child of a draft (e.g. http://example.org/test//post-title-5/)
 		// @see https://core.trac.wordpress.org/ticket/29615
 		// @see https://core.trac.wordpress.org/ticket/23458
 		if ( $wp_rewrite->using_permalinks() && version_compare( $GLOBALS['wp_version'], '4.4', '>=' ) ) {
@@ -785,7 +785,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$test_child		 = $this->posts['test_child'];
 		$test_grandchild = $this->posts['test_grandchild'];
 
-		$all_pages 	   = bu_navigation_get_pages();
+		$all_pages 	  = bu_navigation_get_pages();
 		$page_results = bu_navigation_pages_by_parent( $all_pages );
 
 		// Reorder the pages

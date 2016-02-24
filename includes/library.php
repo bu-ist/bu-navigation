@@ -637,8 +637,7 @@ function bu_navigation_format_page( $page, $args = '' ) {
 		$anchor_class .= sprintf( ' level_%d', intval( $r['depth'] ) );
 
 	$attrs = array(
-		'title' => esc_attr( $title ),
-		'class' => trim( $anchor_class )
+		'class' => trim( $anchor_class ),
 		);
 
 	if ( isset( $page->url ) && ! empty( $page->url ) )
@@ -817,7 +816,7 @@ function bu_navigation_list_section($parent_id, $pages_by_parent, $args = '')
 
 /**
  * Alternative to WordPress' wp_list_pages function
- * 
+ *
  * @todo refactor to decouple widget-specific logic
  *
  * @param $args mixed Array or string of WP-style arguments

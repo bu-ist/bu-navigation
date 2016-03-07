@@ -867,7 +867,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$args = array( 'item_tag' => 'td' );
 		$formatted_page = bu_navigation_format_page( $page, $args );
-		$expected_formatted_page = sprintf("<td class=\"page_item page-item-%s\">\n<a href=\"%s\">%s</a>\n </td>\n", $parent, $title, $url, $title );
+		$expected_formatted_page = sprintf("<td class=\"page_item page-item-%s\">\n<a href=\"%s\">%s</a>\n </td>\n", $parent, $url, $title );
 
 		$this->assertEquals( $expected_formatted_page, $formatted_page);
 
@@ -877,7 +877,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$args = array( 'anchor_class' => 'test_class' );
 		$formatted_page = bu_navigation_format_page( $page, $args );
-		$expected_formatted_page = sprintf("<li class=\"page_item page-item-%s\">\n<a class=\"test_class\" href=\"%s\">%s</a>\n </li>\n", $parent, $title, $url, $title );
+		$expected_formatted_page = sprintf("<li class=\"page_item page-item-%s\">\n<a class=\"test_class\" href=\"%s\">%s</a>\n </li>\n", $parent, $url, $title );
 
 		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
@@ -887,7 +887,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$args = array( 'depth' => 5 );
 		$formatted_page = bu_navigation_format_page( $page, $args );
-		$expected_formatted_page = sprintf("<li class=\"page_item page-item-%s\">\n<a class=\"level_5\" href=\"%s\">%s</a>\n </li>\n", $parent, $title, $url, $title );
+		$expected_formatted_page = sprintf("<li class=\"page_item page-item-%s\">\n<a class=\"level_5\" href=\"%s\">%s</a>\n </li>\n", $parent, $url, $title );
 
 		$this->assertEquals( $expected_formatted_page, $formatted_page );
 

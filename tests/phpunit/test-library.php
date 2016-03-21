@@ -214,7 +214,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$test_grandchild = $this->posts['test_grandchild'];
 		$selective_section = bu_navigation_load_sections('test');
-		$selective_depth_results =  bu_navigation_get_page_depth( $test_grandchild, $selective_section );
+		$selective_depth_results = bu_navigation_get_page_depth( $test_grandchild, $selective_section );
 
 		// Test selective section functionality
 		$this->assertEquals( $selective_depth_results, 3 );
@@ -324,8 +324,8 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$test_child 	 = $this->posts['test_child'];
 
 		// Get all pages
-		$args = array( 'post_types' => array( 'page', 'bu_link', 'test' ));
-		$pages  = bu_navigation_get_pages( $args );
+		$args  = array( 'post_types' => array( 'page', 'bu_link', 'test' ));
+		$pages = bu_navigation_get_pages( $args );
 
 		// Get the base url
 		$base_url = trailingslashit( get_option( 'home' ) );
@@ -450,17 +450,13 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$draft_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'draft', 'post_parent' => $public));
 		$pending_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'pending', 'post_parent' => $public));
 		$draft = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'draft'));
-		$public_draft_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'publish', 'post_parent' => $draft));
 		$pending = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'pending'));
-		$public_pending_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'publish', 'post_parent' => $pending));
 
 		// Our functions require post objects
 		$draft = get_post( $draft );
 		$draft_child = get_post( $draft_child );
 		$pending = get_post( $draft_child );
 		$pending_child = get_post( $pending_child );
-		$public_draft_child = get_post( $public_draft_child );
-		$public_pending_child = get_post( $public_pending_child );
 
 		// Root unpublished
 		$this->assertEquals( get_post_permalink( $draft ), bu_navigation_get_post_link( $draft ) );
@@ -470,21 +466,46 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$this->assertEquals( get_post_permalink( $draft_child ), bu_navigation_get_post_link( $draft_child ) );
 		$this->assertEquals( get_post_permalink( $pending_child ), bu_navigation_get_post_link( $pending_child ) );
 
-		// #29615: Non-Page Hierarchical Post Type 'Default Permalinks' do not work for child posts prior to 4.0.
-		// #23458: get_post_permalink() improved in v4.4 to fix incorrect URLs for pages when child of a draft (e.g. http://example.org/test//post-title-5/) 
-		// @see https://core.trac.wordpress.org/ticket/29615
-		// @see https://core.trac.wordpress.org/ticket/23458
-		if ( $wp_rewrite->using_permalinks() && version_compare( $GLOBALS['wp_version'], '4.4', '>=' ) ) {
-			// Draft parent, public children
-			$this->assertEquals( get_post_permalink( $public_draft_child ), bu_navigation_get_post_link( $public_draft_child ) );
-			$this->assertEquals( get_post_permalink( $public_pending_child ), bu_navigation_get_post_link( $public_pending_child ) );
-		}
-
 		// Sample permalinks for unpublished posts
 		$this->assertEquals( get_post_permalink( $draft, false, true ), bu_navigation_get_post_link( $draft, array(), true ) );
 		$this->assertEquals( get_post_permalink( $draft_child, false, true ), bu_navigation_get_post_link( $draft_child, array(), true ) );
 		$this->assertEquals( get_post_permalink( $pending, false, true ), bu_navigation_get_post_link( $pending, array(), true ) );
 		$this->assertEquals( get_post_permalink( $pending_child, false, true ), bu_navigation_get_post_link( $pending_child, array(), true ) );
+	}
+
+	/**
+	 * According to https://core.trac.wordpress.org/ticket/36174,
+	 * non-page hierarchical post types that are not published
+	 * must first be published to get a usable post_name.
+	 *
+	 * This may get fixed in core. Until then, the WP-generated URLs will be
+	 * incorrect. We'll just use the "publish and unpublish" trick to get
+	 * this to work in the meantime.
+	 *
+	 * @return null
+	 */
+	public function test_bu_navigation_get_post_link_unpublished_public_children() {
+		$draft = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'draft'));
+		$public_draft_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'publish', 'post_parent' => $draft));
+		$pending = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'pending'));
+		$public_pending_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'publish', 'post_parent' => $pending));
+
+		// "publish and unpublish" to generate post_name
+		$public_draft_child = get_post( $public_draft_child );
+		$public_draft_child->post_status = 'publish';
+		wp_update_post($public_draft_child);
+		$public_draft_child->post_status = 'draft';
+		wp_update_post($public_draft_child);
+
+		$public_pending_child = get_post( $public_pending_child );
+		$public_pending_child->post_status = 'publish';
+		wp_update_post($public_pending_child);
+		$public_pending_child->post_status = 'pending';
+		wp_update_post($public_pending_child);
+
+		// Draft parent, public children
+		$this->assertEquals( get_post_permalink( $public_draft_child ), bu_navigation_get_post_link( $public_draft_child ) );
+		$this->assertEquals( get_post_permalink( $public_pending_child ), bu_navigation_get_post_link( $public_pending_child ) );
 	}
 
 	public function test_bu_navigation_get_post_link_no_permalinks() {
@@ -785,7 +806,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$test_child		 = $this->posts['test_child'];
 		$test_grandchild = $this->posts['test_grandchild'];
 
-		$all_pages 	   = bu_navigation_get_pages();
+		$all_pages 	  = bu_navigation_get_pages();
 		$page_results = bu_navigation_pages_by_parent( $all_pages );
 
 		// Reorder the pages
@@ -853,7 +874,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		// Expected formatted results
 		$title = $page->post_title;
 		$url = $page->url;
-		$expected_formatted_page = '<li class="page_item page-item-' . $parent . '">' . "\n" . '<a title="' . $title . '" href="' . $url . '">' . $title . '</a>' . "\n" . ' </li>' . "\n";
+		$expected_formatted_page = '<li class="page_item page-item-' . $parent . '">' . "\n" . '<a href="' . $url . '">' . $title . '</a>' . "\n" . ' </li>' . "\n";
 
 		// Format $parent Page
 		$formatted_page = bu_navigation_format_page( $page );
@@ -867,7 +888,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$args = array( 'item_tag' => 'td' );
 		$formatted_page = bu_navigation_format_page( $page, $args );
-		$expected_formatted_page = sprintf("<td class=\"page_item page-item-%s\">\n<a title=\"%s\" href=\"%s\">%s</a>\n </td>\n", $parent, $title, $url, $title );
+		$expected_formatted_page = sprintf("<td class=\"page_item page-item-%s\">\n<a href=\"%s\">%s</a>\n </td>\n", $parent, $url, $title );
 
 		$this->assertEquals( $expected_formatted_page, $formatted_page);
 
@@ -877,7 +898,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$args = array( 'anchor_class' => 'test_class' );
 		$formatted_page = bu_navigation_format_page( $page, $args );
-		$expected_formatted_page = sprintf("<li class=\"page_item page-item-%s\">\n<a title=\"%s\" class=\"test_class\" href=\"%s\">%s</a>\n </li>\n", $parent, $title, $url, $title );
+		$expected_formatted_page = sprintf("<li class=\"page_item page-item-%s\">\n<a class=\"test_class\" href=\"%s\">%s</a>\n </li>\n", $parent, $url, $title );
 
 		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
@@ -887,7 +908,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$args = array( 'depth' => 5 );
 		$formatted_page = bu_navigation_format_page( $page, $args );
-		$expected_formatted_page = sprintf("<li class=\"page_item page-item-%s\">\n<a title=\"%s\" class=\"level_5\" href=\"%s\">%s</a>\n </li>\n", $parent, $title, $url, $title );
+		$expected_formatted_page = sprintf("<li class=\"page_item page-item-%s\">\n<a class=\"level_5\" href=\"%s\">%s</a>\n </li>\n", $parent, $url, $title );
 
 		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
@@ -902,7 +923,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$args = array( 'section_ids' => array( $parent, $child ));
 		$formatted_page = bu_navigation_format_page( $page_child, $args );
-		$expected_formatted_page = '<li class="page_item page-item-' . $child . ' has_children">' . "\n" . '<a title="' . $title_child . '" href="' . $url_child . '">' . $title_child . '</a>' . "\n" . ' </li>' . "\n";
+		$expected_formatted_page = '<li class="page_item page-item-' . $child . ' has_children">' . "\n" . '<a href="' . $url_child . '">' . $title_child . '</a>' . "\n" . ' </li>' . "\n";
 
 		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
@@ -913,14 +934,14 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		// First Item
 		$args = array( 'position' => 1, 'siblings' => 3 );
 		$formatted_page = bu_navigation_format_page( $page, $args );
-		$expected_formatted_page = '<li class="page_item page-item-' . $parent . ' first_item">' . "\n" . '<a title="' . $title . '" href="' . $url . '">' . $title . '</a>' . "\n" . ' </li>' . "\n";
+		$expected_formatted_page = '<li class="page_item page-item-' . $parent . ' first_item">' . "\n" . '<a href="' . $url . '">' . $title . '</a>' . "\n" . ' </li>' . "\n";
 
 		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
 		// Last Item
 		$args = array( 'position' => 3, 'siblings' => 3 );
 		$formatted_page = bu_navigation_format_page( $page, $args );
-		$expected_formatted_page = '<li class="page_item page-item-' . $parent . ' last_item">' . "\n" . '<a title="' . $title . '" href="' . $url . '">' . $title . '</a>' . "\n" . ' </li>' . "\n";
+		$expected_formatted_page = '<li class="page_item page-item-' . $parent . ' last_item">' . "\n" . '<a href="' . $url . '">' . $title . '</a>' . "\n" . ' </li>' . "\n";
 
 		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
@@ -930,7 +951,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$args = array( 'html' => 'some html' );
 		$formatted_page = bu_navigation_format_page( $page, $args );
-		$expected_formatted_page = '<li class="page_item page-item-' . $parent . '">' . "\n" . '<a title="' . $title . '" href="' . $url . '">' . $title . '</a>' . "\n" . ' some html</li>' . "\n";
+		$expected_formatted_page = '<li class="page_item page-item-' . $parent . '">' . "\n" . '<a href="' . $url . '">' . $title . '</a>' . "\n" . ' some html</li>' . "\n";
 
 		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
@@ -940,7 +961,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$args = array( 'item_id' => 'test_item_id' );
 		$formatted_page = bu_navigation_format_page( $page, $args );
-		$expected_formatted_page = '<li id="test_item_id" class="page_item page-item-' . $parent . '">' . "\n" . '<a title="' . $title . '" href="' . $url . '">' . $title . '</a>' . "\n" . ' </li>' . "\n";
+		$expected_formatted_page = '<li id="test_item_id" class="page_item page-item-' . $parent . '">' . "\n" . '<a href="' . $url . '">' . $title . '</a>' . "\n" . ' </li>' . "\n";
 
 		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
@@ -1089,33 +1110,33 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		// Generate Expected Results - Child Section
 		$child_section_expected = "\n<ul>\n" .
 				'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
-				'<a title="' . $pages[$grandchild_one]->post_title . '" class="level_1" href="' . $pages[$grandchild_one]->url . '">'. $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
+				'<a class="level_1" href="' . $pages[$grandchild_one]->url . '">'. $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
 				"<ul>\n" .
 				'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
-				'<a title="' . $pages[$greatgrandchild]->post_title . '" class="level_2" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
+				'<a class="level_2" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
 				" </li>\n\n" .
 				"</ul>\n" .
 				"</li>\n" .
 				'<li class="page_item page-item-' . $grandchild_two . '">' . "\n" .
-				'<a title="' . $pages[$grandchild_two]->post_title . '" class="level_1" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
+				'<a class="level_1" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
 				" </li>\n\n" .
 				"</ul>\n";
 
 		// Generate Expected Results - Parent Section
 		$parent_section_expected = "\n<ul>\n" .
 				'<li class="page_item page-item-' . $child . '">' . "\n" .
-				'<a title="' . $pages[$child]->post_title . '" class="level_1" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
+				'<a class="level_1" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
 				"<ul>\n" .
 				'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
-				'<a title="' . $pages[$grandchild_one]->post_title . '" class="level_2" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
+				'<a class="level_2" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
 				"<ul>\n" .
 				'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
-				'<a title="' . $pages[$greatgrandchild]->post_title . '" class="level_3" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
+				'<a class="level_3" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
 				" </li>\n\n" .
 				"</ul>\n" .
 				"</li>\n" .
 				'<li class="page_item page-item-' . $grandchild_two . '">' . "\n" .
-				'<a title="' . $pages[$grandchild_two]->post_title . '" class="level_2" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
+				'<a class="level_2" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
 				" </li>\n\n" .
 				"</ul>\n</li>\n\n" .
 				"</ul>\n";
@@ -1134,18 +1155,18 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$parent_section_depth_expected = "\n<ul>\n" .
 				'<li class="page_item page-item-' . $child . '">' . "\n" .
-				'<a title="' . $pages[$child]->post_title . '" class="level_3" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
+				'<a class="level_3" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
 				"<ul>\n" .
 				'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
-				'<a title="' . $pages[$grandchild_one]->post_title . '" class="level_4" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
+				'<a class="level_4" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
 				"<ul>\n" .
 				'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
-				'<a title="' . $pages[$greatgrandchild]->post_title . '" class="level_5" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
+				'<a class="level_5" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
 				" </li>\n\n" .
 				"</ul>\n" .
 				"</li>\n" .
 				'<li class="page_item page-item-' . $grandchild_two . '">' . "\n" .
-				'<a title="' . $pages[$grandchild_two]->post_title . '" class="level_4" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
+				'<a class="level_4" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
 				" </li>\n\n" .
 				"</ul>\n</li>\n\n" .
 				"</ul>\n";
@@ -1160,18 +1181,18 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$parent_section_container_tag_expected = "\n<ol>\n" .
 				'<li class="page_item page-item-' . $child . '">' . "\n" .
-				'<a title="' . $pages[$child]->post_title . '" class="level_1" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
+				'<a class="level_1" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
 				"<ol>\n" .
 				'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
-				'<a title="' . $pages[$grandchild_one]->post_title . '" class="level_2" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
+				'<a class="level_2" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
 				"<ol>\n" .
 				'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
-				'<a title="' . $pages[$greatgrandchild]->post_title . '" class="level_3" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
+				'<a class="level_3" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
 				" </li>\n\n" .
 				"</ol>\n" .
 				"</li>\n" .
 				'<li class="page_item page-item-' . $grandchild_two . '">' . "\n" .
-				'<a title="' . $pages[$grandchild_two]->post_title . '" class="level_2" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
+				'<a class="level_2" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
 				" </li>\n\n" .
 				"</ol>\n</li>\n\n" .
 				"</ol>\n";
@@ -1186,18 +1207,18 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$parent_section_item_tag_expected = "\n<ul>\n" .
 				'<test class="page_item page-item-' . $child . '">' . "\n" .
-				'<a title="' . $pages[$child]->post_title . '" class="level_1" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
+				'<a class="level_1" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
 				"<ul>\n" .
 				'<test class="page_item page-item-' . $grandchild_one . '">' . "\n" .
-				'<a title="' . $pages[$grandchild_one]->post_title . '" class="level_2" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
+				'<a class="level_2" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
 				"<ul>\n" .
 				'<test class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
-				'<a title="' . $pages[$greatgrandchild]->post_title . '" class="level_3" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
+				'<a class="level_3" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
 				" </test>\n\n" .
 				"</ul>\n" .
 				"</test>\n" .
 				'<test class="page_item page-item-' . $grandchild_two . '">' . "\n" .
-				'<a title="' . $pages[$grandchild_two]->post_title . '" class="level_2" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
+				'<a class="level_2" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
 				" </test>\n\n" .
 				"</ul>\n</test>\n\n" .
 				"</ul>\n";
@@ -1212,18 +1233,18 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$parent_section_section_id_expected = "\n<ul>\n" .
 				'<li class="page_item page-item-' . $child . ' has_children">' . "\n" .
-				'<a title="' . $pages[$child]->post_title . '" class="level_1" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
+				'<a class="level_1" href="' . $pages[$child]->url . '">'. $pages[$child]->post_title . '</a>' . "\n \n" .
 				"<ul>\n" .
 				'<li class="page_item page-item-' . $grandchild_one . ' has_children">' . "\n" .
-				'<a title="' . $pages[$grandchild_one]->post_title . '" class="level_2" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
+				'<a class="level_2" href="' . $pages[$grandchild_one]->url . '">' . $pages[$grandchild_one]->post_title . '</a>' . "\n \n" .
 				"<ul>\n" .
 				'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
-				'<a title="' . $pages[$greatgrandchild]->post_title . '" class="level_3" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
+				'<a class="level_3" href="' . $pages[$greatgrandchild]->url . '">' . $pages[$greatgrandchild]->post_title . '</a>' . "\n" .
 				" </li>\n\n" .
 				"</ul>\n" .
 				"</li>\n" .
 				'<li class="page_item page-item-' . $grandchild_two . '">' . "\n" .
-				'<a title="' . $pages[$grandchild_two]->post_title . '" class="level_2" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
+				'<a class="level_2" href="' . $pages[$grandchild_two]->url . '">' . $pages[$grandchild_two]->post_title . '</a>' . "\n" .
 				" </li>\n\n" .
 				"</ul>\n</li>\n\n" .
 				"</ul>\n";
@@ -1255,37 +1276,37 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$list_pages_expected = "<ul >\n" .
 			'<li class="page_item page-item-' . $parent . ' first_item">' . "\n" .
-			'<a title="Parent Page" class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
+			'<a class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $child . '">' . "\n" .
-			'<a title="Child Page" class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			'<a class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
-			'<a title="Grand Child Page 1" class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
+			'<a class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
-			'<a title="Great Grand Child" class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
+			'<a class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
 			" </li>\n\n" .
 			"</ul>\n" .
 			"</li>\n" .
 			'<li class="page_item page-item-' . $grandchild_two . '">' . "\n".
-			'<a title="Grand Child Page 2" class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			'<a class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
 			" </li>\n\n" .
 			"</ul>\n" .
 			"</li>\n\n" .
 			"</ul>\n" .
 			"</li>\n" .
 			'<li class="page_item page-item-' . $parent_two . '">' . "\n" .
-			'<a title="Parent Page Two" class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $edit . '">' . "\n" .
-			'<a title="Edit and Delete Me" class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $google . '">' . "\n" .
-			'<a title="Google" class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $last_page . ' last_item">' . "\n" .
-			'<a title="Last Page" class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
 			" </li>\n" .
 			"</ul>\n";
 
@@ -1298,24 +1319,24 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$list_pages_page_id_expected = "<ul >\n" .
 			'<li class="page_item page-item-' . $parent . ' has_children first_item">' . "\n" .
-			'<a title="Parent Page" class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
+			'<a class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $child . ' has_children">' . "\n" .
-			'<a title="Child Page" class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n" .
+			'<a class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n" .
 			" </li>\n\n" .
 			"</ul>\n" .
 			"</li>\n" .
 			'<li class="page_item page-item-' . $parent_two . '">' . "\n" .
-			'<a title="Parent Page Two" class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $edit . '">' . "\n" .
-			'<a title="Edit and Delete Me" class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $google . '">' . "\n" .
-			'<a title="Google" class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $last_page . ' last_item">' . "\n" .
-			'<a title="Last Page" class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
 			" </li>\n" .
 			"</ul>\n";
 
@@ -1341,18 +1362,18 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$list_pages_navigate_in_section_expected = "<ul >\n" .
 			'<li class="page_item page-item-' . $child . ' first_item last_item">' . "\n" .
-			'<a title="Child Page" class="level_1" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			'<a class="level_1" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
-			'<a title="Grand Child Page 1" class="level_2" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
+			'<a class="level_2" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
-			'<a title="Great Grand Child" class="level_3" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
+			'<a class="level_3" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
 			" </li>\n\n" .
 			"</ul>\n" .
 			"</li>\n" .
 			'<li class="page_item page-item-' . $grandchild_two . '">' . "\n".
-			'<a title="Grand Child Page 2" class="level_2" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			'<a class="level_2" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
 			" </li>\n\n" .
 			"</ul>\n" .
 			"</li>\n" .
@@ -1368,37 +1389,37 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$list_pages_container_tag_expected = "<ol >\n" .
 			'<li class="page_item page-item-' . $parent . ' first_item">' . "\n" .
-			'<a title="Parent Page" class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
+			'<a class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
 			"<ol>\n" .
 			'<li class="page_item page-item-' . $child . '">' . "\n" .
-			'<a title="Child Page" class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			'<a class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
 			"<ol>\n" .
 			'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
-			'<a title="Grand Child Page 1" class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
+			'<a class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
 			"<ol>\n" .
 			'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
-			'<a title="Great Grand Child" class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
+			'<a class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
 			" </li>\n\n" .
 			"</ol>\n" .
 			"</li>\n" .
 			'<li class="page_item page-item-' . $grandchild_two . '">' . "\n".
-			'<a title="Grand Child Page 2" class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			'<a class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
 			" </li>\n\n" .
 			"</ol>\n" .
 			"</li>\n\n" .
 			"</ol>\n" .
 			"</li>\n" .
 			'<li class="page_item page-item-' . $parent_two . '">' . "\n" .
-			'<a title="Parent Page Two" class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $edit . '">' . "\n" .
-			'<a title="Edit and Delete Me" class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $google . '">' . "\n" .
-			'<a title="Google" class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $last_page . ' last_item">' . "\n" .
-			'<a title="Last Page" class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
 			" </li>\n" .
 			"</ol>\n";
 
@@ -1412,37 +1433,37 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$list_pages_container_id_expected = '<ul  id="test_container_id">' . "\n" .
 			'<li class="page_item page-item-' . $parent . ' first_item">' . "\n" .
-			'<a title="Parent Page" class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
+			'<a class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $child . '">' . "\n" .
-			'<a title="Child Page" class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			'<a class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
-			'<a title="Grand Child Page 1" class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
+			'<a class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
-			'<a title="Great Grand Child" class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
+			'<a class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
 			" </li>\n\n" .
 			"</ul>\n" .
 			"</li>\n" .
 			'<li class="page_item page-item-' . $grandchild_two . '">' . "\n".
-			'<a title="Grand Child Page 2" class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			'<a class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
 			" </li>\n\n" .
 			"</ul>\n" .
 			"</li>\n\n" .
 			"</ul>\n" .
 			"</li>\n" .
 			'<li class="page_item page-item-' . $parent_two . '">' . "\n" .
-			'<a title="Parent Page Two" class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $edit . '">' . "\n" .
-			'<a title="Edit and Delete Me" class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $google . '">' . "\n" .
-			'<a title="Google" class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $last_page . ' last_item">' . "\n" .
-			'<a title="Last Page" class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
 			" </li>\n" .
 			"</ul>\n";
 
@@ -1457,37 +1478,37 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$list_pages_container_class_expected = '<ul  class="test_container_class">' . "\n" .
 			'<li class="page_item page-item-' . $parent . ' first_item">' . "\n" .
-			'<a title="Parent Page" class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
+			'<a class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $child . '">' . "\n" .
-			'<a title="Child Page" class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			'<a class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
-			'<a title="Grand Child Page 1" class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
+			'<a class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
-			'<a title="Great Grand Child" class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
+			'<a class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
 			" </li>\n\n" .
 			"</ul>\n" .
 			"</li>\n" .
 			'<li class="page_item page-item-' . $grandchild_two . '">' . "\n".
-			'<a title="Grand Child Page 2" class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			'<a class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
 			" </li>\n\n" .
 			"</ul>\n" .
 			"</li>\n\n" .
 			"</ul>\n" .
 			"</li>\n" .
 			'<li class="page_item page-item-' . $parent_two . '">' . "\n" .
-			'<a title="Parent Page Two" class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $edit . '">' . "\n" .
-			'<a title="Edit and Delete Me" class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $google . '">' . "\n" .
-			'<a title="Google" class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $last_page . ' last_item">' . "\n" .
-			'<a title="Last Page" class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
 			" </li>\n" .
 			"</ul>\n";
 
@@ -1501,37 +1522,37 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$list_pages_item_tag_expected = "<ul >\n" .
 			'<ll class="page_item page-item-' . $parent . ' first_item">' . "\n" .
-			'<a title="Parent Page" class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
+			'<a class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
 			"<ul>\n" .
 			'<ll class="page_item page-item-' . $child . '">' . "\n" .
-			'<a title="Child Page" class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			'<a class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
 			"<ul>\n" .
 			'<ll class="page_item page-item-' . $grandchild_one . '">' . "\n" .
-			'<a title="Grand Child Page 1" class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
+			'<a class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
 			"<ul>\n" .
 			'<ll class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
-			'<a title="Great Grand Child" class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
+			'<a class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
 			" </ll>\n\n" .
 			"</ul>\n" .
 			"</ll>\n" .
 			'<ll class="page_item page-item-' . $grandchild_two . '">' . "\n".
-			'<a title="Grand Child Page 2" class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			'<a class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
 			" </ll>\n\n" .
 			"</ul>\n" .
 			"</ll>\n\n" .
 			"</ul>\n" .
 			"</ll>\n" .
 			'<ll class="page_item page-item-' . $parent_two . '">' . "\n" .
-			'<a title="Parent Page Two" class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
 			" </ll>\n" .
 			'<ll class="page_item page-item-' . $edit . '">' . "\n" .
-			'<a title="Edit and Delete Me" class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
 			" </ll>\n" .
 			'<ll class="page_item page-item-' . $google . '">' . "\n" .
-			'<a title="Google" class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
 			" </ll>\n" .
 			'<ll class="page_item page-item-' . $last_page . ' last_item">' . "\n" .
-			'<a title="Last Page" class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
+			'<a class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
 			" </ll>\n" .
 			"</ul>\n";
 
@@ -1545,13 +1566,13 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		$list_pages_style_expected = "<ul >\n" .
 			'<li class="page_item page-item-' . $child . ' has_children first_item last_item">' . "\n" .
-			'<a title="Child Page" class="level_1" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			'<a class="level_1" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $grandchild_one . ' has_children">' . "\n" .
-			'<a title="Grand Child Page 1" class="level_2" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n" .
+			'<a class="level_2" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n" .
 			" </li>\n" .
 			'<li class="page_item page-item-' . $grandchild_two . '">' . "\n".
-			'<a title="Grand Child Page 2" class="level_2" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			'<a class="level_2" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
 			" </li>\n\n" .
 			"</ul>\n" .
 			"</li>\n" .
@@ -1566,13 +1587,13 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		*/
 		$list_pages_post_type_expected = "<ul >\n" .
 			'<li class="page_item page-item-' . $test . ' first_item last_item">' . "\n" .
-			'<a title="Test Type Page" class="level_1" href="' . get_permalink( $test ) . '">Test Type Page</a>' . "\n \n" .
+			'<a class="level_1" href="' . get_permalink( $test ) . '">Test Type Page</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $test_child . '">' . "\n" .
-			'<a title="Test Child" class="level_2" href="' . get_permalink( $test_child ) . '">Test Child</a>' . "\n \n" .
+			'<a class="level_2" href="' . get_permalink( $test_child ) . '">Test Child</a>' . "\n \n" .
 			"<ul>\n" .
 			'<li class="page_item page-item-' . $test_grandchild . '">' . "\n".
-			'<a title="Test Grandchild" class="level_3" href="' . get_permalink( $test_grandchild ) . '">Test Grandchild</a>' . "\n" .
+			'<a class="level_3" href="' . get_permalink( $test_grandchild ) . '">Test Grandchild</a>' . "\n" .
 			" </li>\n\n" .
 			"</ul>\n" .
 			"</li>\n\n" .

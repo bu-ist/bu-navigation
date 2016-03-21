@@ -1,9 +1,9 @@
 === BU Navigation ===
-Contributors: ntk, mgburns, gcorne, jtwiest, awbauer
+Contributors: ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
 Tested up to: 4.4
-Stable tag: 1.2.8
+Stable tag: 1.2.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,9 +76,14 @@ Please see this page for the details:
 
 == Changelog ==
 
+= 1.2.9 =
+
+* Fixes redundant title attributes
+* Corrects invalid unit tests
+
 = 1.2.8 =
 
-* Fixes an issue affecting section titles in the navigation widget when using Adaptive Mode 
+* Fixes an issue affecting section titles in the navigation widget when using Adaptive Mode
 * Corrects invalid unit tests
 
 = 1.2.7 =

@@ -1,11 +1,11 @@
 # BU Navigation #
-**Contributors:** ntk, mgburns, gcorne, jtwiest, awbauer
-**Tags:** navigation, hierarchical, post type, boston university, bu
-**Requires at least:** 3.1
-**Tested up to:** 4.4
-**Stable tag:** 1.2.8
-**License:** GPLv2 or later
-**License URI:** http://www.gnu.org/licenses/gpl-2.0.html
+**Contributors:** ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99  
+**Tags:** navigation, hierarchical, post type, boston university, bu  
+**Requires at least:** 3.1  
+**Tested up to:** 4.4  
+**Stable tag:** 1.2.9  
+**License:** GPLv2 or later  
+**License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
 Robust tools for managing hierarchical page content in WordPress. Ideal for blogs with large page counts.
 
@@ -69,25 +69,31 @@ Please see this page for the details:
 ## Screenshots ##
 
 ###1. Manage your site’s page hierarchy with an easy to use drag and drop interface###
-![Manage your site’s page hierarchy with an easy to use drag and drop interface](http://s-plugins.wordpress.org/bu-navigation/assets/screenshot-1.png)
+![Manage your site’s page hierarchy with an easy to use drag and drop interface](https://ps.w.org/bu-navigation/assets/screenshot-1.png)
 
 ###2. The “Add a Link” tool allows you to add external links to your navigation lists###
-![The “Add a Link” tool allows you to add external links to your navigation lists](http://s-plugins.wordpress.org/bu-navigation/assets/screenshot-2.png)
+![The “Add a Link” tool allows you to add external links to your navigation lists](https://ps.w.org/bu-navigation/assets/screenshot-2.png)
 
 ###3. The “Content Navigation” widget presents a configurable sidebar navigation list###
-![The “Content Navigation” widget presents a configurable sidebar navigation list](http://s-plugins.wordpress.org/bu-navigation/assets/screenshot-3.png)
+![The “Content Navigation” widget presents a configurable sidebar navigation list](https://ps.w.org/bu-navigation/assets/screenshot-3.png)
 
 ###4. The “Navigation Attributes” metabox replaces the built-in “Page Parent” and “Menu Order” dropdowns###
-![The “Navigation Attributes” metabox replaces the built-in “Page Parent” and “Menu Order” dropdowns](http://s-plugins.wordpress.org/bu-navigation/assets/screenshot-4.png)
+![The “Navigation Attributes” metabox replaces the built-in “Page Parent” and “Menu Order” dropdowns](https://ps.w.org/bu-navigation/assets/screenshot-4.png)
 
 ###5. The same drag and drop view is available to move pages while editing them###
-![The same drag and drop view is available to move pages while editing them](http://s-plugins.wordpress.org/bu-navigation/assets/screenshot-5.png)
+![The same drag and drop view is available to move pages while editing them](https://ps.w.org/bu-navigation/assets/screenshot-5.png)
+
 
 ## Changelog ##
 
+### 1.2.9 ###
+
+* Fixes redundant title attributes
+* Corrects invalid unit tests
+
 ### 1.2.8 ###
 
-* Fixes an issue affecting section titles in the navigation widget when using Adaptive Mode 
+* Fixes an issue affecting section titles in the navigation widget when using Adaptive Mode
 * Corrects invalid unit tests
 
 ### 1.2.7 ###

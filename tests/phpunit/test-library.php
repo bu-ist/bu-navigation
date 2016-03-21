@@ -450,17 +450,13 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$draft_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'draft', 'post_parent' => $public));
 		$pending_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'pending', 'post_parent' => $public));
 		$draft = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'draft'));
-		$public_draft_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'publish', 'post_parent' => $draft));
 		$pending = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'pending'));
-		$public_pending_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'publish', 'post_parent' => $pending));
 
 		// Our functions require post objects
 		$draft = get_post( $draft );
 		$draft_child = get_post( $draft_child );
 		$pending = get_post( $draft_child );
 		$pending_child = get_post( $pending_child );
-		$public_draft_child = get_post( $public_draft_child );
-		$public_pending_child = get_post( $public_pending_child );
 
 		// Root unpublished
 		$this->assertEquals( get_post_permalink( $draft ), bu_navigation_get_post_link( $draft ) );
@@ -470,21 +466,46 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$this->assertEquals( get_post_permalink( $draft_child ), bu_navigation_get_post_link( $draft_child ) );
 		$this->assertEquals( get_post_permalink( $pending_child ), bu_navigation_get_post_link( $pending_child ) );
 
-		// #29615: Non-Page Hierarchical Post Type 'Default Permalinks' do not work for child posts prior to 4.0.
-		// #23458: get_post_permalink() improved in v4.4 to fix incorrect URLs for pages when child of a draft (e.g. http://example.org/test//post-title-5/)
-		// @see https://core.trac.wordpress.org/ticket/29615
-		// @see https://core.trac.wordpress.org/ticket/23458
-		if ( $wp_rewrite->using_permalinks() && version_compare( $GLOBALS['wp_version'], '4.4', '>=' ) ) {
-			// Draft parent, public children
-			$this->assertEquals( get_post_permalink( $public_draft_child ), bu_navigation_get_post_link( $public_draft_child ) );
-			$this->assertEquals( get_post_permalink( $public_pending_child ), bu_navigation_get_post_link( $public_pending_child ) );
-		}
-
 		// Sample permalinks for unpublished posts
 		$this->assertEquals( get_post_permalink( $draft, false, true ), bu_navigation_get_post_link( $draft, array(), true ) );
 		$this->assertEquals( get_post_permalink( $draft_child, false, true ), bu_navigation_get_post_link( $draft_child, array(), true ) );
 		$this->assertEquals( get_post_permalink( $pending, false, true ), bu_navigation_get_post_link( $pending, array(), true ) );
 		$this->assertEquals( get_post_permalink( $pending_child, false, true ), bu_navigation_get_post_link( $pending_child, array(), true ) );
+	}
+
+	/**
+	 * According to https://core.trac.wordpress.org/ticket/36174,
+	 * non-page hierarchical post types that are not published
+	 * must first be published to get a usable post_name.
+	 *
+	 * This may get fixed in core. Until then, the WP-generated URLs will be
+	 * incorrect. We'll just use the "publish and unpublish" trick to get
+	 * this to work in the meantime.
+	 *
+	 * @return null
+	 */
+	public function test_bu_navigation_get_post_link_unpublished_public_children() {
+		$draft = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'draft'));
+		$public_draft_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'publish', 'post_parent' => $draft));
+		$pending = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'pending'));
+		$public_pending_child = $this->factory->post->create(array('post_type' => 'test', 'post_status' => 'publish', 'post_parent' => $pending));
+
+		// "publish and unpublish" to generate post_name
+		$public_draft_child = get_post( $public_draft_child );
+		$public_draft_child->post_status = 'publish';
+		wp_update_post($public_draft_child);
+		$public_draft_child->post_status = 'draft';
+		wp_update_post($public_draft_child);
+
+		$public_pending_child = get_post( $public_pending_child );
+		$public_pending_child->post_status = 'publish';
+		wp_update_post($public_pending_child);
+		$public_pending_child->post_status = 'pending';
+		wp_update_post($public_pending_child);
+
+		// Draft parent, public children
+		$this->assertEquals( get_post_permalink( $public_draft_child ), bu_navigation_get_post_link( $public_draft_child ) );
+		$this->assertEquals( get_post_permalink( $public_pending_child ), bu_navigation_get_post_link( $public_pending_child ) );
 	}
 
 	public function test_bu_navigation_get_post_link_no_permalinks() {

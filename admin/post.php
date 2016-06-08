@@ -121,8 +121,12 @@ class BU_Navigation_Admin_Post {
 	public function add_meta_boxes( $post_type, $post ) {
 		$post_type_object = get_post_type_object( $post_type );
 
+		if ( 'page' != $post_type && apply_filters( 'bu_nav_disable_post_type', false, $post_type, $post_type_object ) ) {
+			return;
+		}
+
 		// Remove built in page attributes meta box
-		remove_meta_box('pageparentdiv', 'page', 'side');
+		remove_meta_box('pageparentdiv', $post_type, 'side');
 
 		$templates = get_page_templates();
 

@@ -126,7 +126,7 @@ class BU_Navigation_Admin_Post {
 		$post_type_object = get_post_type_object( $post_type );
 
 		// Remove built in page attributes meta box
-		remove_meta_box('pageparentdiv', 'page', 'side');
+		remove_meta_box('pageparentdiv', $post_type, 'side');
 
 		$templates = get_page_templates();
 

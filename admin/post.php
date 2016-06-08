@@ -119,7 +119,7 @@ class BU_Navigation_Admin_Post {
 	 * @todo needs selenium tests
 	 */
 	public function add_meta_boxes( $post_type, $post ) {
-		if ( in_array( $post_type, $this->plugin->supported_post_types() ) ) {
+		if ( ! in_array( $post_type, $this->plugin->supported_post_types() ) ) {
 			return;
 		}
 

@@ -91,5 +91,3 @@ function bu_navigation_post_excluded( $post ) {
 	return (bool) $excluded;
 
 }
-
-?>

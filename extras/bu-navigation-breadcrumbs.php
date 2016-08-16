@@ -173,5 +173,3 @@ function bu_navigation_breadcrumbs_sc( $atts ) {
 }
 
 add_shortcode( 'breadcrumbs', 'bu_navigation_breadcrumbs_sc' );
-
-?>

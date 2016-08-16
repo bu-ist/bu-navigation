@@ -166,7 +166,7 @@ class Test_BU_Navigation_Admin_Manager extends BU_Navigation_UnitTestCase {
 		// array of post ID's to delete
 		$deletions = array( $this->posts['grandchild_two'], $this->posts['google'] );
 
-		$result =$this->navman->process_deletions( $deletions );
+		$result = $this->navman->process_deletions( $deletions );
 
 		$this->assertNotInstanceOf( 'WP_Error', $result );
 
@@ -187,7 +187,7 @@ class Test_BU_Navigation_Admin_Manager extends BU_Navigation_UnitTestCase {
 		// array of post ID's to delete
 		$deletions = array( $this->posts['grandchild_two'], $this->posts['google'] );
 
-		$result =$this->navman->process_deletions( $deletions );
+		$result = $this->navman->process_deletions( $deletions );
 
 		$this->assertInstanceOf( 'WP_Error', $result );
 

@@ -194,5 +194,3 @@ class BU_Navigation_Reorder_Tracker {
 	}
 
 }
-
-?>

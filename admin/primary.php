@@ -95,7 +95,7 @@ class BU_Navigation_Admin_Primary {
 
 		// Prevent illegal updates
 		if( ! current_user_can( $this->get_cap() ) || ! check_admin_referer( self::NONCE_ACTION ) ) {
-			error_log('[bu-navigation] Illegal access to "Primary Navigaiton" page!');
+			$this->plugin->log( '%s - Illegal access to "Primary Navigaiton" page!', __METHOD__ );
 			wp_die('Cheatin, eh?');
 		}
 

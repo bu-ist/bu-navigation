@@ -34,7 +34,7 @@ function bu_navigation_breadcrumbs( $args = '' ) {
 		}
 
 		if( is_null( $p ) ) {
-			error_log( 'bu_navigation_breadcrumbs - invalid post argument: ' . $r['post'] );
+			$this->plugin->log( '%s - invalid post argument: %s', __METHOD__, $r['post'] );
 			return false;
 		}
 	}

@@ -385,7 +385,7 @@ class BU_Navigation_Admin_Manager {
 				$saved = true;
 			} else {
 				// @todo notify user of error messages from WP_Error objects
-				error_log('Errors encountered during navman save:' . print_r( $errors, true ) );
+				$this->plugin->log( '%s - Errors encountered during navman save: %s', __METHOD__, print_r( $errors, true ) );
 			}
 
 		}
@@ -421,8 +421,8 @@ class BU_Navigation_Admin_Manager {
 					$deleted = wp_delete_post( (int) $id, $force_delete );
 				}
 
-				if( ! $deleted ) {
-					error_log(sprintf('[BU Navigation Navman] Unable to delete post %d', $id));
+				if ( ! $deleted ) {
+					$this->plugin->log( '%s - Unable to delete post %d', __METHOD__, $id );
 					array_push( $failures, $id );
 				} else {
 
@@ -476,8 +476,8 @@ class BU_Navigation_Admin_Manager {
 
 				if( false == $updated || is_wp_error( $updated ) ) {
 
-					error_log(sprintf('[BU Navigation Navman] Could not update link: %s', print_r($post, true)));
-					error_log(print_r($updated,true));
+					$this->plugin->log( '%s - Could not update link: %s', __METHOD__, print_r( $post, true ) );
+					$this->plugin->log( print_r( $updated,true ) );
 					array_push( $failures, $post->post_title );
 
 				} else {
@@ -541,8 +541,8 @@ class BU_Navigation_Admin_Manager {
 
 					if( false == $inserted || is_wp_error( $inserted ) ) {
 
-						error_log(sprintf('[BU Navigation Navman] Could not create link: %s', print_r($post, true)));
-						error_log(print_r($inserted,true));
+						$this->plugin->log( '%s - Could not create link: %s', __METHOD__, print_r( $post, true ) );
+						$this->plugin->log( print_r( $inserted,true ) );
 						array_push( $failures, $post->post_title );
 
 					} else {
@@ -608,8 +608,8 @@ class BU_Navigation_Admin_Manager {
 
 				if( false == $updated || is_wp_error( $updated ) ) {
 
-					error_log(sprintf('[BU Navigation Navman] Could not move post: %s', print_r($post, true)));
-					error_log(print_r($updated, true));
+					$this->plugin->log( '%s - Could not move post: %s', __METHOD__, print_r( $post, true ) );
+					$this->plugin->log( print_r( $updated, true ) );
 					array_push( $failures, $post->ID );
 
 				} else {

@@ -74,5 +74,3 @@ function bu_navigation_get_label( $post, $empty_label = '(no title)' ) {
 	return $label;
 
 }
-
-?>

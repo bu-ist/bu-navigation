@@ -53,7 +53,7 @@ class BU_Navigation_Settings {
 
 		// Sanity check
 		if( ! array_key_exists( $name, self::$fields ) ) {
-			error_log("[bu-navigation] Attempt to access invalid settings key: $name");
+			$this->plugin->log( '%s - Attempt to access invalid settings key: %s', __METHOD__, $name );
 			return false;
 		}
 
@@ -144,7 +144,7 @@ class BU_Navigation_Settings {
 
 			} else {
 
-				error_log("[bu-navigation] Attempt to update invalid settings key: $key");
+				$this->plugin->log( '%s - Attempt to update invalid settings key: %s', __METHOD__, $key );
 
 			}
 

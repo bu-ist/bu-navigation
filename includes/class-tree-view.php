@@ -422,7 +422,7 @@ class BU_Navigation_Tree_Query {
 			$exclude_meta = $wpdb->get_results( $query, OBJECT_K );
 
 			if ( false === $exclude_meta ) {
-				error_log( __FUNCTION__ . " - Error querying navigation exclusions: {$wpdb->last_error}" );
+				$this->plugin->log( '%s - Error querying navigation exclusions: %s', __METHOD__, $wpdb->last_error );
 				return apply_filters( 'bu_nav_tree_view_filter_posts', $posts );
 			}
 

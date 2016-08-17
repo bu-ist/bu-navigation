@@ -887,8 +887,8 @@ function bu_navigation_list_pages( $args = '' ) {
 			array_push( $sections, $last_section );
 
 			if ( array_key_exists( $last_section, $pages_by_parent ) &&
-			     is_array( $pages_by_parent[$last_section] ) && 
-			     ( count( $pages_by_parent[$last_section] ) > 0 ) 
+			     is_array( $pages_by_parent[$last_section] ) &&
+			     ( count( $pages_by_parent[$last_section] ) > 0 )
 			   ) {
 				// The last section has children, so it will be the "top"
 				$sections = array_slice($sections, -2);
@@ -1152,5 +1152,3 @@ function bu_filter_pages_parent_dropdown($pages_by_parent, $default = 0, $parent
 	return FALSE;
 
 }
-
-?>

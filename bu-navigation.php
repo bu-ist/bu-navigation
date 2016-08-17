@@ -197,7 +197,7 @@ class BU_Navigation_Plugin {
 		$defaults = $this->features();
 
 		if ( ! in_array( $feature, array_keys( $defaults ) ) ) {
-			error_log( "[bu-navigation] Unknown feature: $feature" );
+			$this->log( '%s - Unknown feature: %s', __METHOD__, $feature );
 			return false;
 		}
 
@@ -234,6 +234,22 @@ class BU_Navigation_Plugin {
 
 		return $post_types;
 
+	}
+
+	/**
+	 * Log messages through error_log. Except when running through cli.
+	 * Prepends [bu-navigation]
+	 *
+	 * @return null
+	 */
+	public function log() {
+		if ( php_sapi_name() === 'cli' ) {
+			return;
+		}
+
+		$args = func_get_args();
+		$args[0] = sprintf( '[bu-navigation] %s', $args[0] );
+		error_log( call_user_func_array( 'sprintf', $args ) );
 	}
 
 }

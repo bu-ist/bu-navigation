@@ -150,7 +150,7 @@ class BU_Widget_Pages extends WP_Widget {
 			}
 
 		} else {
-			error_log( "No nav label widget style set!" );
+			$this->plugin->log( 'No nav label widget style set!' );
 		}
 
 		do_action( 'bu_navigation_widget_before_list' );

@@ -622,6 +622,8 @@ function bu_navigation_format_page( $page, $args = '' ) {
 		'siblings' => null,
 		'anchor_class' => '',
 		'anchor' => true,
+		'title_before' => '',
+		'title_after' => '',
 		'section_ids' => null
 		);
 	$r = wp_parse_args( $args, $defaults );
@@ -675,6 +677,7 @@ function bu_navigation_format_page( $page, $args = '' ) {
 	$title = apply_filters( 'bu_page_title', $title );
 	$label = apply_filters( 'bu_navigation_format_page_label', $title, $page );
 
+	$label = $r['title_before'] . $label . $r['title_after'];
 	$anchor = $r['anchor'] ? sprintf( '<a%s>%s</a>', $attributes, $label ) : $label;
 
 	$html = sprintf( "<%s class=\"%s\">\n%s\n %s</%s>\n",
@@ -835,6 +838,8 @@ function bu_navigation_list_pages( $args = '' ) {
 		'container_id' => '',
 		'container_class' => '',
 		'item_tag' => 'li',
+		'title_before' => '',
+		'title_after' => '',
 		'style' => null
 		);
 	$r = wp_parse_args($args, $defaults);
@@ -972,7 +977,9 @@ function bu_navigation_display_primary( $args = '' ) {
 		'item_tag' => 'li',
 		'identify_top' => false,
 		'whitelist_top' => null,
-		'echo' => 1
+		'echo' => 1,
+		'title_before' => '',
+		'title_after' => '',
 		);
 	$r = wp_parse_args( $args, apply_filters( 'bu_filter_primarynav_defaults', $defaults ) );
 

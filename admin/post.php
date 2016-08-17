@@ -119,10 +119,14 @@ class BU_Navigation_Admin_Post {
 	 * @todo needs selenium tests
 	 */
 	public function add_meta_boxes( $post_type, $post ) {
+		if ( ! in_array( $post_type, $this->plugin->supported_post_types() ) ) {
+			return;
+		}
+
 		$post_type_object = get_post_type_object( $post_type );
 
 		// Remove built in page attributes meta box
-		remove_meta_box('pageparentdiv', 'page', 'side');
+		remove_meta_box('pageparentdiv', $post_type, 'side');
 
 		$templates = get_page_templates();
 

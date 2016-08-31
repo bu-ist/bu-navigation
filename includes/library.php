@@ -895,10 +895,10 @@ function bu_navigation_list_pages( $args = '' ) {
 			     is_array( $pages_by_parent[$last_section] ) &&
 			     ( count( $pages_by_parent[$last_section] ) > 0 )
 			   ) {
-				// The last section has children, so it will be the "top"
+				// Last section has children, so it will be the "top"
 				$sections = array_slice($sections, -2);
 			} else {
-				// Last section has no children, so it's parent will be the "top"
+				// Last section has no children, so its parent will be the "top"
 				$sections = array_slice($sections, -3);
 			}
 		}

@@ -104,6 +104,24 @@ class Test_BU_Navigation_Plugin extends BU_Navigation_UnitTestCase {
 
 		$this->assertRegExp('/<h2.+Page 1<\/a>/i', $widget);
 		$this->assertRegExp('/class="level_1".+Subpage 1-A<\/a>/is', $widget);
-	}
 
+		// load perspective of page page1_A
+		$post = get_post( $page1_A );
+		setup_postdata( $post );
+
+		$instance = array(
+			'navigation_title' => 'section',
+			'navigation_title_text' => '',
+			'navigation_title_url' => '',
+			'navigation_style' => 'adaptive',
+			);
+
+		ob_start();
+		the_widget( 'BU_Widget_Pages', $instance );
+		$widget = ob_get_contents();
+		ob_end_clean();
+
+		$this->assertRegExp('/<h2.+Page 1<\/a>/i', $widget);
+		$this->assertRegExp('/class="level_1".+Subpage 1-A<\/a>/is', $widget);
+	}
 }

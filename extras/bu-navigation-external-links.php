@@ -123,5 +123,3 @@ function bu_navigation_post_type_link_filter( $link, $id ) {
 }
 
 add_filter( 'post_type_link', 'bu_navigation_post_type_link_filter', 10, 2 );
-
-?>

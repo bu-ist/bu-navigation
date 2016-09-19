@@ -963,6 +963,14 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$formatted_page = bu_navigation_format_page( $page, $args );
 		$expected_formatted_page = '<li id="test_item_id" class="page_item page-item-' . $parent . '">' . "\n" . '<a href="' . $url . '">' . $title . '</a>' . "\n" . ' </li>' . "\n";
 
+		/*
+		*	Test title before/after Functionaltiy
+		*/
+
+		$args = array( 'title_before' => '<span>', 'title_after' => '</span>', );
+		$formatted_page = bu_navigation_format_page( $page, $args );
+		$expected_formatted_page = '<li class="page_item page-item-' . $parent . '">' . "\n" . '<a href="' . $url . '"><span>' . $title . '</span></a>' . "\n" . ' </li>' . "\n";
+
 		$this->assertEquals( $expected_formatted_page, $formatted_page );
 
 	}

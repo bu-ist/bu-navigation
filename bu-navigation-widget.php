@@ -49,11 +49,28 @@ class BU_Widget_Pages extends WP_Widget {
 
 			// Adaptive navigation style uses the grandparent of current post
 			if ( $instance['navigation_style'] == 'adaptive' ) {
-				$grandparent_offset = count( $sections ) - 2;
 
-				// If the current page is the last item, go up one further
-				if( end( $sections ) == $post->ID ){
-					$grandparent_offset--;
+				// Fetch post list, possibly limited to specific sections
+				$page_args = array(
+					'sections' => $sections,
+					'post_types' => array( $post->post_type ),
+					'include_links' => false,
+					);
+				$pages = bu_navigation_get_pages( $page_args );
+				$pages_by_parent = bu_navigation_pages_by_parent( $pages );
+
+				$last_section = array_pop( $sections );
+				array_push( $sections, $last_section );
+
+				if ( array_key_exists( $last_section, $pages_by_parent ) &&
+				     is_array( $pages_by_parent[$last_section] ) &&
+				     ( count( $pages_by_parent[$last_section] ) > 0 )
+				   ) {
+					// Last section has children, so its parent will be section title
+					$grandparent_offset = count( $sections ) - 2;
+				} else {
+					// Last section has no children, so its grandparent will be the section title
+					$grandparent_offset = count( $sections ) - 3;
 				}
 
 				if ( isset( $sections[$grandparent_offset] ) ) {
@@ -150,7 +167,7 @@ class BU_Widget_Pages extends WP_Widget {
 			}
 
 		} else {
-			error_log( "No nav label widget style set!" );
+			$this->plugin->log( 'No nav label widget style set!' );
 		}
 
 		do_action( 'bu_navigation_widget_before_list' );

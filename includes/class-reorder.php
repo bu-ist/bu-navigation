@@ -69,8 +69,8 @@ class BU_Navigation_Reorder_Tracker {
 	 * @todo write unit tests
 	 */
 	public function run() {
-		// error_log('======== Navman Reordering =========');
-		// error_log('Already moved: ' . print_r( $this->already_moved, true ) );
+		// $this->plugin->log( '======== Navman Reordering =========' );
+		// $this->plugin->log( 'Already moved: ' . print_r( $this->already_moved, true ) );
 
 		global $wpdb;
 
@@ -89,7 +89,7 @@ class BU_Navigation_Reorder_Tracker {
 		);
 		$posts_by_parent = bu_navigation_pages_by_parent( $posts );
 
-		// error_log('Sections for reordering: ' . print_r( $posts_by_parent, true ) );
+		// $this->plugin->log( 'Sections for reordering: ' . print_r( $posts_by_parent, true ) );
 
 		// Loop through affected sections, reordering children as needed
 		foreach( $posts_by_parent as $parent_id => $children ) {
@@ -105,7 +105,7 @@ class BU_Navigation_Reorder_Tracker {
 					while( $this->position_already_set( $position, $parent_id ) ) {
 
 						// Skip over any positions that were set for previously updated children
-						// error_log('Position has already been set, skipping ' . $position );
+						// $this->plugin->log( 'Position has already been set, skipping ' . $position );
 						$position++;
 
 					}
@@ -118,7 +118,7 @@ class BU_Navigation_Reorder_Tracker {
 
 						if( false === $rc ) {
 							$error_msg = sprintf('Error updating menu order (%s) for post (%s): %s', $position, $child->post_title, $wpdb->last_error );
-							error_log($error_msg);
+							$this->plugin->log( '%s - %s', __METHOD__, $error_msg );
 							array_push( $this->errors, new WP_Error( 'bu_navigation_reorder_error', $error_msg ) );
 						} else {
 
@@ -127,11 +127,11 @@ class BU_Navigation_Reorder_Tracker {
 						}
 
 						// Temporary logging
-						// error_log('Setting menu order for post "' . $child->post_title . '": ' . $position );
+						// $this->plugin->log( 'Setting menu order for post "' . $child->post_title . '": ' . $position );
 
 					} else {
 						/* noop */
-						// error_log('Skipping menu order update, already correct for post ' . $child->post_title . ' (' . $position . ')' );
+						// $this->plugin->log( 'Skipping menu order update, already correct for post ' . $child->post_title . ' (' . $position . ')' );
 					}
 
 					$position++;
@@ -139,7 +139,7 @@ class BU_Navigation_Reorder_Tracker {
 				} else {
 
 					/* noop */
-					// error_log('Child already has correct menu order, skipping myself (' . $child->post_title . ')');
+					// $this->plugin->log( 'Child already has correct menu order, skipping myself (' . $child->post_title . ')');
 
 				}
 
@@ -194,5 +194,3 @@ class BU_Navigation_Reorder_Tracker {
 	}
 
 }
-
-?>

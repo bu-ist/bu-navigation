@@ -58,5 +58,3 @@ class BU_Navigation_Admin_Filter_Pages {
 	}
 
 }
-
-?>

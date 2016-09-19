@@ -622,6 +622,8 @@ function bu_navigation_format_page( $page, $args = '' ) {
 		'siblings' => null,
 		'anchor_class' => '',
 		'anchor' => true,
+		'title_before' => '',
+		'title_after' => '',
 		'section_ids' => null
 		);
 	$r = wp_parse_args( $args, $defaults );
@@ -675,6 +677,7 @@ function bu_navigation_format_page( $page, $args = '' ) {
 	$title = apply_filters( 'bu_page_title', $title );
 	$label = apply_filters( 'bu_navigation_format_page_label', $title, $page );
 
+	$label = $r['title_before'] . $label . $r['title_after'];
 	$anchor = $r['anchor'] ? sprintf( '<a%s>%s</a>', $attributes, $label ) : $label;
 
 	$html = sprintf( "<%s class=\"%s\">\n%s\n %s</%s>\n",
@@ -835,6 +838,8 @@ function bu_navigation_list_pages( $args = '' ) {
 		'container_id' => '',
 		'container_class' => '',
 		'item_tag' => 'li',
+		'title_before' => '',
+		'title_after' => '',
 		'style' => null
 		);
 	$r = wp_parse_args($args, $defaults);
@@ -887,13 +892,13 @@ function bu_navigation_list_pages( $args = '' ) {
 			array_push( $sections, $last_section );
 
 			if ( array_key_exists( $last_section, $pages_by_parent ) &&
-			     is_array( $pages_by_parent[$last_section] ) && 
-			     ( count( $pages_by_parent[$last_section] ) > 0 ) 
+			     is_array( $pages_by_parent[$last_section] ) &&
+			     ( count( $pages_by_parent[$last_section] ) > 0 )
 			   ) {
-				// The last section has children, so it will be the "top"
+				// Last section has children, so it will be the "top"
 				$sections = array_slice($sections, -2);
 			} else {
-				// Last section has no children, so it's parent will be the "top"
+				// Last section has no children, so its parent will be the "top"
 				$sections = array_slice($sections, -3);
 			}
 		}
@@ -972,7 +977,9 @@ function bu_navigation_display_primary( $args = '' ) {
 		'item_tag' => 'li',
 		'identify_top' => false,
 		'whitelist_top' => null,
-		'echo' => 1
+		'echo' => 1,
+		'title_before' => '',
+		'title_after' => '',
 		);
 	$r = wp_parse_args( $args, apply_filters( 'bu_filter_primarynav_defaults', $defaults ) );
 
@@ -1152,5 +1159,3 @@ function bu_filter_pages_parent_dropdown($pages_by_parent, $default = 0, $parent
 	return FALSE;
 
 }
-
-?>

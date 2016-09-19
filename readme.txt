@@ -2,8 +2,8 @@
 Contributors: ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
-Tested up to: 4.4
-Stable tag: 1.2.9
+Tested up to: 4.6.1
+Stable tag: 1.2.11
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,8 @@ For more information check out [http://developer.bu.edu/bu-navigation/](http://d
 = Developers =
 
 For developer documentation, feature roadmaps and more visit the [plugin repository on Github](https://github.com/bu-ist/bu-navigation/).
+
+[Build Status](https://travis-ci.org/bu-ist/bu-slideshow)
 
 == Installation ==
 
@@ -75,6 +77,15 @@ Please see this page for the details:
 5. The same drag and drop view is available to move pages while editing them
 
 == Changelog ==
+
+= 1.2.11 =
+
+* Add before/after attributes to support wrapping title/labels. Fixes #12.
+* Fix adaptive nav section title calculation. Fixes #22.
+
+= 1.2.10 =
+
+* Fix hierarchical custom post type support. Fixes #20.
 
 = 1.2.9 =
 

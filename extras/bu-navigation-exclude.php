@@ -14,35 +14,43 @@ if ( ! defined( 'BU_NAVIGATION_POST_EXCLUDE_DEFAULT' ) )
  *
  * Note that new posts are excluded by default.  In the case where no meta value exists yet,
  * the post will be excluded from navigation lists.
+
+ * @param array $pages
+ *
+ * @return array
  */
 function bu_navigation_filter_pages_exclude( $pages ) {
-	global $wpdb;
-
 	$filtered = array();
 
 	if ( is_array( $pages ) && count( $pages ) > 0 ) {
 
 		// Fetch pages that have been explicitly excluded from navigation lists
-		$ids = array_keys( $pages );
-		$query = sprintf( "SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s)",
-			$wpdb->postmeta,
-			BU_NAV_META_PAGE_EXCLUDE,
-			implode( ',', $ids )
-			);
-		$exclude_meta = $wpdb->get_results( $query, OBJECT_K );
+		$exclude_meta = array();
 
-		if ( false === $exclude_meta ) {
-			$this->plugin->log( '%s - Error querying navigation exclusions: %s', __METHOD__, $wpdb->last_error );
-			return $pages;
-		}
+		$excluded_posts = new WP_Query( array(
+			'post_type' => 'any',
+			'post_status' => 'any',
+			'meta_query' => array(
+				array(
+					'key' => BU_NAV_META_PAGE_EXCLUDE,
+					'compare' => '=',
+					'value' => 1,
+				),
+			),
+			'post__in' => wp_list_pluck( $pages, 'ID' ),
+			'fields' => 'ids',
+			'posts_per_page' => 100,
+		) );
+
+		$not_excluded = array_diff( wp_list_pluck( $pages, 'ID' ), $excluded_posts->posts );
 
 		foreach ( $pages as $page ) {
-
 			// Post meta row exists, determine exclusion based on meta_value
-			if ( array_key_exists( $page->ID, $exclude_meta ) ) {
-				$excluded = (bool) $exclude_meta[ $page->ID ]->meta_value;
+			if ( in_array( $page->ID, $excluded_posts->posts ) ) {
+				$excluded = true;
+			} elseif ( in_array( $page->ID, $not_excluded ) ) {
+				$excluded = false;
 			} else {
-
 				// No post meta row has been inserted yet
 				if ( isset( $page->post_type ) && BU_NAVIGATION_LINK_POST_TYPE == $page->post_type ) {
 					// Navigation links get special treatment since they will always be visible
@@ -53,10 +61,10 @@ function bu_navigation_filter_pages_exclude( $pages ) {
 				}
 			}
 
-			if ( ! $excluded )
+			if ( ! $excluded ) {
 				$filtered[ $page->ID ] = $page;
+			}
 		}
-
 	}
 
 	return $filtered;

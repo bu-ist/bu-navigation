@@ -42,7 +42,7 @@ class BU_Widget_Pages extends WP_Widget {
 		$section_id = 0;
 
 		// Determine which post to use for the section title
-		if ( $instance['navigation_style'] != 'site' ) {
+		if ( ! empty( $instance['navigation_style'] ) && $instance['navigation_style'] != 'site' ) {
 
 			// Gather ancestors
 			$sections = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ) );
@@ -157,7 +157,7 @@ class BU_Widget_Pages extends WP_Widget {
 		// Set list arguments based on navigation style
 		if ( array_key_exists( 'navigation_style', $instance ) ) {
 
-		  $list_args['style'] = $instance['navigation_style'];
+			$list_args['style'] = $instance['navigation_style'];
 
 			if ( $instance['navigation_style'] == 'section' ) {
 				$list_args['navigate_in_section'] = 1;
@@ -167,7 +167,7 @@ class BU_Widget_Pages extends WP_Widget {
 			}
 
 		} else {
-			$this->plugin->log( 'No nav label widget style set!' );
+			$GLOBALS['bu_navigation_plugin']->log( 'No nav label widget style set!' );
 		}
 
 		do_action( 'bu_navigation_widget_before_list' );

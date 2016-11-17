@@ -1,3 +1,6 @@
 *.pyc
 node_modules
 /vendor
+.eslintignore
+.eslintrc
+.sass-lint.yml

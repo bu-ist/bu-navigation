@@ -628,8 +628,9 @@ function bu_navigation_format_page( $page, $args = '' ) {
 		);
 	$r = wp_parse_args( $args, $defaults );
 
-	if ( ! isset( $page->navigation_label ) )
-		$page->navigation_label = apply_filters( 'the_title', $page->post_title );
+	if ( ! isset( $page->navigation_label ) ) {
+		$page->navigation_label = apply_filters( 'the_title', $page->post_title, $page->ID );
+	}
 
 	$title = $page->navigation_label;
 	$href = $page->url;

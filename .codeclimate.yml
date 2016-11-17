@@ -1,0 +1,56 @@
+---
+exclude_paths:
+- tests/
+- node_modules/
+- languages/
+- vendor/
+- bower_components/
+- js/vendor/
+- ".sass-cache/"
+- "*.min.css"
+- "*.min.js"
+- "**.css"
+
+prepare:
+  fetch:
+  - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.sass-lint.yml"
+  - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.eslintrc"
+  - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.eslintignore"
+
+engines:
+  csslint:
+    enabled: false
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - javascript
+      - php
+  eslint:
+    enabled: true
+    channel: eslint-3
+  fixme:
+    enabled: true
+  markdownlint:
+    enabled: true
+  phpcodesniffer:
+    enabled: true
+    config:
+      file_extensions: php
+      standard: WordPress
+      ignore_warnings: false
+      encoding: utf-8
+  phpmd:
+    enabled: true
+    config:
+      file_extensions: php
+      rulesets: codesize,naming,unusedcode
+  scss-lint:
+    enabled: true
+ratings:
+  paths:
+  - "**.inc"
+  - "**.js"
+  - "**.php"
+  - "**.css"
+  - "**.scss"

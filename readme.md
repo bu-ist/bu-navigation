@@ -88,6 +88,12 @@ Please see this page for the details:
 
 ## Changelog ##
 
+### 1.2.12 ###
+
+* Add missing parameter to `the_title` filter call. 
+* Update unit test scripts.
+* Setup Code Climate.
+
 ### 1.2.11 ###
 
 * Add before/after attributes to support wrapping title/labels. Fixes #12.

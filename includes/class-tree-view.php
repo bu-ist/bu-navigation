@@ -251,7 +251,7 @@ class BU_Navigation_Tree_View {
 	public function format_post( $post, $has_children = false ) {
 		// Label
 		if( !isset( $post->navigation_label ) ) {
-			$post->navigation_label = apply_filters( 'the_title', $post->post_title );
+			$post->navigation_label = apply_filters( 'the_title', $post->post_title, $post->ID );
 		}
 
 		if ( empty( $post->navigation_label ) ) {

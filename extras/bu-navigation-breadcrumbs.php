@@ -93,7 +93,7 @@ function bu_navigation_breadcrumbs( $args = '' ) {
 			$current = $pages[$page_id];
 
 			if ( ! isset( $current->navigation_label ) ) {
-				$current->navigation_label = apply_filters( 'the_title', $current->post_title );
+				$current->navigation_label = apply_filters( 'the_title', $current->post_title, $current->ID );
 			}
 
 			$title = esc_attr( $current->navigation_label );

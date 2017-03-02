@@ -102,7 +102,7 @@ class Test_BU_Navigation_Plugin extends BU_Navigation_UnitTestCase {
 		ob_end_clean();
 
 		$this->assertRegExp('/<h2.+Page 1<\/a>/i', $widget);
-		$this->assertRegExp('/class="level_1".+Subpage 1-A<\/a>/is', $widget);
+		$this->assertRegExp('/class="contentnavlist-link level_1".+Subpage 1-A<\/a>/is', $widget);
 
 		// load perspective of page page1_A
 		$post = get_post( $page1_A );
@@ -121,6 +121,6 @@ class Test_BU_Navigation_Plugin extends BU_Navigation_UnitTestCase {
 		ob_end_clean();
 
 		$this->assertRegExp('/<h2.+Page 1<\/a>/i', $widget);
-		$this->assertRegExp('/class="level_1".+Subpage 1-A<\/a>/is', $widget);
+		$this->assertRegExp('/class="contentnavlist-link level_1".+Subpage 1-A<\/a>/is', $widget);
 	}
 }

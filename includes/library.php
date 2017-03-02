@@ -786,9 +786,10 @@ function bu_navigation_list_section($parent_id, $pages_by_parent, $args = '')
 	$defaults = array(
 		'depth' => 1,
 		'container_tag' => 'ul',
+		'container_class' => NULL,
 		'item_tag' => 'li',
 		'section_ids' => NULL
-		);
+	);
 
 	$r = wp_parse_args($args, $defaults);
 
@@ -800,7 +801,11 @@ function bu_navigation_list_section($parent_id, $pages_by_parent, $args = '')
 
 		if ((is_array($children)) && (count($children) > 0))
 		{
-			$html .= sprintf("\n<%s>\n", $r['container_tag']);;
+			if ( $r['container_class'] ) {
+				$html .= sprintf( '<%s class="%s">', $r['container_tag'], $r['container_class'] );;
+			} else {
+				$html .= sprintf( '<%s>', $r['container_tag'] );;
+			}
 
 			foreach ($children as $page)
 			{
@@ -808,12 +813,19 @@ function bu_navigation_list_section($parent_id, $pages_by_parent, $args = '')
 				$sargs['depth']++;
 
 				$child_html = bu_navigation_list_section($page->ID, $pages_by_parent, $sargs);
-				$html .= bu_navigation_format_page($page, array(
+
+				$pargs = array(
 					'html' => $child_html,
 					'depth' => $r['depth'],
 					'item_tag' => $r['item_tag'],
-					'section_ids' => $r['section_ids']
-					));
+					'section_ids' => $r['section_ids'],
+				);
+
+				if ( $r['container_class'] ) {
+					$pargs['item_class'] = $r['container_class'] . '-item';
+				}
+
+				$html .= bu_navigation_format_page( $page, $pargs );
 			}
 
 			$html .= sprintf("\n</%s>\n", $r['container_tag']);
@@ -927,10 +939,11 @@ function bu_navigation_list_pages( $args = '' ) {
 
 		$sargs = array(
 			'container_tag' => $r['container_tag'],
+			'container_class' => $r['container_class'],
 			'item_tag' => $r['item_tag'],
 			'depth' => 2,
 			'section_ids' => $section_ids
-			);
+		);
 
 		$page_position = 1;
 		$number_siblings = count( $pages_by_parent[$section] );
@@ -1036,6 +1049,7 @@ function bu_navigation_display_primary( $args = '' ) {
 		// Section arguments
 		$sargs = array(
 			'container_tag' => $r['container_tag'],
+			'container_class' => $r['container_class'] . '-section',
 			'item_tag' => $r['item_tag'],
 			'depth' => 2
 			);

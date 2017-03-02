@@ -616,6 +616,7 @@ function bu_navigation_format_page( $page, $args = '' ) {
 	$defaults = array(
 		'item_tag' => 'li',
 		'item_id' => null,
+		'item_class' => null,
 		'html' => '',
 		'depth' => null,
 		'position' => null,
@@ -664,6 +665,10 @@ function bu_navigation_format_page( $page, $args = '' ) {
 
 	if ( is_array( $r['section_ids'] ) && in_array( $page->ID, $r['section_ids'] ) )
 		array_push( $item_classes, 'has_children' );
+
+	if ( $r['item_class'] ) {
+		array_push( $item_classes, $r['item_class'] );
+	}
 
 	if ( is_numeric( $r['position'] ) && is_numeric( $r['siblings'] ) ) {
 		if ( $r['position'] == 1 )
@@ -1047,12 +1052,22 @@ function bu_navigation_display_primary( $args = '' ) {
 			if ( $r['dive'] )
 				$child_html = bu_navigation_list_section( $page->ID, $pages_by_parent, $sargs );
 
+			$pargs = array(
+				'html' => $child_html,
+				'depth' => 1,
+				'item_tag' => $r['item_tag']
+			);
+
+			if ( $r['container_class'] ) {
+				$pargs['item_class'] = $r['container_id'] . '-item';
+			}
+
 			// Display formatted page (optionally with post name as ID)
 			if ( $r['identify_top'] ) {
-				$html .= bu_navigation_format_page( $page, array( 'html' => $child_html, 'depth' => 1, 'item_tag' => $r['item_tag'], 'item_id' => $page->post_name ) );
-			} else {
-				$html .= bu_navigation_format_page( $page, array( 'html' => $child_html, 'depth' => 1, 'item_tag' => $r['item_tag'] ) );
+				$pargs['item_id'] = $page->post_name;
 			}
+
+			$html .= bu_navigation_format_page( $page, $pargs );
 
 			$nItems++;
 

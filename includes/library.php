@@ -803,7 +803,7 @@ function bu_navigation_list_section($parent_id, $pages_by_parent, $args = '')
 		if ((is_array($children)) && (count($children) > 0))
 		{
 			if ( $r['container_class'] ) {
-				$html .= sprintf( "\n<%s class='%s'>\n", $r['container_tag'], $r['container_class'] );
+				$html .= "\n" . sprintf( '<%s class="%s">', $r['container_tag'], $r['container_class'] ) . "\n";
 			} else {
 				$html .= sprintf( "\n<%s>\n", $r['container_tag'] );
 			}

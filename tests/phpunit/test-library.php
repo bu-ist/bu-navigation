@@ -1440,38 +1440,38 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		*/
 
 		$list_pages_container_id_expected = '<ul  id="test_container_id">' . "\n" .
-			'<li class="page_item page-item-' . $parent . ' first_item">' . "\n" .
-			'<a class="level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
-			"<ul>\n" .
-			'<li class="page_item page-item-' . $child . '">' . "\n" .
-			'<a class="level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
-			"<ul>\n" .
-			'<li class="page_item page-item-' . $grandchild_one . '">' . "\n" .
-			'<a class="level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
-			"<ul>\n" .
-			'<li class="page_item page-item-' . $greatgrandchild . '">' . "\n" .
-			'<a class="level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
+			'<li class="page_item page-item-' . $parent . ' test_container_id-item first_item">' . "\n" .
+			'<a class="test_container_id-link level_1" href="' . get_permalink( $parent ) . '">Parent Page</a>' . "\n \n" .
+			'<ul class="test_container_id-section">' . "\n" .
+			'<li class="page_item page-item-' . $child . ' test_container_id-section-item">' . "\n" .
+			'<a class="test_container_id-section-link level_2" href="' . get_permalink( $child ) . '">Child Page</a>' . "\n \n" .
+			'<ul class="test_container_id-section">' . "\n" .
+			'<li class="page_item page-item-' . $grandchild_one . ' test_container_id-section-item">' . "\n" .
+			'<a class="test_container_id-section-link level_3" href="' . get_permalink( $grandchild_one ) . '">Grand Child Page 1</a>' . "\n \n" .
+			'<ul class="test_container_id-section">' . "\n" .
+			'<li class="page_item page-item-' . $greatgrandchild . ' test_container_id-section-item">' . "\n" .
+			'<a class="test_container_id-section-link level_4" href="' . get_permalink( $greatgrandchild ) . '">Great Grand Child</a>' . "\n" .
 			" </li>\n\n" .
 			"</ul>\n" .
 			"</li>\n" .
-			'<li class="page_item page-item-' . $grandchild_two . '">' . "\n".
-			'<a class="level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
+			'<li class="page_item page-item-' . $grandchild_two . ' test_container_id-section-item">' . "\n".
+			'<a class="test_container_id-section-link level_3" href="' . get_permalink( $grandchild_two ) . '">Grand Child Page 2</a>' . "\n" .
 			" </li>\n\n" .
 			"</ul>\n" .
 			"</li>\n\n" .
 			"</ul>\n" .
 			"</li>\n" .
-			'<li class="page_item page-item-' . $parent_two . '">' . "\n" .
-			'<a class="level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
+			'<li class="page_item page-item-' . $parent_two . ' test_container_id-item">' . "\n" .
+			'<a class="test_container_id-link level_1" href="' . get_permalink( $parent_two ) . '">Parent Page Two</a>' . "\n" .
 			" </li>\n" .
-			'<li class="page_item page-item-' . $edit . '">' . "\n" .
-			'<a class="level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
+			'<li class="page_item page-item-' . $edit . ' test_container_id-item">' . "\n" .
+			'<a class="test_container_id-link level_1" href="' . get_permalink( $edit ) . '">Edit and Delete Me</a>' . "\n" .
 			" </li>\n" .
-			'<li class="page_item page-item-' . $google . '">' . "\n" .
-			'<a class="level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
+			'<li class="page_item page-item-' . $google . ' test_container_id-item">' . "\n" .
+			'<a class="test_container_id-link level_1" href="' . get_permalink( $google ) . '" target="_blank">Google</a>' . "\n" .
 			" </li>\n" .
-			'<li class="page_item page-item-' . $last_page . ' last_item">' . "\n" .
-			'<a class="level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
+			'<li class="page_item page-item-' . $last_page . ' test_container_id-item last_item">' . "\n" .
+			'<a class="test_container_id-link level_1" href="' . get_permalink( $last_page ) . '">Last Page</a>' . "\n" .
 			" </li>\n" .
 			"</ul>\n";
 

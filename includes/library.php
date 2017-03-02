@@ -941,11 +941,14 @@ function bu_navigation_list_pages( $args = '' ) {
 
 		$sargs = array(
 			'container_tag' => $r['container_tag'],
-			'container_class' => $r['container_class'],
 			'item_tag' => $r['item_tag'],
 			'depth' => 2,
 			'section_ids' => $section_ids
 		);
+
+		if ( $r['container_id'] ) {
+			$sargs['container_class'] = $r['container_id'] . '-section';
+		}
 
 		$page_position = 1;
 		$number_siblings = count( $pages_by_parent[$section] );
@@ -1056,10 +1059,13 @@ function bu_navigation_display_primary( $args = '' ) {
 		// Section arguments
 		$sargs = array(
 			'container_tag' => $r['container_tag'],
-			'container_class' => $r['container_class'] . '-section',
 			'item_tag' => $r['item_tag'],
 			'depth' => 2
 			);
+
+		if ( $r['container_id'] ) {
+			$sargs['container_class'] = $r['container_id'] . '-section';
+		}
 
 		foreach ( $top_level_pages as $page ) {
 

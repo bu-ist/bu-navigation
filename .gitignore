@@ -4,3 +4,4 @@ node_modules
 .eslintignore
 .eslintrc
 .sass-lint.yml
+/sftp-config.json

@@ -966,9 +966,9 @@ function bu_navigation_list_pages( $args = '' ) {
 				'section_ids' => $section_ids
 			);
 
-			if ( $r['container_class'] ) {
-				$pargs['item_class'] = $r['container_class'] . '-item';
-				$pargs['anchor_class'] = $r['container_class'] . '-link';
+			if ( $r['container_id'] ) {
+				$pargs['item_class'] = $r['container_id'] . '-item';
+				$pargs['anchor_class'] = $r['container_id'] . '-link';
 			}
 
 			$html .= bu_navigation_format_page($page, $pargs);
@@ -1085,9 +1085,9 @@ function bu_navigation_display_primary( $args = '' ) {
 				'item_tag' => $r['item_tag']
 			);
 
-			if ( $r['container_class'] ) {
-				$pargs['item_class'] = $r['container_class'] . '-item';
-				$pargs['anchor_class'] = $r['container_class'] . '-link';
+			if ( $r['container_id'] ) {
+				$pargs['item_class'] = $r['container_id'] . '-item';
+				$pargs['anchor_class'] = $r['container_id'] . '-link';
 			}
 
 			// Display formatted page (optionally with post name as ID)

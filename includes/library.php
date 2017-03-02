@@ -637,8 +637,9 @@ function bu_navigation_format_page( $page, $args = '' ) {
 	$href = $page->url;
 	$anchor_class = $r['anchor_class'];
 
-	if ( is_numeric( $r['depth'] ) )
+	if ( is_numeric( $r['depth'] ) ) {
 		$anchor_class .= sprintf( ' level_%d', intval( $r['depth'] ) );
+	}
 
 	$attrs = array(
 		'class' => trim( $anchor_class ),
@@ -823,6 +824,7 @@ function bu_navigation_list_section($parent_id, $pages_by_parent, $args = '')
 
 				if ( $r['container_class'] ) {
 					$pargs['item_class'] = $r['container_class'] . '-item';
+					$pargs['anchor_class'] = $r['container_class'] . '-link';
 				}
 
 				$html .= bu_navigation_format_page( $page, $pargs );
@@ -961,6 +963,11 @@ function bu_navigation_list_pages( $args = '' ) {
 				'section_ids' => $section_ids
 			);
 
+			if ( $r['container_class'] ) {
+				$pargs['item_class'] = $r['container_class'] . '-item';
+				$pargs['anchor_class'] = $r['container_class'] . '-link';
+			}
+
 			$html .= bu_navigation_format_page($page, $pargs);
 
 			$page_position++;
@@ -1073,7 +1080,8 @@ function bu_navigation_display_primary( $args = '' ) {
 			);
 
 			if ( $r['container_class'] ) {
-				$pargs['item_class'] = $r['container_id'] . '-item';
+				$pargs['item_class'] = $r['container_class'] . '-item';
+				$pargs['anchor_class'] = $r['container_class'] . '-link';
 			}
 
 			// Display formatted page (optionally with post name as ID)

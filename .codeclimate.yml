@@ -4,8 +4,8 @@ exclude_paths:
 - languages/
 - vendor/
 - js/vendor/
-- "*.min.css"
-- "*.min.js"
+- "**.min.css"
+- "**.min.js"
 
 prepare:
   fetch:

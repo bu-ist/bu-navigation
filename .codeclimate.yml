@@ -13,7 +13,7 @@ exclude_paths:
 
 prepare:
   fetch:
-  - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.sass-lint.yml"
+  - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.scss-lint.yml"
   - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.eslintrc"
   - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.eslintignore"
 

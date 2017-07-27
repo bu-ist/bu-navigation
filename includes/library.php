@@ -785,7 +785,7 @@ function bu_navigation_list_section($parent_id, $pages_by_parent, $args = '')
 		'section_ids' => NULL
 		);
 
-	$r = wp_parse_args($args, $defaults);
+	$r = wp_parse_args( $args, apply_filters( 'bu_filter_list_section_defaults', $defaults ));
 
 	$html = '';
 

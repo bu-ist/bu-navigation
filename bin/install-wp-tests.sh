@@ -62,7 +62,6 @@ install_wp() {
 		elif [[ $WP_VERSION =~ [0-9]+\.[0-9]+ ]]; then
 		    # https serves multiple offers, whereas http serves single.
             download https://api.wordpress.org/core/version-check/1.7/ /tmp/wp-latest.json
-			grep '[0-9]+\.[0-9]+(\.[0-9]+)?' /tmp/wp-latest.json
 			VERSION_ESCAPED=`echo $WP_VERSION | sed 's/\./\\\\./g'`
 			LATEST_VERSION=$(grep -o '"version":"'$VERSION_ESCAPED'[^"]*' /tmp/wp-latest.json | sed 's/"version":"//' | head -1)
 			if [[ -z "$LATEST_VERSION" ]]; then

@@ -1,21 +1,21 @@
 ---
 exclude_paths:
-- tests/
-- node_modules/
-- languages/
-- vendor/
-- bower_components/
+- images/
 - js/vendor/
-- ".sass-cache/"
-- "*.min.css"
-- "*.min.js"
-- "**.css"
+- languages/
+- tests/
+- vendor/
+- "**.min.css"
+- "**.min.js"
+- "js/jquery-ui-classic.css"
+- "js/jquery-ui-fresh.css"
 
 prepare:
   fetch:
-  - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.sass-lint.yml"
   - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.eslintrc"
   - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.eslintignore"
+  - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.mdlrc"
+  - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/markdown.rb"
 
 engines:
   csslint:
@@ -46,11 +46,9 @@ engines:
       file_extensions: php
       rulesets: codesize,naming,unusedcode
   scss-lint:
-    enabled: true
+    enabled: false
 ratings:
   paths:
-  - "**.inc"
   - "**.js"
   - "**.php"
   - "**.css"
-  - "**.scss"

@@ -23,7 +23,7 @@ download() {
     fi
 }
 
-if [[ $WP_VERSION =~ [0-9]+\.[0-9]+ ]]; then
+if [[ $WP_VERSION =~ ^[0-9]+\.[0-9]+$ ]]; then
 	WP_TESTS_TAG="branches/$WP_VERSION"
 elif [[ $WP_VERSION =~ [0-9]+\.[0-9]+\.[0-9]+ ]]; then
 	WP_TESTS_TAG="tags/$WP_VERSION"

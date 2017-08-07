@@ -781,11 +781,12 @@ function bu_navigation_list_section($parent_id, $pages_by_parent, $args = '')
 	$defaults = array(
 		'depth' => 1,
 		'container_tag' => 'ul',
+		'container_class' => NULL,
 		'item_tag' => 'li',
 		'section_ids' => NULL
 		);
 
-	$r = wp_parse_args($args, $defaults);
+	$r = wp_parse_args( $args, apply_filters( 'bu_filter_list_section_defaults', $defaults ) );
 
 	$html = '';
 
@@ -795,7 +796,13 @@ function bu_navigation_list_section($parent_id, $pages_by_parent, $args = '')
 
 		if ((is_array($children)) && (count($children) > 0))
 		{
-			$html .= sprintf("\n<%s>\n", $r['container_tag']);;
+			$html .= sprintf("\n<%s", $r['container_tag']);;
+
+			if ( $r['container_class'] ) {
+				$html .= ' class="' . esc_attr( $r['container_class'] ) . '"';
+			}
+
+			$html .= ">\n";
 
 			foreach ($children as $page)
 			{

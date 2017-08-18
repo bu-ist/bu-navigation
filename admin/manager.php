@@ -95,7 +95,7 @@ class BU_Navigation_Admin_Manager {
 				__( 'Edit Order', 'bu-navigation' ),
 				__( 'Edit Order', 'bu-navigation' ),
 				$this->get_menu_cap_for_post_type( $pt ),
-				'bu-navigation-manager',
+				'bu-navigation-manager-' . $pt,
 				array( $this, 'render' )
 			);
 

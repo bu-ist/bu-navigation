@@ -145,9 +145,6 @@ class BU_Navigation_Admin_Manager {
 
 	}
 
-	/**
-	 * Get fully configured instance of BU_Navigation_Tree_View
-	 */
 	public function get_navigation_tree() {
 		// Strings for localization
 		$nav_menu_label = __( 'Appearance > Primary Navigation', 'bu-navigation' );
@@ -178,7 +175,7 @@ class BU_Navigation_Admin_Manager {
 			'lazyLoad' => true,
 			'showCounts' => true,
 		);
-
+		
 		return new BU_Navigation_Tree_View( 'bu_navman', array_merge( $script_context, $strings ) );
 	}
 
@@ -187,8 +184,20 @@ class BU_Navigation_Admin_Manager {
 	 */
 	public function load() {
 
-		// Save if post data is present
-		$saved = $this->save();
+		if ( array_key_exists( 'navman-hash', $_POST ) ) {
+			$tree = $this->get_navigation_tree();
+			$hash_stayed_same = $tree->hierarchy->as_hash() == $_POST['navman-hash'];
+		}
+		else {
+			$hash_stayed_same = true;
+		}
+
+		if ( $hash_stayed_same ) {
+			$saved = $this->save();
+		}
+		else {
+			$saved = false;
+		}
 
 		// Post/Redirect/Get
 		if ( ! is_null( $saved ) ) {
@@ -197,8 +206,16 @@ class BU_Navigation_Admin_Manager {
 			$url = remove_query_arg( array( 'message', 'notice' ), wp_get_referer() );
 
 			// Notifications
-			if ( $saved === true ) { $url = add_query_arg( 'message', 1, $url );
-			} else { $url = add_query_arg( 'notice', 1, $url ); }
+			if ( $saved === true ) {
+				$url = add_query_arg( 'message', 1, $url );
+			} else {
+				if ( ! $hash_stayed_same ) {
+					$url = add_query_arg( 'notice', 3, $url );
+				}
+				else {
+					$url = add_query_arg( 'notice', 1, $url ); 
+				}
+			}
 
 			wp_redirect( $url );
 
@@ -250,6 +267,7 @@ class BU_Navigation_Admin_Manager {
 				0 => '',
 				1 => __( 'Errors occurred while saving your navigation changes.', 'bu-navigation' ),
 				2 => sprintf( __( "Warning: %s is currently editing this site's navigation.", 'bu-navigation' ), $user_markup ),
+				3 => __( "Error: Another user made changes to this site's navigation menu. Please retry.", 'bu-navigation' ),
 			),
 		);
 

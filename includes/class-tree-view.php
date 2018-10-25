@@ -316,6 +316,37 @@ class BU_Navigation_Tree_View {
 
 }
 
+class BU_Navigation_Tree_Hierarchy {
+
+	const HIERARCHICAL_PROPERTIES = array( 'ID', 'excluded', 'menu_order', 'post_parent' );
+	public $query;
+
+	public function __construct( $query ) {
+		$this->query = $query;
+	}
+
+	public function as_object() {
+		$hierarchy = $this->query->posts_by_parent();
+		foreach ( $hierarchy as $parent ) {
+			foreach ( $parent as $child ) {
+				foreach ( $child as $prop_name => $prop_value ) {
+					if ( ! in_array( $prop_name, self::HIERARCHICAL_PROPERTIES ) ) {
+						unset( $child->$prop_name );
+					}
+				}
+			}
+		}
+
+		return $hierarchy;
+	}
+
+	public function as_hash() {
+		$obj = $this->as_object();
+		$str = json_encode( $obj );
+		return md5( $str );
+	}
+}
+
 /**
  * WP_Query-like class optimized for querying hierarchical post types
  *

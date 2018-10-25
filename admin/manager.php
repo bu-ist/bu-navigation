@@ -145,6 +145,9 @@ class BU_Navigation_Admin_Manager {
 
 	}
 
+	/**	
+	 * Get fully configured instance of BU_Navigation_Tree_View	
+	 */
 	public function get_navigation_tree() {
 		// Strings for localization
 		$nav_menu_label = __( 'Appearance > Primary Navigation', 'bu-navigation' );
@@ -175,7 +178,7 @@ class BU_Navigation_Admin_Manager {
 			'lazyLoad' => true,
 			'showCounts' => true,
 		);
-		
+
 		return new BU_Navigation_Tree_View( 'bu_navman', array_merge( $script_context, $strings ) );
 	}
 

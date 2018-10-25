@@ -329,7 +329,7 @@ class BU_Navigation_Admin_Manager {
 		$notices = $this->get_notice_list();
 		$include_links = $this->plugin->supports( 'links' ) && 'page' == $this->post_type;
 		$disable_add_link = ! $this->can_publish_top_level( $this->post_type );
-
+		$tree = $this->get_navigation_tree();
 		// Render interface
 		include( BU_NAV_PLUGIN_DIR . '/templates/edit-order.php' );
 

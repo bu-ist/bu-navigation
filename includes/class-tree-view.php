@@ -12,6 +12,8 @@ class BU_Navigation_Tree_View {
 	private $plugin;
 
 	private $query;
+	
+	public $hierarchy;
 
 	/**
 	 * Setup an object capable of creating the navigation management interface
@@ -60,6 +62,7 @@ class BU_Navigation_Tree_View {
 			'suppress_urls' => $this->settings['suppressUrls']
 		);
 		$this->query = new BU_Navigation_Tree_Query( $query_args );
+		$this->hierarchy = new BU_Navigation_Tree_Hierarchy( $this->query );
 
 		// No need to register scripts during AJAX requests
 		if( ! defined('DOING_AJAX') || ! DOING_AJAX ) {

@@ -319,17 +319,33 @@ class BU_Navigation_Tree_View {
 
 }
 
+/**
+ * Collection of methods that allow the page hierarchy be represented as 
+ * a hash value. By comparing two hash values, we can tell if there were
+ * any changes in the hierarchy.
+ */
 class BU_Navigation_Tree_Hierarchy {
 
-	const HIERARCHICAL_PROPERTIES = array( 'ID', 'excluded', 'menu_order', 'post_parent' );
-	public $query;
+	/**
+	 * Holds the BU_Navigation_Tree_Query instance passed into constructor.
+	 */
+	private $tree_query;
 
-	public function __construct( $query ) {
-		$this->query = $query;
-	}
+	/**
+	 * Post properties that describe hierarchy. If any of these changed,
+	 * the hierarchy changed.
+	 */
+	const HIERARCHICAL_PROPERTIES = array( 'ID', 'menu_order', 'post_parent' );
 
-	public function as_object() {
-		$hierarchy = $this->query->posts_by_parent();
+	/**
+	 * By taking the posts structure and leaving only hierarchy-related
+	 * preperties of it, we get the object that stays the same as long as
+	 * the post hierarchy stays the same.
+	 * 
+	 * @return array Object that represents post tree hierarchy
+	 */
+	private function as_object() {
+		$hierarchy = $this->tree_query->posts_by_parent();
 		foreach ( $hierarchy as $parent ) {
 			foreach ( $parent as $child ) {
 				foreach ( $child as $prop_name => $prop_value ) {
@@ -343,6 +359,19 @@ class BU_Navigation_Tree_Hierarchy {
 		return $hierarchy;
 	}
 
+	/**
+	 * Constructor.
+	 */
+	public function __construct( BU_Navigation_Tree_Query $tree_query ) {
+		$this->tree_query = $tree_query;
+	}
+
+	/**
+	 * Gets hashed representation of the BU_Navigation_Tree_Query instance
+	 * passed into the constructor of this class.
+	 * 
+	 * @return String hashed representation of the post hierarchy
+	 */
 	public function as_hash() {
 		$obj = $this->as_object();
 		$str = json_encode( $obj );

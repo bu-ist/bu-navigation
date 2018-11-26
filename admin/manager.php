@@ -260,6 +260,7 @@ class BU_Navigation_Admin_Manager {
 	public function get_notice_by_code( $type, $code ) {
 
 		$user_markup = '<strong>%s</strong>';
+		$post_type = get_post_type_object( $this->post_type );
 
 		$notices = array(
 			'message' => array(
@@ -270,7 +271,7 @@ class BU_Navigation_Admin_Manager {
 				0 => '',
 				1 => __( 'Errors occurred while saving your navigation changes.', 'bu-navigation' ),
 				2 => sprintf( __( "Warning: %s is currently editing this site's navigation.", 'bu-navigation' ), $user_markup ),
-				3 => __( "Error: Another user made changes to this site's navigation menu. Please retry.", 'bu-navigation' ),
+				3 => sprintf( __( '%s order has been modified by someone else. Please retry.', 'bu-navigation' ),  $post_type->labels->singular_name),
 			),
 		);
 

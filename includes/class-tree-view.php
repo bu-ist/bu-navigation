@@ -12,6 +12,8 @@ class BU_Navigation_Tree_View {
 	private $plugin;
 
 	private $query;
+	
+	public $hierarchy;
 
 	/**
 	 * Setup an object capable of creating the navigation management interface
@@ -60,6 +62,7 @@ class BU_Navigation_Tree_View {
 			'suppress_urls' => $this->settings['suppressUrls']
 		);
 		$this->query = new BU_Navigation_Tree_Query( $query_args );
+		$this->hierarchy = new BU_Navigation_Tree_Hierarchy( $this->query );
 
 		// No need to register scripts during AJAX requests
 		if( ! defined('DOING_AJAX') || ! DOING_AJAX ) {
@@ -314,6 +317,66 @@ class BU_Navigation_Tree_View {
 
 	}
 
+}
+
+/**
+ * Collection of methods that allow the page hierarchy be represented as 
+ * a hash value. By comparing two hash values, we can tell if there were
+ * any changes in the hierarchy.
+ */
+class BU_Navigation_Tree_Hierarchy {
+
+	/**
+	 * Holds the BU_Navigation_Tree_Query instance passed into constructor.
+	 */
+	private $tree_query;
+
+	/**
+	 * Post properties that describe hierarchy. If any of these changed,
+	 * the hierarchy changed.
+	 */
+	const HIERARCHICAL_PROPERTIES = array( 'ID', 'menu_order', 'post_parent' );
+
+	/**
+	 * By taking the posts structure and leaving only hierarchy-related
+	 * preperties of it, we get the object that stays the same as long as
+	 * the post hierarchy stays the same.
+	 * 
+	 * @return array Object that represents post tree hierarchy
+	 */
+	private function as_object() {
+		$hierarchy = $this->tree_query->posts_by_parent();
+		foreach ( $hierarchy as $parent ) {
+			foreach ( $parent as $child ) {
+				foreach ( $child as $prop_name => $prop_value ) {
+					if ( ! in_array( $prop_name, self::HIERARCHICAL_PROPERTIES ) ) {
+						unset( $child->$prop_name );
+					}
+				}
+			}
+		}
+
+		return $hierarchy;
+	}
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct( BU_Navigation_Tree_Query $tree_query ) {
+		$this->tree_query = $tree_query;
+	}
+
+	/**
+	 * Gets hashed representation of the BU_Navigation_Tree_Query instance
+	 * passed into the constructor of this class.
+	 * 
+	 * @return String hashed representation of the post hierarchy
+	 */
+	public function as_hash() {
+		$obj = $this->as_object();
+		$str = json_encode( $obj );
+		return md5( $str );
+	}
 }
 
 /**

@@ -126,37 +126,8 @@ class BU_Navigation_Admin_Manager {
 			wp_register_script( 'bu-jquery-validate', $vendor_url . '/jquery.validate' . $suffix . '.js', array( 'jquery' ), '1.8.1', true );
 			wp_register_script( 'bu-navman', $scripts_url . '/manage' . $suffix . '.js', array( 'bu-navigation', 'jquery-ui-dialog', 'bu-jquery-validate' ), BU_Navigation_Plugin::VERSION, true );
 
-			// Strings for localization
-			$nav_menu_label = __( 'Appearance > Primary Navigation', 'bu-navigation' );
-			$strings = array(
-				'optionsLabel' => __( 'options', 'bu-navigation' ),
-				'optionsEditLabel' => __( 'Edit', 'bu-navigation' ),
-				'optionsViewLabel' => __( 'View', 'bu-navigation' ),
-				'optionsDeleteLabel' => __( 'Delete', 'bu-navigation' ),
-				'optionsTrashLabel' => __( 'Move to Trash', 'bu-navigation' ),
-				'addLinkDialogTitle' => __( 'Add a Link', 'bu-navigation' ),
-				'editLinkDialogTitle' => __( 'Edit Link', 'bu-navigation' ),
-				'cancelLinkBtn' => __( 'Cancel', 'bu-navigation' ),
-				'confirmLinkBtn' => __( 'Ok', 'bu-navigation' ),
-				'noTopLevelNotice' => __( 'You are not allowed to create top level published content.', 'bu-navigation' ),
-				'noLinksNotice' => __( 'You are not allowed to add links', 'bu-navigation' ),
-				'createLinkNotice' => __( 'Select a page that you can edit and click "Add a Link" to create a new link below the selected page.', 'bu-navigation' ),
-				'allowTopNotice' => sprintf( __( 'Site administrators can change this behavior by visiting %s and enabling the "Allow Top-Level Pages" setting.', 'bu-navigation' ), $nav_menu_label ),
-				'noChildLinkNotice' => __( 'Links are not permitted to have children.', 'bu-navigation' ),
-				'unloadWarning' => __( 'You have made changes to your navigation that have not yet been saved.', 'bu-navigation' ),
-				'saveNotice' => __( 'Saving navigation changes...', 'bu-navigation' ),
-				);
-
-			// Setup dynamic script context for manage.js
-			$script_context = array(
-				'postTypes' => $this->post_type,
-				'postStatuses' => array( 'publish', 'private' ),
-				'nodePrefix' => 'nm',
-				'lazyLoad' => true,
-				'showCounts' => true,
-				);
 			// Navigation tree view will handle actual enqueuing of our script
-			$treeview = new BU_Navigation_Tree_View( 'bu_navman', array_merge( $script_context, $strings ) );
+			$treeview = $this->get_navigation_tree();
 			$treeview->enqueue_script( 'bu-navman' );
 
 			// Register custom jQuery UI stylesheet if it isn't already
@@ -174,13 +145,62 @@ class BU_Navigation_Admin_Manager {
 
 	}
 
+	/**	
+	 * Get fully configured instance of BU_Navigation_Tree_View	
+	 */
+	public function get_navigation_tree() {
+		// Strings for localization
+		$nav_menu_label = __( 'Appearance > Primary Navigation', 'bu-navigation' );
+		$strings = array(
+			'optionsLabel' => __( 'options', 'bu-navigation' ),
+			'optionsEditLabel' => __( 'Edit', 'bu-navigation' ),
+			'optionsViewLabel' => __( 'View', 'bu-navigation' ),
+			'optionsDeleteLabel' => __( 'Delete', 'bu-navigation' ),
+			'optionsTrashLabel' => __( 'Move to Trash', 'bu-navigation' ),
+			'addLinkDialogTitle' => __( 'Add a Link', 'bu-navigation' ),
+			'editLinkDialogTitle' => __( 'Edit Link', 'bu-navigation' ),
+			'cancelLinkBtn' => __( 'Cancel', 'bu-navigation' ),
+			'confirmLinkBtn' => __( 'Ok', 'bu-navigation' ),
+			'noTopLevelNotice' => __( 'You are not allowed to create top level published content.', 'bu-navigation' ),
+			'noLinksNotice' => __( 'You are not allowed to add links', 'bu-navigation' ),
+			'createLinkNotice' => __( 'Select a page that you can edit and click "Add a Link" to create a new link below the selected page.', 'bu-navigation' ),
+			'allowTopNotice' => sprintf( __( 'Site administrators can change this behavior by visiting %s and enabling the "Allow Top-Level Pages" setting.', 'bu-navigation' ), $nav_menu_label ),
+			'noChildLinkNotice' => __( 'Links are not permitted to have children.', 'bu-navigation' ),
+			'unloadWarning' => __( 'You have made changes to your navigation that have not yet been saved.', 'bu-navigation' ),
+			'saveNotice' => __( 'Saving navigation changes...', 'bu-navigation' ),
+		);
+
+		// Setup dynamic script context for manage.js
+		$script_context = array(
+			'postTypes' => $this->post_type,
+			'postStatuses' => array( 'publish', 'private' ),
+			'nodePrefix' => 'nm',
+			'lazyLoad' => true,
+			'showCounts' => true,
+		);
+
+		return new BU_Navigation_Tree_View( 'bu_navman', array_merge( $script_context, $strings ) );
+	}
+
 	/**
 	 * Handle admin page setup
 	 */
 	public function load() {
 
-		// Save if post data is present
-		$saved = $this->save();
+		if ( array_key_exists( 'navman-hash', $_POST ) ) {
+			$tree = $this->get_navigation_tree();
+			$hash_stayed_same = $tree->hierarchy->as_hash() == $_POST['navman-hash'];
+		}
+		else {
+			$hash_stayed_same = true;
+		}
+
+		if ( $hash_stayed_same ) {
+			$saved = $this->save();
+		}
+		else {
+			$saved = false;
+		}
 
 		// Post/Redirect/Get
 		if ( ! is_null( $saved ) ) {
@@ -189,8 +209,16 @@ class BU_Navigation_Admin_Manager {
 			$url = remove_query_arg( array( 'message', 'notice' ), wp_get_referer() );
 
 			// Notifications
-			if ( $saved === true ) { $url = add_query_arg( 'message', 1, $url );
-			} else { $url = add_query_arg( 'notice', 1, $url ); }
+			if ( $saved === true ) {
+				$url = add_query_arg( 'message', 1, $url );
+			} else {
+				if ( ! $hash_stayed_same ) {
+					$url = add_query_arg( 'notice', 3, $url );
+				}
+				else {
+					$url = add_query_arg( 'notice', 1, $url ); 
+				}
+			}
 
 			wp_redirect( $url );
 
@@ -232,6 +260,7 @@ class BU_Navigation_Admin_Manager {
 	public function get_notice_by_code( $type, $code ) {
 
 		$user_markup = '<strong>%s</strong>';
+		$post_type = get_post_type_object( $this->post_type );
 
 		$notices = array(
 			'message' => array(
@@ -242,6 +271,7 @@ class BU_Navigation_Admin_Manager {
 				0 => '',
 				1 => __( 'Errors occurred while saving your navigation changes.', 'bu-navigation' ),
 				2 => sprintf( __( "Warning: %s is currently editing this site's navigation.", 'bu-navigation' ), $user_markup ),
+				3 => sprintf( __( '%s order has been modified by someone else. Please retry.', 'bu-navigation' ),  $post_type->labels->singular_name),
 			),
 		);
 
@@ -321,7 +351,7 @@ class BU_Navigation_Admin_Manager {
 		$notices = $this->get_notice_list();
 		$include_links = $this->plugin->supports( 'links' ) && 'page' == $this->post_type;
 		$disable_add_link = ! $this->can_publish_top_level( $this->post_type );
-
+		$tree = $this->get_navigation_tree();
 		// Render interface
 		include( BU_NAV_PLUGIN_DIR . '/templates/edit-order.php' );
 

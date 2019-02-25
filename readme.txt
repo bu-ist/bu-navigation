@@ -3,7 +3,7 @@ Contributors: ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
 Tested up to: 4.6.1
-Stable tag: 1.2.14
+Stable tag: 1.2.15
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,7 +78,7 @@ Please see this page for the details:
 
 == Changelog ==
 
-= 1.2.14 =
+= 1.2.15 =
 
 * Add hash comparison before saving changes to post hierarchy in Change Order page.
 

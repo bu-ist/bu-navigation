@@ -211,7 +211,7 @@ html[xmlns] .jstree-bu li {
 	margin-right: 8px;
 }
 
-@-moz-document url-prefix() {
+@-moz-document url-prefix(http) {
     .jstree-bu .post-statuses {
         margin-top: -16px;
     }
@@ -282,7 +282,7 @@ html[xmlns] .jstree-bu li {
 	outline: none;
 }
 
-@-moz-document url-prefix() {
+@-moz-document url-prefix(http) {
     .jstree-bu .edit-options {
 	    margin-top: -24px;
     }

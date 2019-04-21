@@ -31,6 +31,7 @@ class BU_Navigation_Admin {
 	public function register_hooks() {
 		global $wp_version;
 
+		add_action( 'admin_enqueue_scripts', array( &$this, 'thickbox' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 
 		// Components with menu items need to be registered for every admin request
@@ -65,6 +66,13 @@ class BU_Navigation_Admin {
 			add_action( 'wp_ajax_check_hidden_page', array( $this, 'ajax_check_hidden_page' ) );
 		}
 
+	}
+
+	/**
+	 * Enqueue Thickbox for Gutenberg editor
+	 */
+	public function thickbox() {
+		add_thickbox();
 	}
 
 	public function admin_scripts() {

@@ -32,6 +32,7 @@ class BU_Navigation_Admin {
 		global $wp_version;
 
 		add_action( 'admin_enqueue_scripts', array( &$this, 'thickbox' ) );
+		add_action( 'enqueue_block_editor_assets', array( &$this, 'remove_bulb_attributes_panel' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 
 		// Components with menu items need to be registered for every admin request
@@ -66,6 +67,24 @@ class BU_Navigation_Admin {
 			add_action( 'wp_ajax_check_hidden_page', array( $this, 'ajax_check_hidden_page' ) );
 		}
 
+	}
+
+	/**
+	 * Load script to kill attributes panel in Document editor panel.
+	 *
+	 * @since 1.3.0
+	 */
+	public function remove_bulb_attributes_panel() {
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$scripts_url = plugins_url( 'js', BU_NAV_PLUGIN );
+
+		wp_enqueue_script(
+			'remove-panel-js',
+			$scripts_url . '/remove_attributes_panel' . $suffix . '.js',
+			array(),
+			BU_Navigation_Plugin::VERSION,
+			true
+		);
 	}
 
 	/**

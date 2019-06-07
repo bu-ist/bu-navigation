@@ -8,7 +8,7 @@
 }
 
 #TB_window #TB_ajaxContent li {
-	margin: 0;
+	margin: 0git;
 }
 
 #TB_window .post-placement-toolbar p.hint {
@@ -22,7 +22,7 @@
 	color: black;
 }
 
-#TB_window .bu-edit-git post .denied > a {
+#TB_window .bu-edit-post .denied > a {
 	color: #af5d5d;
 }
 

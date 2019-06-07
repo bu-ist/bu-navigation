@@ -3,6 +3,14 @@
 	text-align: right;
 }
 
+#TB_window #TB_ajaxContent li::before {
+	content: none;
+}
+
+#TB_window #TB_ajaxContent li {
+	margin: 0;
+}
+
 #TB_window .post-placement-toolbar p.hint {
 	margin-left: 20px;
 	color: #777;
@@ -14,22 +22,22 @@
 	color: black;
 }
 
-#TB_window .bu-edit-post .denied > a {
-    color: #AF5D5D;
+#TB_window .bu-edit-git post .denied > a {
+	color: #af5d5d;
 }
 
 #TB_window .bu-edit-post.current-post-status-auto-draft .denied > a,
 #TB_window .bu-edit-post.current-post-status-draft .denied > a,
 #TB_window .bu-edit-post.current-post-status-pending .denied > a,
 #TB_window .bu-edit-post.current-post-status-private .denied > a {
-  color: black;
+	color: black;
 	background: #eee;
 	background: -moz-linear-gradient(top, #ffffff 0%, #eeeeee 100%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #ffffff), color-stop(100%, #eeeeee));
-	background: -webkit-linear-gradient(top, #ffffff 0%,#eeeeee 100%);
-	background: -o-linear-gradient(top, #ffffff 0%,#eeeeee 100%);
-	background: -ms-linear-gradient(top, #ffffff 0%,#eeeeee 100%);
-	background: linear-gradient(to bottom, #ffffff 0%,#eeeeee 100%);
+	background: -webkit-linear-gradient(top, #ffffff 0%, #eeeeee 100%);
+	background: -o-linear-gradient(top, #ffffff 0%, #eeeeee 100%);
+	background: -ms-linear-gradient(top, #ffffff 0%, #eeeeee 100%);
+	background: linear-gradient(to bottom, #ffffff 0%, #eeeeee 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eeeeee',GradientType=0 );
 }
 
@@ -55,7 +63,7 @@
 	height: 16px;
 }
 
-#bunavattrsdiv input[type="text"] {
+#bunavattrsdiv input[type='text'] {
 	width: 68%;
 }
 
@@ -65,7 +73,7 @@
 }
 
 #bu-post-breadcrumbs ul {
-    margin-top: 6px;
+	margin-top: 6px;
 }
 
 #bu-post-breadcrumbs li {
@@ -89,6 +97,6 @@
 	vertical-align: middle;
 	margin-left: 2px;
 	padding: 3px;
-	background-color: #EEE;
-	border: 1px solid #CCC;
+	background-color: #eee;
+	border: 1px solid #ccc;
 }

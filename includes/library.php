@@ -428,6 +428,45 @@ function bu_navigation_get_posts( $args = '' ) {
 		);
 	$r = wp_parse_args( $args, $defaults );
 
+	// Get the `last_changed` key from the core `posts` group.
+	// This key is updated by core in `clean_post_cache`.
+	$last_changed = wp_cache_get( 'last_changed', 'posts' );
+
+	// Get the `posts_last_changed` key for comparison.
+	$bu_nav_posts_last_changed = wp_cache_get( 'posts_last_changed', 'bu-navigation-persistent' );
+
+	// If the `last_changed` key has no value, set it using the current time.
+	if ( ! $last_changed ) {
+		$last_changed = microtime();
+		wp_cache_set( 'last_changed', $last_changed, 'posts' );
+	}
+
+	// If the `posts_last_changed` key has no value, set it using the current time.
+	if ( ! $bu_nav_posts_last_changed ) {
+		$bu_nav_posts_last_changed = microtime();
+		wp_cache_set( 'posts_last_changed', $bu_nav_posts_last_changed, 'bu-navigation-persistent' );
+	}
+
+	// Create the key to use for storing the results of the following query.
+	$cache_key = 'get_posts:' . md5( wp_json_encode( $r ) );
+
+	// Check if we have the results of the following query in cache.
+	$posts = wp_cache_get( $cache_key, 'bu-navigation-persistent' );
+
+	// If the core and BU Navigation last changed values match up,
+	// and the results of the the following query are already in cache,
+	// return it now.
+	if ( $last_changed === $bu_nav_posts_last_changed && $posts ) {
+		return $posts;
+	}
+
+	// If the core and BU Navigation last changed values don't match,
+	// or the results of the the following query are not yet cached,
+	// set `posts_last_changed` to match core's `last_changed` key value.
+	if ( $last_changed !== $bu_nav_posts_last_changed ) {
+		wp_cache_set( 'posts_last_changed', $last_changed, 'bu-navigation-persistent' );
+	}
+
 	// Start building the query
 	$where = $orderby = '';
 
@@ -531,6 +570,9 @@ function bu_navigation_get_posts( $args = '' ) {
 		}
 		$posts = $items;
 	}
+
+	// Cache results.
+	wp_cache_set( $cache_key, $posts, 'bu-navigation-persistent' );
 
 	return $posts;
 

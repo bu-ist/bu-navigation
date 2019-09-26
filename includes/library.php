@@ -432,40 +432,22 @@ function bu_navigation_get_posts( $args = '' ) {
 	// This key is updated by core in `clean_post_cache`.
 	$last_changed = wp_cache_get( 'last_changed', 'posts' );
 
-	// Get the `last_changed` key from the `bu-navigation-persistent` cache group.
-	$bu_nav_last_changed = wp_cache_get( 'last_changed', 'bu-navigation-persistent' );
-
 	// If WP's `last_changed` key has no value, set it using the current time.
 	if ( ! $last_changed ) {
-		$last_changed = microtime();
-		wp_cache_set( 'last_changed', $last_changed, 'posts' );
-	}
-
-	// If BU Navigation's `last_changed` key has no value,
-	// set it using the current time.
-	if ( ! $bu_nav_last_changed ) {
-		$bu_nav_last_changed = microtime();
-		wp_cache_set( 'last_changed', $bu_nav_last_changed, 'bu-navigation-persistent' );
+		wp_cache_set( 'last_changed', microtime(), 'posts' );
 	}
 
 	// Create the key to use for storing the results of the following query.
 	$cache_key = 'get_posts:' . md5( wp_json_encode( $r ) );
 
 	// Check if the results of the following query are in cache.
-	$posts = wp_cache_get( $cache_key, 'bu-navigation-persistent' );
+	$cached_posts = wp_cache_get( $cache_key, 'bu-navigation-persistent' );
 
 	// If the core and BU Navigation `last_changed` values match up,
 	// and the results of the following query are already in cache,
 	// return it now.
-	if ( $last_changed === $bu_nav_last_changed && $posts ) {
-		return $posts;
-	}
-
-	// If the core and BU Navigation `last_changed` values don't match,
-	// or the results of the following query are not yet cached,
-	// set `last_changed` to match core's `last_changed` key value.
-	if ( $last_changed !== $bu_nav_last_changed ) {
-		wp_cache_set( 'last_changed', $last_changed, 'bu-navigation-persistent' );
+	if ( $cached_posts && $cached_posts['last_changed'] === $last_changed ) {
+		return $cached_posts['query'];
 	}
 
 	// Start building the query
@@ -572,8 +554,13 @@ function bu_navigation_get_posts( $args = '' ) {
 		$posts = $items;
 	}
 
-	// Cache results.
-	wp_cache_set( $cache_key, $posts, 'bu-navigation-persistent' );
+	// Cache the `last_changed` value and the query results.
+	$cache_value = array(
+		'last_changed' => $last_changed,
+		'query'        => $posts,
+	);
+
+	wp_cache_set( $cache_key, $cache_value, 'bu-navigation-persistent' );
 
 	return $posts;
 

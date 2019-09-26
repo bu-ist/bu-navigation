@@ -417,8 +417,7 @@ class BU_Navigation_Admin_Manager {
 			}
 
 			// Update the `last_changed` key value with the current time.
-			$bu_nav_last_changed = microtime();
-			wp_cache_set( 'last_changed', $bu_nav_last_changed, 'bu-navigation-persistent' );
+			wp_cache_set( 'last_changed', microtime(), 'posts' );
 		}
 
 		return $saved;

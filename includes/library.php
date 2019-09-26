@@ -443,9 +443,8 @@ function bu_navigation_get_posts( $args = '' ) {
 	// Check if the results of the following query are in cache.
 	$cached_posts = wp_cache_get( $cache_key, 'bu-navigation-persistent' );
 
-	// If the core and BU Navigation `last_changed` values match up,
-	// and the results of the following query are already in cache,
-	// return it now.
+	// If we have a cached value and its `last_changed` property matches
+	// WP's `last_changed` cache value, return the cached query results.
 	if ( $cached_posts && $cached_posts['last_changed'] === $last_changed ) {
 		return $cached_posts['query'];
 	}

@@ -415,6 +415,9 @@ class BU_Navigation_Admin_Manager {
 				// @todo notify user of error messages from WP_Error objects
 				$this->plugin->log( '%s - Errors encountered during navman save: %s', __METHOD__, print_r( $errors, true ) );
 			}
+
+			$bu_nav_posts_last_changed = microtime();
+			wp_cache_set( 'posts_last_changed', $bu_nav_posts_last_changed, 'bu-navigation-persistent' );
 		}
 
 		return $saved;

@@ -416,8 +416,9 @@ class BU_Navigation_Admin_Manager {
 				$this->plugin->log( '%s - Errors encountered during navman save: %s', __METHOD__, print_r( $errors, true ) );
 			}
 
-			$bu_nav_posts_last_changed = microtime();
-			wp_cache_set( 'posts_last_changed', $bu_nav_posts_last_changed, 'bu-navigation-persistent' );
+			// Update the `last_changed` key value with the current time.
+			$bu_nav_last_changed = microtime();
+			wp_cache_set( 'last_changed', $bu_nav_last_changed, 'bu-navigation-persistent' );
 		}
 
 		return $saved;

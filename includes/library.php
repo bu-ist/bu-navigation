@@ -425,17 +425,12 @@ function bu_navigation_get_posts( $args = '' ) {
 		'include_links' => true,
 		'suppress_filter_posts' => false,
 		'suppress_urls' => false,
-		);
+	);
+
 	$r = wp_parse_args( $args, $defaults );
 
-	// Get the `last_changed` key from the WP core `posts` cache group.
-	// This key is updated by core in `clean_post_cache`.
-	$last_changed = wp_cache_get( 'last_changed', 'posts' );
-
-	// If WP's `last_changed` key has no value, set it using the current time.
-	if ( ! $last_changed ) {
-		wp_cache_set( 'last_changed', microtime(), 'posts' );
-	}
+	// Get last changed date for the WP core `posts` cache group.
+	$last_changed = wp_cache_get_last_changed( 'posts' );
 
 	// Create the key to use for storing the results of the following query.
 	$cache_key = 'get_posts:' . md5( wp_json_encode( $r ) );
@@ -444,7 +439,8 @@ function bu_navigation_get_posts( $args = '' ) {
 	$cached_posts = wp_cache_get( $cache_key, 'bu-navigation-persistent' );
 
 	// If a cached value exists and its `last_changed` property matches
-	// WP's `last_changed` cache value, return the cached query results.
+	// the last changed date for the WP core `posts` cache group,
+	// return the cached query results.
 	if ( $cached_posts && $cached_posts['last_changed'] === $last_changed ) {
 		return $cached_posts['query'];
 	}

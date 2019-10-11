@@ -415,6 +415,9 @@ class BU_Navigation_Admin_Manager {
 				// @todo notify user of error messages from WP_Error objects
 				$this->plugin->log( '%s - Errors encountered during navman save: %s', __METHOD__, print_r( $errors, true ) );
 			}
+
+			// Update the `last_changed` key value with the current time.
+			wp_cache_set( 'last_changed', microtime(), 'posts' );
 		}
 
 		return $saved;

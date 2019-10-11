@@ -425,8 +425,25 @@ function bu_navigation_get_posts( $args = '' ) {
 		'include_links' => true,
 		'suppress_filter_posts' => false,
 		'suppress_urls' => false,
-		);
+	);
+
 	$r = wp_parse_args( $args, $defaults );
+
+	// Get last changed date for the WP core `posts` cache group.
+	$last_changed = wp_cache_get_last_changed( 'posts' );
+
+	// Create the key to use for storing the results of the following query.
+	$cache_key = 'get_posts:' . md5( wp_json_encode( $r ) );
+
+	// Check if the results of the following query are in cache.
+	$cached_posts = wp_cache_get( $cache_key, 'bu-navigation-persistent' );
+
+	// If a cached value exists and its `last_changed` property matches
+	// the last changed date for the WP core `posts` cache group,
+	// return the cached query results.
+	if ( $cached_posts && $cached_posts['last_changed'] === $last_changed ) {
+		return $cached_posts['query'];
+	}
 
 	// Start building the query
 	$where = $orderby = '';
@@ -531,6 +548,14 @@ function bu_navigation_get_posts( $args = '' ) {
 		}
 		$posts = $items;
 	}
+
+	// Cache the `last_changed` value and the query results.
+	$cache_value = array(
+		'last_changed' => $last_changed,
+		'query'        => $posts,
+	);
+
+	wp_cache_set( $cache_key, $cache_value, 'bu-navigation-persistent' );
 
 	return $posts;
 

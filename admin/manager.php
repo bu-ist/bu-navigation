@@ -220,7 +220,8 @@ class BU_Navigation_Admin_Manager {
 				}
 			}
 
-			wp_redirect( $url );
+			wp_safe_redirect( $url );
+			exit;
 
 		}
 

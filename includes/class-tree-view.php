@@ -477,12 +477,11 @@ class BU_Navigation_Tree_Query {
 
 			// Fetch posts that have been explicitly excluded from navigation lists
 			$ids = array_keys( $posts );
-			$query = sprintf( "SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s)",
-				$wpdb->postmeta,
+			$query = $wpdb->prepare( "SELECT post_id, meta_value FROM $wpdb->postmeta WHERE meta_key = %s AND post_id IN (%s)",
 				BU_NAV_META_PAGE_EXCLUDE,
 				implode( ',', $ids )
-				);
-			$exclude_meta = $wpdb->get_results( $query, OBJECT_K );
+			);
+			$exclude_meta = $wpdb->get_results( $query, OBJECT_K ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 			if ( false === $exclude_meta ) {
 				$this->plugin->log( '%s - Error querying navigation exclusions: %s', __METHOD__, $wpdb->last_error );

@@ -231,8 +231,7 @@ class BU_Navigation_Admin {
 		$post_type = get_post_type_object( $post->post_type );
 
 		// get children pages/links
-		$page_children_query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='$post->post_type'", $post_id );
-		$page_children = $wpdb->get_results( $page_children_query );
+		$page_children = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type = %s", $post_id, $post->post_type ) );
 		$link_children_query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type='".BU_NAVIGATION_LINK_POST_TYPE."'", $post_id );
 		$link_children = $wpdb->get_results( $link_children_query );
 

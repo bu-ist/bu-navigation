@@ -74,12 +74,11 @@ function bu_navigation_filter_pages_external_links( $pages ) {
 	if ( is_array( $pages ) && count( $pages ) > 0 ) {
 
 		$ids = array_keys($pages);
-		$query = sprintf("SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s)",
-			$wpdb->postmeta,
+		$query = $wpdb->prepare( "SELECT post_id, meta_value FROM $wpdb->postmeta WHERE meta_key = %s AND post_id IN (%s)",
 			BU_NAV_META_TARGET,
 			implode( ',', $ids )
-			);
-		$targets = $wpdb->get_results( $query, OBJECT_K );
+		);
+		$targets = $wpdb->get_results( $query, OBJECT_K ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		foreach ( $pages as $page ) {
 			if ( $page->post_type == BU_NAVIGATION_LINK_POST_TYPE ) {

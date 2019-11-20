@@ -113,8 +113,7 @@ class BU_Navigation_Reorder_Tracker {
 					// Only update if menu order has actually changed
 					if( $child->menu_order != $position ) {
 
-						$stmt = $wpdb->prepare('UPDATE ' . $wpdb->posts . ' SET menu_order = %d WHERE ID = %d', $position, $child->ID );
-						$rc = $wpdb->query($stmt);
+						$rc = $wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET menu_order = %d WHERE ID = %d", $position, $child->ID ) );
 
 						if( false === $rc ) {
 							$error_msg = sprintf('Error updating menu order (%s) for post (%s): %s', $position, $child->post_title, $wpdb->last_error );

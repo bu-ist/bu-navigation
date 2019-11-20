@@ -56,7 +56,6 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 			unset( $post_types[ $index ] );
 		}
 	}
-	$in_post_types = implode( "','", $post_types );
 
 	// Try the cache first
 
@@ -74,13 +73,14 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 	}
 
 	$wpdb->query( $wpdb->prepare( "SET SESSION group_concat_max_len = %d", GROUP_CONCAT_MAX_LEN ) );
-	$query = sprintf("
-		SELECT DISTINCT(post_parent) AS section, GROUP_CONCAT(ID) AS children
-		  FROM %s
-		 WHERE post_type IN ('$in_post_types')
-		 GROUP BY post_parent
-		 ORDER BY post_parent ASC", $wpdb->posts);
-	$rows = $wpdb->get_results($query);
+	$rows = $wpdb->get_results( $wpdb->prepare(
+		"SELECT DISTINCT(post_parent) AS section, GROUP_CONCAT(ID) AS children
+		FROM $wpdb->posts
+		WHERE post_type IN (%s)
+		GROUP BY post_parent
+		ORDER BY post_parent ASC",
+		implode( ',', $post_types )
+	) );
 
 	$sections = array();
 	$pages = array();

@@ -16,12 +16,11 @@ function bu_navigation_filter_pages_navlabels( $pages ) {
 	if ( is_array( $pages ) && count( $pages ) > 0 ) {
 
 		$ids = array_keys( $pages );
-		$query = sprintf( "SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value != ''",
-			$wpdb->postmeta,
+		$query = $wpdb->prepare( "SELECT post_id, meta_value FROM $wpdb->postmeta WHERE meta_key = %s AND post_id IN (%s) AND meta_value != ''",
 			BU_NAV_META_PAGE_LABEL,
 			implode( ',', $ids )
-			);
-		$labels = $wpdb->get_results( $query, OBJECT_K );
+		);
+		$labels = $wpdb->get_results( $query, OBJECT_K ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( is_array( $labels ) && count( $labels ) > 0 ) {
 			foreach ( $pages as $page ) {

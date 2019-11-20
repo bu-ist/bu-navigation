@@ -73,7 +73,7 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 		return $all_sections;
 	}
 
-	$wpdb->query('SET SESSION group_concat_max_len = ' . GROUP_CONCAT_MAX_LEN);
+	$wpdb->query( $wpdb->prepare( "SET SESSION group_concat_max_len = %d", GROUP_CONCAT_MAX_LEN ) );
 	$query = sprintf("
 		SELECT DISTINCT(post_parent) AS section, GROUP_CONCAT(ID) AS children
 		  FROM %s

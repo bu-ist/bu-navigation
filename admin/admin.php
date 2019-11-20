@@ -198,8 +198,7 @@ class BU_Navigation_Admin {
 
 		if ( $exclude ) {	// post was hidden
 			// get children
-			$children_query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_parent = %d", $post_id );
-			$children = $wpdb->get_results( $children_query );
+			$children = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_parent = %d", $post_id ) );
 
 			// mark each hidden
 			foreach ( (array) $children as $child ) {

@@ -24,10 +24,11 @@ function bu_navigation_filter_pages_exclude( $pages ) {
 
 		// Fetch pages that have been explicitly excluded from navigation lists
 		$ids = array_keys( $pages );
-		$query = $wpdb->prepare( "SELECT post_id, meta_value FROM $wpdb->postmeta WHERE meta_key = %s AND post_id IN (%s)",
-			BU_NAV_META_PAGE_EXCLUDE,
-			implode( ',', $ids )
-		);
+
+		// Prepare statement split to accomodate the `$ids` array, as the method only accepts one extra param if the type is array.
+		$query  = $wpdb->prepare( "SELECT post_id, meta_value FROM $wpdb->postmeta WHERE meta_key = %s", BU_NAV_META_PAGE_EXCLUDE );
+		$query .= $wpdb->prepare( " AND post_id IN (" . substr( str_repeat( ',%d', count( $ids ) ), 1 ) . ")", $ids ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
 		$exclude_meta = $wpdb->get_results( $query, OBJECT_K ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( false === $exclude_meta ) {

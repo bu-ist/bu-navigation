@@ -73,14 +73,9 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 	}
 
 	$wpdb->query( $wpdb->prepare( "SET SESSION group_concat_max_len = %d", GROUP_CONCAT_MAX_LEN ) );
-	$rows = $wpdb->get_results( $wpdb->prepare(
-		"SELECT DISTINCT(post_parent) AS section, GROUP_CONCAT(ID) AS children
-		FROM $wpdb->posts
-		WHERE post_type IN (%s)
-		GROUP BY post_parent
-		ORDER BY post_parent ASC",
-		implode( ',', $post_types )
-	) );
+	$rows = $wpdb->get_results(
+		$wpdb->prepare( "SELECT DISTINCT(post_parent) AS section, GROUP_CONCAT(ID) AS children FROM $wpdb->posts WHERE post_type IN (" . substr( str_repeat( ',%s', count( $post_types ) ), 1 ) . ") GROUP BY post_parent ORDER BY post_parent ASC", $post_types ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	);
 
 	$sections = array();
 	$pages = array();

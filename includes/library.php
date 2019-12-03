@@ -424,7 +424,7 @@ function bu_navigation_get_posts( $args = '' ) {
 	$r = wp_parse_args( $args, $defaults );
 
 	// Start building the query
-	$where = $orderby = '';
+	$where = '';
 
 	// Post fields to return
 	$fields = array(
@@ -464,8 +464,7 @@ function bu_navigation_get_posts( $args = '' ) {
 			}
 		}
 
-		$post_types = implode( "','", $post_types );
-		$where .= " AND post_type IN ('$post_types')";
+		$where .= $wpdb->prepare( " AND post_type IN (" . substr( str_repeat( ',%s', count( $post_types ) ), 1 ) . ")", $post_types ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	// Append post statuses
@@ -475,32 +474,28 @@ function bu_navigation_get_posts( $args = '' ) {
 			$post_status = explode( ',', $post_status );
 
 		$post_status = (array) $post_status;
-		$post_status = implode( "','", array_map( 'trim', $post_status ) );
-		$where .= " AND post_status IN ('$post_status')";
+		$post_status = array_map( 'trim', $post_status );
+
+		$where .= $wpdb->prepare( " AND post_status IN (" . substr( str_repeat( ',%s', count( $post_status ) ), 1 ) . ")", $post_status ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	// Limit result set to posts in specific sections
 	if ( is_array( $r['sections'] ) && ( count( $r['sections'] ) > 0 ) ) {
 		$sections = array_map( 'absint', $r['sections'] );
-		$sections = implode( ',', array_unique( $sections ) );
-		$where .= " AND post_parent IN ($sections)";
+		$sections = array_unique( $sections );
+		$where .= $wpdb->prepare( " AND post_parent IN (" . substr( str_repeat( ',%d', count( $sections ) ), 1 ) . ")", $sections ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	// Limit to specific posts
 	if ( is_array( $r['post__in'] ) && ( count( $r['post__in'] ) > 0 ) ) {
 		$post__in = array_map( 'absint', $r['post__in'] );
-		$post__in = implode( ',', array_unique( $post__in ) );
-		$where .= " AND ID IN($post__in)";
+		$post__in = array_unique( $post__in );
+		$where .= $wpdb->prepare( " AND ID IN(" . substr( str_repeat( ',%d', count( $post__in ) ), 1 ) . ")", $post__in ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
-	// Result sorting
-	$orderby = 'ORDER BY post_parent ASC, menu_order ASC';
-
  	// Execute query, fetch results as objects in an array keyed on posts.ID
-	$posts = $wpdb->get_results(
-		"SELECT $fields FROM $wpdb->posts WHERE 1=1 $where $orderby",
-		OBJECT_K
-		);
+	$posts = $wpdb->get_results( "SELECT $fields FROM $wpdb->posts WHERE 1=1 $where ORDER BY post_parent ASC, menu_order ASC", OBJECT_K ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	
 	if ( ! is_array( $posts ) || ( count( $posts ) == 0 ) )
 		return false;
 

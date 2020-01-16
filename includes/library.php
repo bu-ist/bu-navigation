@@ -441,7 +441,7 @@ function bu_navigation_get_posts( $args = '' ) {
 		'post_password'
 		);
 	$fields = apply_filters( 'bu_navigation_filter_fields', $fields );
-	$fields = implode( ",", $fields );
+	$fields = implode( ",", esc_sql( $fields ) );
 
 	// Append post types
 	$post_types = $r['post_types'];

@@ -57,7 +57,7 @@
 		 * displays a warning confirmation box when a post is hidden and has children
 		 * @returns bool true/false (where true means delete the post, false means don't delete)
 		 */
-		$('a.submitdelete').live('click', function(){
+		$('a.submitdelete').on('click', function(){
 
 			var id = ( typeof(inlineEditPost) != "undefined" ) ? inlineEditPost.getId(this) : parseInt($('#post_ID').val(), 10);
 
@@ -100,7 +100,7 @@
 
 				// if we have warnings
 				if (warnings.length) {
-					var multiple_warnings = warnings.length > 1 ? true : false;
+					var multiple_warnings = warnings.length > 1;
 					// now warn them
 					return processResp({ ignore: false, msg:  warnings.join('\n\n') }, multiple_warnings);
 				}

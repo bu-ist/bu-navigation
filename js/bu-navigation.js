@@ -102,12 +102,14 @@ bu.plugins.navigation = {};
 
 	// DOM ready -- browser classes
 	$(document).ready(function () {
-		if( $.browser.msie === true && parseInt($.browser.version, 10) == 7 )
-			$(document.body).addClass('ie7');
-		if( $.browser.msie === true && parseInt($.browser.version, 10) == 8 )
-			$(document.body).addClass('ie8');
-		if( $.browser.msie === true && parseInt($.browser.version, 10) == 9 )
-			$(document.body).addClass('ie9');
+		if($.browser && $.browser.msie){
+			if( $.browser.msie === true && parseInt($.browser.version, 10) === 7 )
+				$(document.body).addClass('ie7');
+			if( $.browser.msie === true && parseInt($.browser.version, 10) === 8 )
+				$(document.body).addClass('ie8');
+			if( $.browser.msie === true && parseInt($.browser.version, 10) === 9 )
+				$(document.body).addClass('ie9');
+		}
 	});
 
 	// Tree constructor
@@ -164,7 +166,7 @@ bu.plugins.navigation = {};
 				isTopLevelMove = m.cr === -1;
 				isVisible = post.post_meta['excluded'] === false || post.post_type === c.linksPostType;
 
-				allowed = true;
+				var allowed = true;
 
 				// Don't allow top level posts if global option prohibits it
 				if (isTopLevelMove && isVisible && !wasTop && !c.allowTop) {
@@ -659,7 +661,7 @@ bu.plugins.navigation = {};
 
 			my.getRelAttrForPost = function(post, hasChildren) {
 				var rel;
-				
+
 				if (hasChildren) {
 					rel = 'section';
 				} else {
@@ -811,7 +813,7 @@ bu.plugins.navigation = {};
 			// ======= jsTree Event Handlers ======= //
 
 			// Tree instance is loaded (before initial opens/selections are made)
-			$tree.bind('loaded.jstree', function( event, data ) {
+			$tree.on('loaded.jstree', function( event, data ) {
 
 				// jstree breaks spectacularly if the stylesheet hasn't set an li height
 				// when the tree is created -- this is what they call a hack...
@@ -823,21 +825,21 @@ bu.plugins.navigation = {};
 			});
 
 			// Run after initial node openings and selections have completed
-			$tree.bind('reselect.jstree', function( event, data ) {
+			$tree.on('reselect.jstree', function( event, data ) {
 
 				that.broadcast('postsSelected');
 
 			});
 
 			// Run after lazy load operation has completed
-			$tree.bind('lazy_loaded.jstree', function (event, data) {
+			$tree.on('lazy_loaded.jstree', function (event, data) {
 
 				that.broadcast('lazyLoadComplete');
 
 			});
 
 			// After node is loaded from server using json_data
-			$tree.bind('load_node.jstree', function( event, data ) {
+			$tree.on('load_node.jstree', function( event, data ) {
 				if( data.rslt.obj !== -1 ) {
 					var $node = data.rslt.obj;
 
@@ -848,7 +850,7 @@ bu.plugins.navigation = {};
 			});
 
 			// Append extra markup to each tree node
-			$tree.bind('clean_node.jstree', function( event, data ) {
+			$tree.on('clean_node.jstree', function( event, data ) {
 				var $nodes = data.rslt.obj;
 
 				// skip root node
@@ -873,7 +875,7 @@ bu.plugins.navigation = {};
 				}
 			});
 
-			$tree.bind('before.jstree', function (event, data) {
+			$tree.on('before.jstree', function (event, data) {
 				var $node;
 
 				switch (data.func) {
@@ -890,18 +892,18 @@ bu.plugins.navigation = {};
 
 			});
 
-			$tree.bind('create_node.jstree', function(event, data ) {
+			$tree.on('create_node.jstree', function(event, data ) {
 				var $node = data.rslt.obj;
 				var post = my.nodeToPost( $node );
 				that.broadcast( 'postCreated', [ post ] );
 			});
 
-			$tree.bind('select_node.jstree', function(event, data ) {
+			$tree.on('select_node.jstree', function(event, data ) {
 				var post = my.nodeToPost(data.rslt.obj);
 				that.broadcast('postSelected', [post]);
 			});
 
-			$tree.bind('create.jstree', function (event, data) {
+			$tree.on('create.jstree', function (event, data) {
 				var	$node = data.rslt.obj,
 					$parent = data.rslt.parent,
 					position = data.rslt.position,
@@ -921,7 +923,7 @@ bu.plugins.navigation = {};
 				that.broadcast('postInserted', [post]);
 			});
 
-			$tree.bind('remove.jstree', function (event, data) {
+			$tree.on('remove.jstree', function (event, data) {
 				var $node = data.rslt.obj,
 					post = my.nodeToPost($node),
 					$oldParent = data.rslt.parent,
@@ -943,16 +945,16 @@ bu.plugins.navigation = {};
 				});
 			});
 
-			$tree.bind('deselect_node.jstree', function(event, data ) {
+			$tree.on('deselect_node.jstree', function(event, data ) {
 				var post = my.nodeToPost( data.rslt.obj );
 				that.broadcast('postDeselected', [post]);
 			});
 
-			$tree.bind('deselect_all.jstree', function (event, data) {
+			$tree.on('deselect_all.jstree', function (event, data) {
 				that.broadcast('postsDeselected');
 			});
 
-			$tree.bind('move_node.jstree', function (event, data ) {
+			$tree.on('move_node.jstree', function (event, data ) {
 				var $moved = data.rslt.o;
 
 				// Repeat move behavior for each moved node (handles multi-select)
@@ -1007,7 +1009,7 @@ bu.plugins.navigation = {};
 			};
 
 			if (c.deselectOnDocumentClick) {
-				$(document).bind( "click", deselectOnDocumentClick );
+				$(document).on( "click", deselectOnDocumentClick );
 			}
 
 			return that;
@@ -1142,14 +1144,14 @@ bu.plugins.navigation = {};
 
 				$(this).addClass('clicked');
 
-				if (currentMenuTarget && currentMenuTarget.attr('id') != obj.attr('id')) {
+				if (currentMenuTarget && currentMenuTarget.attr('id') !== obj.attr('id')) {
 					removeMenu(currentMenuTarget);
 				}
 				currentMenuTarget = obj;
 			});
 
 			// Remove active state on edit options button when the menu is removed
-			$(document).bind('context_hide.vakata', function(e, data){
+			$(document).on('context_hide.vakata', function(e, data){
 				removeMenu(currentMenuTarget);
 			});
 

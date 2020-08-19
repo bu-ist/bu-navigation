@@ -97,7 +97,19 @@ Please see this page for the details:
 
 
 
-## Changelog 
+## Changelog
+
+### 1.2.18
+
+* Fix phpunit test setup scripts.
+
+### 1.2.17
+
+* Add styling to override Yoast SEO Thickbox styles.
+
+### 1.2.16
+
+* Enqueues thickbox explicitly so that the nav modal will open in the block editor and hides the Block Page Attributes panel when BU Navigation is active.
 
 ### 1.2.15
 

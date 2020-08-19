@@ -99,6 +99,10 @@ Please see this page for the details:
 
 ## Changelog
 
+### 1.2.19
+
+* Update deprecated jQuery methods (for 5.5 compatibility).
+
 ### 1.2.18
 
 * Fix phpunit test setup scripts.

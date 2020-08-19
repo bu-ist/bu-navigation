@@ -257,8 +257,8 @@ if((typeof bu === 'undefined' ) ||
 			$toolbar = $(c.toolbarContainer);
 
 			// Modal toolbar actions
-			$toolbar.delegate(c.navSaveBtn, 'click', that.onUpdateLocation);
-			$toolbar.delegate(c.navCancelBtn, 'click', that.onCancelMove);
+			$toolbar.on('click', c.navSaveBtn, that.onUpdateLocation);
+			$toolbar.on('click', c.navCancelBtn, that.onCancelMove);
 
 			// Store initial tree state, either after lazy load is complete or inital selection is made
 			if (c.lazyLoad) {
@@ -290,7 +290,7 @@ if((typeof bu === 'undefined' ) ||
 			that.scrollToSelection();
 
 			// Restore navtree state on close (cancel)
-			$('#TB_window').bind('unload tb_unload', function(e){
+			$('#TB_window').on('unload tb_unload', function(e){
 
 				if(!that.saving) {
 					Navtree.restore();
@@ -305,7 +305,7 @@ if((typeof bu === 'undefined' ) ||
 
 		that.scrollToSelection = function() {
 			var $tree, $node, $container, containerHeight, nodeOffset;
-			$tree = $(c.treeContainer),
+			$tree = $(c.treeContainer);
 			$node = $tree.jstree('get_selected');
 
 			if ($node.length) {
@@ -389,7 +389,7 @@ var tb_position;
 		});
 	};
 
-	$(window).resize(function(){ tb_position(); });
+	$(window).on('resize', function(){ tb_position(); });
 
 })(jQuery);
 

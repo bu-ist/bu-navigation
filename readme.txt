@@ -2,8 +2,8 @@
 Contributors: ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
-Tested up to: 4.6.1
-Stable tag: 1.2.15
+Tested up to: 5.5
+Stable tag: 1.2.19
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,10 +78,25 @@ Please see this page for the details:
 
 == Changelog ==
 
+= 1.2.19 =
+
+* Update deprecated jQuery methods for 5.5 compatibility. (For 5.5, there is still a known bug with the "Add Link" functionality that adds external links to the navigation tree, which will be patched in a future release.)
+
+= 1.2.18 =
+
+* Fix phpunit test setup scripts.
+
+= 1.2.17 =
+
+* Add styling to override Yoast SEO Thickbox styles.
+
+= 1.2.16 =
+
+* Enqueues thickbox explicitly so that the nav modal will open in the block editor and hides the Block Page Attributes panel when BU Navigation is active.
+
 = 1.2.15 =
 
 * Add hash comparison before saving changes to post hierarchy in Change Order page.
-
 
 = 1.2.13 =
 

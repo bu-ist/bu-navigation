@@ -68,17 +68,17 @@ if ((typeof bu === 'undefined') ||
 			Linkman.initialize({allowTop: !!settings.allowTop, isSectionEditor: !!settings.isSectionEditor});
 
 			// Subscribe to relevant tree signals
-			Navtree.listenFor('editPost', $.proxy(this.editPost, this));
+			Navtree.listenFor('editPost', this.editPost.bind(this));
 
-			Navtree.listenFor('postRemoved', $.proxy(this.postRemoved, this));
-			Navtree.listenFor('postMoved', $.proxy(this.postMoved, this));
-			Linkman.listenFor('linkInserted', $.proxy(this.linkInserted, this));
-			Linkman.listenFor('linkUpdated', $.proxy(this.linkUpdated, this));
+			Navtree.listenFor('postRemoved', this.postRemoved.bind(this));
+			Navtree.listenFor('postMoved', this.postMoved.bind(this));
+			Linkman.listenFor('linkInserted', this.linkInserted.bind(this));
+			Linkman.listenFor('linkUpdated', this.linkUpdated.bind(this));
 
 			// Form submission
-			$(this.ui.form).bind('submit', $.proxy(this.save, this));
-			$(this.ui.expandAllBtn).bind('click', this.expandAll);
-			$(this.ui.collapseAllBtn).bind('click', this.collapseAll);
+			$(this.ui.form).on('submit', this.save.bind(this));
+			$(this.ui.expandAllBtn).on('click', this.expandAll);
+			$(this.ui.collapseAllBtn).on('click', this.collapseAll);
 
 		},
 
@@ -273,8 +273,8 @@ if ((typeof bu === 'undefined') ||
 			this.$form = $(this.ui.form);
 
 			var buttons = {};
-			buttons[bu_navman_settings.confirmLinkBtn] = $.proxy(this.save, this);
-			buttons[bu_navman_settings.cancelLinkBtn] = $.proxy(this.cancel, this);
+			buttons[bu_navman_settings.confirmLinkBtn] = this.save.bind(this);
+			buttons[bu_navman_settings.cancelLinkBtn] = this.cancel.bind(this);
 
 			// Edit link dialog
 			this.$el.dialog({
@@ -287,15 +287,15 @@ if ((typeof bu === 'undefined') ||
 			});
 
 			// Prevent clicks in dialog/overlay from removing tree selections
-			$(document.body).delegate('.ui-widget-overlay, .ui-widget', 'click', this.stopPropagation);
+			$(document.body).on('click', '.ui-widget-overlay, .ui-widget', this.stopPropagation);
 
 			// Add link event
-			$(this.ui.addBtn).bind('click', $.proxy(this.add, this));
+			$(this.ui.addBtn).on('click', this.add.bind(this));
 
 			// Enable/disable add link button with selection if allow top is false
-			Navtree.listenFor('postSelected', $.proxy(this.onPostSelected, this));
-			Navtree.listenFor('postDeselected', $.proxy(this.onPostDeselected, this));
-			Navtree.listenFor('postsDeselected', $.proxy(this.onPostDeselected, this));
+			Navtree.listenFor('postSelected', this.onPostSelected.bind(this));
+			Navtree.listenFor('postDeselected', this.onPostDeselected.bind(this));
+			Navtree.listenFor('postsDeselected', this.onPostDeselected.bind(this));
 
 		},
 

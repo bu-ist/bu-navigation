@@ -16,12 +16,12 @@ function bu_navigation_filter_pages_navlabels( $pages ) {
 	if ( is_array( $pages ) && count( $pages ) > 0 ) {
 
 		$ids = array_keys( $pages );
-		$query = sprintf( "SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value != ''",
-			$wpdb->postmeta,
-			BU_NAV_META_PAGE_LABEL,
-			implode( ',', $ids )
-			);
-		$labels = $wpdb->get_results( $query, OBJECT_K );
+
+		// Prepare statement split to accomodate the `$ids` array, as the method only accepts one extra param if the type is array.
+		$query = $wpdb->prepare( "SELECT post_id, meta_value FROM $wpdb->postmeta WHERE meta_key = %s", BU_NAV_META_PAGE_LABEL );
+		$query = $wpdb->prepare( " AND post_id IN (" . substr( str_repeat( ',%d', count( $ids ) ), 1 ) . ") AND meta_value != ''", $ids ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		$labels = $wpdb->get_results( $query, OBJECT_K ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( is_array( $labels ) && count( $labels ) > 0 ) {
 			foreach ( $pages as $page ) {

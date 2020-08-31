@@ -666,23 +666,23 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		// Create and order three pages using 'order' as a custom post type
 		$cpt_args = array( 'hierarchical' => true );
-		register_post_type( 'order', $cpt_args );
+		register_post_type( 'test_order', $cpt_args );
 
 		// Create pages using the 'order' post type
-		$page_args = array( 'post_type' => 'order' , 'menu_order' => '2' );
+		$page_args = array( 'post_type' => 'test_order' , 'menu_order' => '2' );
 		$last_order = $this->factory->post->create( $page_args );
 
-		$page_args = array( 'post_type' => 'order' , 'menu_order' => '1' );
+		$page_args = array( 'post_type' => 'test_order' , 'menu_order' => '1' );
 		$middle_order = $this->factory->post->create( $page_args );
 
-		$page_args = array( 'post_type' => 'order' , 'menu_order' => '0' );
+		$page_args = array( 'post_type' => 'test_order' , 'menu_order' => '0' );
 		$first_order = $this->factory->post->create( $page_args );
 
 		// Construct Expected Order
 		$expected_order = array( $first_order, $middle_order, $last_order );
 
 		// Get Pages
-		$args = array( 'post_types' => array( 'order' ));
+		$args = array( 'post_types' => array( 'test_order' ));
 		$pages = bu_navigation_get_pages( $args );
 
 		// Get actual page order

@@ -337,13 +337,13 @@ if ((typeof bu === 'undefined') ||
 
 		edit: function (link) {
 
-			$(this.ui.urlField).attr("value", link.post_content);
-			$(this.ui.labelField).attr("value", link.post_title);
+			$(this.ui.urlField).prop("value", link.post_content);
+			$(this.ui.labelField).prop("value", link.post_title);
 
 			if ('new' === link.post_meta.bu_link_target) {
-				$(this.ui.targetNewField).attr("checked", "checked");
+				$(this.ui.targetNewField).prop("checked", true);
 			} else {
-				$(this.ui.targetSameField).attr("checked", "checked");
+				$(this.ui.targetSameField).prop("checked", true);
 			}
 
 			this.data.currentLink = link;
@@ -361,10 +361,10 @@ if ((typeof bu === 'undefined') ||
 				var link = this.data.currentLink, saved, selected;
 
 				// Extract updates from form
-				link.post_content = $(this.ui.urlField).attr("value");
-				link.post_title = $(this.ui.labelField).attr("value");
+				link.post_content = $(this.ui.urlField).prop("value");
+				link.post_title = $(this.ui.labelField).prop("value");
 				link.url = link.post_content;
-				link.post_meta.bu_link_target = $("input[name='editlink_target']:checked").attr("value");
+				link.post_meta.bu_link_target = $("input[name='editlink_target']:checked").prop("value");
 
 				selected = Navtree.getSelectedPost();
 

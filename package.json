@@ -7,7 +7,8 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "phpunit"
+    "test": "phpunit",
+    "wp-env": "wp-env"
   },
   "repository": {
     "type": "git",
@@ -29,11 +30,13 @@
   },
   "homepage": "https://github.com/bu-ist/bu-navigation",
   "devDependencies": {
+    "@wordpress/env": "^1.4.0",
     "grunt": "^0.4.5",
     "grunt-contrib-uglify": "^0.6.0",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-po2mo": "^0.1.2",
     "grunt-pot": "^0.2.1",
     "matchdep": "^0.3.0"
-  }
+  },
+  "dependencies": {}
 }

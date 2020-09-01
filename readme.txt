@@ -31,7 +31,7 @@ For more information check out [http://developer.bu.edu/bu-navigation/](http://d
 
 For developer documentation, feature roadmaps and more visit the [plugin repository on Github](https://github.com/bu-ist/bu-navigation/).
 
-[Build Status](https://travis-ci.org/bu-ist/bu-slideshow)
+[Build Status](https://travis-ci.org/bu-ist/bu-navigation)
 
 == Installation ==
 

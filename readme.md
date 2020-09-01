@@ -33,6 +33,10 @@ For developer documentation, feature roadmaps and more visit the [plugin reposit
 
 [![Build Status](https://travis-ci.org/bu-ist/bu-navigation.svg)](https://travis-ci.org/bu-ist/bu-navigation)
 
+To get started developing with BU Navigation, run `npm install` to initialize Nodejs dependencies.  Run `gulp` to compile the JavaScript files locally.
+
+Run `npm run wp-env` to [start a local Docker instance of WordPress for local development.](https://www.npmjs.com/package/@wordpress/env)
+
 ## Installation 
 
 This plugin can be installed automatically through the WordPress admin interface, or by clicking the download link on this page and installing manually.

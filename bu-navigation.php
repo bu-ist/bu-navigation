@@ -60,7 +60,7 @@ class BU_Navigation_Plugin {
 	// Plugin settings
 	public $settings;
 
-	const VERSION = '1.2.20';
+	const VERSION = '1.2.21';
 
 	public function __construct() {
 

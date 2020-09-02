@@ -40,14 +40,14 @@
 @author Andrew Bauer <awbauer@bu.edu>
 */
 
-// Absolute server path to this plugin dir and file for use by included files
+// Absolute server path to this plugin dir and file for use by included files.
 define( 'BU_NAV_PLUGIN', __FILE__ );
 define( 'BU_NAV_PLUGIN_DIR', dirname( __FILE__ ) );
 
-// Primary navigation max items to display per level
+// Primary navigation max items to display per level.
 define( 'BU_NAVIGATION_PRIMARY_MAX', 6 );
 
-// Primary navigation maxium depth
+// Primary navigation maxium depth.
 define( 'BU_NAVIGATION_PRIMARY_DEPTH', 1 );
 
 require_once BU_NAV_PLUGIN_DIR . '/includes/settings.php';
@@ -55,26 +55,52 @@ require_once BU_NAV_PLUGIN_DIR . '/includes/library.php';
 require_once BU_NAV_PLUGIN_DIR . '/includes/class-tree-view.php';
 require_once BU_NAV_PLUGIN_DIR . '/includes/class-reorder.php';
 
+/**
+ * Convenience class to wrap loading and init functions.
+ */
 class BU_Navigation_Plugin {
 
-	// Admin object
+	/**
+	 * Singleton object that handles loading and initialization for the Admin interface.
+	 *
+	 * @var object $admin Instance of the BU_Navigation_Admin class.
+	 */
 	public $admin;
 
-	// Plugin settings
+	/**
+	 * Singleton object that handles settings that affect the entire plugin.
+	 *
+	 * @var object $settings Instance of the BU_Navigation_Settings class.
+	 */
 	public $settings;
 
+	/**
+	 * Plugin version number.
+	 *
+	 * Useful for cache busting on enqueued assets.
+	 *
+	 * @var string
+	 */
 	const VERSION = '1.2.20';
 
+	/**
+	 * Plugin class constructor.
+	 *
+	 * Instantiates the settings object and registers hooks.
+	 *
+	 * @return void
+	 */
 	public function __construct() {
 
 		$this->settings = new BU_Navigation_Settings( $this );
-
 		$this->register_hooks();
 
 	}
 
 	/**
 	 * Attach WordPress hook callbacks
+	 *
+	 * @return void
 	 */
 	public function register_hooks() {
 
@@ -84,6 +110,14 @@ class BU_Navigation_Plugin {
 
 	}
 
+	/**
+	 * Calls wp_cache_add_non_persistent_groups()
+	 *
+	 * Calling wp_cache_add_non_persistent_groups() doesn't appear to do anything
+	 * in modern WordPress?
+	 *
+	 * @return void
+	 */
 	public function add_cache_groups() {
 		if ( function_exists( 'wp_cache_add_non_persistent_groups' ) ) {
 			wp_cache_add_non_persistent_groups( array( 'bu-navigation' ) );
@@ -114,6 +148,11 @@ class BU_Navigation_Plugin {
 
 	}
 
+	/**
+	 * Loads admin.php and instantiates the admin object.
+	 *
+	 * @return void
+	 */
 	public function load_admin() {
 
 		require_once dirname( __FILE__ ) . '/admin/admin.php';
@@ -132,7 +171,7 @@ class BU_Navigation_Plugin {
 			return;
 		}
 
-		require_once dirname( __FILE__ ) . '/bu-navigation-widget.php'; // Content navigation widget
+		require_once dirname( __FILE__ ) . '/bu-navigation-widget.php';
 		register_widget( 'BU_Widget_Pages' );
 
 	}
@@ -176,6 +215,8 @@ class BU_Navigation_Plugin {
 	 *
 	 * bu-navigation-links
 	 *  - turn on or off the external link feature, include with 'page' post type nav menus (on by default)
+	 *
+	 * @return array Array of supported feature defaults.
 	 */
 	public function features() {
 
@@ -196,6 +237,9 @@ class BU_Navigation_Plugin {
 	 * These work as follows:
 	 * 1. Define `BU_NAVIGATION_SUPPORTS_*` constant as true or false in wp-config.php or your theme's functions.php (highest priority)
 	 * 2. Call add_theme_support( 'bu-navigation-*' ) within your theme's functions.php file (recommended for theme authors)
+	 *
+	 * @param string $feature Name of the feature.
+	 * @return boolean Whether or not the feature is supported.
 	 */
 	public function supports( $feature ) {
 
@@ -222,8 +266,8 @@ class BU_Navigation_Plugin {
 	 *
 	 * @todo needs-unit-test
 	 *
-	 * @param boolean $include_link true|false link post_type is something special, so we don't always need it
-	 * @param string  $output type of output (names|objects)
+	 * @param boolean $include_link true|false link post_type is something special, so we don't always need it.
+	 * @param string  $output type of output (names|objects).
 	 * @return array of post_type strings or objects depending on $output param
 	 */
 	public function supported_post_types( $include_link = false, $output = 'names' ) {
@@ -266,7 +310,7 @@ class BU_Navigation_Plugin {
 
 }
 
-// Instantiate plugin (only once)
+// Instantiate plugin (only once).
 if ( ! isset( $GLOBALS['bu_navigation_plugin'] ) ) {
 	$GLOBALS['bu_navigation_plugin'] = new BU_Navigation_Plugin();
 }

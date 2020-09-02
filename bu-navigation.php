@@ -26,8 +26,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-**/
+ **/
 
 /*
 @author Niall Kavanagh <ntk@bu.edu>
@@ -97,55 +96,58 @@ class BU_Navigation_Plugin {
 
 		load_plugin_textdomain( 'bu-navigation', false, plugin_basename( dirname( __FILE__ ) ) . '/languages/' );
 
-		if( defined( 'BU_TS_IS_LOADED' ) ) {
+		if ( defined( 'BU_TS_IS_LOADED' ) ) {
 			require_once BU_NAV_PLUGIN_DIR . '/tests/lettuce/sandbox-setup.php';
 		}
 
 		$this->load_extras();
 
-		if( is_admin() ) {
+		if ( is_admin() ) {
 			$this->load_admin();
 		}
 
-		do_action('bu_navigation_init');
+		do_action( 'bu_navigation_init' );
 
 	}
 
 	public function load_admin() {
 
-		require_once(dirname(__FILE__) . '/admin/admin.php');
+		require_once dirname( __FILE__ ) . '/admin/admin.php';
 		$this->admin = new BU_Navigation_Admin( $this );
 
 	}
 
 	/**
 	 * Initializes navigation widgets
+	 *
 	 * @return void
 	 */
 	public function load_widget() {
 
-		if ( !is_blog_installed() || !$this->supports( 'widget' ) )
+		if ( ! is_blog_installed() || ! $this->supports( 'widget' ) ) {
 			return;
+		}
 
-		require_once(dirname(__FILE__) . '/bu-navigation-widget.php'); // Content navigation widget
-		register_widget('BU_Widget_Pages');
+		require_once dirname( __FILE__ ) . '/bu-navigation-widget.php'; // Content navigation widget
+		register_widget( 'BU_Widget_Pages' );
 
 	}
 
 	/**
 	 * Loads plugins for this... plugin
 	 * Any .php file placed in the extras directory will be automatically loaded.
+	 *
 	 * @return void
 	 */
 	public function load_extras() {
 
-		$pattern = sprintf('%s/extras/*.php', BU_NAV_PLUGIN_DIR);
+		$pattern = sprintf( '%s/extras/*.php', BU_NAV_PLUGIN_DIR );
 
-		$files = glob($pattern);
+		$files = glob( $pattern );
 
-		if ((is_array($files)) && (count($files) > 0)) {
-			foreach ($files as $filename) {
-				@include_once($filename);
+		if ( ( is_array( $files ) ) && ( count( $files ) > 0 ) ) {
+			foreach ( $files as $filename ) {
+				@include_once $filename;
 			}
 		}
 
@@ -160,10 +162,10 @@ class BU_Navigation_Plugin {
 	 * of features, with the key representing the feature name and the value holding the default.
 	 *
 	 * bu-navigation-manager (on by default)
-	 * 	- turn on or off the navigation management interfaces ("Edit Order" pages, "Navigation Attributes" metabox)
+	 *  - turn on or off the navigation management interfaces ("Edit Order" pages, "Navigation Attributes" metabox)
 	 *
 	 * bu-navigation-widget (on by default)
-	 * 	- turn on or off the "Content Navigation" widget (on by default)
+	 *  - turn on or off the "Content Navigation" widget (on by default)
 	 *
 	 * bu-navigation-primary (off by default -- theme authors, use add_theme_support( 'bu-navigation-primary' ))
 	 *  - turn on or off the "Primary Navigation" appearance menu item
@@ -175,10 +177,10 @@ class BU_Navigation_Plugin {
 
 		return array(
 			'manager' => true,
-			'widget' => true,
-			'links' => true,
+			'widget'  => true,
+			'links'   => true,
 			'primary' => false,
-			);
+		);
 
 	}
 
@@ -193,7 +195,7 @@ class BU_Navigation_Plugin {
 	 */
 	public function supports( $feature ) {
 
-		$feature = strtolower( $feature );
+		$feature  = strtolower( $feature );
 		$defaults = $this->features();
 
 		if ( ! in_array( $feature, array_keys( $defaults ) ) ) {
@@ -203,8 +205,8 @@ class BU_Navigation_Plugin {
 
 		$supported_const = 'BU_NAVIGATION_SUPPORTS_' . strtoupper( $feature );
 
-		$disabled = ( defined( $supported_const ) && constant( $supported_const ) == false );
-		$supported = ( defined( $supported_const ) && constant( $supported_const ) == true ) || $defaults[$feature];
+		$disabled        = ( defined( $supported_const ) && constant( $supported_const ) == false );
+		$supported       = ( defined( $supported_const ) && constant( $supported_const ) == true ) || $defaults[ $feature ];
 		$theme_supported = current_theme_supports( 'bu-navigation-' . $feature );
 
 		return ( ! $disabled && ( $supported || $theme_supported ) );
@@ -217,19 +219,25 @@ class BU_Navigation_Plugin {
 	 * @todo needs-unit-test
 	 *
 	 * @param boolean $include_link true|false link post_type is something special, so we don't always need it
-	 * @param string $output type of output (names|objects)
+	 * @param string  $output type of output (names|objects)
 	 * @return array of post_type strings or objects depending on $output param
 	 */
 	public function supported_post_types( $include_link = false, $output = 'names' ) {
 
-		$post_types = get_post_types( array( 'show_ui' => true, 'hierarchical' => true ), $output );
+		$post_types = get_post_types(
+			array(
+				'show_ui'      => true,
+				'hierarchical' => true,
+			), $output
+		);
 		$post_types = apply_filters( 'bu_navigation_post_types', $post_types );
 
 		if ( $this->supports( 'links' ) && $include_link ) {
-			if ( 'names' == $output )
+			if ( 'names' == $output ) {
 				$post_types[ BU_NAVIGATION_LINK_POST_TYPE ] = BU_NAVIGATION_LINK_POST_TYPE;
-			else
+			} else {
 				$post_types[ BU_NAVIGATION_LINK_POST_TYPE ] = get_post_type_object( BU_NAVIGATION_LINK_POST_TYPE );
+			}
 		}
 
 		return $post_types;
@@ -247,7 +255,7 @@ class BU_Navigation_Plugin {
 			return;
 		}
 
-		$args = func_get_args();
+		$args    = func_get_args();
 		$args[0] = sprintf( '[bu-navigation] %s', $args[0] );
 		error_log( call_user_func_array( 'sprintf', $args ) );
 	}
@@ -255,6 +263,6 @@ class BU_Navigation_Plugin {
 }
 
 // Instantiate plugin (only once)
-if( ! isset( $GLOBALS['bu_navigation_plugin'] ) ) {
+if ( ! isset( $GLOBALS['bu_navigation_plugin'] ) ) {
 	$GLOBALS['bu_navigation_plugin'] = new BU_Navigation_Plugin();
 }

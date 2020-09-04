@@ -3,7 +3,7 @@ Contributors: ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
 Tested up to: 5.5
-Stable tag: 1.2.20
+Stable tag: 1.2.21
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,15 @@ Please see this page for the details:
 5. The same drag and drop view is available to move pages while editing them
 
 == Changelog ==
+
+= 1.2.21 =
+
+* Updates npm dependencies and Grunt toolchain
+* Additions and changes to related to PHP code standards
+
+= 1.2.20 =
+
+* Fix for jQuery bug in the "Add Link" functionality.
 
 = 1.2.19 =
 

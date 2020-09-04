@@ -97,9 +97,16 @@ Please see this page for the details:
 ###5. The same drag and drop view is available to move pages while editing them###
 ![The same drag and drop view is available to move pages while editing them](https://ps.w.org/bu-navigation/assets/screenshot-5.png)
 
-
-
 ## Changelog
+
+### 1.2.21
+
+* Updates npm dependencies and Grunt toolchain.
+* Additions and changes to related to PHP code standards.
+
+### 1.2.20
+
+* Fix for jQuery bug in the "Add Link" functionality.
 
 ### 1.2.19
 

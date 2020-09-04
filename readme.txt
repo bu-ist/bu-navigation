@@ -78,6 +78,15 @@ Please see this page for the details:
 
 == Changelog ==
 
+= 1.2.21 =
+
+* Updates npm dependencies and Grunt toolchain
+* Additions and changes to related to PHP code standards
+
+= 1.2.20 =
+
+* Fix for jQuery bug in the "Add Link" functionality.
+
 = 1.2.19 =
 
 * Update deprecated jQuery methods for 5.5 compatibility. (For 5.5, there is still a known bug with the "Add Link" functionality that adds external links to the navigation tree, which will be patched in a future release.)

@@ -81,7 +81,7 @@ class BU_Navigation_Plugin {
 	 *
 	 * @var string
 	 */
-	const VERSION = '1.2.20';
+	const VERSION = '1.2.21';
 
 	/**
 	 * Plugin class constructor.

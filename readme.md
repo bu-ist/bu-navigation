@@ -1,9 +1,9 @@
-# BU Navigation 
+# BU Navigation
 **Contributors:** ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99  
 **Tags:** navigation, hierarchical, post type, boston university, bu  
 **Requires at least:** 3.1  
 **Tested up to:** 5.5
-**Stable tag:** 1.2.20
+**Stable tag:** 1.2.21
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -33,50 +33,48 @@ For developer documentation, feature roadmaps and more visit the [plugin reposit
 
 [![Build Status](https://travis-ci.org/bu-ist/bu-navigation.svg)](https://travis-ci.org/bu-ist/bu-navigation)
 
-## Installation 
+To get started developing with BU Navigation, run `npm install` to initialize Nodejs dependencies.  Run `gulp` to compile the JavaScript files locally.
+
+Run `npm run wp-env` to [start a local Docker instance of WordPress for local development.](https://www.npmjs.com/package/@wordpress/env)
+
+## Installation
 
 This plugin can be installed automatically through the WordPress admin interface, or by clicking the download link on this page and installing manually.
 
-
-### Manual Installation 
+### Manual Installation
 
 1. Upload the `bu-navigation` plugin folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 
+## Frequently Asked Questions
 
-## Frequently Asked Questions 
+### I don’t see the “Primary Navigation” menu! How do I enable it?
 
-
-### I don’t see the “Primary Navigation” menu! How do I enable it? 
 The “Primary Navigation” menu item will only appear if the current theme supports it.
 
 Please see this page for more information:
 [Adding Theme Support for Primary Navigation Menus](https://github.com/bu-ist/bu-navigation/wiki/Adding-Theme-Support-for-Primary-Navigation-Menus "BU Navigation Wiki on Github")
 
-
-### How do I hide a page from my navigation lists? 
+### How do I hide a page from my navigation lists?
 
 While editing your page, uncheck the “Display in navigation lists” checkbox next to the “Visibility” label inside the “Placement in Navigation” metabox. If the metabox is not visible, expand the “Screen Options” panel at the upper right hand corner of the screen and make sure the “Placement in Navigation” checkbox is checked.
 
-
-### My post title is too long for my navigation lists. Is there a way to pick a different label for navigation lists? 
+### My post title is too long for my navigation lists. Is there a way to pick a different label for navigation lists?
 
 While editing your page, enter an alternate navigation label in the “Label” text field inside the “Placement in Navigation” metabox. If the metabox is not visible, expand the “Screen Options” panel at the upper right hand corner of the screen and make sure the “Placement in Navigation” checkbox is checked.
 
-
-### Is there a way to prevent my users from adding top level content to the primary navigation menu? 
+### Is there a way to prevent my users from adding top level content to the primary navigation menu?
 
 Visit the “Appearance > Primary Navigation” screen and uncheck the “Allow Top-Level Pages” checkbox. Be sure to click “Save Changes” to save the setting. With this option unchecked, post authors will not be allowed to publish a top level page if the “Display in navigation lists” checkbox is checked.
 
+### I’m a theme / plugin developer that would like to take advantage of the navigation library, but I don’t want any of the administrative interface enhancements. Is there a way to disable them?
 
-### I’m a theme / plugin developer that would like to take advantage of the navigation library, but I don’t want any of the administrative interface enhancements. Is there a way to disable them? 
 Yes! The navigation manager interface, content navigation widget, and other plugin features can be disabled on a per-install or theme-by-theme basis.
 
 Please see this page for the details:
 [Configuring Plugin Features](https://github.com/bu-ist/bu-navigation/wiki/Configuring-Plugin-Features "BU Navigation Wiki on Github")
 
-
-## Screenshots 
+## Screenshots
 
 ###1. Manage your site’s page hierarchy with an easy to use drag and drop interface###
 ![Manage your site’s page hierarchy with an easy to use drag and drop interface](https://ps.w.org/bu-navigation/assets/screenshot-1.png)
@@ -93,9 +91,16 @@ Please see this page for the details:
 ###5. The same drag and drop view is available to move pages while editing them###
 ![The same drag and drop view is available to move pages while editing them](https://ps.w.org/bu-navigation/assets/screenshot-5.png)
 
-
-
 ## Changelog
+
+### 1.2.21
+
+* Updates npm dependencies and Grunt toolchain.
+* Additions and changes to related to PHP code standards.
+
+### 1.2.20
+
+* Fix for jQuery bug in the "Add Link" functionality.
 
 ### 1.2.19
 
@@ -117,53 +122,45 @@ Please see this page for the details:
 
 * Add hash comparison before saving changes to post hierarchy in Change Order page.
 
-### 1.2.13 
+### 1.2.13
 
 * Add missing parameter to `the_title` filter call. Part 2.
 
-
-### 1.2.12 
+### 1.2.12
 
 * Add missing parameter to `the_title` filter call.
 * Update unit test scripts.
 * Setup Code Climate.
 
-
-### 1.2.11 
+### 1.2.11
 
 * Add before/after attributes to support wrapping title/labels. Fixes #12.
 * Fix adaptive nav section title calculation. Fixes #22.
 
-
-### 1.2.10 
+### 1.2.10
 
 * Fix hierarchical custom post type support. Fixes #20.
 
-
-### 1.2.9 
+### 1.2.9
 
 * Fixes redundant title attributes
 * Corrects invalid unit tests
 
-
-### 1.2.8 
+### 1.2.8
 
 * Fixes an issue affecting section titles in the navigation widget when using Adaptive Mode
 * Corrects invalid unit tests
 
-
-### 1.2.7 
+### 1.2.7
 
 * Fixed WP4.3 widget init issues -- props nobleclem
 * Fixed PHP4 style constructors
 
-
-### 1.2.6 
+### 1.2.6
 
 * Confirmed 4.2 compatibility
 
-
-### 1.2.5 
+### 1.2.5
 
 * JSON Ajax callbacks now return correct HTTP response headers
 * Fixed cache issue with `bu_navigation_load_sections`
@@ -171,31 +168,26 @@ Please see this page for the details:
 * Added Grunt for script compilation
 * Added TravisCI integration
 
-
-### 1.2.4 
+### 1.2.4
 
 * 4.0 Compatibility - Fixes style conflicts
 * IE8 style fixes
 
-
-### 1.2.3 
+### 1.2.3
 
 * Added buwp-smoketests integration (lettuce)
 
-
-### 1.2.2 
+### 1.2.2
 
 * 3.9 Compat: Fixed z-index issue with "Move page" modal caused by r27532
 
-
-### 1.2.1 
+### 1.2.1
 
 * Added support for editing of HTML entities in navigation label input field
 * Added filter: bu_navigation_format_page_label
 * Added WP title filters to bu_navigation_format_page_label
 
-
-### 1.2 
+### 1.2
 
 * Added support for HTML in navigation labels
 * Bug Fix: "View" links on "Edit Order" screen corrected for non-root posts
@@ -203,40 +195,34 @@ Please see this page for the details:
 * For Developers: Added several functions for calculating permalinks efficiently for hierarchical post types
 * For Developers: Removed the `bu_navigation_pull_page()` function from the navigation library
 
-
-### 1.1.5 
+### 1.1.5
 
 * Added Swedish translation (props almhorn)
 * Bug Fix: Fix issue where `bu_navigation_breadcrumbs()` was not restoring excluded post filter
 * Bug Fix: Only display replacement page template metabox for pages
 * Bug Fix: jQuery UI-related issues in 3.6+
 
-
-### 1.1.4 
+### 1.1.4
 
 * WP.org release
 
-
-### 1.1.3 
+### 1.1.3
 
 * Add support for privately published posts in navigation management views
 * Fix for bug that was preventing links from saving
 * Assorted cleanup
 
-
-### 1.1.2 
+### 1.1.2
 
 * Initial WP.org release
 * Increased test coverage
 * Added constant for setting default post exclude value
 
-
-### 1.1.1 
+### 1.1.1
 
 * Fix for navigation exclude filter
 
-
-### 1.1 
+### 1.1
 
 * Added localization support
 * Added feature configuration through the Theme Features API and PHP constants

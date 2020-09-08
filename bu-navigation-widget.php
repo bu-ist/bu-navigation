@@ -235,10 +235,10 @@ class BU_Widget_Pages extends WP_Widget {
 		$instance = $old_instance;
 		$instance = wp_parse_args( $instance, $this->defaults );
 
-		$instance['navigation_title']      = ( in_array( $new_instance['navigation_title'], $this->title_options ) ) ? $new_instance['navigation_title'] : 'none';
-		$instance['navigation_title_text'] = ( $instance['navigation_title'] == 'static' ) ? sanitize_text_field( $new_instance['navigation_title_text'] ) : '';
-		$instance['navigation_title_url']  = ( $instance['navigation_title'] == 'static' ) ? sanitize_text_field( $new_instance['navigation_title_url'] ) : '';
-		$instance['navigation_style']      = ( in_array( $new_instance['navigation_style'], $this->styles ) ) ? $new_instance['navigation_style'] : 'site';
+		$instance['navigation_title']      = ( in_array( $new_instance['navigation_title'], $this->title_options, true ) ) ? $new_instance['navigation_title'] : 'none';
+		$instance['navigation_title_text'] = ( 'static' === $instance['navigation_title'] ) ? sanitize_text_field( $new_instance['navigation_title_text'] ) : '';
+		$instance['navigation_title_url']  = ( 'static' === $instance['navigation_title'] ) ? sanitize_text_field( $new_instance['navigation_title_url'] ) : '';
+		$instance['navigation_style']      = ( in_array( $new_instance['navigation_style'], $this->styles, true ) ) ? $new_instance['navigation_style'] : 'site';
 
 		return $instance;
 	}
@@ -252,10 +252,10 @@ class BU_Widget_Pages extends WP_Widget {
 
 		$instance = wp_parse_args( $instance, $this->defaults );
 
-		$navigation_title      = ( in_array( $instance['navigation_title'], $this->title_options ) ) ? $instance['navigation_title'] : 'none';
+		$navigation_title      = ( in_array( $instance['navigation_title'], $this->title_options, true ) ) ? $instance['navigation_title'] : 'none';
 		$navigation_title_text = esc_attr( $instance['navigation_title_text'] );
 		$navigation_title_url  = esc_attr( $instance['navigation_title_url'] );
-		$navigation_style      = ( in_array( $instance['navigation_style'], $this->styles ) ) ? $instance['navigation_style'] : 'site';
+		$navigation_style      = ( in_array( $instance['navigation_style'], $this->styles, true ) ) ? $instance['navigation_style'] : 'site';
 
 		include BU_NAV_PLUGIN_DIR . '/templates/widget-form.php';
 	}

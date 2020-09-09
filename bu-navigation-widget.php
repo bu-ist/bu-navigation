@@ -245,26 +245,38 @@ class BU_Widget_Pages extends WP_Widget {
 		include BU_NAV_PLUGIN_DIR . '/templates/widget-form.php';
 	}
 
+	/**
+	 * Gets the widget title based on the instance options.
+	 *
+	 * There are 3 return scenarios:
+	 * 1- empty string for a widget that doesn't render a title at all
+	 * 2- the static title
+	 * 3- the section title as returned by section_title()
+	 *
+	 * This private helper function sorts out those scenarios based on the instance options.
+	 *
+	 * @param array $args widget args, as passed to WP_Widget::widget.
+	 * @param array $instance The settings for the particular instance of the widget.
+	 * @return string $title Empty string, plain text title, or anchor tag wrapped title string.
+	 */
 	private function get_widget_title( $args, $instance ) {
-		$title = '';
-
-		// Set widget title.
-		if ( ( $instance['navigation_title'] == 'static' ) && ( ! empty( $instance['navigation_title_text'] ) ) ) {
-
-			$title = apply_filters( 'widget_title', $instance['navigation_title_text'] );
-
-			// Wrap with anchor tag if URL is present.
-			if ( ! empty( $instance['navigation_title_url'] ) ) {
-				$title = sprintf( '<a class="content_nav_header" href="%s">%s</a>', $instance['navigation_title_url'], $title );
-			}
-		} elseif ( $instance['navigation_title'] == 'section' ) {
-
-			// Use the navigation label of top level post of the current section for the widget title.
-			$title = $this->section_title( $args, $instance );
-
+		if ( 'none' === $instance['navigation_title'] ) {
+			return '';
 		}
 
-		return $title;
+		if ( 'static' === $instance['navigation_title'] ) {
+			// Do not make a special condition if the navigation_title_text is empty.
+			// Empty values for navigation_title_text are valid, it just means the widget doesn't render a title.
+			// Wrap the title in an anchor tag if a URL was specified, otherwise just return the title.
+			return ( '' !== $instance['navigation_title_url'] ) ? sprintf( '<a class="content_nav_header" href="%s">%s</a>', $instance['navigation_title_url'], $instance['navigation_title_text'] ) : $instance['navigation_title_text'];
+		}
+
+		if ( 'section' === $instance['navigation_title'] ) {
+			return $this->section_title( $args, $instance );
+		}
+
+		// In case the navigation_title option is something else, just return an empty string.
+		return '';
 	}
 
 }

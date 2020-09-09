@@ -267,8 +267,10 @@ class BU_Widget_Pages extends WP_Widget {
 		if ( 'static' === $instance['navigation_title'] ) {
 			// Do not make a special condition if the navigation_title_text is empty.
 			// Empty values for navigation_title_text are valid, it just means the widget doesn't render a title.
+			$filtered_title = apply_filters( 'widget_title', $instance['navigation_title_text'] );
+
 			// Wrap the title in an anchor tag if a URL was specified, otherwise just return the title.
-			return ( '' !== $instance['navigation_title_url'] ) ? sprintf( '<a class="content_nav_header" href="%s">%s</a>', $instance['navigation_title_url'], $instance['navigation_title_text'] ) : $instance['navigation_title_text'];
+			return ( '' !== $instance['navigation_title_url'] ) ? sprintf( '<a class="content_nav_header" href="%s">%s</a>', $instance['navigation_title_url'], $filtered_title ) : $filtered_title;
 		}
 
 		if ( 'section' === $instance['navigation_title'] ) {

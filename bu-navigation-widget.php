@@ -160,24 +160,9 @@ class BU_Widget_Pages extends WP_Widget {
 
 		extract( $args );
 
-		$title = '';
+		$title = $this->get_widget_title( $args, $instance );
 
 		// Set widget title.
-		if ( ( $instance['navigation_title'] == 'static' ) && ( ! empty( $instance['navigation_title_text'] ) ) ) {
-
-			$title = apply_filters( 'widget_title', $instance['navigation_title_text'] );
-
-			// Wrap with anchor tag if URL is present.
-			if ( ! empty( $instance['navigation_title_url'] ) ) {
-				$title = sprintf( '<a class="content_nav_header" href="%s">%s</a>', $instance['navigation_title_url'], $title );
-			}
-		} elseif ( $instance['navigation_title'] == 'section' ) {
-
-			// Use navigation label of top level post for current section.
-			$title = $this->section_title( $args, $instance );
-
-		}
-
 		// Prepare arguments to bu_navigation_list_pages
 		$list_args = array(
 			'page_id'      => $post->ID,
@@ -259,4 +244,27 @@ class BU_Widget_Pages extends WP_Widget {
 
 		include BU_NAV_PLUGIN_DIR . '/templates/widget-form.php';
 	}
+
+	private function get_widget_title( $args, $instance ) {
+		$title = '';
+
+		// Set widget title.
+		if ( ( $instance['navigation_title'] == 'static' ) && ( ! empty( $instance['navigation_title_text'] ) ) ) {
+
+			$title = apply_filters( 'widget_title', $instance['navigation_title_text'] );
+
+			// Wrap with anchor tag if URL is present.
+			if ( ! empty( $instance['navigation_title_url'] ) ) {
+				$title = sprintf( '<a class="content_nav_header" href="%s">%s</a>', $instance['navigation_title_url'], $title );
+			}
+		} elseif ( $instance['navigation_title'] == 'section' ) {
+
+			// Use the navigation label of top level post of the current section for the widget title.
+			$title = $this->section_title( $args, $instance );
+
+		}
+
+		return $title;
+	}
+
 }

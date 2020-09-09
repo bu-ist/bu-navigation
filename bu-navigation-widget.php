@@ -162,32 +162,8 @@ class BU_Widget_Pages extends WP_Widget {
 
 		$title = $this->get_widget_title( $args, $instance );
 
-		// Set widget title.
-		// Prepare arguments to bu_navigation_list_pages
-		$list_args = array(
-			'page_id'      => $post->ID,
-			'title_li'     => '',
-			'echo'         => 0,
-			'container_id' => BU_WIDGET_PAGES_LIST_ID,
-			'post_types'   => $post->post_type,
-		);
-
-		// Set list arguments based on navigation style.
-		if ( array_key_exists( 'navigation_style', $instance ) ) {
-
-			$list_args['style'] = $instance['navigation_style'];
-
-			if ( $instance['navigation_style'] == 'section' ) {
-				$list_args['navigate_in_section'] = 1;
-				if ( is_404() ) {
-					return '';
-				}
-			} elseif ( $instance['navigation_style'] == 'adaptive' ) {
-				add_action( 'bu_navigation_widget_before_list', 'bu_navigation_widget_adaptive_before_list' );
-			}
-		} else {
-			$GLOBALS['bu_navigation_plugin']->log( 'No nav label widget style set!' );
-		}
+		// Set list arguments based on post type and navigation style.
+		$list_args = $this->set_list_args( $post, $instance );
 
 		do_action( 'bu_navigation_widget_before_list' );
 
@@ -279,6 +255,35 @@ class BU_Widget_Pages extends WP_Widget {
 
 		// In case the navigation_title option is something else, just return an empty string.
 		return '';
+	}
+
+	private function set_list_args( $post, $instance ) {
+
+		// Prepare arguments to bu_navigation_list_pages.
+		$list_args = array(
+			'page_id'      => $post->ID,
+			'title_li'     => '',
+			'echo'         => 0,
+			'container_id' => BU_WIDGET_PAGES_LIST_ID,
+			'post_types'   => $post->post_type,
+		);
+
+		if ( array_key_exists( 'navigation_style', $instance ) ) {
+
+			$list_args['style'] = $instance['navigation_style'];
+
+			if ( $instance['navigation_style'] == 'section' ) {
+				$list_args['navigate_in_section'] = 1;
+				if ( is_404() ) {
+					return '';
+				}
+			} elseif ( $instance['navigation_style'] == 'adaptive' ) {
+				add_action( 'bu_navigation_widget_before_list', 'bu_navigation_widget_adaptive_before_list' );
+			}
+		} else {
+			$GLOBALS['bu_navigation_plugin']->log( 'No nav label widget style set!' );
+		}
+
 	}
 
 }

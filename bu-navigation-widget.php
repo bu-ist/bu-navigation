@@ -76,47 +76,10 @@ class BU_Widget_Pages extends WP_Widget {
 		$href       = '';
 		$section_id = 0;
 
-		// Determine which post to use for the section title.
+		// Don't calculate a section_id for 'site' style.
 		if ( ! empty( $instance['navigation_style'] ) && $instance['navigation_style'] != 'site' ) {
-
-			// Gather ancestors.
-			$sections = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ) );
-
-			// Adaptive navigation style uses the grandparent of current post.
-			if ( $instance['navigation_style'] == 'adaptive' ) {
-
-				// Fetch post list, possibly limited to specific sections.
-				$page_args       = array(
-					'sections'      => $sections,
-					'post_types'    => array( $post->post_type ),
-					'include_links' => false,
-				);
-				$pages           = bu_navigation_get_pages( $page_args );
-				$pages_by_parent = bu_navigation_pages_by_parent( $pages );
-
-				$last_section = array_pop( $sections );
-				array_push( $sections, $last_section );
-
-				if ( array_key_exists( $last_section, $pages_by_parent ) &&
-					is_array( $pages_by_parent[ $last_section ] ) &&
-					( count( $pages_by_parent[ $last_section ] ) > 0 )
-				   ) {
-					// Last section has children, so its parent will be section title.
-					$grandparent_offset = count( $sections ) - 2;
-				} else {
-					// Last section has no children, so its grandparent will be the section title.
-					$grandparent_offset = count( $sections ) - 3;
-				}
-
-				if ( isset( $sections[ $grandparent_offset ] ) ) {
-					$section_id = $sections[ $grandparent_offset ];
-				}
-			} else {
-				// Default to top level post (if we have one).
-				if ( isset( $sections[1] ) ) {
-					$section_id = $sections[1];
-				}
-			}
+			// Otherwise override the section_id for adaptive or section style.
+			$section_id = $this->get_section_id_for_title( $post, $instance );
 		}
 
 		// Use section post for title.
@@ -305,6 +268,48 @@ class BU_Widget_Pages extends WP_Widget {
 
 		// 'site' navigation_style doesn't require additional handling.
 		return $list_args;
+	}
+
+	private function get_section_id_for_title( $post, $instance ) {
+
+		// Gather ancestors.
+		$sections = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ) );
+
+		// Adaptive navigation style uses the grandparent of current post.
+		if ( $instance['navigation_style'] == 'adaptive' ) {
+
+			// Fetch post list, possibly limited to specific sections.
+			$page_args       = array(
+				'sections'      => $sections,
+				'post_types'    => array( $post->post_type ),
+				'include_links' => false,
+			);
+			$pages           = bu_navigation_get_pages( $page_args );
+			$pages_by_parent = bu_navigation_pages_by_parent( $pages );
+
+			$last_section = array_pop( $sections );
+			array_push( $sections, $last_section );
+
+			if ( array_key_exists( $last_section, $pages_by_parent ) &&
+				is_array( $pages_by_parent[ $last_section ] ) &&
+				( count( $pages_by_parent[ $last_section ] ) > 0 )
+			   ) {
+				// Last section has children, so its parent will be section title.
+				$grandparent_offset = count( $sections ) - 2;
+			} else {
+				// Last section has no children, so its grandparent will be the section title.
+				$grandparent_offset = count( $sections ) - 3;
+			}
+
+			if ( isset( $sections[ $grandparent_offset ] ) ) {
+				return $sections[ $grandparent_offset ];
+			}
+		} else {
+			// Default to top level post (if we have one).
+			if ( isset( $sections[1] ) ) {
+				return $sections[1];
+			}
+		}
 
 	}
 }

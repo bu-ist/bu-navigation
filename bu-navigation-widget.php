@@ -145,7 +145,7 @@ class BU_Widget_Pages extends WP_Widget {
 	}
 
 	/**
-	 * Display the content navigation widget, overrides parent method.
+	 * Echos the content navigation widget content, overrides parent method.
 	 *
 	 * @param array $args Display arguments for WP_Widget.
 	 * @param array $instance The settings for the particular instance of the widget.
@@ -154,7 +154,7 @@ class BU_Widget_Pages extends WP_Widget {
 		global $post;
 
 		// Only display navigation widget for supported post types.
-		if ( ! in_array( $post->post_type, bu_navigation_supported_post_types() ) ) {
+		if ( ! in_array( $post->post_type, bu_navigation_supported_post_types(), true ) ) {
 			return;
 		}
 

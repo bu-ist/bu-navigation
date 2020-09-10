@@ -162,32 +162,8 @@ class BU_Widget_Pages extends WP_Widget {
 
 		$title = $this->get_widget_title( $args, $instance );
 
-		// Set widget title.
-		// Prepare arguments to bu_navigation_list_pages
-		$list_args = array(
-			'page_id'      => $post->ID,
-			'title_li'     => '',
-			'echo'         => 0,
-			'container_id' => BU_WIDGET_PAGES_LIST_ID,
-			'post_types'   => $post->post_type,
-		);
-
-		// Set list arguments based on navigation style.
-		if ( array_key_exists( 'navigation_style', $instance ) ) {
-
-			$list_args['style'] = $instance['navigation_style'];
-
-			if ( $instance['navigation_style'] == 'section' ) {
-				$list_args['navigate_in_section'] = 1;
-				if ( is_404() ) {
-					return '';
-				}
-			} elseif ( $instance['navigation_style'] == 'adaptive' ) {
-				add_action( 'bu_navigation_widget_before_list', 'bu_navigation_widget_adaptive_before_list' );
-			}
-		} else {
-			$GLOBALS['bu_navigation_plugin']->log( 'No nav label widget style set!' );
-		}
+		// Set list arguments based on post type and navigation style.
+		$list_args = $this->get_list_args( $post, $instance );
 
 		do_action( 'bu_navigation_widget_before_list' );
 
@@ -281,4 +257,52 @@ class BU_Widget_Pages extends WP_Widget {
 		return '';
 	}
 
+	/**
+	 * Get arguments for the page list query.
+	 *
+	 * A helper method that sets up the list query arguements based on the instance style.
+	 * These arguements are structured for the bu_navigation_list_pages() query in library.php.
+	 *
+	 * @param WP_Post $post The post being rendered.
+	 * @param array   $instance The settings for this instance of the widget.
+	 *
+	 * @return array Arguements for the bu_navigation_list_pages() query in library.php
+	 */
+	private function get_list_args( $post, $instance ) {
+
+		// Prepare arguments to bu_navigation_list_pages.
+		$list_args = array(
+			'page_id'      => $post->ID,
+			'title_li'     => '',
+			'echo'         => 0,
+			'container_id' => BU_WIDGET_PAGES_LIST_ID,
+			'post_types'   => $post->post_type,
+		);
+
+		// Not sure this check is necessary as there should always be an instance style, but leaving it in to preserve original behavior.
+		if ( ! array_key_exists( 'navigation_style', $instance ) ) {
+			$GLOBALS['bu_navigation_plugin']->log( 'No nav label widget style set!' );
+			return $list_args;
+		}
+
+		// Include the instance navigation style in the list args.
+		$list_args['style'] = $instance['navigation_style'];
+
+		// 'section' style has special handling.
+		if ( 'section' === $instance['navigation_style'] ) {
+			$list_args['navigate_in_section'] = 1;
+			// Not sure why it is necessary to check for a 404 here, but this is the original handling.
+			return ( is_404() ) ? '' : $list_args;
+		}
+
+		// 'adaptive' style needs an action from included/library.php to be loaded.
+		if ( 'adaptive' === $instance['navigation_style'] ) {
+			add_action( 'bu_navigation_widget_before_list', 'bu_navigation_widget_adaptive_before_list' );
+			return $list_args;
+		}
+
+		// 'site' navigation_style doesn't require additional handling.
+		return $list_args;
+
+	}
 }

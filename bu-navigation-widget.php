@@ -64,6 +64,9 @@ class BU_Widget_Pages extends WP_Widget {
 	/**
 	 * Returns HTML fragment containing a section title
 	 *
+	 * Uses bu_navigation_gather_sections, bu_navigation_get_pages, bu_navigation_pages_by_parent, bu_navigation_get_label
+	 * from includes/library.php
+	 *
 	 * @param array $args widget args, as passed to WP_Widget::widget.
 	 * @param array $instance widget instance args, as passed to WP_Widget::widget.
 	 * @return string HTML fragment with title

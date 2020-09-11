@@ -74,49 +74,25 @@ class BU_Widget_Pages extends WP_Widget {
 		$html       = '';
 		$title      = '';
 		$href       = '';
-		$section_id = 0;
+		$section_id = 0;  // If this stays zero, then the site title is returned.  Otherwise set this to a post id and that post title will be used.
+		$sections   = []; // Array of post ids.
 
-		// Determine which post to use for the section title.
-		if ( ! empty( $instance['navigation_style'] ) && $instance['navigation_style'] != 'site' ) {
-
+		// Don't calculate a section_id for 'site' style, leave it as 0. No need to gather sections in that case.
+		// Only run gather_sections() for 'section' or 'adaptive' styles.
+		// Also account for the possibility (?) that the navigation style maybe blank, to match previous behavior.
+		if ( 'site' !== $instance['navigation_style'] || ! empty( $instance['navigation_style'] ) ) {
 			// Gather ancestors.
 			$sections = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ) );
+		}
 
-			// Adaptive navigation style uses the grandparent of current post.
-			if ( $instance['navigation_style'] == 'adaptive' ) {
+		// Otherwise override the section_id for section style.
+		if ( 'section' === $instance['navigation_style'] ) {
+			// Default to top level post (if we have one).
+			$section_id = isset( $sections[1] ) ? $sections[1] : 0;
+		}
 
-				// Fetch post list, possibly limited to specific sections.
-				$page_args       = array(
-					'sections'      => $sections,
-					'post_types'    => array( $post->post_type ),
-					'include_links' => false,
-				);
-				$pages           = bu_navigation_get_pages( $page_args );
-				$pages_by_parent = bu_navigation_pages_by_parent( $pages );
-
-				$last_section = array_pop( $sections );
-				array_push( $sections, $last_section );
-
-				if ( array_key_exists( $last_section, $pages_by_parent ) &&
-					is_array( $pages_by_parent[ $last_section ] ) &&
-					( count( $pages_by_parent[ $last_section ] ) > 0 )
-				   ) {
-					// Last section has children, so its parent will be section title.
-					$grandparent_offset = count( $sections ) - 2;
-				} else {
-					// Last section has no children, so its grandparent will be the section title.
-					$grandparent_offset = count( $sections ) - 3;
-				}
-
-				if ( isset( $sections[ $grandparent_offset ] ) ) {
-					$section_id = $sections[ $grandparent_offset ];
-				}
-			} else {
-				// Default to top level post (if we have one).
-				if ( isset( $sections[1] ) ) {
-					$section_id = $sections[1];
-				}
-			}
+		if ( 'adaptive' === $instance['navigation_style'] ) {
+			$section_id = $this->get_adaptive_section_id( $sections, $post->post_type );
 		}
 
 		// Use section post for title.
@@ -233,6 +209,8 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * This private helper function sorts out those scenarios based on the instance options.
 	 *
+	 * @since 1.2.22
+	 *
 	 * @param array $args widget args, as passed to WP_Widget::widget.
 	 * @param array $instance The settings for the particular instance of the widget.
 	 * @return string $title Empty string, plain text title, or anchor tag wrapped title string.
@@ -264,6 +242,8 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * A helper method that sets up the list query arguements based on the instance style.
 	 * These arguements are structured for the bu_navigation_list_pages() query in library.php.
+	 *
+	 * @since 1.2.22
 	 *
 	 * @param WP_Post $post The post being rendered.
 	 * @param array   $instance The settings for this instance of the widget.
@@ -305,6 +285,47 @@ class BU_Widget_Pages extends WP_Widget {
 
 		// 'site' navigation_style doesn't require additional handling.
 		return $list_args;
+	}
 
+	/**
+	 * Get adaptive section id.
+	 *
+	 * Adaptive navigation style uses the title of the grandparent of current post.
+	 * Given a post type and the post ids of the current section members, this function
+	 * returns the post id of the grandparent post.
+	 *
+	 * @since 1.2.22
+	 *
+	 * @param array  $sections Array of post ids.
+	 * @param string $post_type Post type of the post being rendered.
+	 * @return string Post Id of the grandparent post for the widget title.
+	 */
+	private function get_adaptive_section_id( $sections, $post_type ) {
+		// Fetch post list, possibly limited to specific sections.
+		$page_args       = array(
+			'sections'      => $sections,
+			'post_types'    => array( $post->post_type ),
+			'include_links' => false,
+		);
+		$pages           = bu_navigation_get_pages( $page_args );
+		$pages_by_parent = bu_navigation_pages_by_parent( $pages );
+
+		// This looks strange, but is just a way to quickly get the last element of an array in php.
+		$last_section = array_pop( $sections );
+		array_push( $sections, $last_section );
+
+		if ( array_key_exists( $last_section, $pages_by_parent ) &&
+			is_array( $pages_by_parent[ $last_section ] ) &&
+			( count( $pages_by_parent[ $last_section ] ) > 0 )
+			) {
+			// Last section has children, so its parent will be section title.
+			$grandparent_offset = count( $sections ) - 2;
+		} else {
+			// Last section has no children, so its grandparent will be the section title.
+			$grandparent_offset = count( $sections ) - 3;
+		}
+
+		// Return the calculated grandparent post id, or 0 if none found.
+		return ( isset( $sections[ $grandparent_offset ] ) ) ? $sections[ $grandparent_offset ] : 0;
 	}
 }

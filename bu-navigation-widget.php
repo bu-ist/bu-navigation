@@ -214,11 +214,10 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * @since 1.2.22
 	 *
-	 * @param array $args widget args, as passed to WP_Widget::widget.
 	 * @param array $instance The settings for the particular instance of the widget.
 	 * @return string $title Empty string, plain text title, or anchor tag wrapped title string.
 	 */
-	private function get_widget_title( $args, $instance ) {
+	private function get_widget_title( $instance ) {
 		if ( 'none' === $instance['navigation_title'] ) {
 			return '';
 		}

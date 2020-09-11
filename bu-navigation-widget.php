@@ -144,23 +144,24 @@ class BU_Widget_Pages extends WP_Widget {
 		// Fetch markup.
 		$nav_list_markup = bu_navigation_list_pages( apply_filters( 'widget_bu_pages_args', $list_args ) );
 
-		// Only output anything at all if the is existing markup from list_pages.
-		if ( ! empty( $nav_list_markup ) ) {
-
-			$output = sprintf( '%s<div id="contentnav">', $args['before_widget'] );
-
-			// Only add the title markup if the title isn't blank.
-			if ( $title ) {
-				$output .= $args['before_title'] . $title . $args['after_title'];
-			}
-
-			// Add content markup and closing tags.
-			$output .= sprintf( '%s</div>', $nav_list_markup ) . $args['after_widget'];
-
-			// Echo assembled widget markup.
-			echo wp_kses_post( $output );
+		// Only output anything at all if there is existing markup from list_pages.
+		if ( empty( $nav_list_markup ) ) {
+			return;
 		}
 
+		// Assemble the markup into $output, starting with the opening tags.
+		$output = sprintf( '%s<div id="contentnav">', $args['before_widget'] );
+
+		// Only add the title markup if the title isn't blank.
+		if ( $title ) {
+			$output .= $args['before_title'] . $title . $args['after_title'];
+		}
+
+		// Add content markup and closing tags.
+		$output .= sprintf( '%s</div>', $nav_list_markup ) . $args['after_widget'];
+
+		// Echo assembled widget markup.
+		echo wp_kses_post( $output );
 	}
 
 	/**

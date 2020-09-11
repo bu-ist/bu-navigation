@@ -308,7 +308,7 @@ class BU_Widget_Pages extends WP_Widget {
 		// Fetch post list, possibly limited to specific sections.
 		$page_args       = array(
 			'sections'      => $sections,
-			'post_types'    => array( $post->post_type ),
+			'post_types'    => array( $post_type ),
 			'include_links' => false,
 		);
 		$pages           = bu_navigation_get_pages( $page_args );

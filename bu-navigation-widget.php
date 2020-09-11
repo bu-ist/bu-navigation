@@ -67,11 +67,10 @@ class BU_Widget_Pages extends WP_Widget {
 	 * Uses bu_navigation_gather_sections, bu_navigation_get_pages, bu_navigation_pages_by_parent, bu_navigation_get_label
 	 * from includes/library.php
 	 *
-	 * @param array $args widget args, as passed to WP_Widget::widget.
 	 * @param array $instance widget instance args, as passed to WP_Widget::widget.
 	 * @return string HTML fragment with title
 	 */
-	public function section_title( $args, $instance ) {
+	public function section_title( $instance ) {
 		global $post;
 
 		$html       = '';
@@ -234,7 +233,7 @@ class BU_Widget_Pages extends WP_Widget {
 		}
 
 		if ( 'section' === $instance['navigation_title'] ) {
-			return $this->section_title( $args, $instance );
+			return $this->section_title( $instance );
 		}
 
 		// In case the navigation_title option is something else, just return an empty string.

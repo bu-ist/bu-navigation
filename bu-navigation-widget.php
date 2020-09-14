@@ -67,11 +67,11 @@ class BU_Widget_Pages extends WP_Widget {
 	 * Uses bu_navigation_gather_sections, bu_navigation_get_pages, bu_navigation_pages_by_parent, bu_navigation_get_label
 	 * from includes/library.php
 	 *
-	 * @param array $instance widget instance args, as passed to WP_Widget::widget.
+	 * @param WP_Post $post Root post as passed through global to the widget() method.
+	 * @param array   $instance widget instance args, as passed to WP_Widget::widget.
 	 * @return string HTML fragment with title
 	 */
-	public function section_title( $instance ) {
-		global $post;
+	public function section_title( $post, $instance ) {
 
 		$html  = '';
 		$title = '';
@@ -118,7 +118,7 @@ class BU_Widget_Pages extends WP_Widget {
 			return;
 		}
 
-		$title = $this->get_widget_title( $instance );
+		$title = $this->get_widget_title( $post, $instance );
 
 		// Set list arguments based on post type and navigation style.
 		$list_args = $this->get_list_args( $post, $instance );
@@ -196,10 +196,11 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * @since 1.2.22
 	 *
-	 * @param array $instance The settings for the particular instance of the widget.
+	 * @param WP_Post $post Root post as passed through global to the widget() method.
+	 * @param array   $instance The settings for the particular instance of the widget.
 	 * @return string $title Empty string, plain text title, or anchor tag wrapped title string.
 	 */
-	private function get_widget_title( $instance ) {
+	private function get_widget_title( $post, $instance ) {
 		if ( 'none' === $instance['navigation_title'] ) {
 			return '';
 		}
@@ -214,7 +215,7 @@ class BU_Widget_Pages extends WP_Widget {
 		}
 
 		if ( 'section' === $instance['navigation_title'] ) {
-			return $this->section_title( $instance );
+			return $this->section_title( $post, $instance );
 		}
 
 		// In case the navigation_title option is something else, just return an empty string.

@@ -73,29 +73,11 @@ class BU_Widget_Pages extends WP_Widget {
 	public function section_title( $instance ) {
 		global $post;
 
-		$html       = '';
-		$title      = '';
-		$href       = '';
-		$section_id = 0;  // If this stays zero, then the site title is returned.  Otherwise set this to a post id and that post title will be used.
-		$sections   = []; // Array of post ids.
+		$html  = '';
+		$title = '';
+		$href  = '';
 
-		// Don't calculate a section_id for 'site' style, leave it as 0. No need to gather sections in that case.
-		// Only run gather_sections() for 'section' or 'adaptive' styles.
-		// Also account for the possibility (?) that the navigation style maybe blank, to match previous behavior.
-		if ( 'site' !== $instance['navigation_style'] || ! empty( $instance['navigation_style'] ) ) {
-			// Gather ancestors.
-			$sections = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ) );
-		}
-
-		// Otherwise override the section_id for section style.
-		if ( 'section' === $instance['navigation_style'] ) {
-			// Default to top level post (if we have one).
-			$section_id = isset( $sections[1] ) ? $sections[1] : 0;
-		}
-
-		if ( 'adaptive' === $instance['navigation_style'] ) {
-			$section_id = $this->get_adaptive_section_id( $sections, $post->post_type );
-		}
+		$section_id = $this->get_title_post_id_for_child( $post, $instance['navigation_style'] );
 
 		// Use section post for title.
 		if ( $section_id ) {
@@ -329,5 +311,38 @@ class BU_Widget_Pages extends WP_Widget {
 
 		// Return the calculated grandparent post id, or 0 if none found.
 		return ( isset( $sections[ $grandparent_offset ] ) ) ? $sections[ $grandparent_offset ] : 0;
+	}
+
+	/**
+	 * Get the title post id for a given child post.
+	 *
+	 * Given a post in the hierarchy, returns a post id for a "title" post, based on the current navigation style (mode).
+	 *
+	 * @since 1.2.22
+	 *
+	 * @param WP_Post $post The post object as passed to the the widget() method.
+	 * @param string  $nav_style The navigation style of the widget (mode).
+	 * @return int Either a post id for the title post, or zero if there is no appropriate match.
+	 */
+	private function get_title_post_id_for_child( $post, $nav_style ) {
+		// Site mode doesn't need a title post, skip gather_section().
+		if ( 'site' === $nav_style ) {
+			return 0;
+		}
+
+		// Gets an array of page ids representing the "section" for a given post.
+		$sections = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ) );
+
+		if ( 'section' === $nav_style ) {
+			// Default to top level post of the section (if we have one).
+			return isset( $sections[1] ) ? $sections[1] : 0;
+		}
+
+		if ( 'adaptive' === $nav_style ) {
+			return $this->get_adaptive_section_id( $sections, $post->post_type );
+		}
+
+		// Default to zero for any unknown $nav_style (mode).
+		return 0;
 	}
 }

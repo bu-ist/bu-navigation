@@ -136,7 +136,7 @@ class BU_Widget_Pages extends WP_Widget {
 			return;
 		}
 
-		$title = $this->get_widget_title( $args, $instance );
+		$title = $this->get_widget_title( $instance );
 
 		// Set list arguments based on post type and navigation style.
 		$list_args = $this->get_list_args( $post, $instance );

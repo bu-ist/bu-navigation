@@ -72,14 +72,12 @@ class BU_Widget_Pages extends WP_Widget {
 	 * @return string HTML fragment with title
 	 */
 	public function section_title( $post, $instance ) {
-
-		$html  = '';
-		$title = '';
-		$href  = '';
+		// Format string to deliver the title and href as an HTML fragment.
+		$wrapped_title_format = '<a class="content_nav_header" href="%s">%s</a>';
 
 		$section_id = $this->get_title_post_id_for_child( $post, $instance['navigation_style'] );
 
-		// Use section post for title.
+		// If there is a title post for this child ("section_id"), then use it for the title.
 		if ( $section_id ) {
 			$section = get_post( $section_id );
 
@@ -88,20 +86,18 @@ class BU_Widget_Pages extends WP_Widget {
 				// Second argument prevents usage of default (no title) label.
 				$title = bu_navigation_get_label( $section, '' );
 				$href  = get_permalink( $section->ID );
+
+				// Prevent empty titles.
+				if ( ! empty( $title ) ) {
+					return sprintf( $wrapped_title_format, esc_attr( $href ), $title );
+				}
 			}
 		}
 
-		// Fallback to site title if we're still empty.
-		if ( empty( $title ) ) {
-			$title = get_bloginfo( 'name' );
-			$href  = trailingslashit( get_bloginfo( 'url' ) );
-		}
-
-		if ( $title && $href ) {
-			$html = sprintf( "<a class=\"content_nav_header\" href=\"%s\">%s</a>\n", esc_attr( $href ), $title );
-		}
-
-		return $html;
+		// Otherwise, default to the site name and url.
+		$title = get_bloginfo( 'name' );
+		$href  = trailingslashit( get_bloginfo( 'url' ) );
+		return sprintf( $wrapped_title_format, esc_attr( $href ), $title );
 	}
 
 	/**

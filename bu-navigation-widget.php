@@ -72,36 +72,49 @@ class BU_Widget_Pages extends WP_Widget {
 	 * @return string HTML fragment with title
 	 */
 	public function section_title( $post, $instance ) {
-
-		$html  = '';
-		$title = '';
-		$href  = '';
+		// Format string to deliver the title and href as an HTML fragment.
+		$wrapped_title_format = '<a class="content_nav_header" href="%s">%s</a>';
 
 		$section_id = $this->get_title_post_id_for_child( $post, $instance['navigation_style'] );
 
-		// Use section post for title.
-		if ( $section_id ) {
-			$section = get_post( $section_id );
-
-			// Prevent usage of non-published posts as titles.
-			if ( 'publish' === $section->post_status ) {
-				// Second argument prevents usage of default (no title) label.
-				$title = bu_navigation_get_label( $section, '' );
-				$href  = get_permalink( $section->ID );
-			}
+		// If no title post is returned, use the site title.
+		if ( ! $section_id ) {
+			return $this->get_site_title( $wrapped_title_format );
 		}
 
-		// Fallback to site title if we're still empty.
-		if ( empty( $title ) ) {
-			$title = get_bloginfo( 'name' );
-			$href  = trailingslashit( get_bloginfo( 'url' ) );
+		// If there is a title post for this child ("section_id"), then try using it for the title.
+		$section = get_post( $section_id );
+
+		// Get title, the second argument prevents usage of default (no title) label.
+		$title = bu_navigation_get_label( $section, '' );
+
+		// Prevent usage of non-published posts or empty titles, use site title instead.
+		if ( ( 'publish' !== $section->post_status ) || empty( $title ) ) {
+			return $this->get_site_title( $wrapped_title_format );
 		}
 
-		if ( $title && $href ) {
-			$html = sprintf( "<a class=\"content_nav_header\" href=\"%s\">%s</a>\n", esc_attr( $href ), $title );
-		}
+		$href = get_permalink( $section->ID );
 
-		return $html;
+		return sprintf( $wrapped_title_format, esc_attr( $href ), $title );
+
+	}
+
+	/**
+	 * Get site title
+	 *
+	 * Private convenience method to make it easier to give section_title multiple early return options.
+	 * There are more than one condition that make section_title want to return the overall site title
+	 * as the widget title.  This function gets the title and href from the site and returns them formatted.
+	 *
+	 * @since 1.2.22
+	 *
+	 * @param string $wrapped_title_format An sprintf format string to render the title and href as an html fragement.
+	 * @return string Formatted html fragment with the site title and link.
+	 */
+	private function get_site_title( $wrapped_title_format ) {
+		$title = get_bloginfo( 'name' );
+		$href  = trailingslashit( get_bloginfo( 'url' ) );
+		return sprintf( $wrapped_title_format, esc_attr( $href ), $title );
 	}
 
 	/**

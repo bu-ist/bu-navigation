@@ -102,16 +102,17 @@ class BU_Widget_Pages extends WP_Widget {
 	/**
 	 * Get site title
 	 *
-	 * Private convenience method to make it easier to give section_title multiple early return options.
+	 * Gets the title and href from the site and returns them formatted for use as a widget title.
+	 * It is a protected convenience method to make it easier to give section_title multiple early return options.
 	 * There are more than one condition that make section_title want to return the overall site title
-	 * as the widget title.  This function gets the title and href from the site and returns them formatted.
+	 * as the widget title.
 	 *
 	 * @since 1.2.22
 	 *
 	 * @param string $wrapped_title_format An sprintf format string to render the title and href as an html fragement.
 	 * @return string Formatted html fragment with the site title and link.
 	 */
-	private function get_site_title( $wrapped_title_format ) {
+	protected function get_site_title( $wrapped_title_format ) {
 		$title = get_bloginfo( 'name' );
 		$href  = trailingslashit( get_bloginfo( 'url' ) );
 		return sprintf( $wrapped_title_format, esc_attr( $href ), $title );
@@ -205,7 +206,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 * 2- the static title
 	 * 3- the section title as returned by section_title()
 	 *
-	 * This private helper function sorts out those scenarios based on the instance options.
+	 * This helper function sorts out those scenarios based on the instance options.
 	 *
 	 * @since 1.2.22
 	 *
@@ -213,7 +214,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 * @param array   $instance The settings for the particular instance of the widget.
 	 * @return string $title Empty string, plain text title, or anchor tag wrapped title string.
 	 */
-	private function get_widget_title( $post, $instance ) {
+	protected function get_widget_title( $post, $instance ) {
 		if ( 'none' === $instance['navigation_title'] ) {
 			return '';
 		}
@@ -248,7 +249,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * @return array Arguements for the bu_navigation_list_pages() query in library.php
 	 */
-	private function get_list_args( $post, $instance ) {
+	protected function get_list_args( $post, $instance ) {
 
 		// Prepare arguments to bu_navigation_list_pages.
 		$list_args = array(
@@ -298,7 +299,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 * @param string $post_type Post type of the post being rendered.
 	 * @return string Post Id of the grandparent post for the widget title.
 	 */
-	private function get_adaptive_section_id( $sections, $post_type ) {
+	protected function get_adaptive_section_id( $sections, $post_type ) {
 		// Fetch post list, possibly limited to specific sections.
 		$page_args       = array(
 			'sections'      => $sections,
@@ -338,7 +339,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 * @param string  $nav_style The navigation style of the widget (mode).
 	 * @return int Either a post id for the title post, or zero if there is no appropriate match.
 	 */
-	private function get_title_post_id_for_child( $post, $nav_style ) {
+	protected function get_title_post_id_for_child( $post, $nav_style ) {
 		// Site mode doesn't need a title post, skip gather_section().
 		if ( 'site' === $nav_style ) {
 			return 0;

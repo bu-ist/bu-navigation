@@ -3,7 +3,7 @@ Contributors: ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
 Tested up to: 5.5
-Stable tag: 1.2.21
+Stable tag: 1.2.22
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,10 @@ Please see this page for the details:
 5. The same drag and drop view is available to move pages while editing them
 
 == Changelog ==
+
+= 1.2.22 =
+
+* Refactor bu-navigation-widget.php to improve code standards.
 
 = 1.2.21 =
 

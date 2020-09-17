@@ -93,6 +93,10 @@ Please see this page for the details:
 
 ## Changelog
 
+### 1.2.22
+
+* Refactor bu-navigation-widget.php to improve code standards.
+
 ### 1.2.21
 
 * Updates npm dependencies and Grunt toolchain.

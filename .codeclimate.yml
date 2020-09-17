@@ -1,10 +1,12 @@
----
-exclude_paths:
+version: "2"
+
+exclude_patterns:
 - images/
 - js/vendor/
 - languages/
 - tests/
 - vendor/
+- node_modules/
 - "**.min.css"
 - "**.min.js"
 - "js/jquery-ui-classic.css"
@@ -17,7 +19,7 @@ prepare:
   - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.mdlrc"
   - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/markdown.rb"
 
-engines:
+plugins:
   csslint:
     enabled: false
   duplication:
@@ -47,8 +49,3 @@ engines:
       rulesets: codesize,naming,unusedcode
   scss-lint:
     enabled: false
-ratings:
-  paths:
-  - "**.js"
-  - "**.php"
-  - "**.css"

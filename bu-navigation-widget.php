@@ -103,7 +103,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * Gets the title and href from the site and returns them formatted for use as a widget title.
 	 * It is a protected convenience method to make it easier to give section_title multiple early return options.
-	 * There are more than one condition that make section_title want to return the overall site title
+	 * There is more than one condition that causes section_title to return the overall site title
 	 * as the widget title.
 	 *
 	 * @since 1.2.22

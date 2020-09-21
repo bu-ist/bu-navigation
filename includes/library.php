@@ -888,6 +888,9 @@ function bu_navigation_list_section( $parent_id, $pages_by_parent, $args = '' ) 
 /**
  * Alternative to WordPress' wp_list_pages function
  *
+ * Inside the plugin, only the widget uses this function.
+ * Externally it is also used by the r-editorial theme and associated child themes.
+ *
  * @todo refactor to decouple widget-specific logic
  *
  * @param mixed $args Array or string of WP-style arguments.

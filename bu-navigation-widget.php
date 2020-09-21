@@ -64,8 +64,7 @@ class BU_Widget_Pages extends WP_Widget {
 	/**
 	 * Returns HTML fragment containing a section title
 	 *
-	 * Uses bu_navigation_gather_sections, bu_navigation_get_pages, bu_navigation_pages_by_parent, bu_navigation_get_label
-	 * from includes/library.php
+	 * @see bu_navigation_get_label() from extras/bu-navigation-labels.php
 	 *
 	 * @param WP_Post $post Root post as passed through global to the widget() method.
 	 * @param array   $instance widget instance args, as passed to WP_Widget::widget.
@@ -120,6 +119,9 @@ class BU_Widget_Pages extends WP_Widget {
 
 	/**
 	 * Echos the content navigation widget content, overrides parent method.
+	 *
+	 * @see bu_navigation_supported_post_types() from library.php
+	 * @see bu_navigation_list_pages() from library.php
 	 *
 	 * @param array $args Display arguments for WP_Widget.
 	 * @param array $instance The settings for the particular instance of the widget.
@@ -295,6 +297,9 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * @since 1.2.22
 	 *
+	 * @see bu_navigation_get_pages() from library.php
+	 * @see bu_navigation_pages_by_parent() from library.php
+	 *
 	 * @param array  $sections Array of post ids.
 	 * @param string $post_type Post type of the post being rendered.
 	 * @return string Post Id of the grandparent post for the widget title.
@@ -334,6 +339,8 @@ class BU_Widget_Pages extends WP_Widget {
 	 * Given a post in the hierarchy, returns a post id for a "title" post, based on the current navigation style (mode).
 	 *
 	 * @since 1.2.22
+	 *
+	 * @see bu_navigation_gather_sections() from library.php
 	 *
 	 * @param WP_Post $post The post object as passed to the the widget() method.
 	 * @param string  $nav_style The navigation style of the widget (mode).

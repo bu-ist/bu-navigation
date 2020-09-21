@@ -1,8 +1,11 @@
 <?php
 /**
- * Generic navigation function for WordPress 2.8+
- * Niall Kavanagh
- * ntk@bu.edu
+ * Data model methods
+ *
+ * Provides several methods to the global scope for pulling
+ * navigation related data from the database.
+ *
+ * @package BU_Navigation
  */
 
 if ( defined( 'BU_NAVIGATION_LIB_LOADED' ) && BU_NAVIGATION_LIB_LOADED ) {
@@ -16,7 +19,10 @@ define( 'GROUP_CONCAT_MAX_LEN', 20480 );
 /**
  * Gets the supported post_types by the bu-navigation plugin.
  *
- * @param boolean $include_link true|false link post_type is something special, so we don't always need it
+ * This is just a wrapper that calls the underlying global plugin class method.
+ *
+ * @param boolean $include_link true|false link post_type is something special, so we don't always need it.
+ * @param string  $output type of output (names|objects).
  * @return array of post_type strings
  */
 function bu_navigation_supported_post_types( $include_link = false, $output = 'names' ) {
@@ -30,14 +36,14 @@ function bu_navigation_supported_post_types( $include_link = false, $output = 'n
  * Returns all the sections with children and all the pages with parents (so both ways)
  *
  * @global type $wpdb
- * @param array $post_types focus on a specific post_type
- * @param bool  $include_links whether or not to include links (with pages only)
+ * @param array $post_types focus on a specific post_type.
+ * @param bool  $include_links whether or not to include links (with pages only).
  * @return array (sections => array(sectionid1 => [pageid1, ...], ...), pages => array( pageid1 => sectionid1, ... )
  */
 function bu_navigation_load_sections( $post_types = array(), $include_links = true ) {
 	global $wpdb, $bu_navigation_plugin;
 
-	// Setup target post type(s)
+	// Setup target post type(s).
 	if ( empty( $post_types ) ) {
 		$post_types = array( 'page' );
 	} elseif ( is_string( $post_types ) ) {
@@ -46,7 +52,7 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 		$post_types = (array) $post_types;
 	}
 
-	// Handle links
+	// Handle links.
 	if ( $include_links && ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types ) ) {
 		if ( in_array( 'page', $post_types ) && ( count( $post_types ) == 1 ) ) {
 			$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
@@ -62,7 +68,7 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 
 	// Try the cache first
 	// Cache is timestamped for maximum freshness (see `get_pages`)
-	// The `last_changed` key is updated by core in `clean_post_cache`
+	// The `last_changed` key is updated by core in `clean_post_cache`.
 	$last_changed = wp_cache_get( 'last_changed', 'posts' );
 	if ( ! $last_changed ) {
 		$last_changed = microtime();
@@ -100,7 +106,7 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 		}
 	}
 
-	// Cache results
+	// Cache results.
 	$all_sections = array(
 		'sections' => $sections,
 		'pages'    => $pages,
@@ -111,7 +117,15 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 }
 
 /**
- * @todo needs docblock
+ * Returns a 'section' of the navigation tree based on a set of args.
+ *
+ * @see bu_navigation_load_sections()
+ * @see bu_navigation_gather_childsections()
+ *
+ * @param mixed $page_id ID of the page to gather sections for (string | int).
+ * @param array $args Array of arguments (defaults to an empty string but should really probably default to an empty array).
+ * @param array $all_sections Complex array.
+ * @return array
  */
 function bu_navigation_gather_sections( $page_id, $args = '', $all_sections = null ) {
 	$defaults = array(
@@ -129,12 +143,12 @@ function bu_navigation_gather_sections( $page_id, $args = '', $all_sections = nu
 	$pages    = $all_sections['pages'];
 	$sections = array();
 
-	// Include the current page as a section if it has any children
+	// Include the current page as a section if it has any children.
 	if ( array_key_exists( $page_id, $all_sections['sections'] ) ) {
 		array_push( $sections, $page_id );
 	}
 
-	// Gather descendants or ancestors depending on direction
+	// Gather descendants or ancestors depending on direction.
 	if ( $r['direction'] == 'down' ) {
 
 		$child_sections = bu_navigation_gather_childsections( $page_id, $all_sections['sections'], $r['depth'] );
@@ -166,7 +180,13 @@ function bu_navigation_gather_sections( $page_id, $args = '', $all_sections = nu
 }
 
 /**
- * @todo needs docblock
+ * Gets a section of children given a post ID and some arguments.
+ *
+ * @param string  $parent_id ID of a parent post expressed as a string.
+ * @param array   $sections
+ * @param integer $max_depth
+ * @param integer $current_depth
+ * @return array
  */
 function bu_navigation_gather_childsections( $parent_id, $sections, $max_depth = 0, $current_depth = 1 ) {
 	$child_sections = array();
@@ -379,6 +399,11 @@ function bu_navigation_get_page_uri( $page, $ancestors ) {
 	return $uri;
 }
 
+/**
+ * Undocumented function
+ *
+ * Docs in progress.
+ */
 function _bu_navigation_page_uri_ancestors( $post ) {
 
 	$ancestors    = array();
@@ -411,6 +436,13 @@ function _bu_navigation_page_uri_ancestors( $post ) {
 	return $ancestors;
 }
 
+/**
+ * This looks like an artifact, as the parameter is never used
+ * and it just returns an array of static strings.
+ *
+ * @param array $fields Not used.
+ * @return array
+ */
 function _bu_navigation_page_uri_ancestors_fields( $fields ) {
 	return array( 'ID', 'post_name', 'post_parent' );
 }
@@ -420,7 +452,7 @@ function _bu_navigation_page_uri_ancestors_fields( $fields ) {
  *
  * TODO: Function incomplete; most arguments ignored. Sort order should allow +1 column
  *
- * @param $args mixed Wordpress-style arguments (string or array)
+ * @param mixed $args Wordpress-style arguments (string or array).
  * @return array Array of pages keyed on page ID or FALSE on problem
  */
 function bu_navigation_get_posts( $args = '' ) {
@@ -438,10 +470,11 @@ function bu_navigation_get_posts( $args = '' ) {
 	);
 	$r        = wp_parse_args( $args, $defaults );
 
-	// Start building the query
-	$where = $orderby = '';
+	// Start building the query.
+	$where   = '';
+	$orderby = '';
 
-	// Post fields to return
+	// Post fields to return.
 	$fields = array(
 		'ID',
 		'post_date',
@@ -458,7 +491,7 @@ function bu_navigation_get_posts( $args = '' ) {
 	$fields = apply_filters( 'bu_navigation_filter_fields', $fields );
 	$fields = implode( ',', $fields );
 
-	// Append post types
+	// Append post types.
 	$post_types = $r['post_types'];
 	if ( 'any' != $post_types ) {
 		if ( is_string( $post_types ) ) {
@@ -468,7 +501,7 @@ function bu_navigation_get_posts( $args = '' ) {
 		$post_types = (array) $post_types;
 		$post_types = array_map( 'trim', $post_types );
 
-		// Include links?
+		// If links are included, add them to the post types array.
 		if ( $r['include_links'] && ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types ) ) {
 			if ( in_array( 'page', $post_types ) && ( count( $post_types ) == 1 ) ) {
 				$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
@@ -485,7 +518,7 @@ function bu_navigation_get_posts( $args = '' ) {
 		$where     .= " AND post_type IN ('$post_types')";
 	}
 
-	// Append post statuses
+	// Append post statuses.
 	$post_status = $r['post_status'];
 	if ( 'any' != $post_status ) {
 		if ( is_string( $post_status ) ) {
@@ -558,7 +591,7 @@ function bu_navigation_get_posts( $args = '' ) {
  *
  * Translates legacy arguments that have been updated for consistency with WP_Query
  *
- * @param $args mixed Wordpress-style arguments (string or array)
+ * @param mixed $args  Wordpress-style arguments (string or array).
  * @return array Array of pages keyed on page ID or FALSE on problem
  */
 function bu_navigation_get_pages( $args = '' ) {
@@ -583,7 +616,7 @@ function bu_navigation_get_pages( $args = '' ) {
 /**
  * Indexes an array of pages by their parent page ID
  *
- * @param $pages array Array of page objects (usually indexed by the post.ID)
+ * @param array $pages Array of page objects (usually indexed by the post.ID).
  * @return array Array of arrays indexed on post.ID with second-level array containing the immediate children of that post
  */
 function bu_navigation_pages_by_parent( $pages ) {
@@ -605,6 +638,9 @@ function bu_navigation_pages_by_parent( $pages ) {
 
 /**
  * Add this filter before calling bu_navigation_pages_by_parent to sort each sub-array by menu order.
+ *
+ * @param array $pages
+ * @return array
  */
 function bu_navigation_pages_by_parent_menu_sort( $pages ) {
 	if ( is_array( $pages ) ) {
@@ -626,7 +662,7 @@ function bu_navigation_pages_by_parent_menu_sort_cb( $a, $b ) {
 /**
  * Formats a single page for display in a HTML list
  *
- * @param $page object Page object
+ * @param object                                                               $page Page object.
  * @param $html string Option HTML to place inside the list item after the page
  * @return string HTML fragment containing list item
  */
@@ -773,8 +809,8 @@ add_filter( 'bu_navigation_filter_item_attrs', 'bu_navigation_filter_item_attrs'
  *
  * @todo relocate to a default filters file
  *
- * @param $attributes array Associative array of anchor attributes
- * @param $page object Page object
+ * @param array  $attributes Associative array of anchor attributes.
+ * @param object $page Page object.
  */
 function bu_navigation_filter_item_active_page( $attributes, $page ) {
 	global $wp_query;
@@ -804,8 +840,9 @@ add_filter( 'bu_navigation_format_page_label', 'trim' );
 /**
  * Generates an unordered list tree of pages in a particular section
  *
- * @param $parent_id Integer ID of section (page parent)
- * @param $pages_by_parent array An array of pages indexed by their parent page (see bu_navigation_pages_by_parent)
+ * @param int   $parent_id ID of section (page parent).
+ * @param array $pages_by_parent An array of pages indexed by their parent page (see bu_navigation_pages_by_parent).
+ * @param mixed $args Array or string of WP-style arguments.
  * @return string HTML fragment containing unordered list
  */
 function bu_navigation_list_section( $parent_id, $pages_by_parent, $args = '' ) {
@@ -853,7 +890,7 @@ function bu_navigation_list_section( $parent_id, $pages_by_parent, $args = '' ) 
  *
  * @todo refactor to decouple widget-specific logic
  *
- * @param $args mixed Array or string of WP-style arguments
+ * @param mixed $args Array or string of WP-style arguments.
  * @return string HTML fragment containing navigation list
  */
 function bu_navigation_list_pages( $args = '' ) {
@@ -879,7 +916,7 @@ function bu_navigation_list_pages( $args = '' ) {
 
 	$section_ids = array();
 
-	// Get ancestors if a specific post is being listed
+	// Get ancestors if a specific post is being listed.
 	if ( $r['page_id'] ) {
 		$all_sections = bu_navigation_load_sections( $r['post_types'], $r['include_links'] );
 
@@ -939,7 +976,7 @@ function bu_navigation_list_pages( $args = '' ) {
 		}
 	}
 
-	// Default to top level pages
+	// Default to top level pages.
 	$section = $sections[0];
 
 	// Sectional navigation requires at least two levels
@@ -951,7 +988,7 @@ function bu_navigation_list_pages( $args = '' ) {
 		}
 	}
 
-	// Loop over top section
+	// Loop over top section.
 	if ( isset( $pages_by_parent[ $section ] ) && is_array( $pages_by_parent[ $section ] ) && ( count( $pages_by_parent[ $section ] ) > 0 ) ) {
 
 		$sargs = array(
@@ -997,7 +1034,15 @@ function bu_navigation_list_pages( $args = '' ) {
 /**
  * Displays a primary navigation bar
  *
- * @return void
+ * This function isn't invoked anywhere from the plugin, but is called from the global scope by several themes.
+ * The return value here is ambiguous.  The function consistently does return the html sting,
+ * however by default is also directly echos the string (based on an overrideable parameter in args
+ * called 'echo').
+ *
+ * @todo Consider resolving the return/echo behavior of the function and refactor it to do just one or the other.
+ *
+ * @param mixed $args Wordpress-style arguments (string or array).
+ * @return string A string of formatted html.
  */
 function bu_navigation_display_primary( $args = '' ) {
 	$defaults = array(
@@ -1018,7 +1063,7 @@ function bu_navigation_display_primary( $args = '' ) {
 	);
 	$r        = wp_parse_args( $args, apply_filters( 'bu_filter_primarynav_defaults', $defaults ) );
 
-	// Gather all sections
+	// Gather all sections.
 	$section_args = array(
 		'direction'     => 'down',
 		'depth'         => $r['depth'],
@@ -1027,7 +1072,7 @@ function bu_navigation_display_primary( $args = '' ) {
 	);
 	$sections     = bu_navigation_gather_sections( 0, $section_args );
 
-	// Fetch only posts in sections that we need
+	// Fetch only posts in sections that we need.
 	$post_args       = array(
 		'sections'      => $sections,
 		'post_types'    => $r['post_types'],
@@ -1039,7 +1084,7 @@ function bu_navigation_display_primary( $args = '' ) {
 	$top_level_pages = array();
 	$html            = '';
 
-	// Start displaying top level posts
+	// Start displaying top level posts.
 	if ( is_array( $pages_by_parent ) && isset( $pages_by_parent[0] ) && ( count( $pages_by_parent[0] ) > 0 ) ) {
 		$top_level_pages = $pages_by_parent[0];
 	}
@@ -1049,7 +1094,7 @@ function bu_navigation_display_primary( $args = '' ) {
 		$nItems    = 0;
 		$whitelist = null;
 
-		// Optionally restrict top level posts to white list of post names
+		// Optionally restrict top level posts to white list of post names.
 		if ( $r['whitelist_top'] ) {
 			if ( is_string( $r['whitelist_top'] ) ) {
 				$whitelist = explode( ',', $r['whitelist_top'] );
@@ -1059,7 +1104,7 @@ function bu_navigation_display_primary( $args = '' ) {
 			}
 		}
 
-		// Start list
+		// Start list.
 		$html = sprintf(
 			'<%s id="%s" class="%s %s">',
 			$r['container_tag'],
@@ -1068,7 +1113,7 @@ function bu_navigation_display_primary( $args = '' ) {
 			$r['dive'] ? '' : 'no-dive'
 		);
 
-		// Section arguments
+		// Section arguments.
 		$sargs = array(
 			'container_tag' => $r['container_tag'],
 			'item_tag'      => $r['item_tag'],
@@ -1077,19 +1122,19 @@ function bu_navigation_display_primary( $args = '' ) {
 
 		foreach ( $top_level_pages as $page ) {
 
-			// Check whitelist if it's being used
+			// Check whitelist if it's being used.
 			if ( is_array( $whitelist ) && ! in_array( $page->post_name, $whitelist ) ) {
 				continue;
 			}
 
 			$child_html = '';
 
-			// List children if we're diving
+			// List children if we're diving.
 			if ( $r['dive'] ) {
 				$child_html = bu_navigation_list_section( $page->ID, $pages_by_parent, $sargs );
 			}
 
-			// Display formatted page (optionally with post name as ID)
+			// Display formatted page (optionally with post name as ID).
 			if ( $r['identify_top'] ) {
 				$html .= bu_navigation_format_page(
 					$page, array(
@@ -1111,13 +1156,13 @@ function bu_navigation_display_primary( $args = '' ) {
 
 			$nItems++;
 
-			// Limit to max number of posts
+			// Limit to max number of posts.
 			if ( $nItems >= $r['max_items'] ) {
 				break;
 			}
 		}
 
-		// Close list
+		// Close list.
 		$html .= sprintf( "\n</%s>\n", $r['container_tag'] );
 	}
 
@@ -1132,11 +1177,15 @@ function bu_navigation_display_primary( $args = '' ) {
 /**
  * Generate page parent select menu
  *
+ * This appears to be a single use function that is only called by admin/filter-pages.php.
+ *
+ * @todo Evalute moving this function to one of the admin files.
+ *
  * @uses bu_filter_pages_parent_dropdown().
  *
- * @param string $post_type required -- post type to filter posts for
- * @param int    $selected post ID of the selected post
- * @param array  $args optional configuration object
+ * @param string $post_type required -- post type to filter posts for.
+ * @param int    $selected post ID of the selected post.
+ * @param array  $args optional configuration parameters.
  *
  * @return string the resulting dropdown markup
  */
@@ -1151,7 +1200,7 @@ function bu_navigation_page_parent_dropdown( $post_type, $selected = 0, $args = 
 	);
 	$r        = wp_parse_args( $args, $defaults );
 
-	// Grab top level pages for current post type
+	// Grab top level pages for current post type.
 	$args     = array(
 		'direction'  => 'down',
 		'depth'      => 1,
@@ -1192,7 +1241,12 @@ function bu_navigation_page_parent_dropdown( $post_type, $selected = 0, $args = 
  * Displays a select box containing page parents, used to filter page list by parent
  *
  * Relocated from the navigation plugin (bu-filter-pages.php) to remove dependency on plugin.
+ * This is only called from bu_navigation_page_parent_dropdown() except for a reference in bu-site-inpection.
  *
+ * @param array   $pages_by_parent
+ * @param integer $default
+ * @param integer $parent
+ * @param integer $level
  * @return boolean TRUE if the box was displayed, FALSE otherwise.
  */
 function bu_filter_pages_parent_dropdown( $pages_by_parent, $default = 0, $parent = 0, $level = 0 ) {

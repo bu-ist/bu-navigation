@@ -5,6 +5,9 @@
  * Provides several methods to the global scope for pulling
  * navigation related data from the database.
  *
+ * A 'section' here is an associative array of parent pages bundled with their children.
+ * The key of each element is the parent page id, and the value is an array of the children page ids.
+ *
  * @package BU_Navigation
  */
 
@@ -34,6 +37,8 @@ function bu_navigation_supported_post_types( $include_link = false, $output = 'n
 
 /**
  * Returns all the sections with children and all the pages with parents (so both ways)
+ *
+ * This function and one other (get_posts) are the only actual data loading methods.
  *
  * @global type $wpdb
  * @param array $post_types focus on a specific post_type.
@@ -117,14 +122,19 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 }
 
 /**
- * Returns a 'section' of the navigation tree based on a set of args.
+ * A front end to bu_navigation_load_sections() that provides some pre and post processing.
+ *
+ * Theory: where load_sections() returns the entire family tree, gather_sections is
+ * more directed to providing just ancestors or decendants.
+ * This function is in direct use from global scope by several themes.
+ * A survey of the use in BU themes indicates that there are only 2 options for direction: 'up' or 'down'.
  *
  * @see bu_navigation_load_sections()
  * @see bu_navigation_gather_childsections()
  *
  * @param mixed $page_id ID of the page to gather sections for (string | int).
- * @param array $args Array of arguments (defaults to an empty string but should really probably default to an empty array).
- * @param array $all_sections Complex array.
+ * @param mixed $args Wordpress-style arguments (string or array).
+ * @param array $all_sections Associative array of parents with all of their direct children.  Appears to be actually unused and should be removed as an argument.
  * @return array
  */
 function bu_navigation_gather_sections( $page_id, $args = '', $all_sections = null ) {
@@ -207,7 +217,10 @@ function bu_navigation_gather_childsections( $parent_id, $sections, $max_depth =
 }
 
 /**
- * @todo needs docblock
+ * This is the only function that appears to allow for the the 3rd 'all_sections' arg from gather_sections.
+ * It is entirely unusued at BU except for the bu-tech-workflow.php template in the bu-tech-2014 theme.
+ * Ideally this function should be deprecated, and the 'all_sections' arg should be removed from gather_sections.
+ *
  */
 function bu_navigation_get_page_depth( $page_id, $all_sections = null ) {
 	$ancestry = bu_navigation_gather_sections( $page_id, null, $all_sections );
@@ -449,6 +462,9 @@ function _bu_navigation_page_uri_ancestors_fields( $fields ) {
 
 /**
  * Returns an array of page objects indexed by page ID
+ *
+ * Appears to be the primary source of the 'section' data type.
+ * This function and one other (load_sections) are the only actual data loading methods.
  *
  * TODO: Function incomplete; most arguments ignored. Sort order should allow +1 column
  *

@@ -159,14 +159,16 @@ function bu_navigation_gather_sections( $page_id, $args = '', $all_sections = nu
 	}
 
 	// Gather descendants or ancestors depending on direction.
-	if ( $parsed_args['direction'] == 'down' ) {
+	if ( 'down' === $parsed_args['direction'] ) {
 
 		$child_sections = bu_navigation_gather_childsections( $page_id, $all_sections['sections'], $parsed_args['depth'] );
 
 		if ( count( $child_sections ) > 0 ) {
 			$sections = array_merge( $sections, $child_sections );
 		}
-	} else {
+	}
+
+	if ( 'up' === $parsed_args['direction'] ) {
 
 		if ( array_key_exists( $page_id, $pages ) ) {
 

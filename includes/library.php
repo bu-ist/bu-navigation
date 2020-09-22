@@ -138,7 +138,7 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
  * @return array
  */
 function bu_navigation_gather_sections( $page_id, $args = '', $all_sections = null ) {
-	$defaults = array(
+	$defaults    = array(
 		'direction'     => 'up',
 		'depth'         => 0,
 		'post_types'    => array( 'page' ),
@@ -168,17 +168,11 @@ function bu_navigation_gather_sections( $page_id, $args = '', $all_sections = nu
 		}
 	}
 
-	if ( 'up' === $parsed_args['direction'] ) {
-
-		if ( array_key_exists( $page_id, $pages ) ) {
-
-			$sections = bu_navigation_gather_ancestor_sections( $page_id, $pages, $sections );
-		}
+	if ( 'up' === $parsed_args['direction'] && array_key_exists( $page_id, $pages ) ) {
+		$sections = bu_navigation_gather_ancestor_sections( $page_id, $pages, $sections );
 	}
 
-	$sections = array_reverse( $sections );
-
-	return $sections;
+	return array_reverse( $sections );
 }
 
 /**

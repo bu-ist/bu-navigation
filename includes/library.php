@@ -172,21 +172,35 @@ function bu_navigation_gather_sections( $page_id, $args = '', $all_sections = nu
 
 		if ( array_key_exists( $page_id, $pages ) ) {
 
-			$current_section = $pages[ $page_id ];
-			array_push( $sections, $current_section );
-
-			while ( $current_section != 0 ) {
-				if ( array_key_exists( $current_section, $pages ) ) {
-					$current_section = $pages[ $current_section ];
-					array_push( $sections, $current_section );
-				} else {
-					break;
-				}
-			}
+			$sections = bu_navigation_gather_ancestor_sections( $page_id, $pages, $sections );
 		}
 	}
 
 	$sections = array_reverse( $sections );
+
+	return $sections;
+}
+
+/**
+ * Adds nodes above a given page id to a given section array.
+ *
+ * @param mixed $page_id ID of the page to gather sections for (string | int).
+ * @param array $pages Array of pages from load_sections.
+ * @param array $sections The sections array being added to.
+ * @return array New array of sections with the ancestors added.
+ */
+function bu_navigation_gather_ancestor_sections( $page_id, $pages, $sections ) {
+	$current_section = $pages[ $page_id ];
+	array_push( $sections, $current_section );
+
+	while ( 0 !== $current_section ) {
+		if ( array_key_exists( $current_section, $pages ) ) {
+			$current_section = $pages[ $current_section ];
+			array_push( $sections, $current_section );
+		} else {
+			break;
+		}
+	}
 
 	return $sections;
 }

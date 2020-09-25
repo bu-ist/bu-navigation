@@ -729,7 +729,7 @@ function bu_navigation_format_page( $page, $args = '' ) {
 	);
 
 	if ( isset( $page->url ) && ! empty( $page->url ) ) {
-		$attrs['href'] = $page->url;
+		$attrs['href'] = esc_url( $page->url );
 	}
 
 	if ( isset( $page->target ) && $page->target == 'new' ) {

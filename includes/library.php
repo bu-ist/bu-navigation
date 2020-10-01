@@ -692,8 +692,8 @@ function bu_navigation_pages_by_parent_menu_sort_cb( $a, $b ) {
 /**
  * Formats a single page for display in a HTML list
  *
- * @param object                                                               $page Page object.
- * @param $html string Option HTML to place inside the list item after the page
+ * @param object $page Page object.
+ * @param mixed  $args Wordpress-style arguments (string or array).
  * @return string HTML fragment containing list item
  */
 function bu_navigation_format_page( $page, $args = '' ) {

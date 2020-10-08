@@ -59,13 +59,13 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 
 	// Handle links.
 	if ( $include_links && ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types ) ) {
-		if ( in_array( 'page', $post_types ) && ( count( $post_types ) == 1 ) ) {
+		if ( in_array( 'page', $post_types, true ) && ( 1 === count( $post_types ) ) ) {
 			$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
 		}
 	}
 	if ( is_object( $bu_navigation_plugin ) && ! $bu_navigation_plugin->supports( 'links' ) ) {
 		$index = array_search( BU_NAVIGATION_LINK_POST_TYPE, $post_types );
-		if ( $index !== false ) {
+		if ( false !== $index ) {
 			unset( $post_types[ $index ] );
 		}
 	}

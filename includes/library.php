@@ -36,14 +36,32 @@ function bu_navigation_supported_post_types( $include_link = false, $output = 'n
 }
 
 /**
- * Returns all the sections with children and all the pages with parents (so both ways)
+ * Returns a complex array that describes the entire navigation tree for the specified post types.
  *
- * This function and one other (get_posts) are the only actual data loading methods.
+ * The return array contains 2 arrays named 'sections' and 'pages'.
  *
- * @global type $wpdb
- * @param array $post_types focus on a specific post_type.
- * @param bool  $include_links whether or not to include links (with pages only).
- * @return array (sections => array(sectionid1 => [pageid1, ...], ...), pages => array( pageid1 => sectionid1, ... )
+ * The 'sections' array contains elements where the key is the ID of a parent post
+ * and the value is an array of page IDs of all direct descendents.  The 'sections' array
+ * then is a collection of *every post that has direct children*, grouped with an array of the children one level deep.
+ * It may be a somewhat counter-intuitive way to return the data, but is is a data efficient way
+ * to fetch it because it leverages the 'GROUP BY' SQL operator.  The 'sections' array must be further parsed
+ * to assemble all of the branches of the hierarchical tree.
+ *
+ * The 'pages' array contains an element for *every post that has a parent*.
+ * The key of each element is the post ID, and the value is the post ID of the parent post.
+ *
+ * These 2 arrays contain the entire tree expressed as atomic one-level-deep elements, with
+ * 'sections' expressing the top down view, and 'pages' expressing the bottom up view.
+ *
+ * The nomenclature here 'sections' and 'pages' not be the most descriptive, the are really something more like
+ * 'parents_with_children' and 'children_with_parents'.
+ *
+ * This function and one other (get_posts) are the only methods that directly query the database.
+ *
+ * @global object $wpdb
+ * @param mixed $post_types Optional, can be an array of post types, or a string containing post type names.
+ * @param bool  $include_links Whether or not to include links (with pages only).
+ * @return array (sections => array(parent1_id => [child1_id, ...], ...), pages => array( child1_id => parent1_id, ... )
  */
 function bu_navigation_load_sections( $post_types = array(), $include_links = true ) {
 	global $wpdb, $bu_navigation_plugin;

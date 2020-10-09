@@ -53,7 +53,7 @@ function bu_navigation_supported_post_types( $include_link = false, $output = 'n
  * These 2 arrays contain the entire tree expressed as atomic one-level-deep elements, with
  * 'sections' expressing the top down view, and 'pages' expressing the bottom up view.
  *
- * The nomenclature here 'sections' and 'pages' not be the most descriptive, the are really something more like
+ * The nomenclature of 'sections' and 'pages' is not the most descriptive, the are really something more like
  * 'parents_with_children' and 'children_with_parents'.
  *
  * This function and one other (get_posts) are the only methods that directly query the database.

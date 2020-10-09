@@ -171,7 +171,7 @@ class BU_Navigation_Plugin {
 			return;
 		}
 
-		require_once dirname( __FILE__ ) . '/bu-navigation-widget.php';
+		require_once dirname( __FILE__ ) . '/class-bu-widget-pages.php';
 		register_widget( 'BU_Widget_Pages' );
 
 	}

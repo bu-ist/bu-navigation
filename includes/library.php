@@ -506,7 +506,6 @@ function _bu_navigation_page_uri_ancestors_fields( $fields ) {
 /**
  * Returns an array of page objects indexed by page ID
  *
- * Appears to be the primary source of the 'section' data type.
  * This function and one other (load_sections) are the only actual data loading methods.
  *
  * TODO: Function incomplete; most arguments ignored. Sort order should allow +1 column

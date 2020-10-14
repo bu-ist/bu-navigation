@@ -5,7 +5,7 @@
  * Author: Boston University (IS&T)
  * Author URI: http://sites.bu.edu/web/
  * Description: Provides alternative navigation elements designed for blogs with large page counts
- * Version: 1.2.22
+ * Version: 1.2.23
  * Text Domain: bu-navigation
  * Domain Path: /languages
  * License: GPL2+
@@ -16,7 +16,7 @@
 
 /**
  * Copyright 2014 by Boston University
-
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -81,7 +81,7 @@ class BU_Navigation_Plugin {
 	 *
 	 * @var string
 	 */
-	const VERSION = '1.2.22';
+	const VERSION = '1.2.23';
 
 	/**
 	 * Plugin class constructor.
@@ -171,7 +171,7 @@ class BU_Navigation_Plugin {
 			return;
 		}
 
-		require_once dirname( __FILE__ ) . '/bu-navigation-widget.php';
+		require_once dirname( __FILE__ ) . '/class-bu-widget-pages.php';
 		register_widget( 'BU_Widget_Pages' );
 
 	}
@@ -281,7 +281,7 @@ class BU_Navigation_Plugin {
 		$post_types = apply_filters( 'bu_navigation_post_types', $post_types );
 
 		if ( $this->supports( 'links' ) && $include_link ) {
-			if ( 'names' == $output ) {
+			if ( 'names' === $output ) {
 				$post_types[ BU_NAVIGATION_LINK_POST_TYPE ] = BU_NAVIGATION_LINK_POST_TYPE;
 			} else {
 				$post_types[ BU_NAVIGATION_LINK_POST_TYPE ] = get_post_type_object( BU_NAVIGATION_LINK_POST_TYPE );

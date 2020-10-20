@@ -92,7 +92,7 @@ function bu_navigation_load_sections( $post_types = array( 'page' ), $include_li
 	// This clause removes links if the plugin support for links has been removed elsewhere.
 	// It is not clear from the supports() function how often this is being done.
 	if ( is_object( $bu_navigation_plugin ) && ! $bu_navigation_plugin->supports( 'links' ) ) {
-		$index = array_search( BU_NAVIGATION_LINK_POST_TYPE, $post_types );
+		$index = array_search( BU_NAVIGATION_LINK_POST_TYPE, $post_types, true );
 		if ( false !== $index ) {
 			unset( $post_types[ $index ] );
 		}
@@ -117,7 +117,7 @@ function bu_navigation_load_sections( $post_types = array( 'page' ), $include_li
 		return $all_sections;
 	}
 
-	$wpdb->query( 'SET SESSION group_concat_max_len = ' . GROUP_CONCAT_MAX_LEN );
+	$wpdb->query( 'SET SESSION group_concat_max_len = ' . GROUP_CONCAT_MAX_LEN ); // db call ok; no-cache ok.
 	$query = sprintf(
 		"
 		SELECT DISTINCT(post_parent) AS section, GROUP_CONCAT(ID) AS children
@@ -126,7 +126,7 @@ function bu_navigation_load_sections( $post_types = array( 'page' ), $include_li
 		 GROUP BY post_parent
 		 ORDER BY post_parent ASC", $wpdb->posts
 	);
-	$rows  = $wpdb->get_results( $query );
+	$rows  = $wpdb->get_results( $query ); // db call ok; no-cache ok.
 
 	$all_sections = bu_navigation_transform_rows( $rows );
 

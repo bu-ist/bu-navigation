@@ -1049,10 +1049,10 @@ function bu_navigation_list_pages( $args = '' ) {
 			$last_section = array_pop( $sections );
 			array_push( $sections, $last_section );
 
-			if ( array_key_exists( $last_section, $pages_by_parent ) &&
-				 is_array( $pages_by_parent[ $last_section ] ) &&
-				 ( count( $pages_by_parent[ $last_section ] ) > 0 )
-			   ) {
+			if ( array_key_exists( $last_section, $pages_by_parent )
+				&& is_array( $pages_by_parent[ $last_section ] )
+				&& ( count( $pages_by_parent[ $last_section ] ) > 0 )
+			) {
 				// Last section has children, so it will be the "top"
 				$sections = array_slice( $sections, -2 );
 			} else {

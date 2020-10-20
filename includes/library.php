@@ -78,13 +78,15 @@ function bu_navigation_load_sections( $post_types = array( 'page' ), $include_li
 	}
 
 	// Handle links.
-	if ( $include_links && ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types ) ) {
-		if ( in_array( 'page', $post_types, true ) && ( 1 === count( $post_types ) ) ) {
-			// Stepping through this, I'm not sure why links would only be added if it is pages being listed.
-			// Also, I'm not sure why links should be skipped if there's more than one type already.
-			// It may be that removing that conditional clause will help simplify the nested conditional here.
-			$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
-		}
+	if ( $include_links
+		&& ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types, true )
+		&& in_array( 'page', $post_types, true )
+		&& ( 1 === count( $post_types ) )
+	) {
+		// Stepping through this, I'm not sure why links would only be added if it is pages being listed.
+		// Also, I'm not sure why links should be skipped if there's more than one type already.
+		// It may be that removing that conditional clause will help simplify the nested conditional here.
+		$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
 	}
 
 	// This clause removes links if the plugin support for links has been removed elsewhere.

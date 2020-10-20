@@ -63,16 +63,17 @@ function bu_navigation_supported_post_types( $include_link = false, $output = 'n
  * @param bool  $include_links Whether or not to include links (with pages only).
  * @return array (sections => array(parent1_id => [child1_id, ...], ...), pages => array( child1_id => parent1_id, ... )
  */
-function bu_navigation_load_sections( $post_types = array(), $include_links = true ) {
+function bu_navigation_load_sections( $post_types = array( 'page' ), $include_links = true ) {
 	global $wpdb, $bu_navigation_plugin;
 
-	// Setup target post type(s).
-	if ( empty( $post_types ) ) {
-		$post_types = array( 'page' );
-	} elseif ( is_string( $post_types ) ) {
+	// Convert string style args to an array.
+	if ( is_string( $post_types ) ) {
 		$post_types = explode( ',', $post_types );
-	} else {
-		// There should not be any scenarios where $post_types isn't already an array, so this clause looks extraneous.
+	}
+
+	// There should not be any scenarios where $post_types isn't already an array, so this clause looks extraneous.
+	// Leaving it here for compatibility with previous behavior, but should be evaluated for removal in future releases.
+	if ( ! is_array( $post_types ) ) {
 		$post_types = (array) $post_types;
 	}
 

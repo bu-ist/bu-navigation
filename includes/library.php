@@ -1113,28 +1113,30 @@ function bu_navigation_list_pages( $args = '' ) {
  */
 function adaptive_section_slice( $page_id, $pages_by_parent, $sections ) {
 	// If the "active" page isn't in the list of sections (because it has no children), add it
-	// @todo I don't think this can ever be true based on the code in bu-navigation-adaptive-contentnav.php
+	// @todo I don't think this can ever be true based on the code in bu-navigation-adaptive-contentnav.php.
 	if ( $page_id && ! in_array( $page_id, $sections, true ) ) {
 		array_push( $sections, $page_id );
 	}
 
-	if ( count( $sections ) > 2 ) {
-		$last_section = array_pop( $sections );
-		array_push( $sections, $last_section );
-
-		if ( array_key_exists( $last_section, $pages_by_parent )
-			&& is_array( $pages_by_parent[ $last_section ] )
-			&& ( count( $pages_by_parent[ $last_section ] ) > 0 )
-		) {
-			// Last section has children, so it will be the "top"
-			$sections = array_slice( $sections, -2 );
-		} else {
-			// Last section has no children, so its parent will be the "top"
-			$sections = array_slice( $sections, -3 );
-		}
+	// If the section count is only 2 or below, return it unmodified as it does not need slicing.
+	if ( count( $sections ) < 3 ) {
+		return $sections;
 	}
 
-	return $sections;
+	$last_section = array_pop( $sections );
+	array_push( $sections, $last_section );
+
+	if ( array_key_exists( $last_section, $pages_by_parent )
+		&& is_array( $pages_by_parent[ $last_section ] )
+		&& ( count( $pages_by_parent[ $last_section ] ) > 0 )
+	) {
+		// Last section has children, so it will be the "top".
+		return array_slice( $sections, -2 );
+	}
+
+	// Last section has no children, so its parent will be the "top".
+	return array_slice( $sections, -3 );
+
 }
 
 /**

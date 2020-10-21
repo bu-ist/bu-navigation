@@ -998,8 +998,6 @@ function bu_navigation_list_pages( $args = '' ) {
 	);
 	$parsed_args = wp_parse_args( $args, $defaults );
 
-	$output = '';
-
 	$section_ids = array();
 
 	// Get ancestors if a specific post is being listed.

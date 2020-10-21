@@ -1039,51 +1039,47 @@ function bu_navigation_list_pages( $args = '' ) {
 
 	$html = sprintf( "<%s %s>\n", $parsed_args['container_tag'], $list_attributes );
 
-
 	// Default to top level pages.
 	$section = $sections[0];
 
-	// Sectional navigation requires at least two levels
+	// Handle sectional navigation style.
 	if ( $parsed_args['navigate_in_section'] ) {
-		if ( isset( $sections[1] ) ) {
-			$section = $sections[1];
-		} else {
-			$section = null;
-		}
+		// Sectional navigation requires at least two levels, return null otherwise.
+		$section = ( isset( $sections[1] ) ) ? $sections[1] : null;
+	}
+
+	// Check that $pages_by_parent[ $section ] has elements, if not return an empty string.
+	if ( ! isset( $pages_by_parent[ $section ] ) || ! is_array( $pages_by_parent[ $section ] ) || ( count( $pages_by_parent[ $section ] ) < 1 ) ) {
+		return '';
 	}
 
 	// Loop over top section.
-	if ( isset( $pages_by_parent[ $section ] ) && is_array( $pages_by_parent[ $section ] ) && ( count( $pages_by_parent[ $section ] ) > 0 ) ) {
+	$sargs = array(
+		'container_tag' => $parsed_args['container_tag'],
+		'item_tag'      => $parsed_args['item_tag'],
+		'depth'         => 2,
+		'section_ids'   => $section_ids,
+	);
 
-		$sargs = array(
-			'container_tag' => $parsed_args['container_tag'],
-			'item_tag'      => $parsed_args['item_tag'],
-			'depth'         => 2,
-			'section_ids'   => $section_ids,
+	$page_position   = 1;
+	$number_siblings = count( $pages_by_parent[ $section ] );
+
+	foreach ( $pages_by_parent[ $section ] as $page ) {
+
+		$child_html = bu_navigation_list_section( $page->ID, $pages_by_parent, $sargs );
+
+		$pargs = array(
+			'html'        => $child_html,
+			'depth'       => 1,
+			'position'    => $page_position,
+			'siblings'    => $number_siblings,
+			'item_tag'    => $parsed_args['item_tag'],
+			'section_ids' => $section_ids,
 		);
 
-		$page_position   = 1;
-		$number_siblings = count( $pages_by_parent[ $section ] );
+		$html .= bu_navigation_format_page( $page, $pargs );
 
-		foreach ( $pages_by_parent[ $section ] as $page ) {
-
-			$child_html = bu_navigation_list_section( $page->ID, $pages_by_parent, $sargs );
-
-			$pargs = array(
-				'html'        => $child_html,
-				'depth'       => 1,
-				'position'    => $page_position,
-				'siblings'    => $number_siblings,
-				'item_tag'    => $parsed_args['item_tag'],
-				'section_ids' => $section_ids,
-			);
-
-			$html .= bu_navigation_format_page( $page, $pargs );
-
-			$page_position++;
-		}
-	} else {
-		return '';
+		$page_position++;
 	}
 
 	$html .= sprintf( "</%s>\n", $parsed_args['container_tag'] );

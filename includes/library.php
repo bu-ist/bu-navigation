@@ -1028,17 +1028,6 @@ function bu_navigation_list_pages( $args = '' ) {
 		$sections = adaptive_section_slice( $parsed_args['page_id'], $pages_by_parent, $sections );
 	}
 
-	$list_attributes = '';
-
-	if ( $parsed_args['container_id'] ) {
-		$list_attributes .= sprintf( ' id="%s"', $parsed_args['container_id'] );
-	}
-	if ( $parsed_args['container_class'] ) {
-		$list_attributes .= sprintf( ' class="%s"', $parsed_args['container_class'] );
-	}
-
-	$html = sprintf( "<%s %s>\n", $parsed_args['container_tag'], $list_attributes );
-
 	// Default to top level pages.
 	$section = $sections[0];
 
@@ -1052,6 +1041,17 @@ function bu_navigation_list_pages( $args = '' ) {
 	if ( ! isset( $pages_by_parent[ $section ] ) || ! is_array( $pages_by_parent[ $section ] ) || ( count( $pages_by_parent[ $section ] ) < 1 ) ) {
 		return '';
 	}
+
+	$list_attributes = '';
+
+	if ( $parsed_args['container_id'] ) {
+		$list_attributes .= sprintf( ' id="%s"', $parsed_args['container_id'] );
+	}
+	if ( $parsed_args['container_class'] ) {
+		$list_attributes .= sprintf( ' class="%s"', $parsed_args['container_class'] );
+	}
+
+	$html = sprintf( "<%s %s>\n", $parsed_args['container_tag'], $list_attributes );
 
 	// Loop over top section.
 	$sargs = array(

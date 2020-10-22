@@ -13,7 +13,6 @@
  */
 function bu_navigation_widget_adaptive_before_list() {
 	add_filter( 'bu_navigation_filter_pages_by_parent', 'bu_navigation_filter_pages_adaptive' );
-	add_filter( 'widget_bu_pages_args', 'widget_bu_pages_args_adaptive' );
 }
 
 /**
@@ -23,7 +22,6 @@ function bu_navigation_widget_adaptive_before_list() {
  * display all sections.
  */
 function widget_bu_pages_args_adaptive( $args ) {
-	remove_filter( 'widget_bu_pages_args', 'widget_bu_pages_args_adaptive' );
 	if ( $args['page_id'] ) {
 		$section_args = array( 'post_types' => $args['post_types'] );
 		$sections     = bu_navigation_gather_sections( $args['page_id'], $section_args );

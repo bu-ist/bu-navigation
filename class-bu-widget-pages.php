@@ -122,6 +122,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * @see bu_navigation_supported_post_types() from library.php
 	 * @see bu_navigation_list_pages() from library.php
+	 * @see widget_bu_pages_args_adaptive() from bu-navigation-adaptive-contentnav.php
 	 *
 	 * @param array $args Display arguments for WP_Widget.
 	 * @param array $instance The settings for the particular instance of the widget.
@@ -141,8 +142,13 @@ class BU_Widget_Pages extends WP_Widget {
 
 		do_action( 'bu_navigation_widget_before_list' );
 
+		// Alter args for adaptive mode.
+		if ( 'adaptive' === $instance['navigation_style'] ) {
+			$list_args = widget_bu_pages_args_adaptive( $list_args );
+		}
+
 		// Fetch markup.
-		$nav_list_markup = bu_navigation_list_pages( apply_filters( 'widget_bu_pages_args', $list_args ) );
+		$nav_list_markup = bu_navigation_list_pages( $list_args );
 
 		// Only output anything at all if there is existing markup from list_pages.
 		if ( empty( $nav_list_markup ) ) {

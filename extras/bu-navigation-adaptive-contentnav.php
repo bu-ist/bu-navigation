@@ -9,13 +9,6 @@
  */
 
 /**
- * Attach adaptive-mode specific hooks
- */
-function bu_navigation_widget_adaptive_before_list() {
-	add_filter( 'bu_navigation_filter_pages_by_parent', 'bu_navigation_filter_pages_adaptive' );
-}
-
-/**
  * Filters arguments passed to bu_navigation_list_pages from widget display
  *
  * This is an ugly way of short circuiting the logic within bu_navigation_list_pages to not
@@ -38,8 +31,6 @@ function widget_bu_pages_args_adaptive( $args ) {
  */
 function bu_navigation_filter_pages_adaptive( $pages_by_parent ) {
 	global $post;
-
-	remove_filter( 'bu_navigation_filter_pages_by_parent', 'bu_navigation_filter_pages_adaptive' );
 
 	$filtered     = array();
 	$has_children = false;

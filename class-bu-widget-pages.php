@@ -140,8 +140,6 @@ class BU_Widget_Pages extends WP_Widget {
 		// Set list arguments based on post type and navigation style.
 		$list_args = $this->get_list_args( $post, $instance );
 
-		do_action( 'bu_navigation_widget_before_list' );
-
 		// Alter args for adaptive mode.
 		if ( 'adaptive' === $instance['navigation_style'] ) {
 			$list_args = widget_bu_pages_args_adaptive( $list_args );
@@ -282,12 +280,6 @@ class BU_Widget_Pages extends WP_Widget {
 			$list_args['navigate_in_section'] = 1;
 			// Not sure why it is necessary to check for a 404 here, but this is the original handling.
 			return ( is_404() ) ? '' : $list_args;
-		}
-
-		// 'adaptive' style needs an action from included/library.php to be loaded.
-		if ( 'adaptive' === $instance['navigation_style'] ) {
-			add_action( 'bu_navigation_widget_before_list', 'bu_navigation_widget_adaptive_before_list' );
-			return $list_args;
 		}
 
 		// 'site' navigation_style doesn't require additional handling.

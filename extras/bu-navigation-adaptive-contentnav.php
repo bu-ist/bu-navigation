@@ -3,14 +3,14 @@
  * Adaptive navigation mode tames list size for large site hierarchies by
  * "drilling down" based on the currently active post, limiting  listings
  * to no more than two levels (plus section title if configured).
- * 
+ *
  * @see [Content Navigation Widget Modes](https://github.com/bu-ist/bu-navigation/wiki/Content-Navigation-Widget)
  * @todo bu_navigation_list_pages has a lot of adaptive mode logic -- refactor to consolidate
- */ 
+ */
 
 /**
- * Attach adaptive-mode specific hooks 
- */ 
+ * Attach adaptive-mode specific hooks
+ */
 function bu_navigation_widget_adaptive_before_list() {
 	add_filter( 'bu_navigation_filter_pages_by_parent', 'bu_navigation_filter_pages_adaptive' );
 	add_filter( 'widget_bu_pages_args', 'widget_bu_pages_args_adaptive' );
@@ -18,18 +18,18 @@ function bu_navigation_widget_adaptive_before_list() {
 
 /**
  * Filters arguments passed to bu_navigation_list_pages from widget display
- * 
+ *
  * This is an ugly way of short circuiting the logic within bu_navigation_list_pages to not
  * display all sections.
- */ 
+ */
 function widget_bu_pages_args_adaptive( $args ) {
 	remove_filter( 'widget_bu_pages_args', 'widget_bu_pages_args_adaptive' );
 	if ( $args['page_id'] ) {
 		$section_args = array( 'post_types' => $args['post_types'] );
-		$sections = bu_navigation_gather_sections( $args['page_id'], $section_args );
+		$sections     = bu_navigation_gather_sections( $args['page_id'], $section_args );
 
 		$args['sections'] = $sections;
-		$args['page_id'] = NULL;
+		$args['page_id']  = null;
 	}
 	return $args;
 }
@@ -37,17 +37,17 @@ function widget_bu_pages_args_adaptive( $args ) {
 /**
  * Filters posts returned from bu_navigation_pages_by_parent to only include those
  * centered around the current post
- */ 
+ */
 function bu_navigation_filter_pages_adaptive( $pages_by_parent ) {
 	global $post;
 
-	remove_filter('bu_navigation_filter_pages_by_parent', 'bu_navigation_filter_pages_adaptive' );
+	remove_filter( 'bu_navigation_filter_pages_by_parent', 'bu_navigation_filter_pages_adaptive' );
 
-	$filtered = array();
-	$has_children = FALSE;
+	$filtered     = array();
+	$has_children = false;
 
-	if ( array_key_exists( $post->ID, $pages_by_parent ) && ( count( $pages_by_parent[$post->ID] ) > 0 ) ) {
-		$has_children = TRUE;
+	if ( array_key_exists( $post->ID, $pages_by_parent ) && ( count( $pages_by_parent[ $post->ID ] ) > 0 ) ) {
+		$has_children = true;
 	}
 
 	foreach ( $pages_by_parent as $parent_id => $posts ) {
@@ -79,7 +79,7 @@ function bu_navigation_filter_pages_adaptive( $pages_by_parent ) {
 			}
 
 			if ( count( $potentials ) > 0 ) {
-				$filtered[$parent_id] = $potentials;
+				$filtered[ $parent_id ] = $potentials;
 			}
 		}
 	}

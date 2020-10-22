@@ -41,45 +41,66 @@ function bu_navigation_filter_pages_adaptive( $pages_by_parent ) {
 	global $post;
 
 	$filtered     = array();
-	$has_children = false;
+	$display_has_children = false;
 
 	if ( array_key_exists( $post->ID, $pages_by_parent ) && ( count( $pages_by_parent[ $post->ID ] ) > 0 ) ) {
-		$has_children = true;
+		$display_has_children = true;
 	}
 
-	foreach ( $pages_by_parent as $parent_id => $posts ) {
-		if ( ( is_array( $posts ) ) && ( count( $posts ) > 0 ) ) {
-			$potentials = array();
+	foreach ( $pages_by_parent as $parent_id => $children ) {
 
-			foreach ( $posts as $p ) {
-				if ( $has_children ) {
-					// Only include the current page from the list of siblings if we have children
-					if ( $p->ID == $post->ID ) {
-						array_push( $potentials, $p );
-					}
-				} else {
-					// If we don't have children...
-					// Display siblings of current page also
-					if ( $p->post_parent == $post->post_parent ) {
-						array_push( $potentials, $p );
-					}
-					// Display the parent page
-					if ( $p->ID == $post->post_parent ) {
-						array_push( $potentials, $p );
-					}
-				}
+		$adaptive_children = adaptive_filter_children( $children, $display_has_children, $post );
 
-				// Include pages that are children of the current page
-				if ( $p->post_parent == $post->ID ) {
-					array_push( $potentials, $p );
-				}
-			}
-
-			if ( count( $potentials ) > 0 ) {
-				$filtered[ $parent_id ] = $potentials;
-			}
+		if ( count( $adaptive_children ) > 0 ) {
+			$filtered[ $parent_id ] = $adaptive_children;
 		}
 	}
 
 	return $filtered;
+}
+
+/**
+ * Filters the children of a post relative to the post being rendered for adaptive display
+ *
+ * @param array   $children Array of post objects.
+ * @param boolean $display_has_children Whether the post being displayed has children.
+ * @param WP_Post $display_post The post being rendered (from the global $post).
+ * @return array  Array of filtered post objects.
+ */
+function adaptive_filter_children( $children, $display_has_children, $display_post ) {
+
+	// If there aren't child posts, return nothing.
+	if ( ( ! is_array( $children ) ) || ( ! count( $children ) > 0 ) ) {
+		return;
+	}
+
+	$potentials = array();
+
+	foreach ( $children as $child ) {
+
+		// Only include the current page from the list of siblings if we have children.
+		if ( $display_has_children && (int) $child->ID === (int) $display_post->ID ) {
+			array_push( $potentials, $child );
+		}
+
+		if ( ! $display_has_children ) {
+			// If we don't have children...
+			// Display siblings of current page also
+			if ( $child->post_parent == $display_post->post_parent ) {
+				array_push( $potentials, $child );
+			}
+			// Display the parent page
+			if ( $child->ID == $display_post->post_parent ) {
+				array_push( $potentials, $child );
+			}
+		}
+
+		// Include pages that are children of the current page
+		if ( $child->post_parent == $display_post->ID ) {
+			array_push( $potentials, $child );
+		}
+	}
+
+	return $potentials;
+
 }

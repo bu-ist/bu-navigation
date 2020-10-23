@@ -58,6 +58,10 @@ function bu_navigation_filter_pages_adaptive( $pages_by_parent ) {
 /**
  * Filters the children of a post relative to the post being rendered for adaptive display
  *
+ * This method has too many returns, but is unwound from a more complicated set of nested conditionals.
+ * The id's are cast as integers, because the $child ids are currently strings, but the parent ids are integers.
+ * Casting everything to an integers is clearer than using un-strict comparisons.
+ *
  * @param array   $children Array of post objects.
  * @param boolean $display_has_children Whether the post being displayed has children.
  * @param WP_Post $display_post The post being rendered (from the global $post).
@@ -65,38 +69,34 @@ function bu_navigation_filter_pages_adaptive( $pages_by_parent ) {
  */
 function adaptive_filter_children( $children, $display_has_children, $display_post ) {
 
-	// If there aren't child posts, return nothing.
-	if ( ( ! is_array( $children ) ) || ( ! count( $children ) > 0 ) ) {
-		return;
-	}
-
-	$potentials = array();
-
-	foreach ( $children as $child ) {
-
-		// Only include the current page from the list of siblings if we have children.
+	$filtered = array_filter( $children, function ( $child ) use ( $display_has_children, $display_post ) {
+		// Only include the current page from the list of siblings if the current page has children.
 		if ( $display_has_children && (int) $child->ID === (int) $display_post->ID ) {
-			array_push( $potentials, $child );
+			return true;
 		}
 
-		if ( ! $display_has_children ) {
-			// If we don't have children...
-			// Display siblings of current page also
-			if ( $child->post_parent == $display_post->post_parent ) {
-				array_push( $potentials, $child );
-			}
-			// Display the parent page
-			if ( $child->ID == $display_post->post_parent ) {
-				array_push( $potentials, $child );
-			}
+		// If the display post doens't have children, display siblings of current page also.
+		if ( ! $display_has_children && (int) $child->post_parent === (int) $display_post->post_parent ) {
+			return true;
 		}
 
-		// Include pages that are children of the current page
-		if ( $child->post_parent == $display_post->ID ) {
-			array_push( $potentials, $child );
+		// If the display post doens't have children, display the parent page.
+		if ( ! $display_has_children && (int) $child->ID === (int) $display_post->post_parent ) {
+			return true;
 		}
-	}
 
-	return $potentials;
+		// Include pages that are children of the current page.
+		if ( (int) $child->post_parent === (int) $display_post->ID ) {
+			return true;
+		}
+
+		// Posts that don't meet any of these criteria are filtered out of the result.
+		return false;
+
+	});
+
+	// Re-index the array keys, since array_filter preserves them.
+	// This is just to match the previous behavior, it is unclear if it is necessary and can probably be removed.
+	return array_values( $filtered );
 
 }

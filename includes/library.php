@@ -934,34 +934,37 @@ function bu_navigation_list_section( $parent_id, $pages_by_parent, $args = '' ) 
 		'section_ids'   => null,
 	);
 
-	$r = wp_parse_args( $args, $defaults );
+	$parsed_args = wp_parse_args( $args, $defaults );
 
-	$html = '';
-
-	if ( array_key_exists( $parent_id, $pages_by_parent ) ) {
-		$children = $pages_by_parent[ $parent_id ];
-
-		if ( ( is_array( $children ) ) && ( count( $children ) > 0 ) ) {
-			$html .= sprintf( "\n<%s>\n", $r['container_tag'] );
-
-			foreach ( $children as $page ) {
-				$sargs = $r;
-				$sargs['depth']++;
-
-				$child_html = bu_navigation_list_section( $page->ID, $pages_by_parent, $sargs );
-				$html      .= bu_navigation_format_page(
-					$page, array(
-						'html'        => $child_html,
-						'depth'       => $r['depth'],
-						'item_tag'    => $r['item_tag'],
-						'section_ids' => $r['section_ids'],
-					)
-				);
-			}
-
-			$html .= sprintf( "\n</%s>\n", $r['container_tag'] );
-		}
+	if ( ! array_key_exists( $parent_id, $pages_by_parent ) ) {
+		return '';
 	}
+
+	$html     = '';
+	$children = $pages_by_parent[ $parent_id ];
+
+	if ( ! is_array( $children ) || ! ( count( $children ) > 0 ) ) {
+		return '';
+	}
+
+	$html .= sprintf( "\n<%s>\n", $parsed_args['container_tag'] );
+
+	foreach ( $children as $page ) {
+		$sargs = $parsed_args;
+		$sargs['depth']++;
+
+		$child_html = bu_navigation_list_section( $page->ID, $pages_by_parent, $sargs );
+		$html      .= bu_navigation_format_page(
+			$page, array(
+				'html'        => $child_html,
+				'depth'       => $parsed_args['depth'],
+				'item_tag'    => $parsed_args['item_tag'],
+				'section_ids' => $parsed_args['section_ids'],
+			)
+		);
+	}
+
+	$html .= sprintf( "\n</%s>\n", $parsed_args['container_tag'] );
 
 	return $html;
 }

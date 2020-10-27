@@ -63,33 +63,36 @@ function bu_navigation_supported_post_types( $include_link = false, $output = 'n
  * @param bool  $include_links Whether or not to include links (with pages only).
  * @return array (sections => array(parent1_id => [child1_id, ...], ...), pages => array( child1_id => parent1_id, ... )
  */
-function bu_navigation_load_sections( $post_types = array(), $include_links = true ) {
+function bu_navigation_load_sections( $post_types = array( 'page' ), $include_links = true ) {
 	global $wpdb, $bu_navigation_plugin;
 
-	// Setup target post type(s).
-	if ( empty( $post_types ) ) {
-		$post_types = array( 'page' );
-	} elseif ( is_string( $post_types ) ) {
+	// Convert string style args to an array.
+	if ( is_string( $post_types ) ) {
 		$post_types = explode( ',', $post_types );
-	} else {
-		// There should not be any scenarios where $post_types isn't already an array, so this clause looks extraneous.
+	}
+
+	// There should not be any scenarios where $post_types isn't already an array, so this clause looks extraneous.
+	// Leaving it here for compatibility with previous behavior, but should be evaluated for removal in future releases.
+	if ( ! is_array( $post_types ) ) {
 		$post_types = (array) $post_types;
 	}
 
 	// Handle links.
-	if ( $include_links && ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types ) ) {
-		if ( in_array( 'page', $post_types, true ) && ( 1 === count( $post_types ) ) ) {
-			// Stepping through this, I'm not sure why links would only be added if it is pages being listed.
-			// Also, I'm not sure why links should be skipped if there's more than one type already.
-			// It may be that removing that conditional clause will help simplify the nested conditional here.
-			$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
-		}
+	if ( $include_links
+		&& ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types, true )
+		&& in_array( 'page', $post_types, true )
+		&& ( 1 === count( $post_types ) )
+	) {
+		// Stepping through this, I'm not sure why links would only be added if it is pages being listed.
+		// Also, I'm not sure why links should be skipped if there's more than one type already.
+		// It may be that removing that conditional clause will help simplify the nested conditional here.
+		$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
 	}
 
 	// This clause removes links if the plugin support for links has been removed elsewhere.
 	// It is not clear from the supports() function how often this is being done.
 	if ( is_object( $bu_navigation_plugin ) && ! $bu_navigation_plugin->supports( 'links' ) ) {
-		$index = array_search( BU_NAVIGATION_LINK_POST_TYPE, $post_types );
+		$index = array_search( BU_NAVIGATION_LINK_POST_TYPE, $post_types, true );
 		if ( false !== $index ) {
 			unset( $post_types[ $index ] );
 		}
@@ -114,7 +117,7 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 		return $all_sections;
 	}
 
-	$wpdb->query( 'SET SESSION group_concat_max_len = ' . GROUP_CONCAT_MAX_LEN );
+	$wpdb->query( 'SET SESSION group_concat_max_len = ' . GROUP_CONCAT_MAX_LEN ); // db call ok; no-cache ok.
 	$query = sprintf(
 		"
 		SELECT DISTINCT(post_parent) AS section, GROUP_CONCAT(ID) AS children
@@ -123,31 +126,53 @@ function bu_navigation_load_sections( $post_types = array(), $include_links = tr
 		 GROUP BY post_parent
 		 ORDER BY post_parent ASC", $wpdb->posts
 	);
-	$rows  = $wpdb->get_results( $query );
+	$rows  = $wpdb->get_results( $query ); // db call ok; no-cache ok.
 
-	$sections = array();
-	$pages    = array();
-
-	if ( is_array( $rows ) && ( count( $rows ) > 0 ) ) {
-		foreach ( $rows as $row ) {
-			$sections[ $row->section ] = explode( ',', $row->children );
-
-			if ( is_array( $sections[ $row->section ] ) && ( count( $sections[ $row->section ] ) > 0 ) ) {
-				foreach ( $sections[ $row->section ] as $child ) {
-					$pages[ $child ] = $row->section;
-				}
-			}
-		}
-	}
+	$all_sections = bu_navigation_transform_rows( $rows );
 
 	// Cache results.
-	$all_sections = array(
-		'sections' => $sections,
-		'pages'    => $pages,
-	);
 	wp_cache_set( $cache_key, $all_sections, 'bu-navigation' );
 
 	return $all_sections;
+}
+
+/**
+ * Takes the results of the custom parents query and maps them into the 'section' and 'pages' format.
+ *
+ * @since 1.2.24
+ *
+ * @param array $rows Array of objects from $wpdb, where each object has a 'section' and 'children property.
+ * @return array
+ */
+function bu_navigation_transform_rows( $rows ) {
+
+	// If $rows is malformed or empty, return an empty result.
+	if ( ! is_array( $rows ) || 0 === count( $rows ) ) {
+		return array(
+			'sections' => array(),
+			'pages'    => array(),
+		);
+	}
+
+	// Construct the 'section' array with elements where the key is the parent post ID and the value is an array of child post ids.
+	$sections = array();
+	foreach ( $rows as $row ) {
+		$sections[ $row->section ] = explode( ',', $row->children );
+	}
+
+	// Construct the 'pages' array with elements where the key is the child id and the value is the parent id.
+	// Seems like something like array_reduce() would be more elegant, but returning significant keys is a challenge.
+	$pages = array();
+	foreach ( $sections as $parent_id => $children_ids ) {
+		foreach ( $children_ids as $child_id ) {
+			$pages[ $child_id ] = strval( $parent_id );
+		}
+	}
+
+	return array(
+		'sections' => $sections,
+		'pages'    => $pages,
+	);
 }
 
 /**

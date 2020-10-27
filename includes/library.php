@@ -682,18 +682,18 @@ function bu_navigation_get_pages( $args = '' ) {
 		'pages'                 => null,
 		'suppress_filter_pages' => false,
 	);
-	$r        = wp_parse_args( $args, $defaults );
+	$new_args = wp_parse_args( $args, $defaults );
 
-	// Legacy arg translation
-	if ( ! is_null( $r['pages'] ) ) {
-		$r['post__in'] = $r['pages'];
-		unset( $r['pages'] );
+	// Legacy arg translation.
+	if ( ! is_null( $new_args['pages'] ) ) {
+		$new_args['post__in'] = $new_args['pages'];
+		unset( $new_args['pages'] );
 	}
 
-	$r['suppress_filter_posts'] = $r['suppress_filter_pages'];
-	unset( $r['suppress_filter_pages'] );
+	$new_args['suppress_filter_posts'] = $new_args['suppress_filter_pages'];
+	unset( $new_args['suppress_filter_pages'] );
 
-	return bu_navigation_get_posts( $r );
+	return bu_navigation_get_posts( $new_args );
 }
 
 /**

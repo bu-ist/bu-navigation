@@ -996,125 +996,141 @@ function bu_navigation_list_pages( $args = '' ) {
 		'title_after'         => '',
 		'style'               => null,
 	);
-	$r        = wp_parse_args( $args, $defaults );
-
-	$output = '';
+	$parsed_args = wp_parse_args( $args, $defaults );
 
 	$section_ids = array();
 
 	// Get ancestors if a specific post is being listed.
-	if ( $r['page_id'] ) {
-		$all_sections = bu_navigation_load_sections( $r['post_types'], $r['include_links'] );
+	if ( $parsed_args['page_id'] ) {
+		$all_sections = bu_navigation_load_sections( $parsed_args['post_types'], $parsed_args['include_links'] );
 
 		$section_ids   = array_keys( $all_sections['sections'] );
 		$section_args  = array(
-			'post_types'    => $r['post_types'],
-			'include_links' => $r['include_links'],
+			'post_types'    => $parsed_args['post_types'],
+			'include_links' => $parsed_args['include_links'],
 		);
-		$r['sections'] = bu_navigation_gather_sections( $r['page_id'], $section_args, $all_sections );
+		$parsed_args['sections'] = bu_navigation_gather_sections( $parsed_args['page_id'], $section_args, $all_sections );
 
 	}
 
 	// Fetch post list, possibly limited to specific sections
 	$page_args       = array(
-		'sections'      => $r['sections'],
-		'post_types'    => $r['post_types'],
-		'include_links' => $r['include_links'],
+		'sections'      => $parsed_args['sections'],
+		'post_types'    => $parsed_args['post_types'],
+		'include_links' => $parsed_args['include_links'],
 	);
 	$pages           = bu_navigation_get_pages( $page_args );
 	$pages_by_parent = bu_navigation_pages_by_parent( $pages );
 
-	$sections = ! empty( $r['sections'] ) ? $r['sections'] : array_keys( $pages_by_parent );
+	$sections = ! empty( $parsed_args['sections'] ) ? $parsed_args['sections'] : array_keys( $pages_by_parent );
 
-	$list_attributes = '';
-
-	if ( $r['container_id'] ) {
-		$list_attributes .= sprintf( ' id="%s"', $r['container_id'] );
-	}
-	if ( $r['container_class'] ) {
-		$list_attributes .= sprintf( ' class="%s"', $r['container_class'] );
-	}
-
-	$html = sprintf( "<%s %s>\n", $r['container_tag'], $list_attributes );
-
-	if ( $r['style'] == 'adaptive' ) {
-
-		// If the "active" page isn't in the list of sections (because it has no children), add it
-		// @todo I don't think this can ever be true based on the code in bu-navigation-adaptive-contentnav.php
-		if ( $r['page_id'] && ! in_array( $r['page_id'], $sections ) ) {
-			array_push( $sections, $r['page_id'] );
-		}
-
-		if ( count( $sections ) > 2 ) {
-			$last_section = array_pop( $sections );
-			array_push( $sections, $last_section );
-
-			if ( array_key_exists( $last_section, $pages_by_parent ) &&
-				 is_array( $pages_by_parent[ $last_section ] ) &&
-				 ( count( $pages_by_parent[ $last_section ] ) > 0 )
-			   ) {
-				// Last section has children, so it will be the "top"
-				$sections = array_slice( $sections, -2 );
-			} else {
-				// Last section has no children, so its parent will be the "top"
-				$sections = array_slice( $sections, -3 );
-			}
-		}
+	if ( 'adaptive' === $parsed_args['style'] ) {
+		$sections = adaptive_section_slice( $parsed_args['page_id'], $pages_by_parent, $sections );
 	}
 
 	// Default to top level pages.
 	$section = $sections[0];
 
-	// Sectional navigation requires at least two levels
-	if ( $r['navigate_in_section'] ) {
-		if ( isset( $sections[1] ) ) {
-			$section = $sections[1];
-		} else {
-			$section = null;
-		}
+	// Handle sectional navigation style.
+	if ( $parsed_args['navigate_in_section'] ) {
+		// Sectional navigation requires at least two levels, return null otherwise.
+		$section = ( isset( $sections[1] ) ) ? $sections[1] : null;
 	}
 
-	// Loop over top section.
-	if ( isset( $pages_by_parent[ $section ] ) && is_array( $pages_by_parent[ $section ] ) && ( count( $pages_by_parent[ $section ] ) > 0 ) ) {
-
-		$sargs = array(
-			'container_tag' => $r['container_tag'],
-			'item_tag'      => $r['item_tag'],
-			'depth'         => 2,
-			'section_ids'   => $section_ids,
-		);
-
-		$page_position   = 1;
-		$number_siblings = count( $pages_by_parent[ $section ] );
-
-		foreach ( $pages_by_parent[ $section ] as $page ) {
-
-			$child_html = bu_navigation_list_section( $page->ID, $pages_by_parent, $sargs );
-
-			$pargs = array(
-				'html'        => $child_html,
-				'depth'       => 1,
-				'position'    => $page_position,
-				'siblings'    => $number_siblings,
-				'item_tag'    => $r['item_tag'],
-				'section_ids' => $section_ids,
-			);
-
-			$html .= bu_navigation_format_page( $page, $pargs );
-
-			$page_position++;
-		}
-	} else {
+	// Check that $pages_by_parent[ $section ] has elements, if not return an empty string.
+	if ( ! isset( $pages_by_parent[ $section ] ) || ! is_array( $pages_by_parent[ $section ] ) || ( count( $pages_by_parent[ $section ] ) < 1 ) ) {
 		return '';
 	}
 
-	$html .= sprintf( "</%s>\n", $r['container_tag'] );
+	$list_attributes = '';
 
-	if ( $r['echo'] ) {
+	if ( $parsed_args['container_id'] ) {
+		$list_attributes .= sprintf( ' id="%s"', $parsed_args['container_id'] );
+	}
+	if ( $parsed_args['container_class'] ) {
+		$list_attributes .= sprintf( ' class="%s"', $parsed_args['container_class'] );
+	}
+
+	$html = sprintf( "<%s %s>\n", $parsed_args['container_tag'], $list_attributes );
+
+	// Loop over top section.
+	$sargs = array(
+		'container_tag' => $parsed_args['container_tag'],
+		'item_tag'      => $parsed_args['item_tag'],
+		'depth'         => 2,
+		'section_ids'   => $section_ids,
+	);
+
+	$page_position   = 1;
+	$number_siblings = count( $pages_by_parent[ $section ] );
+
+	foreach ( $pages_by_parent[ $section ] as $page ) {
+
+		$child_html = bu_navigation_list_section( $page->ID, $pages_by_parent, $sargs );
+
+		$pargs = array(
+			'html'        => $child_html,
+			'depth'       => 1,
+			'position'    => $page_position,
+			'siblings'    => $number_siblings,
+			'item_tag'    => $parsed_args['item_tag'],
+			'section_ids' => $section_ids,
+		);
+
+		$html .= bu_navigation_format_page( $page, $pargs );
+
+		$page_position++;
+	}
+
+	$html .= sprintf( "</%s>\n", $parsed_args['container_tag'] );
+
+	if ( $parsed_args['echo'] ) {
 		echo $html;
 	}
 
 	return $html;
+}
+
+/**
+ * Return a slice of the section elements for the 'adaptive' widget mode
+ *
+ * The page_id parameter should be examined in conjunction with the widget_bu_pages_args filter,
+ * which may be an artifact than can be unwound.
+ *
+ * @since 1.2.24
+ * @see bu_navigation_list_pages()
+ *
+ * @param mixed $page_id String or int; see note below, this is likely never anything but null due to the widget_bu_pages_args filter.
+ * @param array $pages_by_parent Array where the key is a post id, and the value is an array of post objects.
+ * @param array $sections Array of post IDs, either strings or ints.
+ * @return array Array of post ids.
+ */
+function adaptive_section_slice( $page_id, $pages_by_parent, $sections ) {
+	// If the "active" page isn't in the list of sections (because it has no children), add it
+	// @todo I don't think this can ever be true based on the code in bu-navigation-adaptive-contentnav.php.
+	if ( $page_id && ! in_array( $page_id, $sections, true ) ) {
+		array_push( $sections, $page_id );
+	}
+
+	// If the section count is only 2 or below, return it unmodified as it does not need slicing.
+	if ( count( $sections ) < 3 ) {
+		return $sections;
+	}
+
+	$last_section = array_pop( $sections );
+	array_push( $sections, $last_section );
+
+	if ( array_key_exists( $last_section, $pages_by_parent )
+		&& is_array( $pages_by_parent[ $last_section ] )
+		&& ( count( $pages_by_parent[ $last_section ] ) > 0 )
+	) {
+		// Last section has children, so it will be the "top".
+		return array_slice( $sections, -2 );
+	}
+
+	// Last section has no children, so its parent will be the "top".
+	return array_slice( $sections, -3 );
+
 }
 
 /**

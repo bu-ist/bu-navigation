@@ -539,7 +539,7 @@ function _bu_navigation_page_uri_ancestors_fields( $fields ) {
  * @return array Array of pages keyed on page ID or FALSE on problem
  */
 function bu_navigation_get_posts( $args = '' ) {
-	global $wpdb, $bu_navigation_plugin;
+	global $wpdb;
 
 	$defaults    = array(
 		'post_types'            => array( 'page' ),
@@ -552,10 +552,6 @@ function bu_navigation_get_posts( $args = '' ) {
 		'suppress_urls'         => false,
 	);
 	$parsed_args = wp_parse_args( $args, $defaults );
-
-	// Start building the query.
-	$where   = '';
-	$orderby = '';
 
 	// Post fields to return.
 	$fields = array(
@@ -574,31 +570,15 @@ function bu_navigation_get_posts( $args = '' ) {
 	$fields = apply_filters( 'bu_navigation_filter_fields', $fields );
 	$fields = implode( ',', $fields );
 
-	// Append post types.
-	$post_types = $parsed_args['post_types'];
-	if ( 'any' != $post_types ) {
-		if ( is_string( $post_types ) ) {
-			$post_types = explode( ',', $post_types );
-		}
+	// Variables to accumulate the query parameter strings as they are constructed.
+	$where   = '';
+	$orderby = '';
 
-		$post_types = (array) $post_types;
-		$post_types = array_map( 'trim', $post_types );
-
-		// If links are included, add them to the post types array.
-		if ( $parsed_args['include_links'] && ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types ) ) {
-			if ( in_array( 'page', $post_types ) && ( count( $post_types ) == 1 ) ) {
-				$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
-			}
-		}
-		if ( is_object( $bu_navigation_plugin ) && ! $bu_navigation_plugin->supports( 'links' ) ) {
-			$index = array_search( BU_NAVIGATION_LINK_POST_TYPE, $post_types );
-			if ( $index !== false ) {
-				unset( $post_types[ $index ] );
-			}
-		}
-
-		$post_types = implode( "','", $post_types );
-		$where     .= " AND post_type IN ('$post_types')";
+	// If the requests post types is 'any', then don't restrict the post type with a where clause.
+	if ( 'any' !== $parsed_args['post_types'] ) {
+		// Otherwise append post types where clause to the SQL query.
+		$post_types_list = bu_navigation_post_types_list( $parsed_args['post_types'], $parsed_args['include_links'] );
+		$where          .= " AND post_type IN ('$post_types_list')";
 	}
 
 	// Append post statuses.
@@ -667,6 +647,45 @@ function bu_navigation_get_posts( $args = '' ) {
 
 	return $posts;
 
+}
+
+/**
+ * Get a list of post types for inclusion in a database query
+ *
+ * Given the initial post_types parameter, this checks to see if the link type should be included,
+ * also checking the global plugin settings.
+ *
+ * @since 1.2.24
+ *
+ * @global object $bu_navigation_plugin
+ * @param mixed   $post_types String or array representing all of the post types to be retrieved with the query.
+ * @param boolean $include_links Whether or not to include the 'links' post type in the list.
+ * @return string Comma delimited list of post types.
+ */
+function bu_navigation_post_types_list( $post_types, $include_links ) {
+	global $bu_navigation_plugin;
+
+	if ( is_string( $post_types ) ) {
+		$post_types = explode( ',', $post_types );
+	}
+
+	$post_types = (array) $post_types;
+	$post_types = array_map( 'trim', $post_types );
+
+	// If links are included, add them to the post types array.
+	if ( $include_links && ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types ) ) {
+		if ( in_array( 'page', $post_types ) && ( count( $post_types ) == 1 ) ) {
+			$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
+		}
+	}
+	if ( is_object( $bu_navigation_plugin ) && ! $bu_navigation_plugin->supports( 'links' ) ) {
+		$index = array_search( BU_NAVIGATION_LINK_POST_TYPE, $post_types );
+		if ( $index !== false ) {
+			unset( $post_types[ $index ] );
+		}
+	}
+
+	return implode( "','", $post_types );
 }
 
 /**

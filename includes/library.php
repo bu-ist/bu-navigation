@@ -714,8 +714,6 @@ function bu_navigation_pages_by_parent( $pages ) {
 		}
 	}
 
-	$pages_by_parent = apply_filters( 'bu_navigation_filter_pages_by_parent', $pages_by_parent );
-
 	return $pages_by_parent;
 }
 
@@ -1021,6 +1019,10 @@ function bu_navigation_list_pages( $args = '' ) {
 	);
 	$pages           = bu_navigation_get_pages( $page_args );
 	$pages_by_parent = bu_navigation_pages_by_parent( $pages );
+
+	if ( 'adaptive' === $parsed_args['style'] ) {
+		$pages_by_parent = bu_navigation_filter_pages_adaptive( $pages_by_parent );
+	}
 
 	$sections = ! empty( $parsed_args['sections'] ) ? $parsed_args['sections'] : array_keys( $pages_by_parent );
 

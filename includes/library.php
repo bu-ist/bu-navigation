@@ -541,7 +541,7 @@ function _bu_navigation_page_uri_ancestors_fields( $fields ) {
 function bu_navigation_get_posts( $args = '' ) {
 	global $wpdb, $bu_navigation_plugin;
 
-	$defaults = array(
+	$defaults    = array(
 		'post_types'            => array( 'page' ),
 		'post_status'           => array( 'publish' ),
 		'sections'              => null,
@@ -551,7 +551,7 @@ function bu_navigation_get_posts( $args = '' ) {
 		'suppress_filter_posts' => false,
 		'suppress_urls'         => false,
 	);
-	$parsed_args        = wp_parse_args( $args, $defaults );
+	$parsed_args = wp_parse_args( $args, $defaults );
 
 	// Start building the query.
 	$where   = '';

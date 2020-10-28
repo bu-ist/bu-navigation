@@ -577,7 +577,8 @@ function bu_navigation_get_posts( $args = '' ) {
 	// If the requests post types is 'any', then don't restrict the post type with a where clause.
 	if ( 'any' !== $parsed_args['post_types'] ) {
 		// Otherwise append post types where clause to the SQL query.
-		$post_types_list = bu_navigation_post_types_list( $parsed_args['post_types'], $parsed_args['include_links'] );
+		$post_types_list = bu_navigation_post_types_to_select( $parsed_args['post_types'], $parsed_args['include_links'] );
+		$post_types_list = implode( "','", $post_types_list );
 		$where          .= " AND post_type IN ('$post_types_list')";
 	}
 
@@ -650,7 +651,7 @@ function bu_navigation_get_posts( $args = '' ) {
 }
 
 /**
- * Get a list of post types for inclusion in a database query
+ * Get a list of post types for inclusion in a database select query
  *
  * Given the initial post_types parameter, this checks to see if the link type should be included,
  * also checking the global plugin settings.
@@ -660,9 +661,9 @@ function bu_navigation_get_posts( $args = '' ) {
  * @global object $bu_navigation_plugin
  * @param mixed   $post_types String or array representing all of the post types to be retrieved with the query.
  * @param boolean $include_links Whether or not to include the 'links' post type in the list.
- * @return string Comma delimited list of post types.
+ * @return array Array of post types to include in database query.
  */
-function bu_navigation_post_types_list( $post_types, $include_links ) {
+function bu_navigation_post_types_to_select( $post_types, $include_links ) {
 	global $bu_navigation_plugin;
 
 	if ( is_string( $post_types ) ) {
@@ -685,7 +686,7 @@ function bu_navigation_post_types_list( $post_types, $include_links ) {
 		}
 	}
 
-	return implode( "','", $post_types );
+	return $post_types;
 }
 
 /**

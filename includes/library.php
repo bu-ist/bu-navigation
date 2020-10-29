@@ -601,19 +601,9 @@ function bu_navigation_get_posts( $args = '' ) {
 		$posts = apply_filters( 'bu_navigation_filter_pages', $posts );
 	}
 
-	// Chop off anything great than max_items
-	if ( $parsed_args['max_items'] && is_array( $posts ) && ( count( $posts ) > 0 ) ) {
-		$items  = array();
-		$nItems = 0;
-
-		foreach ( $posts as $id => $post ) {
-			if ( $nItems >= $parsed_args['max_items'] ) {
-				break;
-			}
-			$items[ $id ] = $post;
-			$nItems++;
-		}
-		$posts = $items;
+	// Chop off anything great than max_items, if set.
+	if ( $parsed_args['max_items'] ) {
+		$posts = array_slice( $posts, 0, $parsed_args['max_items'], true );
 	}
 
 	return $posts;

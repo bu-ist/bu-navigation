@@ -647,28 +647,29 @@ function _get_posts_where_clause( $post_types, $include_links, $post_status, $se
 
 	// Append post statuses.
 	if ( 'any' !== $post_status ) {
-		if ( is_string( $post_status ) ) {
-			$post_status = explode( ',', $post_status );
-		}
-
+		// Explode strings to arrays, and coerce anything else to an array.  Probably overkill, but matches previous behavior.
+		$post_status = ( is_string( $post_status ) ) ? explode( ',', $post_status ) : (array) $post_status;
 		$post_status = (array) $post_status;
+
 		$post_status = implode( "','", array_map( 'trim', $post_status ) );
 		$where      .= " AND post_status IN ('$post_status')";
 	}
 
-	// Limit result set to posts in specific sections
-	if ( is_array( $sections ) && ( count( $sections ) > 0 ) ) {
-		$sections = array_map( 'absint', $sections );
-		$sections = implode( ',', array_unique( $sections ) );
-		$where   .= " AND post_parent IN ($sections)";
-	}
+	// Validate sections parameter such that it is an array, coerce the values to absolute integers, and enforce uniqueness.
+	// This seems like overkill, but is included for consistency with prior behavior.
+	$parsed_sections = is_array( $sections ) ? array_unique( array_map( 'absint', $sections ) ) : array();
+	$sections_list   = implode( ',', $parsed_sections );
 
-	// Limit to specific posts
-	if ( is_array( $post__in ) && ( count( $post__in ) > 0 ) ) {
-		$post__in = array_map( 'absint', $post__in );
-		$post__in = implode( ',', array_unique( $post__in ) );
-		$where   .= " AND ID IN($post__in)";
-	}
+	// Limit result set to children of specified page ids, if present.
+	$where .= ! empty( $sections_list ) ? " AND post_parent IN ($sections_list)" : '';
+
+	// Validate posts__in parameter such that it is an array, coerce the values to absolute integers, and enforce uniqueness.
+	$parsed_post__in = is_array( $post__in ) ? array_unique( array_map( 'absint', $post__in ) ) : array();
+	$post__in_list   = implode( ',', $parsed_post__in );
+
+	// Limit to specific posts, if present.
+	$where .= ! empty( $post__in_list ) ? " AND ID IN($post__in_list)" : '';
+
 	return $where;
 }
 

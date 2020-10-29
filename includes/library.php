@@ -581,21 +581,22 @@ function bu_navigation_get_posts( $args = '' ) {
 	// Result sorting clause.
 	$orderby = 'ORDER BY post_parent ASC, menu_order ASC';
 
-	// Execute query, fetch results as objects in an array keyed on posts.ID
+	// Execute query, fetch results as objects in an array keyed on posts.ID.
 	$posts = $wpdb->get_results(
 		"SELECT $fields FROM $wpdb->posts WHERE 1=1 $where $orderby",
 		OBJECT_K
-	);
-	if ( ! is_array( $posts ) || ( count( $posts ) == 0 ) ) {
+	); // db call ok; no-cache ok.
+
+	if ( ! is_array( $posts ) || ( count( $posts ) === 0 ) ) {
 		return false;
 	}
 
-	// Add url property to each post object ($post->url = permalink)
+	// Add url property to each post object ($post->url = permalink).
 	if ( ! $parsed_args['suppress_urls'] ) {
 		$posts = bu_navigation_get_urls( $posts );
 	}
 
-	// Allow custom filtering of posts retrieved using this function
+	// Allow custom filtering of posts retrieved using this function.
 	if ( ! $parsed_args['suppress_filter_posts'] ) {
 		$posts = apply_filters( 'bu_navigation_filter_posts', $posts );
 		$posts = apply_filters( 'bu_navigation_filter_pages', $posts );

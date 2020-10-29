@@ -570,45 +570,15 @@ function bu_navigation_get_posts( $args = '' ) {
 	$fields = apply_filters( 'bu_navigation_filter_fields', $fields );
 	$fields = implode( ',', $fields );
 
-	// Variables to accumulate the query parameter strings as they are constructed.
-	$where   = '';
-	$orderby = '';
+	$where = _get_posts_where_clause(
+		$parsed_args['post_types'],
+		$parsed_args['include_links'],
+		$parsed_args['post_status'],
+		$parsed_args['sections'],
+		$parsed_args['post__in']
+	);
 
-	// If the requests post types is 'any', then don't restrict the post type with a where clause.
-	if ( 'any' !== $parsed_args['post_types'] ) {
-		// Otherwise append post types where clause to the SQL query.
-		$post_types_list = bu_navigation_post_types_to_select( $parsed_args['post_types'], $parsed_args['include_links'] );
-		$post_types_list = implode( "','", $post_types_list );
-		$where          .= " AND post_type IN ('$post_types_list')";
-	}
-
-	// Append post statuses.
-	$post_status = $parsed_args['post_status'];
-	if ( 'any' != $post_status ) {
-		if ( is_string( $post_status ) ) {
-			$post_status = explode( ',', $post_status );
-		}
-
-		$post_status = (array) $post_status;
-		$post_status = implode( "','", array_map( 'trim', $post_status ) );
-		$where      .= " AND post_status IN ('$post_status')";
-	}
-
-	// Limit result set to posts in specific sections
-	if ( is_array( $parsed_args['sections'] ) && ( count( $parsed_args['sections'] ) > 0 ) ) {
-		$sections = array_map( 'absint', $parsed_args['sections'] );
-		$sections = implode( ',', array_unique( $sections ) );
-		$where   .= " AND post_parent IN ($sections)";
-	}
-
-	// Limit to specific posts
-	if ( is_array( $parsed_args['post__in'] ) && ( count( $parsed_args['post__in'] ) > 0 ) ) {
-		$post__in = array_map( 'absint', $parsed_args['post__in'] );
-		$post__in = implode( ',', array_unique( $post__in ) );
-		$where   .= " AND ID IN($post__in)";
-	}
-
-	// Result sorting
+	// Result sorting clause.
 	$orderby = 'ORDER BY post_parent ASC, menu_order ASC';
 
 	// Execute query, fetch results as objects in an array keyed on posts.ID
@@ -649,6 +619,59 @@ function bu_navigation_get_posts( $args = '' ) {
 	return $posts;
 
 }
+
+/**
+ * Assembles a SQL where clause based on query parameters
+ *
+ * Used by get_posts() to assemble the custom query.
+ *
+ * @since 1.2.24
+ *
+ * @param mixed   $post_types String or array representing all of the post types to be retrieved with the query.
+ * @param boolean $include_links Whether or not to include the 'links' post type in the list.
+ * @param mixed   $post_status String or array representing all of the allowed post statuses.
+ * @param array   $sections Array of page ids (not like the other uses of 'section', this deserves renaming).
+ * @param array   $post__in Array of post_ids to include in the query.
+ * @return string A SQL 'where' clause limiting the query results according to the filtering parameters.
+ */
+function _get_posts_where_clause( $post_types, $include_links, $post_status, $sections, $post__in ) {
+	$where = '';
+
+	// If the requests post types is 'any', then don't restrict the post type with a where clause.
+	if ( 'any' !== $post_types ) {
+		// Otherwise append post types where clause to the SQL query.
+		$post_types_list = bu_navigation_post_types_to_select( $post_types, $include_links );
+		$post_types_list = implode( "','", $post_types_list );
+		$where          .= " AND post_type IN ('$post_types_list')";
+	}
+
+	// Append post statuses.
+	if ( 'any' !== $post_status ) {
+		if ( is_string( $post_status ) ) {
+			$post_status = explode( ',', $post_status );
+		}
+
+		$post_status = (array) $post_status;
+		$post_status = implode( "','", array_map( 'trim', $post_status ) );
+		$where      .= " AND post_status IN ('$post_status')";
+	}
+
+	// Limit result set to posts in specific sections
+	if ( is_array( $sections ) && ( count( $sections ) > 0 ) ) {
+		$sections = array_map( 'absint', $sections );
+		$sections = implode( ',', array_unique( $sections ) );
+		$where   .= " AND post_parent IN ($sections)";
+	}
+
+	// Limit to specific posts
+	if ( is_array( $post__in ) && ( count( $post__in ) > 0 ) ) {
+		$post__in = array_map( 'absint', $post__in );
+		$post__in = implode( ',', array_unique( $post__in ) );
+		$where   .= " AND ID IN($post__in)";
+	}
+	return $where;
+}
+
 
 /**
  * Get a list of post types for inclusion in a database select query

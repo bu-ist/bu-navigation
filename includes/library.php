@@ -673,12 +673,15 @@ function bu_navigation_post_types_to_select( $post_types, $include_links ) {
 	$post_types = (array) $post_types;
 	$post_types = array_map( 'trim', $post_types );
 
-	// If links are included, add them to the post types array.
-	if ( $include_links && ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types ) ) {
-		if ( in_array( 'page', $post_types ) && ( count( $post_types ) == 1 ) ) {
-			$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
-		}
+	// If include_links is set in the args, add the link type to the post types array (if it's not there already).
+	if ( $include_links
+		&& ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types, true )
+		&& in_array( 'page', $post_types, true ) // Not clear why links are only added if pages are there.
+		&& count( $post_types ) === 1 // Not clear why links are only added if there's only one other existing post type.
+	) {
+		$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
 	}
+
 	if ( is_object( $bu_navigation_plugin ) && ! $bu_navigation_plugin->supports( 'links' ) ) {
 		$index = array_search( BU_NAVIGATION_LINK_POST_TYPE, $post_types );
 		if ( $index !== false ) {

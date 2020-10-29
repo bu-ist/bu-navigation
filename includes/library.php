@@ -640,7 +640,6 @@ function _get_posts_where_clause( $post_types, $include_links, $post_status, $se
 	if ( 'any' !== $post_status ) {
 		// Explode strings to arrays, and coerce anything else to an array.  Probably overkill, but matches previous behavior.
 		$post_status = ( is_string( $post_status ) ) ? explode( ',', $post_status ) : (array) $post_status;
-		$post_status = (array) $post_status;
 
 		$post_status = implode( "','", array_map( 'trim', $post_status ) );
 		$where      .= " AND post_status IN ('$post_status')";

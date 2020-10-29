@@ -682,11 +682,12 @@ function bu_navigation_post_types_to_select( $post_types, $include_links ) {
 		$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
 	}
 
+	// Check the plugin level 'supports' function to see if 'link' type support has been removed.
 	if ( is_object( $bu_navigation_plugin ) && ! $bu_navigation_plugin->supports( 'links' ) ) {
-		$index = array_search( BU_NAVIGATION_LINK_POST_TYPE, $post_types );
-		if ( $index !== false ) {
-			unset( $post_types[ $index ] );
-		}
+		// If so, filter out the link type if it is there.
+		$post_types = array_filter( $post_types, function( $post_type ) {
+			return BU_NAVIGATION_LINK_POST_TYPE !== $post_type;
+		} );
 	}
 
 	return $post_types;

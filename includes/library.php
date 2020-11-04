@@ -656,13 +656,12 @@ function _get_posts_where_clause( $post_types, $include_links, $post_status, $se
 		$where      .= " AND post_status IN ('$post_status')";
 	}
 
-	// Validate sections parameter such that it is an array, coerce the values to absolute integers, and enforce uniqueness.
-	// This seems like overkill, but is included for consistency with prior behavior.
-	$parsed_sections = is_array( $sections ) ? array_unique( array_map( 'absint', $sections ) ) : array();
-	$sections_list   = implode( ',', $parsed_sections );
-
-	// Limit result set to children of specified page ids, if present.
-	$where .= ! empty( $sections_list ) ? " AND post_parent IN ($sections_list)" : '';
+	// Limit result set to posts in specific sections.
+	if ( is_array( $sections ) && ( count( $sections ) > 0 ) ) {
+		$sections = array_map( 'absint', $sections );
+		$sections = implode( ',', array_unique( $sections ) );
+		$where   .= " AND post_parent IN ($sections)";
+	}
 
 	// Validate posts__in parameter such that it is an array, coerce the values to absolute integers, and enforce uniqueness.
 	$parsed_post__in = is_array( $post__in ) ? array_unique( array_map( 'absint', $post__in ) ) : array();

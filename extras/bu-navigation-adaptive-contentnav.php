@@ -41,7 +41,7 @@ function bu_navigation_filter_pages_adaptive( $pages_by_parent ) {
 	global $post;
 
 	$filtered             = array();
-	$display_has_children = array_key_exists( $post->ID, $pages_by_parent ) && ( count( $pages_by_parent[ $post->ID ] ) > 0 );
+	$display_has_children = isset( $post->ID ) && array_key_exists( $post->ID, $pages_by_parent ) && ( count( $pages_by_parent[ $post->ID ] ) > 0 );
 
 	foreach ( $pages_by_parent as $parent_id => $children ) {
 

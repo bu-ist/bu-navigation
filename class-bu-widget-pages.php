@@ -264,6 +264,7 @@ class BU_Widget_Pages extends WP_Widget {
 			'echo'         => 0,
 			'container_id' => BU_WIDGET_PAGES_LIST_ID,
 			'post_types'   => $post->post_type,
+			'widget'       => true,
 		);
 
 		// Not sure this check is necessary as there should always be an instance style, but leaving it in to preserve original behavior.

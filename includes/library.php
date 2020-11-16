@@ -1031,7 +1031,7 @@ function bu_navigation_list_section( $parent_id, $pages_by_parent, $args = '' ) 
  * @return string HTML fragment containing navigation list
  */
 function bu_navigation_list_pages( $args = '' ) {
-	$defaults = array(
+	$defaults    = array(
 		'page_id'             => null,
 		'sections'            => null,
 		'post_types'          => array( 'page' ),

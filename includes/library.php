@@ -318,20 +318,31 @@ function bu_navigation_get_page_depth( $page_id, $all_sections = null ) {
  * @return array $pages The input array with $post->url set to the permalink for each post.
  */
 function bu_navigation_get_urls( $pages ) {
-	if ( ( is_array( $pages ) ) && ( count( $pages ) > 0 ) ) {
-		foreach ( $pages as $page ) {
-			$url = '';
-			if ( 'page' === $page->post_type ) {
-				$url = bu_navigation_get_page_link( $page, $pages );
-			} elseif ( BU_NAVIGATION_LINK_POST_TYPE === $page->post_type ) {
-				$url = $page->post_content;
-			} else {
-				$url = bu_navigation_get_post_link( $page, $pages );
-			}
-			$page->url = $url;
-		}
+	// If the $pages parameter isn't an array, or is empty, return it back unaltered.
+	if ( empty( $pages ) || ! is_array( $pages ) ) {
+		return $pages;
 	}
-	return $pages;
+
+	$pages_with_url = array_map( function ( $page ) use ( $pages ) {
+		// Use get_page_link for pages.
+		if ( 'page' === $page->post_type ) {
+			$page->url = bu_navigation_get_page_link( $page, $pages );
+			return $page;
+		}
+
+		// Use post_content as url for the 'link' type.
+		if ( BU_NAVIGATION_LINK_POST_TYPE === $page->post_type ) {
+			$page->url = $page->post_content;
+			return $page;
+		}
+
+		// Use post_link for everything else.
+		$page->url = bu_navigation_get_post_link( $page, $pages );
+		return $page;
+
+	}, $pages );
+
+	return $pages_with_url;
 }
 
 /**
@@ -539,9 +550,9 @@ function _bu_navigation_page_uri_ancestors_fields( $fields ) {
  * @return array Array of pages keyed on page ID or FALSE on problem
  */
 function bu_navigation_get_posts( $args = '' ) {
-	global $wpdb, $bu_navigation_plugin;
+	global $wpdb;
 
-	$defaults = array(
+	$defaults    = array(
 		'post_types'            => array( 'page' ),
 		'post_status'           => array( 'publish' ),
 		'sections'              => null,
@@ -551,11 +562,7 @@ function bu_navigation_get_posts( $args = '' ) {
 		'suppress_filter_posts' => false,
 		'suppress_urls'         => false,
 	);
-	$r        = wp_parse_args( $args, $defaults );
-
-	// Start building the query.
-	$where   = '';
-	$orderby = '';
+	$parsed_args = wp_parse_args( $args, $defaults );
 
 	// Post fields to return.
 	$fields = array(
@@ -574,99 +581,140 @@ function bu_navigation_get_posts( $args = '' ) {
 	$fields = apply_filters( 'bu_navigation_filter_fields', $fields );
 	$fields = implode( ',', $fields );
 
-	// Append post types.
-	$post_types = $r['post_types'];
-	if ( 'any' != $post_types ) {
-		if ( is_string( $post_types ) ) {
-			$post_types = explode( ',', $post_types );
-		}
+	$where = _get_posts_where_clause(
+		$parsed_args['post_types'],
+		$parsed_args['include_links'],
+		$parsed_args['post_status'],
+		$parsed_args['sections'],
+		$parsed_args['post__in']
+	);
 
-		$post_types = (array) $post_types;
-		$post_types = array_map( 'trim', $post_types );
-
-		// If links are included, add them to the post types array.
-		if ( $r['include_links'] && ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types ) ) {
-			if ( in_array( 'page', $post_types ) && ( count( $post_types ) == 1 ) ) {
-				$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
-			}
-		}
-		if ( is_object( $bu_navigation_plugin ) && ! $bu_navigation_plugin->supports( 'links' ) ) {
-			$index = array_search( BU_NAVIGATION_LINK_POST_TYPE, $post_types );
-			if ( $index !== false ) {
-				unset( $post_types[ $index ] );
-			}
-		}
-
-		$post_types = implode( "','", $post_types );
-		$where     .= " AND post_type IN ('$post_types')";
-	}
-
-	// Append post statuses.
-	$post_status = $r['post_status'];
-	if ( 'any' != $post_status ) {
-		if ( is_string( $post_status ) ) {
-			$post_status = explode( ',', $post_status );
-		}
-
-		$post_status = (array) $post_status;
-		$post_status = implode( "','", array_map( 'trim', $post_status ) );
-		$where      .= " AND post_status IN ('$post_status')";
-	}
-
-	// Limit result set to posts in specific sections
-	if ( is_array( $r['sections'] ) && ( count( $r['sections'] ) > 0 ) ) {
-		$sections = array_map( 'absint', $r['sections'] );
-		$sections = implode( ',', array_unique( $sections ) );
-		$where   .= " AND post_parent IN ($sections)";
-	}
-
-	// Limit to specific posts
-	if ( is_array( $r['post__in'] ) && ( count( $r['post__in'] ) > 0 ) ) {
-		$post__in = array_map( 'absint', $r['post__in'] );
-		$post__in = implode( ',', array_unique( $post__in ) );
-		$where   .= " AND ID IN($post__in)";
-	}
-
-	// Result sorting
+	// Result sorting clause.
 	$orderby = 'ORDER BY post_parent ASC, menu_order ASC';
 
-	// Execute query, fetch results as objects in an array keyed on posts.ID
+	// Execute query, fetch results as objects in an array keyed on posts.ID.
 	$posts = $wpdb->get_results(
 		"SELECT $fields FROM $wpdb->posts WHERE 1=1 $where $orderby",
 		OBJECT_K
-	);
-	if ( ! is_array( $posts ) || ( count( $posts ) == 0 ) ) {
+	); // db call ok; no-cache ok.
+
+	if ( ! is_array( $posts ) || ( count( $posts ) === 0 ) ) {
 		return false;
 	}
 
-	// Add url property to each post object ($post->url = permalink)
-	if ( ! $r['suppress_urls'] ) {
+	// Add url property to each post object ($post->url = permalink).
+	if ( ! $parsed_args['suppress_urls'] ) {
 		$posts = bu_navigation_get_urls( $posts );
 	}
 
-	// Allow custom filtering of posts retrieved using this function
-	if ( ! $r['suppress_filter_posts'] ) {
+	// Allow custom filtering of posts retrieved using this function.
+	if ( ! $parsed_args['suppress_filter_posts'] ) {
 		$posts = apply_filters( 'bu_navigation_filter_posts', $posts );
 		$posts = apply_filters( 'bu_navigation_filter_pages', $posts );
 	}
 
-	// Chop off anything great than max_items
-	if ( $r['max_items'] && is_array( $posts ) && ( count( $posts ) > 0 ) ) {
-		$items  = array();
-		$nItems = 0;
-
-		foreach ( $posts as $id => $post ) {
-			if ( $nItems >= $r['max_items'] ) {
-				break;
-			}
-			$items[ $id ] = $post;
-			$nItems++;
-		}
-		$posts = $items;
+	// Chop off anything great than max_items, if set.
+	if ( $parsed_args['max_items'] ) {
+		$posts = array_slice( $posts, 0, $parsed_args['max_items'], true );
 	}
 
 	return $posts;
 
+}
+
+/**
+ * Assembles a SQL where clause based on query parameters
+ *
+ * Used by get_posts() to assemble the custom query.
+ *
+ * @since 1.2.24
+ *
+ * @param mixed   $post_types String or array representing all of the post types to be retrieved with the query.
+ * @param boolean $include_links Whether or not to include the 'links' post type in the list.
+ * @param mixed   $post_status String or array representing all of the allowed post statuses.
+ * @param array   $sections Array of page ids (not like the other uses of 'section', this deserves renaming).
+ * @param array   $post__in Array of post_ids to include in the query.
+ * @return string A SQL 'where' clause limiting the query results according to the filtering parameters.
+ */
+function _get_posts_where_clause( $post_types, $include_links, $post_status, $sections, $post__in ) {
+	$where = '';
+
+	// If the requests post types is 'any', then don't restrict the post type with a where clause.
+	if ( 'any' !== $post_types ) {
+		// Otherwise append post types where clause to the SQL query.
+		$post_types_list = bu_navigation_post_types_to_select( $post_types, $include_links );
+		$post_types_list = implode( "','", $post_types_list );
+		$where          .= " AND post_type IN ('$post_types_list')";
+	}
+
+	// Append post statuses.
+	if ( 'any' !== $post_status ) {
+		// Explode strings to arrays, and coerce anything else to an array.  Probably overkill, but matches previous behavior.
+		$post_status = ( is_string( $post_status ) ) ? explode( ',', $post_status ) : (array) $post_status;
+
+		$post_status = implode( "','", array_map( 'trim', $post_status ) );
+		$where      .= " AND post_status IN ('$post_status')";
+	}
+
+	// Limit result set to posts in specific sections.
+	if ( is_array( $sections ) && ( count( $sections ) > 0 ) ) {
+		$sections = array_map( 'absint', $sections );
+		$sections = implode( ',', array_unique( $sections ) );
+		$where   .= " AND post_parent IN ($sections)";
+	}
+
+	// Validate posts__in parameter such that it is an array, coerce the values to absolute integers, and enforce uniqueness.
+	$parsed_post__in = is_array( $post__in ) ? array_unique( array_map( 'absint', $post__in ) ) : array();
+	$post__in_list   = implode( ',', $parsed_post__in );
+
+	// Limit to specific posts, if present.
+	$where .= ! empty( $post__in_list ) ? " AND ID IN($post__in_list)" : '';
+
+	return $where;
+}
+
+
+/**
+ * Get a list of post types for inclusion in a database select query
+ *
+ * Given the initial post_types parameter, this checks to see if the link type should be included,
+ * also checking the global plugin settings.
+ *
+ * @since 1.2.24
+ *
+ * @global object $bu_navigation_plugin
+ * @param mixed   $post_types String or array representing all of the post types to be retrieved with the query.
+ * @param boolean $include_links Whether or not to include the 'links' post type in the list.
+ * @return array Array of post types to include in database query.
+ */
+function bu_navigation_post_types_to_select( $post_types, $include_links ) {
+	global $bu_navigation_plugin;
+
+	if ( is_string( $post_types ) ) {
+		$post_types = explode( ',', $post_types );
+	}
+
+	$post_types = (array) $post_types;
+	$post_types = array_map( 'trim', $post_types );
+
+	// If include_links is set in the args, add the link type to the post types array (if it's not there already).
+	if ( $include_links
+		&& ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types, true )
+		&& in_array( 'page', $post_types, true ) // Not clear why links are only added if pages are there.
+		&& count( $post_types ) === 1 // Not clear why links are only added if there's only one other existing post type.
+	) {
+		$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
+	}
+
+	// Check the plugin level 'supports' function to see if 'link' type support has been removed.
+	if ( is_object( $bu_navigation_plugin ) && ! $bu_navigation_plugin->supports( 'links' ) ) {
+		// If so, filter out the link type if it is there.
+		$post_types = array_filter( $post_types, function( $post_type ) {
+			return BU_NAVIGATION_LINK_POST_TYPE !== $post_type;
+		} );
+	}
+
+	return $post_types;
 }
 
 /**
@@ -682,18 +730,18 @@ function bu_navigation_get_pages( $args = '' ) {
 		'pages'                 => null,
 		'suppress_filter_pages' => false,
 	);
-	$r        = wp_parse_args( $args, $defaults );
+	$new_args = wp_parse_args( $args, $defaults );
 
-	// Legacy arg translation
-	if ( ! is_null( $r['pages'] ) ) {
-		$r['post__in'] = $r['pages'];
-		unset( $r['pages'] );
+	// Legacy arg translation.
+	if ( ! is_null( $new_args['pages'] ) ) {
+		$new_args['post__in'] = $new_args['pages'];
+		unset( $new_args['pages'] );
 	}
 
-	$r['suppress_filter_posts'] = $r['suppress_filter_pages'];
-	unset( $r['suppress_filter_pages'] );
+	$new_args['suppress_filter_posts'] = $new_args['suppress_filter_pages'];
+	unset( $new_args['suppress_filter_pages'] );
 
-	return bu_navigation_get_posts( $r );
+	return bu_navigation_get_posts( $new_args );
 }
 
 /**
@@ -703,15 +751,17 @@ function bu_navigation_get_pages( $args = '' ) {
  * @return array Array of arrays indexed on post.ID with second-level array containing the immediate children of that post
  */
 function bu_navigation_pages_by_parent( $pages ) {
-	$pages_by_parent = array();
 
-	if ( is_array( $pages ) && count( $pages ) > 0 ) {
-		foreach ( $pages as $page ) {
-			if ( ! array_key_exists( $page->post_parent, $pages_by_parent ) ) {
-				$pages_by_parent[ $page->post_parent ] = array();
-			}
-			array_push( $pages_by_parent[ $page->post_parent ], $page );
+	if ( ! is_array( $pages ) && ! count( $pages ) > 0 ) {
+		return array();
+	}
+
+	$pages_by_parent = array();
+	foreach ( $pages as $page ) {
+		if ( ! array_key_exists( $page->post_parent, $pages_by_parent ) ) {
+			$pages_by_parent[ $page->post_parent ] = array();
 		}
+		array_push( $pages_by_parent[ $page->post_parent ], $page );
 	}
 
 	return $pages_by_parent;

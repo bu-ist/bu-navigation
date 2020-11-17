@@ -264,6 +264,8 @@ class BU_Widget_Pages extends WP_Widget {
 			'echo'         => 0,
 			'container_id' => BU_WIDGET_PAGES_LIST_ID,
 			'post_types'   => $post->post_type,
+			'style'        => $instance['navigation_style'],
+			'widget'       => true,
 		);
 
 		// Not sure this check is necessary as there should always be an instance style, but leaving it in to preserve original behavior.
@@ -271,9 +273,6 @@ class BU_Widget_Pages extends WP_Widget {
 			$GLOBALS['bu_navigation_plugin']->log( 'No nav label widget style set!' );
 			return $list_args;
 		}
-
-		// Include the instance navigation style in the list args.
-		$list_args['style'] = $instance['navigation_style'];
 
 		// 'section' style has special handling.
 		if ( 'section' === $instance['navigation_style'] ) {

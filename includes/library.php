@@ -1031,7 +1031,7 @@ function bu_navigation_list_section( $parent_id, $pages_by_parent, $args = '' ) 
  * @return string HTML fragment containing navigation list
  */
 function bu_navigation_list_pages( $args = '' ) {
-	$defaults = array(
+	$defaults    = array(
 		'page_id'             => null,
 		'sections'            => null,
 		'post_types'          => array( 'page' ),
@@ -1046,6 +1046,7 @@ function bu_navigation_list_pages( $args = '' ) {
 		'title_before'        => '',
 		'title_after'         => '',
 		'style'               => null,
+		'widget'              => false,
 	);
 	$parsed_args = wp_parse_args( $args, $defaults );
 
@@ -1073,7 +1074,7 @@ function bu_navigation_list_pages( $args = '' ) {
 	$pages           = bu_navigation_get_pages( $page_args );
 	$pages_by_parent = bu_navigation_pages_by_parent( $pages );
 
-	if ( 'adaptive' === $parsed_args['style'] ) {
+	if ( $parsed_args['widget'] && 'adaptive' === $parsed_args['style'] ) {
 		$pages_by_parent = bu_navigation_filter_pages_adaptive( $pages_by_parent );
 	}
 

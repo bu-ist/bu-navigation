@@ -462,7 +462,7 @@ function _bu_navigation_page_uri_ancestors_fields( $fields ) {
  */
 function bu_navigation_get_posts( $args = '' ) {
 
-	return Navigation\get_posts( $args );
+	return Navigation\get_nav_posts( $args );
 
 }
 

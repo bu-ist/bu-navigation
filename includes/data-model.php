@@ -114,12 +114,13 @@ function load_sections( $post_types = array( 'page' ), $include_links = true ) {
  *
  * This function and one other (load_sections) are the only actual data loading methods.
  *
- * TODO: Function incomplete; most arguments ignored. Sort order should allow +1 column
+ * Renamed from the original 'bu_navigation_get_posts'.
+ * Name is 'get_nav_posts' to avoid any potential confusion with the global WP method 'get_posts'.
  *
  * @param mixed $args Wordpress-style arguments (string or array).
  * @return array Array of pages keyed on page ID or FALSE on problem
  */
-function get_posts( $args = '' ) {
+function get_nav_posts( $args = '' ) {
 	global $wpdb;
 
 	$defaults    = array(

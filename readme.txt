@@ -78,6 +78,10 @@ Please see this page for the details:
 
 == Changelog ==
 
+= 1.2.24 =
+
+* Refactor library query functions for code standards and maintainability.
+
 = 1.2.23 =
 
 * Initial refactor of includes/library.php to improve code standards. Also renames the widget file.

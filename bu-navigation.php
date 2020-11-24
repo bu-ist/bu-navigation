@@ -38,6 +38,7 @@
 @author Mike Burns <mgburns@bu.edu>
 @author Tyler Wiest <jtwiest@gmail.com>
 @author Andrew Bauer <awbauer@bu.edu>
+@author Jonathan Williams <jaydub@bu.edu>
 */
 
 // Absolute server path to this plugin dir and file for use by included files.

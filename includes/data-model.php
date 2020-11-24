@@ -230,6 +230,7 @@ function get_nav_pages( $args = '' ) {
  *
  * @see BU\Plugins\Navigation\load_sections()
  * @see BU\Plugins\Navigation\gather_sections()
+ * @see BU\Plugins\Navigation\pages_by_parent()
  *
  * @param mixed $args Array or string of WP-style arguments.
  * @return string HTML fragment containing navigation list
@@ -276,7 +277,7 @@ function list_pages( $args = '' ) {
 		'include_links' => $parsed_args['include_links'],
 	);
 	$pages           = get_nav_pages( $page_args );
-	$pages_by_parent = bu_navigation_pages_by_parent( $pages );
+	$pages_by_parent = pages_by_parent( $pages );
 
 	if ( $parsed_args['widget'] && 'adaptive' === $parsed_args['style'] ) {
 		$pages_by_parent = bu_navigation_filter_pages_adaptive( $pages_by_parent );

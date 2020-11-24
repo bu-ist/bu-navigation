@@ -248,18 +248,18 @@ class BU_Widget_Pages extends WP_Widget {
 	 * Get arguments for the page list query.
 	 *
 	 * A helper method that sets up the list query arguements based on the instance style.
-	 * These arguements are structured for the bu_navigation_list_pages() query in library.php.
+	 * These arguments are structured for the BU\Plugins\Navigation\list_pages() query.
 	 *
 	 * @since 1.2.22
 	 *
 	 * @param WP_Post $post The post being rendered.
 	 * @param array   $instance The settings for this instance of the widget.
 	 *
-	 * @return array Arguements for the bu_navigation_list_pages() query in library.php
+	 * @return array Arguments for the BU\Plugins\Navigation\list_pages() query
 	 */
 	protected function get_list_args( $post, $instance ) {
 
-		// Prepare arguments to bu_navigation_list_pages.
+		// Prepare arguments to BU\Plugins\Navigation\list_pages().
 		$list_args = array(
 			'page_id'      => $post->ID,
 			'title_li'     => '',
@@ -297,7 +297,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 * @since 1.2.22
 	 *
 	 * @see \BU\Plugins\Navigation\get_nav_pages()
-	 * @see bu_navigation_pages_by_parent() from library.php
+	 * @see \BU\Plugins\Navigation\pages_by_parent()
 	 *
 	 * @param array  $sections Array of post ids.
 	 * @param string $post_type Post type of the post being rendered.
@@ -311,7 +311,7 @@ class BU_Widget_Pages extends WP_Widget {
 			'include_links' => false,
 		);
 		$pages           = Navigation\get_nav_pages( $page_args );
-		$pages_by_parent = bu_navigation_pages_by_parent( $pages );
+		$pages_by_parent = Navigation\pages_by_parent( $pages );
 
 		// This looks strange, but is just a way to quickly get the last element of an array in php.
 		$last_section = array_pop( $sections );

@@ -566,26 +566,14 @@ function bu_navigation_post_types_to_select( $post_types, $include_links ) {
  *
  * Translates legacy arguments that have been updated for consistency with WP_Query
  *
+ * This is now a global stub function for compatibility with themes that expect the global prefixed function.
+ * The primary function has moved to a namespaced function.
+ *
  * @param mixed $args  Wordpress-style arguments (string or array).
  * @return array Array of pages keyed on page ID or FALSE on problem
  */
 function bu_navigation_get_pages( $args = '' ) {
-	$defaults = array(
-		'pages'                 => null,
-		'suppress_filter_pages' => false,
-	);
-	$new_args = wp_parse_args( $args, $defaults );
-
-	// Legacy arg translation.
-	if ( ! is_null( $new_args['pages'] ) ) {
-		$new_args['post__in'] = $new_args['pages'];
-		unset( $new_args['pages'] );
-	}
-
-	$new_args['suppress_filter_posts'] = $new_args['suppress_filter_pages'];
-	unset( $new_args['suppress_filter_pages'] );
-
-	return bu_navigation_get_posts( $new_args );
+	return Navigation\get_nav_pages( $args );
 }
 
 /**

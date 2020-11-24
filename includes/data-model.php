@@ -217,7 +217,7 @@ function get_nav_pages( $args = '' ) {
 	$new_args['suppress_filter_posts'] = $new_args['suppress_filter_pages'];
 	unset( $new_args['suppress_filter_pages'] );
 
-	return bu_navigation_get_posts( $new_args );
+	return get_nav_posts( $new_args );
 }
 
 /**
@@ -255,7 +255,7 @@ function list_pages( $args = '' ) {
 
 	// Get ancestors if a specific post is being listed.
 	if ( $parsed_args['page_id'] ) {
-		$all_sections = bu_navigation_load_sections( $parsed_args['post_types'], $parsed_args['include_links'] );
+		$all_sections = load_sections( $parsed_args['post_types'], $parsed_args['include_links'] );
 
 		$section_ids   = array_keys( $all_sections['sections'] );
 		$section_args  = array(
@@ -272,7 +272,7 @@ function list_pages( $args = '' ) {
 		'post_types'    => $parsed_args['post_types'],
 		'include_links' => $parsed_args['include_links'],
 	);
-	$pages           = bu_navigation_get_pages( $page_args );
+	$pages           = get_nav_pages( $page_args );
 	$pages_by_parent = bu_navigation_pages_by_parent( $pages );
 
 	if ( $parsed_args['widget'] && 'adaptive' === $parsed_args['style'] ) {

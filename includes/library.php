@@ -102,41 +102,7 @@ function bu_navigation_transform_rows( $rows ) {
  * @return array
  */
 function bu_navigation_gather_sections( $page_id, $args = '', $all_sections = null ) {
-	$defaults    = array(
-		'direction'     => 'up',
-		'depth'         => 0,
-		'post_types'    => array( 'page' ),
-		'include_links' => true,
-	);
-	$parsed_args = wp_parse_args( $args, $defaults );
-
-	if ( is_null( $all_sections ) ) {
-		$all_sections = bu_navigation_load_sections( $parsed_args['post_types'], $parsed_args['include_links'] );
-	}
-
-	$pages    = $all_sections['pages'];
-	$sections = array();
-
-	// Include the current page as a section if it has any children.
-	if ( array_key_exists( $page_id, $all_sections['sections'] ) ) {
-		array_push( $sections, $page_id );
-	}
-
-	// Gather descendants or ancestors depending on direction.
-	if ( 'down' === $parsed_args['direction'] ) {
-
-		$child_sections = bu_navigation_gather_childsections( $page_id, $all_sections['sections'], $parsed_args['depth'] );
-
-		if ( count( $child_sections ) > 0 ) {
-			$sections = array_merge( $sections, $child_sections );
-		}
-	}
-
-	if ( 'up' === $parsed_args['direction'] && array_key_exists( $page_id, $pages ) ) {
-		$sections = bu_navigation_gather_ancestor_sections( $page_id, $pages, $sections );
-	}
-
-	return array_reverse( $sections );
+	return Navigation\gather_sections( $page_id, $args, $all_sections );
 }
 
 /**

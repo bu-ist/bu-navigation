@@ -122,6 +122,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * @see bu_navigation_supported_post_types() from library.php
 	 * @see bu_navigation_list_pages() from library.php
+	 * @see widget_bu_pages_args_adaptive() from bu-navigation-adaptive-contentnav.php
 	 *
 	 * @param array $args Display arguments for WP_Widget.
 	 * @param array $instance The settings for the particular instance of the widget.
@@ -139,10 +140,13 @@ class BU_Widget_Pages extends WP_Widget {
 		// Set list arguments based on post type and navigation style.
 		$list_args = $this->get_list_args( $post, $instance );
 
-		do_action( 'bu_navigation_widget_before_list' );
+		// Alter args for adaptive mode.
+		if ( 'adaptive' === $instance['navigation_style'] ) {
+			$list_args = widget_bu_pages_args_adaptive( $list_args );
+		}
 
 		// Fetch markup.
-		$nav_list_markup = bu_navigation_list_pages( apply_filters( 'widget_bu_pages_args', $list_args ) );
+		$nav_list_markup = bu_navigation_list_pages( $list_args );
 
 		// Only output anything at all if there is existing markup from list_pages.
 		if ( empty( $nav_list_markup ) ) {
@@ -260,6 +264,8 @@ class BU_Widget_Pages extends WP_Widget {
 			'echo'         => 0,
 			'container_id' => BU_WIDGET_PAGES_LIST_ID,
 			'post_types'   => $post->post_type,
+			'style'        => $instance['navigation_style'],
+			'widget'       => true,
 		);
 
 		// Not sure this check is necessary as there should always be an instance style, but leaving it in to preserve original behavior.
@@ -268,20 +274,11 @@ class BU_Widget_Pages extends WP_Widget {
 			return $list_args;
 		}
 
-		// Include the instance navigation style in the list args.
-		$list_args['style'] = $instance['navigation_style'];
-
 		// 'section' style has special handling.
 		if ( 'section' === $instance['navigation_style'] ) {
 			$list_args['navigate_in_section'] = 1;
 			// Not sure why it is necessary to check for a 404 here, but this is the original handling.
 			return ( is_404() ) ? '' : $list_args;
-		}
-
-		// 'adaptive' style needs an action from included/library.php to be loaded.
-		if ( 'adaptive' === $instance['navigation_style'] ) {
-			add_action( 'bu_navigation_widget_before_list', 'bu_navigation_widget_adaptive_before_list' );
-			return $list_args;
 		}
 
 		// 'site' navigation_style doesn't require additional handling.

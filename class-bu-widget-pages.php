@@ -123,7 +123,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 * Echos the content navigation widget content, overrides parent method.
 	 *
 	 * @see bu_navigation_supported_post_types() from library.php
-	 * @see list_pages()
+	 * @see \BU\Plugins\Navigation\list_pages()
 	 * @see widget_bu_pages_args_adaptive() from bu-navigation-adaptive-contentnav.php
 	 *
 	 * @param array $args Display arguments for WP_Widget.
@@ -296,7 +296,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * @since 1.2.22
 	 *
-	 * @see bu_navigation_get_pages() from library.php
+	 * @see \BU\Plugins\Navigation\get_nav_pages()
 	 * @see bu_navigation_pages_by_parent() from library.php
 	 *
 	 * @param array  $sections Array of post ids.
@@ -310,7 +310,7 @@ class BU_Widget_Pages extends WP_Widget {
 			'post_types'    => array( $post_type ),
 			'include_links' => false,
 		);
-		$pages           = bu_navigation_get_pages( $page_args );
+		$pages           = Navigation\get_nav_pages( $page_args );
 		$pages_by_parent = bu_navigation_pages_by_parent( $pages );
 
 		// This looks strange, but is just a way to quickly get the last element of an array in php.
@@ -339,7 +339,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * @since 1.2.22
 	 *
-	 * @see bu_navigation_gather_sections() from library.php
+	 * @see \BU\Plugins\Navigation\gather_sections()
 	 *
 	 * @param WP_Post $post The post object as passed to the the widget() method.
 	 * @param string  $nav_style The navigation style of the widget (mode).
@@ -352,7 +352,7 @@ class BU_Widget_Pages extends WP_Widget {
 		}
 
 		// Gets an array of page ids representing the "section" for a given post.
-		$sections = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ) );
+		$sections = Navigation\gather_sections( $post->ID, array( 'post_types' => $post->post_type ) );
 
 		if ( 'section' === $nav_style ) {
 			// Default to top level post of the section (if we have one).

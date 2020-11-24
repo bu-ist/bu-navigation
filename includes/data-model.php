@@ -228,6 +228,9 @@ function get_nav_pages( $args = '' ) {
  *
  * @todo refactor to decouple widget-specific logic
  *
+ * @see BU\Plugins\Navigation\load_sections()
+ * @see BU\Plugins\Navigation\gather_sections()
+ *
  * @param mixed $args Array or string of WP-style arguments.
  * @return string HTML fragment containing navigation list
  */
@@ -256,13 +259,13 @@ function list_pages( $args = '' ) {
 	// Get ancestors if a specific post is being listed.
 	if ( $parsed_args['page_id'] ) {
 		$all_sections = load_sections( $parsed_args['post_types'], $parsed_args['include_links'] );
-
-		$section_ids   = array_keys( $all_sections['sections'] );
-		$section_args  = array(
+		$section_ids  = array_keys( $all_sections['sections'] );
+		$section_args = array(
 			'post_types'    => $parsed_args['post_types'],
 			'include_links' => $parsed_args['include_links'],
 		);
-		$parsed_args['sections'] = bu_navigation_gather_sections( $parsed_args['page_id'], $section_args, $all_sections );
+
+		$parsed_args['sections'] = gather_sections( $parsed_args['page_id'], $section_args, $all_sections );
 
 	}
 

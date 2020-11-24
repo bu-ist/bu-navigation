@@ -47,14 +47,14 @@ function transform_rows( $rows ) {
 }
 
 /**
- * A front end to bu_navigation_load_sections() that provides some pre and post processing.
+ * A front end to load_sections() that provides some pre and post processing.
  *
  * Theory: where load_sections() returns the entire family tree, gather_sections is
  * more directed to providing just ancestors or decendants.
  * This function is in direct use from global scope by several themes.
  * A survey of the use in BU themes indicates that there are only 2 options for direction: 'up' or 'down'.
  *
- * @see bu_navigation_load_sections()
+ * @see BU\Plugins\Navigation\load_sections()
  * @see bu_navigation_gather_childsections()
  *
  * @param mixed $page_id ID of the page to gather sections for (string | int).
@@ -72,7 +72,7 @@ function gather_sections( $page_id, $args = '', $all_sections = null ) {
 	$parsed_args = wp_parse_args( $args, $defaults );
 
 	if ( is_null( $all_sections ) ) {
-		$all_sections = bu_navigation_load_sections( $parsed_args['post_types'], $parsed_args['include_links'] );
+		$all_sections = load_sections( $parsed_args['post_types'], $parsed_args['include_links'] );
 	}
 
 	$pages    = $all_sections['pages'];

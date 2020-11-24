@@ -549,20 +549,7 @@ function bu_navigation_get_pages( $args = '' ) {
  * @return array Array of arrays indexed on post.ID with second-level array containing the immediate children of that post
  */
 function bu_navigation_pages_by_parent( $pages ) {
-
-	if ( ! is_array( $pages ) && ! count( $pages ) > 0 ) {
-		return array();
-	}
-
-	$pages_by_parent = array();
-	foreach ( $pages as $page ) {
-		if ( ! array_key_exists( $page->post_parent, $pages_by_parent ) ) {
-			$pages_by_parent[ $page->post_parent ] = array();
-		}
-		array_push( $pages_by_parent[ $page->post_parent ], $page );
-	}
-
-	return $pages_by_parent;
+	return Navigation\pages_by_parent( $pages );
 }
 
 /**

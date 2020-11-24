@@ -99,3 +99,26 @@ function gather_sections( $page_id, $args = '', $all_sections = null ) {
 
 	return array_reverse( $sections );
 }
+
+/**
+ * Indexes an array of pages by their parent page ID
+ *
+ * @param array $pages Array of page objects (usually indexed by the post.ID).
+ * @return array Array of arrays indexed on post.ID with second-level array containing the immediate children of that post
+ */
+function pages_by_parent( $pages ) {
+
+	if ( ! is_array( $pages ) && ! count( $pages ) > 0 ) {
+		return array();
+	}
+
+	$pages_by_parent = array();
+	foreach ( $pages as $page ) {
+		if ( ! array_key_exists( $page->post_parent, $pages_by_parent ) ) {
+			$pages_by_parent[ $page->post_parent ] = array();
+		}
+		array_push( $pages_by_parent[ $page->post_parent ], $page );
+	}
+
+	return $pages_by_parent;
+}

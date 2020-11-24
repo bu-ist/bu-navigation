@@ -7,6 +7,8 @@
  * @package BU_Navigation
  */
 
+use BU\Plugins\Navigation as Navigation;
+
 // Default class for list.  UNUSED in the plugin and the BU CMS build.  Should be removed.
 define( 'BU_WIDGET_PAGES_LIST_CLASS', 'smartnav level1' );
 
@@ -121,7 +123,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 * Echos the content navigation widget content, overrides parent method.
 	 *
 	 * @see bu_navigation_supported_post_types() from library.php
-	 * @see bu_navigation_list_pages() from library.php
+	 * @see list_pages()
 	 * @see widget_bu_pages_args_adaptive() from bu-navigation-adaptive-contentnav.php
 	 *
 	 * @param array $args Display arguments for WP_Widget.
@@ -146,7 +148,7 @@ class BU_Widget_Pages extends WP_Widget {
 		}
 
 		// Fetch markup.
-		$nav_list_markup = bu_navigation_list_pages( $list_args );
+		$nav_list_markup = Navigation\list_pages( $list_args );
 
 		// Only output anything at all if there is existing markup from list_pages.
 		if ( empty( $nav_list_markup ) ) {

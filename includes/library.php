@@ -433,58 +433,6 @@ function bu_navigation_get_posts( $args = '' ) {
 }
 
 /**
- * Assembles a SQL where clause based on query parameters
- *
- * Used by get_posts() to assemble the custom query.
- *
- * @since 1.2.24
- *
- * @param mixed   $post_types String or array representing all of the post types to be retrieved with the query.
- * @param boolean $include_links Whether or not to include the 'links' post type in the list.
- * @param mixed   $post_status String or array representing all of the allowed post statuses.
- * @param array   $sections Array of page ids (not like the other uses of 'section', this deserves renaming).
- * @param array   $post__in Array of post_ids to include in the query.
- * @return string A SQL 'where' clause limiting the query results according to the filtering parameters.
- */
-function _get_posts_where_clause( $post_types, $include_links, $post_status, $sections, $post__in ) {
-	$where = '';
-
-	// If the requests post types is 'any', then don't restrict the post type with a where clause.
-	if ( 'any' !== $post_types ) {
-		// Otherwise append post types where clause to the SQL query.
-		$post_types_list = bu_navigation_post_types_to_select( $post_types, $include_links );
-		$post_types_list = implode( "','", $post_types_list );
-		$where          .= " AND post_type IN ('$post_types_list')";
-	}
-
-	// Append post statuses.
-	if ( 'any' !== $post_status ) {
-		// Explode strings to arrays, and coerce anything else to an array.  Probably overkill, but matches previous behavior.
-		$post_status = ( is_string( $post_status ) ) ? explode( ',', $post_status ) : (array) $post_status;
-
-		$post_status = implode( "','", array_map( 'trim', $post_status ) );
-		$where      .= " AND post_status IN ('$post_status')";
-	}
-
-	// Limit result set to posts in specific sections.
-	if ( is_array( $sections ) && ( count( $sections ) > 0 ) ) {
-		$sections = array_map( 'absint', $sections );
-		$sections = implode( ',', array_unique( $sections ) );
-		$where   .= " AND post_parent IN ($sections)";
-	}
-
-	// Validate posts__in parameter such that it is an array, coerce the values to absolute integers, and enforce uniqueness.
-	$parsed_post__in = is_array( $post__in ) ? array_unique( array_map( 'absint', $post__in ) ) : array();
-	$post__in_list   = implode( ',', $parsed_post__in );
-
-	// Limit to specific posts, if present.
-	$where .= ! empty( $post__in_list ) ? " AND ID IN($post__in_list)" : '';
-
-	return $where;
-}
-
-
-/**
  * Get a list of post types for inclusion in a database select query
  *
  * Given the initial post_types parameter, this checks to see if the link type should be included,

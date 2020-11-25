@@ -86,6 +86,56 @@ function get_nav_page_link( $page, $ancestors = array(), $sample = false ) {
 	return $page_link;
 }
 
+/**
+ * Retrieve the permalink for a post with a custom post type.
+ *
+ * Intended as an efficient alternative to get_post_permalink().
+ * Allows you to provide an array of post ancestors for use calculating post name path.
+ *
+ * Was originally bu_navigation_get_post_link().
+ *
+ * @see get_post_permalink()
+ *
+ * @param  object  $post       Post object to calculate permalink for.
+ * @param  array   $ancestors  Optional. An array of post objects keyed on post ID. Should contain all ancestors of $post.
+ * @param  boolean $sample     Optional. Is it a sample permalink.
+ * @return string              Post permalink.
+ */
+function get_nav_post_link( $post, $ancestors = array(), $sample = false ) {
+	global $wp_rewrite;
+
+	$post_link        = $wp_rewrite->get_extra_permastruct( $post->post_type );
+	$draft_or_pending = true;
+	if ( isset( $post->post_status ) ) {
+		$draft_or_pending = in_array( $post->post_status, array( 'draft', 'pending', 'auto-draft' ) );
+	}
+	$use_permastruct = ( ! empty( $post_link ) && ( ! $draft_or_pending || $sample ) );
+	$post_type       = get_post_type_object( $post->post_type );
+	$slug            = $post->post_name;
+
+	if ( $post_type->hierarchical ) {
+		$slug = bu_navigation_get_page_uri( $post, $ancestors );
+	}
+
+	if ( $use_permastruct ) {
+		$post_link = str_replace( "%$post->post_type%", $slug, $post_link );
+		$post_link = home_url( user_trailingslashit( $post_link ) );
+	} else {
+		if ( $post_type->query_var && ! $draft_or_pending ) {
+			$post_link = add_query_arg( $post_type->query_var, $slug, '' );
+		} else {
+			$post_link = add_query_arg(
+				array(
+					'post_type' => $post->post_type,
+					'p'         => $post->ID,
+				), ''
+			);
+		}
+		$post_link = home_url( $post_link );
+	}
+
+	return $post_link;
+}
 
 /**
  * Calculate the post path for a post.

@@ -342,7 +342,7 @@ function _bu_navigation_page_uri_ancestors_fields( $fields ) {
  * This function and one other (load_sections) are the only actual data loading methods.
  *
  * This is now a global stub function for compatibility with themes that expect the global prefixed function.
- * The primary function has moved to a namespaced function.
+ * The primary function has moved to a namespaced function \BU\Plugins\Navigation\get_nav_posts.
  *
  * @param mixed $args Wordpress-style arguments (string or array).
  * @return array Array of pages keyed on page ID or FALSE on problem

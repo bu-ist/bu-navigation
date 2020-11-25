@@ -27,9 +27,13 @@ function get_page_uri( $page, $ancestors ) {
 
 	$uri = $page->post_name;
 
-	while ( isset( $page->post_parent ) && $page->post_parent != 0 ) {
+	// The loose 0 comparison here is a problem, as it needs to match the string "0", not the number 0.
+	// Likely this should be "0" !== $page->post_parent instead.
+	while ( isset( $page->post_parent ) && 0 != $page->post_parent ) {
 
-		// Avoid infinite loops
+		// Avoid infinite loops.
+		// I can't imagine that switching to a strict check here won't cause a problem.
+		// But it's a little hard to say for sure.
 		if ( $page->post_parent == $page->ID ) {
 			break;
 		}
@@ -69,20 +73,25 @@ function get_page_uri( $page, $ancestors ) {
 }
 
 /**
- * Undocumented function
+ * Only used by 'get_page_uri', to calculate "missing ancestors".
  *
- * Docs in progress.
+ * It remained undocumented for years, and this is unsurprising as it is a bit mysterious.
+ * It also looks very expensive as it calls the major data loading components, load_sections() and get_nav_posts().
+ * There may be some more elegant way to account for missing ancestors; potentially a topic for a future release.
+ *
+ * @param object $post Post object to find ancestors for.
+ * @return array Array of objects representing ancestor posts.
  */
 function get_page_uri_ancestors( $post ) {
 
 	$ancestors    = array();
 	$all_sections = load_sections( $post->post_type );
 
-	// Load ancestors post IDs
+	// Load ancestors post IDs.
 	$section_ids = gather_sections( $post->ID, array( 'post_types' => $post->post_type ), $all_sections );
 	$section_ids = array_filter( $section_ids );
 
-	// Fetch ancestor posts, with only the columns we need to determine permalinks
+	// Fetch ancestor posts, with only the columns we need to determine permalinks.
 	if ( ! empty( $section_ids ) ) {
 		$args = array(
 			'post__in'              => $section_ids,

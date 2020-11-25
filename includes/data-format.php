@@ -1,6 +1,7 @@
 <?php
 /**
- * Formatting methods
+ * Formatting methods, to transform data that has been loaded by the
+ * data model methods.
  *
  * @package BU_Navigation
  */

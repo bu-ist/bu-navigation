@@ -213,7 +213,7 @@ function get_nav_posts_where_clause( $post_types, $include_links, $post_status, 
 	// If the requests post types is 'any', then don't restrict the post type with a where clause.
 	if ( 'any' !== $post_types ) {
 		// Otherwise append post types where clause to the SQL query.
-		$post_types_list = bu_navigation_post_types_to_select( $post_types, $include_links );
+		$post_types_list = post_types_to_select( $post_types, $include_links );
 		$post_types_list = implode( "','", $post_types_list );
 		$where          .= " AND post_type IN ('$post_types_list')";
 	}
@@ -242,6 +242,49 @@ function get_nav_posts_where_clause( $post_types, $include_links, $post_status, 
 	$where .= ! empty( $post__in_list ) ? " AND ID IN($post__in_list)" : '';
 
 	return $where;
+}
+
+/**
+ * Get a list of post types for inclusion in a database select query
+ *
+ * Given the initial post_types parameter, this checks to see if the link type should be included,
+ * also checking the global plugin settings.
+ *
+ * @since 1.2.24
+ *
+ * @global object $bu_navigation_plugin
+ * @param mixed   $post_types String or array representing all of the post types to be retrieved with the query.
+ * @param boolean $include_links Whether or not to include the 'links' post type in the list.
+ * @return array Array of post types to include in database query.
+ */
+function post_types_to_select( $post_types, $include_links ) {
+	global $bu_navigation_plugin;
+
+	if ( is_string( $post_types ) ) {
+		$post_types = explode( ',', $post_types );
+	}
+
+	$post_types = (array) $post_types;
+	$post_types = array_map( 'trim', $post_types );
+
+	// If include_links is set in the args, add the link type to the post types array (if it's not there already).
+	if ( $include_links
+		&& ! in_array( BU_NAVIGATION_LINK_POST_TYPE, $post_types, true )
+		&& in_array( 'page', $post_types, true ) // Not clear why links are only added if pages are there.
+		&& count( $post_types ) === 1 // Not clear why links are only added if there's only one other existing post type.
+	) {
+		$post_types[] = BU_NAVIGATION_LINK_POST_TYPE;
+	}
+
+	// Check the plugin level 'supports' function to see if 'link' type support has been removed.
+	if ( is_object( $bu_navigation_plugin ) && ! $bu_navigation_plugin->supports( 'links' ) ) {
+		// If so, filter out the link type if it is there.
+		$post_types = array_filter( $post_types, function( $post_type ) {
+			return BU_NAVIGATION_LINK_POST_TYPE !== $post_type;
+		} );
+	}
+
+	return $post_types;
 }
 
 /**

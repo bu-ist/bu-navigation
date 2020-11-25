@@ -58,6 +58,7 @@ require_once BU_NAV_PLUGIN_DIR . '/includes/class-reorder.php';
 require_once BU_NAV_PLUGIN_DIR . '/includes/data-model.php';
 require_once BU_NAV_PLUGIN_DIR . '/includes/data-format.php';
 require_once BU_NAV_PLUGIN_DIR . '/includes/data-widget.php';
+require_once BU_NAV_PLUGIN_DIR . '/includes/data-get-urls.php';
 
 /**
  * Convenience class to wrap loading and init functions.

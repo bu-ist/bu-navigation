@@ -336,7 +336,7 @@ function bu_navigation_get_page_uri( $page, $ancestors ) {
 		// Attempt to load missing ancestors.
 		if ( ! array_key_exists( $page->post_parent, $ancestors ) ) {
 			if ( ! array_key_exists( $page->post_parent, $extra_pages ) && ! in_array( $page->post_parent, $missing_pages ) ) {
-				$missing_ancestors = _bu_navigation_page_uri_ancestors( $page );
+				$missing_ancestors = Navigation\get_page_uri_ancestors( $page );
 				// Cache any ancestors we load here or can't find in separate data structures.
 				if ( ! empty( $missing_ancestors ) ) {
 					$extra_pages = $extra_pages + $missing_ancestors;
@@ -365,43 +365,6 @@ function bu_navigation_get_page_uri( $page, $ancestors ) {
 	}
 
 	return $uri;
-}
-
-/**
- * Undocumented function
- *
- * Docs in progress.
- */
-function _bu_navigation_page_uri_ancestors( $post ) {
-
-	$ancestors    = array();
-	$all_sections = bu_navigation_load_sections( $post->post_type );
-
-	// Load ancestors post IDs
-	$section_ids = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ), $all_sections );
-	$section_ids = array_filter( $section_ids );
-
-	// Fetch ancestor posts, with only the columns we need to determine permalinks
-	if ( ! empty( $section_ids ) ) {
-		$args = array(
-			'post__in'              => $section_ids,
-			'post_types'            => 'any',
-			'post_status'           => 'any',
-			'suppress_urls'         => true,
-			'suppress_filter_posts' => true,
-		);
-
-		// Only need a few fields to determine the correct URL.
-		add_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields', 9999 );
-		$ancestors = bu_navigation_get_posts( $args );
-		remove_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields', 9999 );
-
-		if ( false === $ancestors ) {
-			$ancestors = array();
-		}
-	}
-
-	return $ancestors;
 }
 
 /**

@@ -29,7 +29,7 @@ function get_urls( $pages ) {
 	$pages_with_url = array_map( function ( $page ) use ( $pages ) {
 		// Use get_page_link for pages.
 		if ( 'page' === $page->post_type ) {
-			$page->url = bu_navigation_get_page_link( $page, $pages );
+			$page->url = get_nav_page_link( $page, $pages );
 			return $page;
 		}
 
@@ -76,7 +76,7 @@ function get_nav_page_link( $page, $ancestors = array(), $sample = false ) {
 	if ( 'page' == get_option( 'show_on_front' ) && $page->ID == get_option( 'page_on_front' ) ) {
 		$page_link = home_url( '/' );
 	} elseif ( $use_permastruct ) {
-		$slug      = bu_navigation_get_page_uri( $page, $ancestors );
+		$slug      = get_page_uri( $page, $ancestors );
 		$page_link = str_replace( '%pagename%', $slug, $page_link );
 		$page_link = home_url( user_trailingslashit( $page_link, 'page' ) );
 	} else {

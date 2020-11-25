@@ -71,21 +71,6 @@ function bu_navigation_load_sections( $post_types = array( 'page' ), $include_li
 }
 
 /**
- * Takes the results of the custom parents query and maps them into the 'section' and 'pages' format.
- *
- * This is now a global stub function for compatibility with themes that expect the global prefixed function.
- * The primary function has moved to a namespaced function.
- *
- * @since 1.2.24
- *
- * @param array $rows Array of objects from $wpdb, where each object has a 'section' and 'children property.
- * @return array
- */
-function bu_navigation_transform_rows( $rows ) {
-	return Navigation\transform_rows( $rows );
-}
-
-/**
  * A front end to bu_navigation_load_sections() that provides some pre and post processing.
  *
  * Theory: where load_sections() returns the entire family tree, gather_sections is

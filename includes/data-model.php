@@ -175,7 +175,7 @@ function get_nav_posts( $args = '' ) {
 
 	// Add url property to each post object ($post->url = permalink).
 	if ( ! $parsed_args['suppress_urls'] ) {
-		$posts = bu_navigation_get_urls( $posts );
+		$posts = get_urls( $posts );
 	}
 
 	// Allow custom filtering of posts retrieved using this function.

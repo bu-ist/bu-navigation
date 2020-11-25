@@ -40,7 +40,7 @@ function get_urls( $pages ) {
 		}
 
 		// Use post_link for everything else.
-		$page->url = bu_navigation_get_post_link( $page, $pages );
+		$page->url = get_nav_post_link( $page, $pages );
 		return $page;
 
 	}, $pages );
@@ -114,7 +114,7 @@ function get_nav_post_link( $post, $ancestors = array(), $sample = false ) {
 	$slug            = $post->post_name;
 
 	if ( $post_type->hierarchical ) {
-		$slug = bu_navigation_get_page_uri( $post, $ancestors );
+		$slug = get_page_uri( $post, $ancestors );
 	}
 
 	if ( $use_permastruct ) {

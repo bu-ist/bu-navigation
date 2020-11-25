@@ -26,27 +26,24 @@ function get_urls( $pages ) {
 		return $pages;
 	}
 
-	$pages_with_url = array_map(
-		function ( $page ) use ( $pages ) {
-			// Use get_page_link for pages.
-			if ( 'page' === $page->post_type ) {
-				$page->url = bu_navigation_get_page_link( $page, $pages );
-				return $page;
-			}
-
-			// Use post_content as url for the 'link' type.
-			if ( BU_NAVIGATION_LINK_POST_TYPE === $page->post_type ) {
-				$page->url = $page->post_content;
-				return $page;
-			}
-
-			// Use post_link for everything else.
-			$page->url = bu_navigation_get_post_link( $page, $pages );
+	$pages_with_url = array_map( function ( $page ) use ( $pages ) {
+		// Use get_page_link for pages.
+		if ( 'page' === $page->post_type ) {
+			$page->url = bu_navigation_get_page_link( $page, $pages );
 			return $page;
+		}
 
-		},
-		$pages,
-	);
+		// Use post_content as url for the 'link' type.
+		if ( BU_NAVIGATION_LINK_POST_TYPE === $page->post_type ) {
+			$page->url = $page->post_content;
+			return $page;
+		}
+
+		// Use post_link for everything else.
+		$page->url = bu_navigation_get_post_link( $page, $pages );
+		return $page;
+
+	}, $pages );
 
 	return $pages_with_url;
 }

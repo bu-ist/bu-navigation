@@ -76,10 +76,10 @@ function get_page_uri( $page, $ancestors ) {
 function get_page_uri_ancestors( $post ) {
 
 	$ancestors    = array();
-	$all_sections = bu_navigation_load_sections( $post->post_type );
+	$all_sections = load_sections( $post->post_type );
 
 	// Load ancestors post IDs
-	$section_ids = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ), $all_sections );
+	$section_ids = gather_sections( $post->ID, array( 'post_types' => $post->post_type ), $all_sections );
 	$section_ids = array_filter( $section_ids );
 
 	// Fetch ancestor posts, with only the columns we need to determine permalinks
@@ -94,7 +94,7 @@ function get_page_uri_ancestors( $post ) {
 
 		// Only need a few fields to determine the correct URL.
 		add_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields', 9999 );
-		$ancestors = bu_navigation_get_posts( $args );
+		$ancestors = get_nav_posts( $args );
 		remove_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields', 9999 );
 
 		if ( false === $ancestors ) {

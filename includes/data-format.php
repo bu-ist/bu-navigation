@@ -102,6 +102,39 @@ function gather_sections( $page_id, $args = '', $all_sections = null ) {
 }
 
 /**
+ * Gets a section of children given a post ID and some arguments.
+ *
+ * Originally called bu_navigation_gather_childsections().
+ *
+ * @param string  $parent_id ID of a parent post expressed as a string.
+ * @param array   $sections All of the sections at the depth being gathered.
+ * @param integer $max_depth Maximum depth to gather.
+ * @param integer $current_depth Current depth from gather_sections() args.
+ * @return array Array of page ids.
+ */
+function gather_childsections( $parent_id, $sections, $max_depth = 0, $current_depth = 1 ) {
+	$child_sections = array();
+
+	// Validate the existence of children, otherwise return an empty array early.
+	if ( ( ! array_key_exists( $parent_id, $sections ) ) || ( 0 === count( $sections[ $parent_id ] ) ) ) {
+		return $child_sections;
+	}
+
+	// Iterate over the array of children of the given parent.
+	foreach ( $sections[ $parent_id ] as $child_id ) {
+		if ( ( array_key_exists( $child_id, $sections ) ) && ( count( $sections[ $child_id ] ) > 0 ) ) {
+			array_push( $child_sections, $child_id );
+
+			if ( ( 0 === $max_depth ) || ( $current_depth < $max_depth ) ) {
+				$child_sections = array_merge( $child_sections, bu_navigation_gather_childsections( $child_id, $sections, $max_depth, ( $current_depth + 1 ) ) );
+			}
+		}
+	}
+
+	return $child_sections;
+}
+
+/**
  * Indexes an array of pages by their parent page ID
  *
  * @param array $pages Array of page objects (usually indexed by the post.ID).

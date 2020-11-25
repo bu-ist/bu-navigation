@@ -117,6 +117,9 @@ function bu_navigation_gather_ancestor_sections( $page_id, $pages, $sections ) {
 /**
  * Gets a section of children given a post ID and some arguments.
  *
+ * This is a stub for the new namespaced function, but there's no reason to think
+ * any other themes or components are calling this. Likely it should be removed.
+ *
  * @param string  $parent_id ID of a parent post expressed as a string.
  * @param array   $sections All of the sections at the depth being gathered.
  * @param integer $max_depth Maximum depth to gather.
@@ -124,25 +127,7 @@ function bu_navigation_gather_ancestor_sections( $page_id, $pages, $sections ) {
  * @return array Array of page ids.
  */
 function bu_navigation_gather_childsections( $parent_id, $sections, $max_depth = 0, $current_depth = 1 ) {
-	$child_sections = array();
-
-	// Validate the existence of children, otherwise return an empty array early.
-	if ( ( ! array_key_exists( $parent_id, $sections ) ) || ( 0 === count( $sections[ $parent_id ] ) ) ) {
-		return $child_sections;
-	}
-
-	// Iterate over the array of children of the given parent.
-	foreach ( $sections[ $parent_id ] as $child_id ) {
-		if ( ( array_key_exists( $child_id, $sections ) ) && ( count( $sections[ $child_id ] ) > 0 ) ) {
-			array_push( $child_sections, $child_id );
-
-			if ( ( 0 === $max_depth ) || ( $current_depth < $max_depth ) ) {
-				$child_sections = array_merge( $child_sections, bu_navigation_gather_childsections( $child_id, $sections, $max_depth, ( $current_depth + 1 ) ) );
-			}
-		}
-	}
-
-	return $child_sections;
+	return Navigation\gather_childsections( $parent_id, $sections, $max_depth, $current_depth );
 }
 
 /**

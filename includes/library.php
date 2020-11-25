@@ -190,35 +190,14 @@ function bu_navigation_get_page_depth( $page_id, $all_sections = null ) {
  * ancestors are missing when calculating hierarchical post names it will load them,
  * at the expensive of a few extra queries.
  *
+ * This is a stub for the new namespaced function, but there's no reason to think
+ * any other themes or components are calling this. Likely it should be removed.
+ *
  * @param  array $pages An array of post objects keyed on post ID. Works with all post types.
  * @return array $pages The input array with $post->url set to the permalink for each post.
  */
 function bu_navigation_get_urls( $pages ) {
-	// If the $pages parameter isn't an array, or is empty, return it back unaltered.
-	if ( empty( $pages ) || ! is_array( $pages ) ) {
-		return $pages;
-	}
-
-	$pages_with_url = array_map( function ( $page ) use ( $pages ) {
-		// Use get_page_link for pages.
-		if ( 'page' === $page->post_type ) {
-			$page->url = bu_navigation_get_page_link( $page, $pages );
-			return $page;
-		}
-
-		// Use post_content as url for the 'link' type.
-		if ( BU_NAVIGATION_LINK_POST_TYPE === $page->post_type ) {
-			$page->url = $page->post_content;
-			return $page;
-		}
-
-		// Use post_link for everything else.
-		$page->url = bu_navigation_get_post_link( $page, $pages );
-		return $page;
-
-	}, $pages );
-
-	return $pages_with_url;
+	return Navigation\get_urls( $pages );
 }
 
 /**

@@ -95,7 +95,7 @@ function gather_sections( $page_id, $args = '', $all_sections = null ) {
 	}
 
 	if ( 'up' === $parsed_args['direction'] && array_key_exists( $page_id, $pages ) ) {
-		$sections = bu_navigation_gather_ancestor_sections( $page_id, $pages, $sections );
+		$sections = gather_ancestor_sections( $page_id, $pages, $sections );
 	}
 
 	return array_reverse( $sections );
@@ -132,6 +132,32 @@ function gather_childsections( $parent_id, $sections, $max_depth = 0, $current_d
 	}
 
 	return $child_sections;
+}
+
+/**
+ * Adds nodes above a given page id to a given section array.
+ *
+ * Originally called bu_navigation_gather_ancestor_sections().
+ *
+ * @param mixed $page_id ID of the page to gather sections for (string | int).
+ * @param array $pages Array of pages from load_sections.
+ * @param array $sections The sections array being added to.
+ * @return array New array of sections with the ancestors added.
+ */
+function gather_ancestor_sections( $page_id, $pages, $sections ) {
+	$current_section = $pages[ $page_id ];
+	array_push( $sections, $current_section );
+
+	while ( 0 !== $current_section ) {
+		if ( array_key_exists( $current_section, $pages ) ) {
+			$current_section = $pages[ $current_section ];
+			array_push( $sections, $current_section );
+		} else {
+			break;
+		}
+	}
+
+	return $sections;
 }
 
 /**

@@ -51,12 +51,12 @@ function get_urls( $pages ) {
 /**
  * Retrieve the page permalink.
  *
- * Intended as an efficient alternative to `get_page_link()` / `_get_page_link()`.
+ * Intended as an efficient alternative to get_page_link() / _get_page_link().
  * Allows you to provide an array of post ancestors for use calculating post name path.
  *
  * Was originally called bu_navigation_get_page_link()
  *
- * @see `_get_page_link()`
+ * @see _get_page_link()
  *
  * @param  object  $page       Post object to calculate permalink for.
  * @param  array   $ancestors  Optional. An array of post objects keyed on post ID. Should contain all ancestors of $page.

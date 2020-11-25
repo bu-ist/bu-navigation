@@ -56,7 +56,7 @@ function transform_rows( $rows ) {
  * A survey of the use in BU themes indicates that there are only 2 options for direction: 'up' or 'down'.
  *
  * @see BU\Plugins\Navigation\load_sections()
- * @see bu_navigation_gather_childsections()
+ * @see BU\Plugins\Navigation\gather_childsections()
  *
  * @param mixed $page_id ID of the page to gather sections for (string | int).
  * @param mixed $args Wordpress-style arguments (string or array).
@@ -87,7 +87,7 @@ function gather_sections( $page_id, $args = '', $all_sections = null ) {
 	// Gather descendants or ancestors depending on direction.
 	if ( 'down' === $parsed_args['direction'] ) {
 
-		$child_sections = bu_navigation_gather_childsections( $page_id, $all_sections['sections'], $parsed_args['depth'] );
+		$child_sections = gather_childsections( $page_id, $all_sections['sections'], $parsed_args['depth'] );
 
 		if ( count( $child_sections ) > 0 ) {
 			$sections = array_merge( $sections, $child_sections );
@@ -126,7 +126,7 @@ function gather_childsections( $parent_id, $sections, $max_depth = 0, $current_d
 			array_push( $child_sections, $child_id );
 
 			if ( ( 0 === $max_depth ) || ( $current_depth < $max_depth ) ) {
-				$child_sections = array_merge( $child_sections, bu_navigation_gather_childsections( $child_id, $sections, $max_depth, ( $current_depth + 1 ) ) );
+				$child_sections = array_merge( $child_sections, gather_childsections( $child_id, $sections, $max_depth, ( $current_depth + 1 ) ) );
 			}
 		}
 	}

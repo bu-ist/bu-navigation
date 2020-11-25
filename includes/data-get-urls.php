@@ -48,6 +48,44 @@ function get_urls( $pages ) {
 	return $pages_with_url;
 }
 
+/**
+ * Retrieve the page permalink.
+ *
+ * Intended as an efficient alternative to `get_page_link()` / `_get_page_link()`.
+ * Allows you to provide an array of post ancestors for use calculating post name path.
+ *
+ * Was originally called bu_navigation_get_page_link()
+ *
+ * @see `_get_page_link()`
+ *
+ * @param  object  $page       Post object to calculate permalink for.
+ * @param  array   $ancestors  Optional. An array of post objects keyed on post ID. Should contain all ancestors of $page.
+ * @param  boolean $sample     Optional. Is it a sample permalink.
+ * @return string              Post permalink.
+ */
+function get_nav_page_link( $page, $ancestors = array(), $sample = false ) {
+	global $wp_rewrite;
+
+	$page_link        = $wp_rewrite->get_page_permastruct();
+	$draft_or_pending = true;
+	if ( isset( $page->post_status ) ) {
+		$draft_or_pending = in_array( $page->post_status, array( 'draft', 'pending', 'auto-draft' ) );
+	}
+	$use_permastruct = ( ! empty( $page_link ) && ( ! $draft_or_pending || $sample ) );
+
+	if ( 'page' == get_option( 'show_on_front' ) && $page->ID == get_option( 'page_on_front' ) ) {
+		$page_link = home_url( '/' );
+	} elseif ( $use_permastruct ) {
+		$slug      = bu_navigation_get_page_uri( $page, $ancestors );
+		$page_link = str_replace( '%pagename%', $slug, $page_link );
+		$page_link = home_url( user_trailingslashit( $page_link, 'page' ) );
+	} else {
+		$page_link = home_url( '?page_id=' . $page->ID );
+	}
+
+	return $page_link;
+}
+
 
 /**
  * Calculate the post path for a post.

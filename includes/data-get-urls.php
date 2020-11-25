@@ -102,9 +102,10 @@ function get_page_uri_ancestors( $post ) {
 		);
 
 		// Only need a few fields to determine the correct URL.
-		add_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields', 9999 );
+		// Adding and removing a filter here seems inelegant, and might be better accomplished with a $fields parameter?
+		add_filter( 'bu_navigation_filter_fields', __NAMESPACE__ . '\page_uri_ancestors_fields', 9999 );
 		$ancestors = get_nav_posts( $args );
-		remove_filter( 'bu_navigation_filter_fields', '_bu_navigation_page_uri_ancestors_fields', 9999 );
+		remove_filter( 'bu_navigation_filter_fields', __NAMESPACE__ . '\page_uri_ancestors_fields', 9999 );
 
 		if ( false === $ancestors ) {
 			$ancestors = array();
@@ -112,4 +113,21 @@ function get_page_uri_ancestors( $post ) {
 	}
 
 	return $ancestors;
+}
+
+/**
+ * Convenience callback function for get_page_uri_ancestors() to filter return fields.
+ *
+ * The callback just provides a hard-coded array of post fields. Returning fewer fields should
+ * make the underlying call to get_nav_posts() faster.  The callback takes the incoming $fields parameter,
+ * but does nothing with it, just returns the hard-coded array.
+ *
+ * Ultimately there has to be a better way to accomplish this than a filter that is added and
+ * removed just for this one query.
+ *
+ * @param array $fields Not used.
+ * @return array
+ */
+function page_uri_ancestors_fields( $fields ) {
+	return array( 'ID', 'post_name', 'post_parent' );
 }

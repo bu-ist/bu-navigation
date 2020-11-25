@@ -326,17 +326,6 @@ function bu_navigation_get_page_uri( $page, $ancestors ) {
 }
 
 /**
- * This looks like an artifact, as the parameter is never used
- * and it just returns an array of static strings.
- *
- * @param array $fields Not used.
- * @return array
- */
-function _bu_navigation_page_uri_ancestors_fields( $fields ) {
-	return array( 'ID', 'post_name', 'post_parent' );
-}
-
-/**
  * Returns an array of page objects indexed by page ID
  *
  * This function and one other (load_sections) are the only actual data loading methods.

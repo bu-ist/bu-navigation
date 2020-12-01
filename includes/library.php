@@ -78,6 +78,9 @@ function bu_navigation_load_sections( $post_types = array( 'page' ), $include_li
  * This function is in direct use from global scope by several themes.
  * A survey of the use in BU themes indicates that there are only 2 options for direction: 'up' or 'down'.
  *
+ * This is now a global stub function for compatibility with themes that expect the global prefixed function.
+ * The primary function has moved to a namespaced function.
+ *
  * @see bu_navigation_load_sections()
  * @see bu_navigation_gather_childsections()
  *

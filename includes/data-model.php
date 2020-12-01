@@ -374,7 +374,7 @@ function list_pages( $args = '' ) {
 	$pages_by_parent = pages_by_parent( $pages );
 
 	if ( $parsed_args['widget'] && 'adaptive' === $parsed_args['style'] ) {
-		$pages_by_parent = bu_navigation_filter_pages_adaptive( $pages_by_parent );
+		$pages_by_parent = adaptive_pages_filter( $pages_by_parent );
 	}
 
 	$sections = ! empty( $parsed_args['sections'] ) ? $parsed_args['sections'] : array_keys( $pages_by_parent );

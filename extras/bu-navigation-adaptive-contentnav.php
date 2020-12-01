@@ -11,26 +11,6 @@
  */
 
 /**
- * Filters arguments passed to bu_navigation_list_pages from widget display
- *
- * This is an ugly way of short circuiting the logic within bu_navigation_list_pages to not
- * display all sections.
- *
- * @param array $args Associative array of arguments for the list pages query.
- * @return array Array of arguments transformed for adaptive mode.
- */
-function widget_bu_pages_args_adaptive( $args ) {
-	if ( $args['page_id'] ) {
-		$section_args = array( 'post_types' => $args['post_types'] );
-		$sections     = bu_navigation_gather_sections( $args['page_id'], $section_args );
-
-		$args['sections'] = $sections;
-		$args['page_id']  = null;
-	}
-	return $args;
-}
-
-/**
  * Filters posts returned from bu_navigation_pages_by_parent to only include those
  * centered around the current post
  *

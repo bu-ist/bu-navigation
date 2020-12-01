@@ -2,6 +2,12 @@
 /**
  * Formatting methods that are specific to the widget (mostly adaptive mode).
  *
+ * Adaptive navigation mode tames list size for large site hierarchies by
+ * "drilling down" based on the currently active post, limiting listings
+ * to no more than two levels (plus section title if configured).
+ *
+ * @see [Content Navigation Widget Modes](https://github.com/bu-ist/bu-navigation/wiki/Content-Navigation-Widget)
+ *
  * @package BU_Navigation
  */
 
@@ -47,4 +53,24 @@ function adaptive_section_slice( $page_id, $pages_by_parent, $sections ) {
 	// Last section has no children, so its parent will be the "top".
 	return array_slice( $sections, -3 );
 
+}
+
+/**
+ * Filters arguments passed to bu_navigation_list_pages from widget display
+ *
+ * This is an ugly way of short circuiting the logic within bu_navigation_list_pages to not
+ * display all sections.
+ *
+ * @param array $args Associative array of arguments for the list pages query.
+ * @return array Array of arguments transformed for adaptive mode.
+ */
+function adaptive_pages_args( $args ) {
+	if ( $args['page_id'] ) {
+		$section_args = array( 'post_types' => $args['post_types'] );
+		$sections     = gather_sections( $args['page_id'], $section_args );
+
+		$args['sections'] = $sections;
+		$args['page_id']  = null;
+	}
+	return $args;
 }

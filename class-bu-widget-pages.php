@@ -144,7 +144,7 @@ class BU_Widget_Pages extends WP_Widget {
 
 		// Alter args for adaptive mode.
 		if ( 'adaptive' === $instance['navigation_style'] ) {
-			$list_args = widget_bu_pages_args_adaptive( $list_args );
+			$list_args = Navigation\adaptive_pages_args( $list_args );
 		}
 
 		// Fetch markup.

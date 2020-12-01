@@ -23,10 +23,13 @@
             "name": "Andrew Bauer",
             "email": "awbauer@bu.edu"
         },
-
         {
             "name": "Jonathan Desrosiers",
             "email": "jondes@bu.edu"
+        },
+        {
+            "name": "Jonathan Williams",
+            "email": "jaydub@bu.edu"
         }
     ],
     "require": {},

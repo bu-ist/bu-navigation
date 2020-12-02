@@ -40,8 +40,7 @@ function bu_navigation_filter_pages_navlabels( $pages ) {
 		if ( is_array( $labels ) && count( $labels ) > 0 ) {
 			foreach ( $pages as $page ) {
 				if ( array_key_exists( $page->ID, $labels ) ) {
-					$label                  = $labels[ $page->ID ];
-					$page->navigation_label = $label->meta_value;
+					$page->navigation_label = $labels[ $page->ID ]->meta_value;
 				}
 				$filtered[ $page->ID ] = $page;
 			}

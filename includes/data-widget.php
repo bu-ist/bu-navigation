@@ -1,6 +1,6 @@
 <?php
 /**
- * Formatting methods that are specific to the widget (mostly adaptive mode).
+ * Formatting methods that are specific to the adaptive mode widget.
  *
  * Adaptive navigation mode tames list size for large site hierarchies by
  * "drilling down" based on the currently active post, limiting listings

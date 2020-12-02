@@ -23,30 +23,33 @@ define( 'BU_NAV_META_PAGE_LABEL', '_bu_cms_navigation_page_label' );
 function bu_navigation_filter_pages_navlabels( $pages ) {
 	global $wpdb;
 
+	// If $pages isn't valid, just return an empty array.
+	if ( ! is_array( $pages ) || ! count( $pages ) > 0 ) {
+		return array();
+	}
+
+	// Otherwise, calculate the labels for all of the given pages.
 	$filtered = array();
 
-	if ( is_array( $pages ) && count( $pages ) > 0 ) {
+	$ids   = array_keys( $pages );
+	$query = sprintf(
+		"SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value != ''",
+		$wpdb->postmeta,
+		BU_NAV_META_PAGE_LABEL,
+		implode( ',', $ids )
+	);
 
-		$ids   = array_keys( $pages );
-		$query = sprintf(
-			"SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value != ''",
-			$wpdb->postmeta,
-			BU_NAV_META_PAGE_LABEL,
-			implode( ',', $ids )
-		);
+	$labels = $wpdb->get_results( $query, OBJECT_K );
 
-		$labels = $wpdb->get_results( $query, OBJECT_K );
-
-		if ( is_array( $labels ) && count( $labels ) > 0 ) {
-			foreach ( $pages as $page ) {
-				if ( array_key_exists( $page->ID, $labels ) ) {
-					$page->navigation_label = $labels[ $page->ID ]->meta_value;
-				}
-				$filtered[ $page->ID ] = $page;
+	if ( is_array( $labels ) && count( $labels ) > 0 ) {
+		foreach ( $pages as $page ) {
+			if ( array_key_exists( $page->ID, $labels ) ) {
+				$page->navigation_label = $labels[ $page->ID ]->meta_value;
 			}
-		} else {
-			$filtered = $pages;
+			$filtered[ $page->ID ] = $page;
 		}
+	} else {
+		$filtered = $pages;
 	}
 
 	return $filtered;

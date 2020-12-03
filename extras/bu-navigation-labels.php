@@ -29,8 +29,7 @@ function bu_navigation_filter_pages_navlabels( $pages ) {
 	}
 
 	// Otherwise, calculate the labels for all of the given pages.
-	$filtered = array();
-
+	// First, load the label meta values for every post ID with a direct database query.
 	$ids   = array_keys( $pages );
 	$query = sprintf(
 		"SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s) AND meta_value != ''",
@@ -47,12 +46,15 @@ function bu_navigation_filter_pages_navlabels( $pages ) {
 	}
 
 	// Otherwise attach any found labels.
-	foreach ( $pages as $page ) {
-		if ( array_key_exists( $page->ID, $labels ) ) {
-			$page->navigation_label = $labels[ $page->ID ]->meta_value;
-		}
-		$filtered[ $page->ID ] = $page;
-	}
+	$filtered = array_map(
+		function ( $page ) use ( $labels ) {
+			if ( array_key_exists( $page->ID, $labels ) ) {
+				$page->navigation_label = $labels[ $page->ID ]->meta_value;
+			}
+			return $page;
+		},
+		$pages
+	);
 
 	return $filtered;
 }

@@ -66,7 +66,7 @@ class BU_Widget_Pages extends WP_Widget {
 	/**
 	 * Returns HTML fragment containing a section title
 	 *
-	 * @see bu_navigation_get_label() from extras/bu-navigation-labels.php
+	 * @see \BU\Plugins\Navigation\get_nav_label()
 	 *
 	 * @param WP_Post $post Root post as passed through global to the widget() method.
 	 * @param array   $instance widget instance args, as passed to WP_Widget::widget.
@@ -87,7 +87,7 @@ class BU_Widget_Pages extends WP_Widget {
 		$section = get_post( $section_id );
 
 		// Get title, the second argument prevents usage of default (no title) label.
-		$title = bu_navigation_get_label( $section, '' );
+		$title = Navigation\get_nav_label( $section, '' );
 
 		// Prevent usage of non-published posts or empty titles, use site title instead.
 		if ( ( 'publish' !== $section->post_status ) || empty( $title ) ) {

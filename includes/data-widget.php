@@ -114,31 +114,33 @@ function adaptive_pages_filter( $pages_by_parent ) {
  */
 function adaptive_filter_children( $children, $display_has_children, $display_post ) {
 
-	$filtered = array_filter( $children, function ( $child ) use ( $display_has_children, $display_post ) {
-		// Only include the current page from the list of siblings if the current page has children.
-		if ( $display_has_children && (int) $child->ID === (int) $display_post->ID ) {
-			return true;
+	$filtered = array_filter(
+		$children,
+		function ( $child ) use ( $display_has_children, $display_post ) {
+			// Only include the current page from the list of siblings if the current page has children.
+			if ( $display_has_children && (int) $child->ID === (int) $display_post->ID ) {
+				return true;
+			}
+
+			// If the display post doensn't have children, display siblings of current page also.
+			if ( ! $display_has_children && (int) $child->post_parent === (int) $display_post->post_parent ) {
+				return true;
+			}
+
+			// If the display post doens't have children, display the parent page.
+			if ( ! $display_has_children && (int) $child->ID === (int) $display_post->post_parent ) {
+				return true;
+			}
+
+			// Include pages that are children of the current page.
+			if ( (int) $child->post_parent === (int) $display_post->ID ) {
+				return true;
+			}
+
+			// Posts that don't meet any of these criteria are filtered out of the result.
+			return false;
 		}
-
-		// If the display post doens't have children, display siblings of current page also.
-		if ( ! $display_has_children && (int) $child->post_parent === (int) $display_post->post_parent ) {
-			return true;
-		}
-
-		// If the display post doens't have children, display the parent page.
-		if ( ! $display_has_children && (int) $child->ID === (int) $display_post->post_parent ) {
-			return true;
-		}
-
-		// Include pages that are children of the current page.
-		if ( (int) $child->post_parent === (int) $display_post->ID ) {
-			return true;
-		}
-
-		// Posts that don't meet any of these criteria are filtered out of the result.
-		return false;
-
-	});
+	);
 
 	// Re-index the array keys, since array_filter preserves them.
 	// This is just to match the previous behavior, it is unclear if it is necessary and can probably be removed.

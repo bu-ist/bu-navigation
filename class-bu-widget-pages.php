@@ -124,7 +124,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * @see bu_navigation_supported_post_types() from library.php
 	 * @see \BU\Plugins\Navigation\list_pages()
-	 * @see widget_bu_pages_args_adaptive() from bu-navigation-adaptive-contentnav.php
+	 * @see \BU\Plugins\Navigation\adaptive_pages_args()
 	 *
 	 * @param array $args Display arguments for WP_Widget.
 	 * @param array $instance The settings for the particular instance of the widget.

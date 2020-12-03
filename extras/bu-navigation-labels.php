@@ -41,15 +41,17 @@ function bu_navigation_filter_pages_navlabels( $pages ) {
 
 	$labels = $wpdb->get_results( $query, OBJECT_K );
 
-	if ( is_array( $labels ) && count( $labels ) > 0 ) {
-		foreach ( $pages as $page ) {
-			if ( array_key_exists( $page->ID, $labels ) ) {
-				$page->navigation_label = $labels[ $page->ID ]->meta_value;
-			}
-			$filtered[ $page->ID ] = $page;
+	// If no labels were retrieved, just return the original unmodified $pages array.
+	if ( ! is_array( $labels ) || ! count( $labels ) > 0 ) {
+		return $pages;
+	}
+
+	// Otherwise attach any found labels.
+	foreach ( $pages as $page ) {
+		if ( array_key_exists( $page->ID, $labels ) ) {
+			$page->navigation_label = $labels[ $page->ID ]->meta_value;
 		}
-	} else {
-		$filtered = $pages;
+		$filtered[ $page->ID ] = $page;
 	}
 
 	return $filtered;

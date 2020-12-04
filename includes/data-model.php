@@ -91,12 +91,12 @@ function load_sections( $post_types = array( 'page' ), $include_links = true ) {
 
 	$wpdb->query( 'SET SESSION group_concat_max_len = ' . GROUP_CONCAT_MAX_LEN ); // db call ok; no-cache ok.
 	$query = sprintf(
-		"
-		SELECT DISTINCT(post_parent) AS section, GROUP_CONCAT(ID) AS children
+		"SELECT DISTINCT(post_parent) AS section, GROUP_CONCAT(ID) AS children
 		  FROM %s
 		 WHERE post_type IN ('$in_post_types')
 		 GROUP BY post_parent
-		 ORDER BY post_parent ASC", $wpdb->posts
+		 ORDER BY post_parent ASC",
+		$wpdb->posts
 	);
 	$rows  = $wpdb->get_results( $query ); // db call ok; no-cache ok.
 

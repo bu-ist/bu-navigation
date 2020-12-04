@@ -367,7 +367,7 @@ function list_pages( $args = '' ) {
 
 	}
 
-	// Fetch post list, possibly limited to specific sections
+	// Fetch post list, possibly limited to specific sections.
 	$page_args       = array(
 		'sections'      => $parsed_args['sections'],
 		'post_types'    => $parsed_args['post_types'],

@@ -72,11 +72,11 @@ function get_nav_page_link( $page, $ancestors = array(), $sample = false ) {
 	$page_link        = $wp_rewrite->get_page_permastruct();
 	$draft_or_pending = true;
 	if ( isset( $page->post_status ) ) {
-		$draft_or_pending = in_array( $page->post_status, array( 'draft', 'pending', 'auto-draft' ) );
+		$draft_or_pending = in_array( $page->post_status, array( 'draft', 'pending', 'auto-draft' ), true );
 	}
 	$use_permastruct = ( ! empty( $page_link ) && ( ! $draft_or_pending || $sample ) );
 
-	if ( 'page' == get_option( 'show_on_front' ) && $page->ID == get_option( 'page_on_front' ) ) {
+	if ( 'page' === get_option( 'show_on_front' ) && get_option( 'page_on_front' ) == $page->ID ) {
 		$page_link = home_url( '/' );
 	} elseif ( $use_permastruct ) {
 		$slug      = get_page_uri( $page, $ancestors );
@@ -110,7 +110,7 @@ function get_nav_post_link( $post, $ancestors = array(), $sample = false ) {
 	$post_link        = $wp_rewrite->get_extra_permastruct( $post->post_type );
 	$draft_or_pending = true;
 	if ( isset( $post->post_status ) ) {
-		$draft_or_pending = in_array( $post->post_status, array( 'draft', 'pending', 'auto-draft' ) );
+		$draft_or_pending = in_array( $post->post_status, array( 'draft', 'pending', 'auto-draft' ), true );
 	}
 	$use_permastruct = ( ! empty( $post_link ) && ( ! $draft_or_pending || $sample ) );
 	$post_type       = get_post_type_object( $post->post_type );
@@ -131,7 +131,8 @@ function get_nav_post_link( $post, $ancestors = array(), $sample = false ) {
 				array(
 					'post_type' => $post->post_type,
 					'p'         => $post->ID,
-				), ''
+				),
+				''
 			);
 		}
 		$post_link = home_url( $post_link );

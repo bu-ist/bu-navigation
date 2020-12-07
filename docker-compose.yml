@@ -1,0 +1,11 @@
+version: '3.1'
+services:
+  wptest:
+    image: carlosesilva/wp-phpunit-xdebug:${WPDC_IMAGE_TAG-latest}
+    volumes:
+      - .:/code
+    working_dir: /code
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'

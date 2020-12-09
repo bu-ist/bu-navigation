@@ -235,3 +235,115 @@ function list_section( $parent_id, $pages_by_parent, $args = '' ) {
 
 	return $html;
 }
+
+/**
+ * Formats a single page for display in a HTML list
+ *
+ * @param object $page Page object.
+ * @param mixed  $args Wordpress-style arguments (string or array).
+ * @return string HTML fragment containing list item
+ */
+function format_page( $page, $args = '' ) {
+	$defaults = array(
+		'item_tag'     => 'li',
+		'item_id'      => null,
+		'html'         => '',
+		'depth'        => null,
+		'position'     => null,
+		'siblings'     => null,
+		'anchor_class' => '',
+		'anchor'       => true,
+		'title_before' => '',
+		'title_after'  => '',
+		'section_ids'  => null,
+	);
+	$r        = wp_parse_args( $args, $defaults );
+
+	if ( ! isset( $page->navigation_label ) ) {
+		$page->navigation_label = apply_filters( 'the_title', $page->post_title, $page->ID );
+	}
+
+	$title        = $page->navigation_label;
+	$href         = $page->url;
+	$anchor_class = $r['anchor_class'];
+
+	if ( is_numeric( $r['depth'] ) ) {
+		$anchor_class .= sprintf( ' level_%d', intval( $r['depth'] ) );
+	}
+
+	$attrs = array(
+		'class' => trim( $anchor_class ),
+	);
+
+	if ( isset( $page->url ) && ! empty( $page->url ) ) {
+		$attrs['href'] = esc_url( $page->url );
+	}
+
+	if ( isset( $page->target ) && $page->target == 'new' ) {
+		$attrs['target'] = '_blank';
+	}
+
+	$attrs = apply_filters( 'bu_navigation_filter_anchor_attrs', $attrs, $page );
+
+	$attributes = '';
+
+	if ( is_array( $attrs ) && count( $attrs ) > 0 ) {
+		foreach ( $attrs as $attr => $val ) {
+			if ( $val ) {
+				$attributes .= sprintf( ' %s="%s"', $attr, $val );
+			}
+		}
+	}
+
+	$item_classes = array( 'page_item', 'page-item-' . $page->ID );
+
+	if ( is_array( $r['section_ids'] ) && in_array( $page->ID, $r['section_ids'] ) ) {
+		array_push( $item_classes, 'has_children' );
+	}
+
+	if ( is_numeric( $r['position'] ) && is_numeric( $r['siblings'] ) ) {
+		if ( $r['position'] == 1 ) {
+			array_push( $item_classes, 'first_item' );
+		}
+		if ( $r['position'] == $r['siblings'] ) {
+			array_push( $item_classes, 'last_item' );
+		}
+	}
+
+	$item_classes = apply_filters( 'bu_navigation_filter_item_attrs', $item_classes, $page );
+	$item_classes = apply_filters( 'page_css_class', $item_classes, $page );
+
+	$title = apply_filters( 'bu_page_title', $title );
+	$label = apply_filters( 'bu_navigation_format_page_label', $title, $page );
+
+	$label  = $r['title_before'] . $label . $r['title_after'];
+	$anchor = $r['anchor'] ? sprintf( '<a%s>%s</a>', $attributes, $label ) : $label;
+
+	$html = sprintf(
+		"<%s class=\"%s\">\n%s\n %s</%s>\n",
+		$r['item_tag'],
+		implode( ' ', $item_classes ),
+		$anchor,
+		$r['html'],
+		$r['item_tag']
+	);
+
+	if ( $r['item_id'] ) {
+		$html = sprintf(
+			"<%s id=\"%s\" class=\"%s\">\n%s\n %s</%s>\n",
+			$r['item_tag'],
+			$r['item_id'],
+			implode( ' ', $item_classes ),
+			$anchor,
+			$r['html'],
+			$r['item_tag']
+		);
+	}
+
+	$args               = $r;
+	$args['attributes'] = $attrs;
+
+	$html = apply_filters( 'bu_navigation_filter_item_html', $html, $page, $args );
+
+	return $html;
+}

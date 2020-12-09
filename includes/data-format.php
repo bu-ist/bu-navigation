@@ -186,6 +186,8 @@ function pages_by_parent( $pages ) {
 /**
  * Generates an unordered list tree of pages in a particular section
  *
+ * Takes loaded data and returns formatted HTML.
+ *
  * @param int   $parent_id ID of section (page parent).
  * @param array $pages_by_parent An array of pages indexed by their parent page (see bu_navigation_pages_by_parent).
  * @param mixed $args Array or string of WP-style arguments.

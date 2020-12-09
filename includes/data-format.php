@@ -182,3 +182,54 @@ function pages_by_parent( $pages ) {
 
 	return $pages_by_parent;
 }
+
+/**
+ * Generates an unordered list tree of pages in a particular section
+ *
+ * @param int   $parent_id ID of section (page parent).
+ * @param array $pages_by_parent An array of pages indexed by their parent page (see bu_navigation_pages_by_parent).
+ * @param mixed $args Array or string of WP-style arguments.
+ * @return string HTML fragment containing unordered list
+ */
+function list_section( $parent_id, $pages_by_parent, $args = '' ) {
+	$defaults = array(
+		'depth'         => 1,
+		'container_tag' => 'ul',
+		'item_tag'      => 'li',
+		'section_ids'   => null,
+	);
+
+	$parsed_args = wp_parse_args( $args, $defaults );
+
+	if ( ! array_key_exists( $parent_id, $pages_by_parent ) ) {
+		return '';
+	}
+
+	$html     = '';
+	$children = $pages_by_parent[ $parent_id ];
+
+	if ( ! is_array( $children ) || ! ( count( $children ) > 0 ) ) {
+		return '';
+	}
+
+	$html .= sprintf( "\n<%s>\n", $parsed_args['container_tag'] );
+
+	foreach ( $children as $page ) {
+		$sargs = $parsed_args;
+		$sargs['depth']++;
+
+		$child_html = list_section( $page->ID, $pages_by_parent, $sargs );
+		$html      .= bu_navigation_format_page(
+			$page, array(
+				'html'        => $child_html,
+				'depth'       => $parsed_args['depth'],
+				'item_tag'    => $parsed_args['item_tag'],
+				'section_ids' => $parsed_args['section_ids'],
+			)
+		);
+	}
+
+	$html .= sprintf( "\n</%s>\n", $parsed_args['container_tag'] );
+
+	return $html;
+}

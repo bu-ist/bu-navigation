@@ -598,7 +598,7 @@ function bu_navigation_display_primary( $args = '' ) {
 
 			// List children if we're diving.
 			if ( $r['dive'] ) {
-				$child_html = bu_navigation_list_section( $page->ID, $pages_by_parent, $sargs );
+				$child_html = Navigation\list_section( $page->ID, $pages_by_parent, $sargs );
 			}
 
 			// Display formatted page (optionally with post name as ID).

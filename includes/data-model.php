@@ -424,7 +424,7 @@ function list_pages( $args = '' ) {
 
 	foreach ( $pages_by_parent[ $section ] as $page ) {
 
-		$child_html = bu_navigation_list_section( $page->ID, $pages_by_parent, $sargs );
+		$child_html = list_section( $page->ID, $pages_by_parent, $sargs );
 
 		$pargs = array(
 			'html'        => $child_html,

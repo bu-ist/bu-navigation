@@ -435,7 +435,7 @@ function list_pages( $args = '' ) {
 			'section_ids' => $section_ids,
 		);
 
-		$html .= bu_navigation_format_page( $page, $pargs );
+		$html .= format_page( $page, $pargs );
 
 		$page_position++;
 	}

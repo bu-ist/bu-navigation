@@ -505,7 +505,7 @@ function bu_navigation_display_primary( $args = '' ) {
 
 			// Display formatted page (optionally with post name as ID).
 			if ( $r['identify_top'] ) {
-				$html .= bu_navigation_format_page(
+				$html .= Navigation\format_page(
 					$page, array(
 						'html'     => $child_html,
 						'depth'    => 1,
@@ -514,7 +514,7 @@ function bu_navigation_display_primary( $args = '' ) {
 					)
 				);
 			} else {
-				$html .= bu_navigation_format_page(
+				$html .= Navigation\format_page(
 					$page, array(
 						'html'     => $child_html,
 						'depth'    => 1,

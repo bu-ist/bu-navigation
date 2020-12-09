@@ -221,7 +221,7 @@ function list_section( $parent_id, $pages_by_parent, $args = '' ) {
 		$sargs['depth']++;
 
 		$child_html = list_section( $page->ID, $pages_by_parent, $sargs );
-		$html      .= bu_navigation_format_page(
+		$html      .= format_page(
 			$page, array(
 				'html'        => $child_html,
 				'depth'       => $parsed_args['depth'],

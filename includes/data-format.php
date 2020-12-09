@@ -239,6 +239,8 @@ function list_section( $parent_id, $pages_by_parent, $args = '' ) {
 /**
  * Formats a single page for display in a HTML list
  *
+ * Takes loaded data and returns formatted HTML.
+ *
  * @param object $page Page object.
  * @param mixed  $args Wordpress-style arguments (string or array).
  * @return string HTML fragment containing list item

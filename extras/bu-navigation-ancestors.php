@@ -29,19 +29,19 @@ function bu_navigation_filter_pages_ancestors( $pages ) {
 
 	$filtered = array();
 
-	if ( is_array( $ancestors ) && ( count( $ancestors ) > 0 ) ) {
-		foreach ( $pages as $page ) {
+	if ( ! is_array( $ancestors ) && ! ( count( $ancestors ) > 0 ) ) {
+		return $pages;
+	}
 
-			$page->active_section = false;
+	foreach ( $pages as $page ) {
 
-			if ( in_array( $page->ID, $ancestors ) && $page->ID != $post->ID ) {
-				$page->active_section = true;
-			}
+		$page->active_section = false;
 
-			$filtered[ $page->ID ] = $page;
+		if ( in_array( $page->ID, $ancestors ) && $page->ID != $post->ID ) {
+			$page->active_section = true;
 		}
-	} else {
-		$filtered = $pages;
+
+		$filtered[ $page->ID ] = $page;
 	}
 
 	return $filtered;

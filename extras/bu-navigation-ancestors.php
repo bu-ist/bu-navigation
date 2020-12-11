@@ -20,14 +20,14 @@ function bu_navigation_filter_pages_ancestors( $pages ) {
 		return $pages;
 	}
 
-	$ancestors = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ) );
-
-	$filtered = array();
-
 	// If there aren't any elements in $pages, just return an empty array.
 	if ( ! is_array( $pages ) || ! ( count( $pages ) > 0 ) ) {
 		return array();
 	}
+
+	$ancestors = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ) );
+
+	$filtered = array();
 
 	if ( is_array( $ancestors ) && ( count( $ancestors ) > 0 ) ) {
 		foreach ( $pages as $page ) {

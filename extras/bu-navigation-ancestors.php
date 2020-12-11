@@ -10,13 +10,15 @@ function bu_navigation_filter_pages_ancestors( $pages ) {
 	global $wpdb, $post;
 
 	// Only useful during single post query
-	if ( ! $post )
+	if ( ! $post ) {
 		return $pages;
+	}
 
 	// Only needed for hierarchical post types
 	$post_type_object = get_post_type_object( $post->post_type );
-	if ( ! $post_type_object->hierarchical )
+	if ( ! $post_type_object->hierarchical ) {
 		return $pages;
+	}
 
 	$ancestors = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ) );
 

@@ -30,8 +30,9 @@ function bu_navigation_filter_pages_ancestors( $pages ) {
 
 				$page->active_section = false;
 
-				if ( in_array( $page->ID, $ancestors ) && $page->ID != $post->ID )
+				if ( in_array( $page->ID, $ancestors ) && $page->ID != $post->ID ) {
 					$page->active_section = true;
+				}
 
 				$filtered[$page->ID] = $page;
 			}

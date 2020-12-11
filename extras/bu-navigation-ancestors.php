@@ -29,10 +29,12 @@ function bu_navigation_filter_pages_ancestors( $pages ) {
 
 	$filtered = array();
 
+	// Return the pages unmodified if there are no ancestors.
 	if ( ! is_array( $ancestors ) && ! ( count( $ancestors ) > 0 ) ) {
 		return $pages;
 	}
 
+	// Otherwise, iterate over all the pages and add the active_section property.
 	foreach ( $pages as $page ) {
 
 		$page->active_section = false;

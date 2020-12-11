@@ -24,21 +24,24 @@ function bu_navigation_filter_pages_ancestors( $pages ) {
 
 	$filtered = array();
 
-	if ( is_array( $pages ) && ( count( $pages ) > 0 ) ) {
-		if ( is_array( $ancestors ) && ( count( $ancestors ) > 0 ) ) {
-			foreach ( $pages as $page ) {
+	// If there aren't any elements in $pages, just return an empty array.
+	if ( ! is_array( $pages ) || ! ( count( $pages ) > 0 ) ) {
+		return array();
+	}
 
-				$page->active_section = false;
+	if ( is_array( $ancestors ) && ( count( $ancestors ) > 0 ) ) {
+		foreach ( $pages as $page ) {
 
-				if ( in_array( $page->ID, $ancestors ) && $page->ID != $post->ID ) {
-					$page->active_section = true;
-				}
+			$page->active_section = false;
 
-				$filtered[ $page->ID ] = $page;
+			if ( in_array( $page->ID, $ancestors ) && $page->ID != $post->ID ) {
+				$page->active_section = true;
 			}
-		} else {
-			$filtered = $pages;
+
+			$filtered[ $page->ID ] = $page;
 		}
+	} else {
+		$filtered = $pages;
 	}
 
 	return $filtered;

@@ -9,12 +9,12 @@
 function bu_navigation_filter_pages_ancestors( $pages ) {
 	global $wpdb, $post;
 
-	// Only useful during single post query
+	// Only useful during single post query, so return early if there's no global post.
 	if ( ! $post ) {
 		return $pages;
 	}
 
-	// Only needed for hierarchical post types
+	// Only needed for hierarchical post types, so return early if this post isn't.
 	$post_type_object = get_post_type_object( $post->post_type );
 	if ( ! $post_type_object->hierarchical ) {
 		return $pages;

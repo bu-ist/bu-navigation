@@ -7,7 +7,7 @@
  * @return array Filtered associative array of pages with active_section member variable set
  */
 function bu_navigation_filter_pages_ancestors( $pages ) {
-	global $wpdb, $post;
+	global $post;
 
 	// Only useful during single post query, so return early if there's no global post.
 	if ( ! $post ) {

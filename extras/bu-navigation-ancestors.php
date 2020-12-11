@@ -34,7 +34,7 @@ function bu_navigation_filter_pages_ancestors( $pages ) {
 					$page->active_section = true;
 				}
 
-				$filtered[$page->ID] = $page;
+				$filtered[ $page->ID ] = $page;
 			}
 		} else {
 			$filtered = $pages;

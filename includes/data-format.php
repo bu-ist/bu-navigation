@@ -222,7 +222,8 @@ function list_section( $parent_id, $pages_by_parent, $args = '' ) {
 
 		$child_html = list_section( $page->ID, $pages_by_parent, $sargs );
 		$html      .= format_page(
-			$page, array(
+			$page,
+			array(
 				'html'        => $child_html,
 				'depth'       => $parsed_args['depth'],
 				'item_tag'    => $parsed_args['item_tag'],

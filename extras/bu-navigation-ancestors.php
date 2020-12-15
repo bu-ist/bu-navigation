@@ -23,13 +23,8 @@ function add_active_section( $pages ) {
 	global $post;
 
 	// Only useful during single post query, so return early if there's no global post.
-	if ( ! $post ) {
-		return $pages;
-	}
-
-	// Only needed for hierarchical post types, so return early if this post isn't.
-	$post_type_object = get_post_type_object( $post->post_type );
-	if ( ! $post_type_object->hierarchical ) {
+	// Or if the current post_type isn't hierarchical.
+	if ( ! $post || ! get_post_type_object( $post->post_type )->hierarchical ) {
 		return $pages;
 	}
 

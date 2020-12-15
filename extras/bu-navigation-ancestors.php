@@ -1,9 +1,18 @@
 <?php
+/**
+ * Filter to add an "active_section" property to an array of pages, based on the global post ancestors
+ *
+ * The function retruns a transformed array where the active_section property is true or false
+ * based whether the array element is part of the displayed post's ancestors.
+ * Should probably be consolidated with other filter functions.
+ *
+ * @package BU_Navigation
+ */
 
 /**
  * Appends an "active_section" property to every post being returned during bu_navigation_get_pages
  *
- * @param array $pages Associative array of pages keyed on page ID
+ * @param array $pages Associative array of pages keyed on page ID.
  * @return array Filtered associative array of pages with active_section member variable set
  */
 function bu_navigation_filter_pages_ancestors( $pages ) {

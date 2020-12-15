@@ -27,24 +27,19 @@ function bu_navigation_filter_pages_ancestors( $pages ) {
 
 	$ancestors = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ) );
 
-	$filtered = array();
-
 	// Return the pages unmodified if there are no ancestors.
 	if ( ! is_array( $ancestors ) && ! ( count( $ancestors ) > 0 ) ) {
 		return $pages;
 	}
 
 	// Otherwise, iterate over all the pages and add the active_section property.
-	foreach ( $pages as $page ) {
-
-		$page->active_section = false;
-
-		if ( in_array( $page->ID, $ancestors ) && $page->ID != $post->ID ) {
-			$page->active_section = true;
-		}
-
-		$filtered[ $page->ID ] = $page;
-	}
+	$filtered = array_map(
+		function ( $page ) use ( $post, $ancestors ) {
+			$page->active_section = ( in_array( $page->ID, $ancestors ) && $page->ID != $post->ID );
+			return $page;
+		},
+		$pages
+	);
 
 	return $filtered;
 }

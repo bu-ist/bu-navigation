@@ -4,8 +4,9 @@
 define( 'BU_NAV_META_PAGE_EXCLUDE', '_bu_cms_navigation_exclude' );
 
 // Default post exclusion value for posts that don't have a post meta row yet
-if ( ! defined( 'BU_NAVIGATION_POST_EXCLUDE_DEFAULT' ) )
+if ( ! defined( 'BU_NAVIGATION_POST_EXCLUDE_DEFAULT' ) ) {
 	define( 'BU_NAVIGATION_POST_EXCLUDE_DEFAULT', false );
+}
 
 /**
  * Built-in filter for bu_navigation_get_pages
@@ -53,10 +54,10 @@ function bu_navigation_filter_pages_exclude( $pages ) {
 				}
 			}
 
-			if ( ! $excluded )
+			if ( ! $excluded ) {
 				$filtered[ $page->ID ] = $page;
+			}
 		}
-
 	}
 
 	return $filtered;

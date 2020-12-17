@@ -61,6 +61,7 @@ require_once BU_NAV_PLUGIN_DIR . '/includes/data-nav-labels.php';
 require_once BU_NAV_PLUGIN_DIR . '/includes/data-widget.php';
 require_once BU_NAV_PLUGIN_DIR . '/includes/data-get-urls.php';
 require_once BU_NAV_PLUGIN_DIR . '/includes/data-active-section.php';
+require_once BU_NAV_PLUGIN_DIR . '/includes/class-navigation-widget.php';
 
 /**
  * Convenience class to wrap loading and init functions.

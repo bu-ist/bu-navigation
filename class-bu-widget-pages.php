@@ -7,6 +7,8 @@
  * @package BU_Navigation
  */
 
+use BU\Plugins\Navigation as Navigation;
+
 // Default class for list.  UNUSED in the plugin and the BU CMS build.  Should be removed.
 define( 'BU_WIDGET_PAGES_LIST_CLASS', 'smartnav level1' );
 
@@ -121,7 +123,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 * Echos the content navigation widget content, overrides parent method.
 	 *
 	 * @see bu_navigation_supported_post_types() from library.php
-	 * @see bu_navigation_list_pages() from library.php
+	 * @see \BU\Plugins\Navigation\list_pages()
 	 * @see widget_bu_pages_args_adaptive() from bu-navigation-adaptive-contentnav.php
 	 *
 	 * @param array $args Display arguments for WP_Widget.
@@ -142,11 +144,11 @@ class BU_Widget_Pages extends WP_Widget {
 
 		// Alter args for adaptive mode.
 		if ( 'adaptive' === $instance['navigation_style'] ) {
-			$list_args = widget_bu_pages_args_adaptive( $list_args );
+			$list_args = Navigation\adaptive_pages_args( $list_args );
 		}
 
 		// Fetch markup.
-		$nav_list_markup = bu_navigation_list_pages( $list_args );
+		$nav_list_markup = Navigation\list_pages( $list_args );
 
 		// Only output anything at all if there is existing markup from list_pages.
 		if ( empty( $nav_list_markup ) ) {
@@ -246,18 +248,18 @@ class BU_Widget_Pages extends WP_Widget {
 	 * Get arguments for the page list query.
 	 *
 	 * A helper method that sets up the list query arguements based on the instance style.
-	 * These arguements are structured for the bu_navigation_list_pages() query in library.php.
+	 * These arguments are structured for the BU\Plugins\Navigation\list_pages() query.
 	 *
 	 * @since 1.2.22
 	 *
 	 * @param WP_Post $post The post being rendered.
 	 * @param array   $instance The settings for this instance of the widget.
 	 *
-	 * @return array Arguements for the bu_navigation_list_pages() query in library.php
+	 * @return array Arguments for the BU\Plugins\Navigation\list_pages() query
 	 */
 	protected function get_list_args( $post, $instance ) {
 
-		// Prepare arguments to bu_navigation_list_pages.
+		// Prepare arguments to BU\Plugins\Navigation\list_pages().
 		$list_args = array(
 			'page_id'      => $post->ID,
 			'title_li'     => '',
@@ -294,8 +296,8 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * @since 1.2.22
 	 *
-	 * @see bu_navigation_get_pages() from library.php
-	 * @see bu_navigation_pages_by_parent() from library.php
+	 * @see \BU\Plugins\Navigation\get_nav_pages()
+	 * @see \BU\Plugins\Navigation\pages_by_parent()
 	 *
 	 * @param array  $sections Array of post ids.
 	 * @param string $post_type Post type of the post being rendered.
@@ -308,8 +310,8 @@ class BU_Widget_Pages extends WP_Widget {
 			'post_types'    => array( $post_type ),
 			'include_links' => false,
 		);
-		$pages           = bu_navigation_get_pages( $page_args );
-		$pages_by_parent = bu_navigation_pages_by_parent( $pages );
+		$pages           = Navigation\get_nav_pages( $page_args );
+		$pages_by_parent = Navigation\pages_by_parent( $pages );
 
 		// This looks strange, but is just a way to quickly get the last element of an array in php.
 		$last_section = array_pop( $sections );
@@ -337,7 +339,7 @@ class BU_Widget_Pages extends WP_Widget {
 	 *
 	 * @since 1.2.22
 	 *
-	 * @see bu_navigation_gather_sections() from library.php
+	 * @see \BU\Plugins\Navigation\gather_sections()
 	 *
 	 * @param WP_Post $post The post object as passed to the the widget() method.
 	 * @param string  $nav_style The navigation style of the widget (mode).
@@ -350,7 +352,7 @@ class BU_Widget_Pages extends WP_Widget {
 		}
 
 		// Gets an array of page ids representing the "section" for a given post.
-		$sections = bu_navigation_gather_sections( $post->ID, array( 'post_types' => $post->post_type ) );
+		$sections = Navigation\gather_sections( $post->ID, array( 'post_types' => $post->post_type ) );
 
 		if ( 'section' === $nav_style ) {
 			// Default to top level post of the section (if we have one).

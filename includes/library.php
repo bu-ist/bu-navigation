@@ -19,7 +19,6 @@ if ( defined( 'BU_NAVIGATION_LIB_LOADED' ) && BU_NAVIGATION_LIB_LOADED ) {
 
 define( 'BU_NAVIGATION_LIB_LOADED', true );
 
-define( 'GROUP_CONCAT_MAX_LEN', 20480 );
 
 /**
  * Gets the supported post_types by the bu-navigation plugin.

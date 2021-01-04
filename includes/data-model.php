@@ -7,6 +7,9 @@
 
 namespace BU\Plugins\Navigation;
 
+// Defines an upper bound for results from direct SQL queries.
+define( 'GROUP_CONCAT_MAX_LEN', 20480 );
+
 /**
  * Returns a complex array that describes the entire navigation tree for the specified post types.
  *

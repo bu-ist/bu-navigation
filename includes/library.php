@@ -209,6 +209,23 @@ function bu_navigation_get_page_uri( $page, $ancestors ) {
 }
 
 /**
+ * Get the navigation label for a post
+ *
+ * Content editors set this value through the "Label" text field in the
+ * "Placement in Navigation" metabox.
+ *
+ * This is now a global stub function for compatibility with themes that expect the global prefixed function.
+ * The primary function has moved to a namespaced function.
+ *
+ * @param mixed  $post Post ID or object to fetch label for.
+ * @param string $empty_label Label to use if no existing value was found.
+ * @return string The post's navigation label, or $empty_label if none was found
+ */
+function bu_navigation_get_label( $post, $empty_label = '(no title)' ) {
+	return Navigation\get_nav_label( $post, $empty_label );
+}
+
+/**
  * Returns an array of page objects indexed by page ID
  *
  * This function and one other (load_sections) are the only actual data loading methods.

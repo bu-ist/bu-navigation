@@ -37,6 +37,20 @@ To get started developing with BU Navigation, run `npm install` to initialize No
 
 Run `npm run wp-env` to [start a local Docker instance of WordPress for local development.](https://www.npmjs.com/package/@wordpress/env)
 
+For running local phpunit tests, there is a `docker-compose` setup.  Run
+
+```bash
+docker-compose up
+```
+
+to launch the php and mysql containers.  To download WordPress and setup the phpunit test, obtain a shell on the wp-phpunit-xdebug container and run the setup script from the container:
+
+```bash
+bash bin/install-wp-tests.sh wordpress_test root '' mysql latest
+```
+
+After setup, running inside the container `phpunit` will run the tests.
+
 ## Installation
 
 This plugin can be installed automatically through the WordPress admin interface, or by clicking the download link on this page and installing manually.

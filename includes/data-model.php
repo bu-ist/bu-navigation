@@ -91,12 +91,12 @@ function load_sections( $post_types = array( 'page' ), $include_links = true ) {
 
 	$wpdb->query( 'SET SESSION group_concat_max_len = ' . GROUP_CONCAT_MAX_LEN ); // db call ok; no-cache ok.
 	$query = sprintf(
-		"
-		SELECT DISTINCT(post_parent) AS section, GROUP_CONCAT(ID) AS children
+		"SELECT DISTINCT(post_parent) AS section, GROUP_CONCAT(ID) AS children
 		  FROM %s
 		 WHERE post_type IN ('$in_post_types')
 		 GROUP BY post_parent
-		 ORDER BY post_parent ASC", $wpdb->posts
+		 ORDER BY post_parent ASC",
+		$wpdb->posts
 	);
 	$rows  = $wpdb->get_results( $query ); // db call ok; no-cache ok.
 
@@ -279,9 +279,12 @@ function post_types_to_select( $post_types, $include_links ) {
 	// Check the plugin level 'supports' function to see if 'link' type support has been removed.
 	if ( is_object( $bu_navigation_plugin ) && ! $bu_navigation_plugin->supports( 'links' ) ) {
 		// If so, filter out the link type if it is there.
-		$post_types = array_filter( $post_types, function( $post_type ) {
-			return BU_NAVIGATION_LINK_POST_TYPE !== $post_type;
-		} );
+		$post_types = array_filter(
+			$post_types,
+			function( $post_type ) {
+				return BU_NAVIGATION_LINK_POST_TYPE !== $post_type;
+			}
+		);
 	}
 
 	return $post_types;
@@ -364,7 +367,7 @@ function list_pages( $args = '' ) {
 
 	}
 
-	// Fetch post list, possibly limited to specific sections
+	// Fetch post list, possibly limited to specific sections.
 	$page_args       = array(
 		'sections'      => $parsed_args['sections'],
 		'post_types'    => $parsed_args['post_types'],

@@ -293,113 +293,15 @@ function bu_navigation_pages_by_parent_menu_sort_cb( $a, $b ) {
 /**
  * Formats a single page for display in a HTML list
  *
+ * This is now a global stub function for compatibility with themes that expect the global prefixed function.
+ * The primary function has moved to a namespaced function.
+ *
  * @param object $page Page object.
  * @param mixed  $args Wordpress-style arguments (string or array).
  * @return string HTML fragment containing list item
  */
 function bu_navigation_format_page( $page, $args = '' ) {
-	$defaults = array(
-		'item_tag'     => 'li',
-		'item_id'      => null,
-		'html'         => '',
-		'depth'        => null,
-		'position'     => null,
-		'siblings'     => null,
-		'anchor_class' => '',
-		'anchor'       => true,
-		'title_before' => '',
-		'title_after'  => '',
-		'section_ids'  => null,
-	);
-	$r        = wp_parse_args( $args, $defaults );
-
-	if ( ! isset( $page->navigation_label ) ) {
-		$page->navigation_label = apply_filters( 'the_title', $page->post_title, $page->ID );
-	}
-
-	$title        = $page->navigation_label;
-	$href         = $page->url;
-	$anchor_class = $r['anchor_class'];
-
-	if ( is_numeric( $r['depth'] ) ) {
-		$anchor_class .= sprintf( ' level_%d', intval( $r['depth'] ) );
-	}
-
-	$attrs = array(
-		'class' => trim( $anchor_class ),
-	);
-
-	if ( isset( $page->url ) && ! empty( $page->url ) ) {
-		$attrs['href'] = esc_url( $page->url );
-	}
-
-	if ( isset( $page->target ) && $page->target == 'new' ) {
-		$attrs['target'] = '_blank';
-	}
-
-	$attrs = apply_filters( 'bu_navigation_filter_anchor_attrs', $attrs, $page );
-
-	$attributes = '';
-
-	if ( is_array( $attrs ) && count( $attrs ) > 0 ) {
-		foreach ( $attrs as $attr => $val ) {
-			if ( $val ) {
-				$attributes .= sprintf( ' %s="%s"', $attr, $val );
-			}
-		}
-	}
-
-	$item_classes = array( 'page_item', 'page-item-' . $page->ID );
-
-	if ( is_array( $r['section_ids'] ) && in_array( $page->ID, $r['section_ids'] ) ) {
-		array_push( $item_classes, 'has_children' );
-	}
-
-	if ( is_numeric( $r['position'] ) && is_numeric( $r['siblings'] ) ) {
-		if ( $r['position'] == 1 ) {
-			array_push( $item_classes, 'first_item' );
-		}
-		if ( $r['position'] == $r['siblings'] ) {
-			array_push( $item_classes, 'last_item' );
-		}
-	}
-
-	$item_classes = apply_filters( 'bu_navigation_filter_item_attrs', $item_classes, $page );
-	$item_classes = apply_filters( 'page_css_class', $item_classes, $page );
-
-	$title = apply_filters( 'bu_page_title', $title );
-	$label = apply_filters( 'bu_navigation_format_page_label', $title, $page );
-
-	$label  = $r['title_before'] . $label . $r['title_after'];
-	$anchor = $r['anchor'] ? sprintf( '<a%s>%s</a>', $attributes, $label ) : $label;
-
-	$html = sprintf(
-		"<%s class=\"%s\">\n%s\n %s</%s>\n",
-		$r['item_tag'],
-		implode( ' ', $item_classes ),
-		$anchor,
-		$r['html'],
-		$r['item_tag']
-	);
-
-	if ( $r['item_id'] ) {
-		$html = sprintf(
-			"<%s id=\"%s\" class=\"%s\">\n%s\n %s</%s>\n",
-			$r['item_tag'],
-			$r['item_id'],
-			implode( ' ', $item_classes ),
-			$anchor,
-			$r['html'],
-			$r['item_tag']
-		);
-	}
-
-	$args               = $r;
-	$args['attributes'] = $attrs;
-
-	$html = apply_filters( 'bu_navigation_filter_item_html', $html, $page, $args );
-
-	return $html;
+	return Navigation\format_page( $page, $args );
 }
 
 /**
@@ -471,52 +373,16 @@ add_filter( 'bu_navigation_format_page_label', 'trim' );
 /**
  * Generates an unordered list tree of pages in a particular section
  *
+ * This is now a global stub function for compatibility with themes that expect the global prefixed function.
+ * The primary function has moved to a namespaced function.
+ *
  * @param int   $parent_id ID of section (page parent).
  * @param array $pages_by_parent An array of pages indexed by their parent page (see bu_navigation_pages_by_parent).
  * @param mixed $args Array or string of WP-style arguments.
  * @return string HTML fragment containing unordered list
  */
 function bu_navigation_list_section( $parent_id, $pages_by_parent, $args = '' ) {
-	$defaults = array(
-		'depth'         => 1,
-		'container_tag' => 'ul',
-		'item_tag'      => 'li',
-		'section_ids'   => null,
-	);
-
-	$parsed_args = wp_parse_args( $args, $defaults );
-
-	if ( ! array_key_exists( $parent_id, $pages_by_parent ) ) {
-		return '';
-	}
-
-	$html     = '';
-	$children = $pages_by_parent[ $parent_id ];
-
-	if ( ! is_array( $children ) || ! ( count( $children ) > 0 ) ) {
-		return '';
-	}
-
-	$html .= sprintf( "\n<%s>\n", $parsed_args['container_tag'] );
-
-	foreach ( $children as $page ) {
-		$sargs = $parsed_args;
-		$sargs['depth']++;
-
-		$child_html = bu_navigation_list_section( $page->ID, $pages_by_parent, $sargs );
-		$html      .= bu_navigation_format_page(
-			$page, array(
-				'html'        => $child_html,
-				'depth'       => $parsed_args['depth'],
-				'item_tag'    => $parsed_args['item_tag'],
-				'section_ids' => $parsed_args['section_ids'],
-			)
-		);
-	}
-
-	$html .= sprintf( "\n</%s>\n", $parsed_args['container_tag'] );
-
-	return $html;
+	return Navigation\list_section( $parent_id, $pages_by_parent, $args );
 }
 
 /**
@@ -634,12 +500,12 @@ function bu_navigation_display_primary( $args = '' ) {
 
 			// List children if we're diving.
 			if ( $r['dive'] ) {
-				$child_html = bu_navigation_list_section( $page->ID, $pages_by_parent, $sargs );
+				$child_html = Navigation\list_section( $page->ID, $pages_by_parent, $sargs );
 			}
 
 			// Display formatted page (optionally with post name as ID).
 			if ( $r['identify_top'] ) {
-				$html .= bu_navigation_format_page(
+				$html .= Navigation\format_page(
 					$page, array(
 						'html'     => $child_html,
 						'depth'    => 1,
@@ -648,7 +514,7 @@ function bu_navigation_display_primary( $args = '' ) {
 					)
 				);
 			} else {
-				$html .= bu_navigation_format_page(
+				$html .= Navigation\format_page(
 					$page, array(
 						'html'     => $child_html,
 						'depth'    => 1,

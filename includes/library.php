@@ -113,25 +113,6 @@ function bu_navigation_get_page_depth( $page_id, $all_sections = null ) {
 }
 
 /**
- * Calculate the post path for a post.
- *
- * Loops backwards from $page through $ancestors to determine full post path.
- * If any ancestor is not present in $ancestors it will attempt to load them on demand.
- * Utilizes static caching to minimize repeat queries across calls.
- *
- * This is a stub for the new namespaced function, but there's no reason to think
- * any other themes or components are calling this. Likely it should be removed.
- *
- * @param  object $page      Post object to query path for. Must contain ID, post_name and post_parent fields.
- * @param  array  $ancestors An array of post objects keyed on post ID.  Should contain ancestors of $page,
- *                           with ID, post_name and post_parent fields for each.
- * @return string            Page path.
- */
-function bu_navigation_get_page_uri( $page, $ancestors ) {
-	return Navigation\get_page_uri( $page, $ancestors );
-}
-
-/**
  * Get the navigation label for a post
  *
  * Content editors set this value through the "Label" text field in the

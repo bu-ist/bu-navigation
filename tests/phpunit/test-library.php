@@ -370,15 +370,15 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 		// With ancestors
 		$ancestors = bu_navigation_gather_sections( $grandchild->ID, array( 'direction' => 'up' ) );
-		$this->assertEquals( get_page_link( $grandchild ), bu_navigation_get_page_link( $grandchild, $ancestors ) );
+		$this->assertEquals( get_page_link( $grandchild ), Navigation\get_nav_page_link( $grandchild, $ancestors ) );
 
 		// Without ancestors
-		$this->assertEquals( get_page_link( $grandchild ), bu_navigation_get_page_link( $grandchild ) );
+		$this->assertEquals( get_page_link( $grandchild ), Navigation\get_nav_page_link( $grandchild ) );
 
 		// Page on front
 		update_option( 'show_on_front', 'page' );
 		update_option( 'page_on_front', $grandchild->ID );
-		$this->assertEquals( get_page_link( $grandchild ), bu_navigation_get_page_link( $grandchild ) );
+		$this->assertEquals( get_page_link( $grandchild ), Navigation\get_nav_page_link( $grandchild ) );
 	}
 
 	public function test_bu_navigation_get_page_link_unpublished() {
@@ -399,22 +399,22 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$public_pending_child = get_post( $public_pending_child );
 
 		// Root unpublished
-		$this->assertEquals( get_page_link( $draft ), bu_navigation_get_page_link( $draft ) );
-		$this->assertEquals( get_page_link( $pending ), bu_navigation_get_page_link( $pending ) );
+		$this->assertEquals( get_page_link( $draft ), Navigation\get_nav_page_link( $draft ) );
+		$this->assertEquals( get_page_link( $pending ), Navigation\get_nav_page_link( $pending ) );
 
 		// Public parent, unpublished children
-		$this->assertEquals( get_page_link( $draft_child ), bu_navigation_get_page_link( $draft_child ) );
-		$this->assertEquals( get_page_link( $pending_child ), bu_navigation_get_page_link( $pending_child ) );
+		$this->assertEquals( get_page_link( $draft_child ), Navigation\get_nav_page_link( $draft_child ) );
+		$this->assertEquals( get_page_link( $pending_child ), Navigation\get_nav_page_link( $pending_child ) );
 
 		// Draft parent, public children
-		$this->assertEquals( get_page_link( $public_draft_child ), bu_navigation_get_page_link( $public_draft_child ) );
-		$this->assertEquals( get_page_link( $public_pending_child ), bu_navigation_get_page_link( $public_pending_child ) );
+		$this->assertEquals( get_page_link( $public_draft_child ), Navigation\get_nav_page_link( $public_draft_child ) );
+		$this->assertEquals( get_page_link( $public_pending_child ), Navigation\get_nav_page_link( $public_pending_child ) );
 
 		// Sample permalinks for unpublished pages
-		$this->assertEquals( get_page_link( $draft, false, true ), bu_navigation_get_page_link( $draft, array(), true ) );
-		$this->assertEquals( get_page_link( $draft_child, false, true ), bu_navigation_get_page_link( $draft_child, array(), true ) );
-		$this->assertEquals( get_page_link( $pending, false, true ), bu_navigation_get_page_link( $pending, array(), true ) );
-		$this->assertEquals( get_page_link( $pending_child, false, true ), bu_navigation_get_page_link( $pending_child, array(), true ) );
+		$this->assertEquals( get_page_link( $draft, false, true ), Navigation\get_nav_page_link( $draft, array(), true ) );
+		$this->assertEquals( get_page_link( $draft_child, false, true ), Navigation\get_nav_page_link( $draft_child, array(), true ) );
+		$this->assertEquals( get_page_link( $pending, false, true ), Navigation\get_nav_page_link( $pending, array(), true ) );
+		$this->assertEquals( get_page_link( $pending_child, false, true ), Navigation\get_nav_page_link( $pending_child, array(), true ) );
 	}
 
 	public function test_bu_navigation_get_page_link_no_permalinks() {

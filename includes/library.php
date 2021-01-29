@@ -213,8 +213,8 @@ function bu_navigation_format_page( $page, $args = '' ) {
  *
  * @todo relocate to a default filters file
  *
- * @param $attributes array Associative array of anchor attributes
- * @param $page object Page object
+ * @param array  $classes Associative array of css classes.
+ * @param object $page Page object.
  * @return array Array of classes
  */
 function bu_navigation_filter_item_attrs( $classes, $page ) {

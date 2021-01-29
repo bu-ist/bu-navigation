@@ -338,7 +338,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		unset( $pages[$test_child]->url );
 
 		// Use get_urls to get the new url
-		$pages = bu_navigation_get_urls( $pages );
+		$pages = Navigation\get_urls( $pages );
 
 		// Test to make sure the url is the expected one
 		$this->assertEquals( get_permalink($parent), $pages[$parent]->url );

@@ -113,26 +113,6 @@ function bu_navigation_get_page_depth( $page_id, $all_sections = null ) {
 }
 
 /**
- * Add the post permalink as a property on the post object.
- *
- * Helpful when you need URLs for a large number of posts and don't want to
- * melt your server with 3000 calls to `get_permalink()`.
- *
- * This is most efficient when $pages contains the complete ancestry for each post. If any post
- * ancestors are missing when calculating hierarchical post names it will load them,
- * at the expensive of a few extra queries.
- *
- * This is a stub for the new namespaced function, but there's no reason to think
- * any other themes or components are calling this. Likely it should be removed.
- *
- * @param  array $pages An array of post objects keyed on post ID. Works with all post types.
- * @return array $pages The input array with $post->url set to the permalink for each post.
- */
-function bu_navigation_get_urls( $pages ) {
-	return Navigation\get_urls( $pages );
-}
-
-/**
  * Retrieve the page permalink.
  *
  * Intended as an efficient alternative to `get_page_link()` / `_get_page_link()`.

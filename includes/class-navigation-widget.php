@@ -7,17 +7,8 @@
 
 namespace BU\Plugins\Navigation;
 
-// Default class for list.  UNUSED in the plugin and the BU CMS build.  Should be removed.
-define( 'BU_WIDGET_PAGES_LIST_CLASS', 'smartnav level1' );
-
 // Default element id for list.
 define( 'BU_WIDGET_PAGES_LIST_ID', 'contentnavlist' );
-
-// Default HTML fragment open. UNUSED in the plugin and the BU CMS build.  Should be removed.
-define( 'BU_WIDGET_CONTENTNAV_BEFORE', '<div id="contentnav">' );
-
-// Default HTML fragment close. UNUSED in the plugin and the BU CMS build.  Should be removed.
-define( 'BU_WIDGET_CONTENTNAV_AFTER', '</div>' );
 
 /**
  * Widget for displaying navigation.

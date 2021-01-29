@@ -1,5 +1,7 @@
 <?php
 
+use BU\Plugins\Navigation as Navigation;
+
 /**
  * Coverage for functions in the BU Navigation library
  *
@@ -170,7 +172,7 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$good_childsections = false;
 
 		// $parent should return child and grandchild_one as the only sections
-		$child_sections = bu_navigation_gather_childsections( $parent, $all_sections['sections'] );
+		$child_sections = Navigation\gather_childsections( $parent, $all_sections['sections'] );
 		if( count( $child_sections ) == 2 and
 			$child_sections[0] == $child  and
 			$child_sections[1] == $grandchild_one )
@@ -179,8 +181,8 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$this->assertTrue( $good_childsections );
 
 		// Test Depth Functionality
-		$depth_one = bu_navigation_gather_childsections( $parent, $all_sections['sections'], 1 );
-		$depth_two = bu_navigation_gather_childsections( $parent, $all_sections['sections'], 2 );
+		$depth_one = Navigation\gather_childsections( $parent, $all_sections['sections'], 1 );
+		$depth_two = Navigation\gather_childsections( $parent, $all_sections['sections'], 2 );
 
 		// Expected results
 		$depth_one_exp = array( $child );

@@ -93,22 +93,6 @@ function bu_navigation_gather_sections( $page_id, $args = '', $all_sections = nu
 }
 
 /**
- * Gets a section of children given a post ID and some arguments.
- *
- * This is a stub for the new namespaced function, but there's no reason to think
- * any other themes or components are calling this. Likely it should be removed.
- *
- * @param string  $parent_id ID of a parent post expressed as a string.
- * @param array   $sections All of the sections at the depth being gathered.
- * @param integer $max_depth Maximum depth to gather.
- * @param integer $current_depth Current depth from gather_sections() args.
- * @return array Array of page ids.
- */
-function bu_navigation_gather_childsections( $parent_id, $sections, $max_depth = 0, $current_depth = 1 ) {
-	return Navigation\gather_childsections( $parent_id, $sections, $max_depth, $current_depth );
-}
-
-/**
  * This is the only function that appears to allow for the the 3rd 'all_sections' arg from gather_sections.
  * It is entirely unusued at BU except for the bu-tech-workflow.php template in the bu-tech-2014 theme.
  * Ideally this function should be deprecated, and the 'all_sections' arg should be removed from gather_sections.

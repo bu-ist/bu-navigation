@@ -113,26 +113,6 @@ function bu_navigation_get_page_depth( $page_id, $all_sections = null ) {
 }
 
 /**
- * Retrieve the permalink for a post with a custom post type.
- *
- * Intended as an efficient alternative to `get_post_permalink()`.
- * Allows you to provide an array of post ancestors for use calculating post name path.
- *
- * @see `get_post_permalink()`
- *
- * This is a stub for the new namespaced function, but there's no reason to think
- * any other themes or components are calling this. Likely it should be removed.
- *
- * @param  object  $post       Post object to calculate permalink for.
- * @param  array   $ancestors  Optional. An array of post objects keyed on post ID. Should contain all ancestors of $post.
- * @param  boolean $sample     Optional. Is it a sample permalink.
- * @return string              Post permalink.
- */
-function bu_navigation_get_post_link( $post, $ancestors = array(), $sample = false ) {
-	return Navigation\get_nav_post_link( $post, $ancestors, $sample );
-}
-
-/**
  * Calculate the post path for a post.
  *
  * Loops backwards from $page through $ancestors to determine full post path.

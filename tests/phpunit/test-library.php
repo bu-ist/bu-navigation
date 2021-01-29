@@ -438,10 +438,10 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 
 			// With ancestors
 			$ancestors = bu_navigation_gather_sections( $grandchild->ID, array( 'direction' => 'up' ) );
-			$this->assertEquals( get_post_permalink( $grandchild ), bu_navigation_get_post_link( $grandchild, $ancestors ) );
+			$this->assertEquals( get_post_permalink( $grandchild ), Navigation\get_nav_post_link( $grandchild, $ancestors ) );
 
 			// Without ancestors
-			$this->assertEquals( get_post_permalink( $grandchild ), bu_navigation_get_post_link( $grandchild ) );
+			$this->assertEquals( get_post_permalink( $grandchild ), Navigation\get_nav_post_link( $grandchild ) );
 		}
 	}
 
@@ -461,18 +461,18 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$pending_child = get_post( $pending_child );
 
 		// Root unpublished
-		$this->assertEquals( get_post_permalink( $draft ), bu_navigation_get_post_link( $draft ) );
-		$this->assertEquals( get_post_permalink( $pending ), bu_navigation_get_post_link( $pending ) );
+		$this->assertEquals( get_post_permalink( $draft ), Navigation\get_nav_post_link( $draft ) );
+		$this->assertEquals( get_post_permalink( $pending ), Navigation\get_nav_post_link( $pending ) );
 
 		// Public parent, unpublished children
-		$this->assertEquals( get_post_permalink( $draft_child ), bu_navigation_get_post_link( $draft_child ) );
-		$this->assertEquals( get_post_permalink( $pending_child ), bu_navigation_get_post_link( $pending_child ) );
+		$this->assertEquals( get_post_permalink( $draft_child ), Navigation\get_nav_post_link( $draft_child ) );
+		$this->assertEquals( get_post_permalink( $pending_child ), Navigation\get_nav_post_link( $pending_child ) );
 
 		// Sample permalinks for unpublished posts
-		$this->assertEquals( get_post_permalink( $draft, false, true ), bu_navigation_get_post_link( $draft, array(), true ) );
-		$this->assertEquals( get_post_permalink( $draft_child, false, true ), bu_navigation_get_post_link( $draft_child, array(), true ) );
-		$this->assertEquals( get_post_permalink( $pending, false, true ), bu_navigation_get_post_link( $pending, array(), true ) );
-		$this->assertEquals( get_post_permalink( $pending_child, false, true ), bu_navigation_get_post_link( $pending_child, array(), true ) );
+		$this->assertEquals( get_post_permalink( $draft, false, true ), Navigation\get_nav_post_link( $draft, array(), true ) );
+		$this->assertEquals( get_post_permalink( $draft_child, false, true ), Navigation\get_nav_post_link( $draft_child, array(), true ) );
+		$this->assertEquals( get_post_permalink( $pending, false, true ), Navigation\get_nav_post_link( $pending, array(), true ) );
+		$this->assertEquals( get_post_permalink( $pending_child, false, true ), Navigation\get_nav_post_link( $pending_child, array(), true ) );
 	}
 
 	/**
@@ -506,8 +506,8 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		wp_update_post($public_pending_child);
 
 		// Draft parent, public children
-		$this->assertEquals( get_post_permalink( $public_draft_child ), bu_navigation_get_post_link( $public_draft_child ) );
-		$this->assertEquals( get_post_permalink( $public_pending_child ), bu_navigation_get_post_link( $public_pending_child ) );
+		$this->assertEquals( get_post_permalink( $public_draft_child ), Navigation\get_nav_post_link( $public_draft_child ) );
+		$this->assertEquals( get_post_permalink( $public_pending_child ), Navigation\get_nav_post_link( $public_pending_child ) );
 	}
 
 	public function test_bu_navigation_get_post_link_no_permalinks() {
@@ -537,9 +537,9 @@ class Test_BU_Navigation_Library extends BU_Navigation_UnitTestCase {
 		$cpt_two = get_post( $cpt_two );
 		$cpt_three = get_post( $cpt_three );
 
-		$this->assertEquals( get_post_permalink( $cpt_one ), bu_navigation_get_post_link( $cpt_one ) );
-		$this->assertEquals( get_post_permalink( $cpt_two ), bu_navigation_get_post_link( $cpt_two ) );
-		$this->assertEquals( get_post_permalink( $cpt_three ), bu_navigation_get_post_link( $cpt_three ) );
+		$this->assertEquals( get_post_permalink( $cpt_one ), Navigation\get_nav_post_link( $cpt_one ) );
+		$this->assertEquals( get_post_permalink( $cpt_two ), Navigation\get_nav_post_link( $cpt_two ) );
+		$this->assertEquals( get_post_permalink( $cpt_three ), Navigation\get_nav_post_link( $cpt_three ) );
 	}
 
 	/**

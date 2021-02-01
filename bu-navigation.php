@@ -55,13 +55,14 @@ require_once BU_NAV_PLUGIN_DIR . '/includes/settings.php';
 require_once BU_NAV_PLUGIN_DIR . '/includes/library.php';
 require_once BU_NAV_PLUGIN_DIR . '/includes/class-tree-view.php';
 require_once BU_NAV_PLUGIN_DIR . '/includes/class-reorder.php';
-require_once BU_NAV_PLUGIN_DIR . '/includes/data-model.php';
-require_once BU_NAV_PLUGIN_DIR . '/includes/data-format.php';
-require_once BU_NAV_PLUGIN_DIR . '/includes/data-nav-labels.php';
-require_once BU_NAV_PLUGIN_DIR . '/includes/data-widget.php';
-require_once BU_NAV_PLUGIN_DIR . '/includes/data-get-urls.php';
-require_once BU_NAV_PLUGIN_DIR . '/includes/data-active-section.php';
-require_once BU_NAV_PLUGIN_DIR . '/includes/class-navigation-widget.php';
+
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-model.php';
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-format.php';
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-nav-labels.php';
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-widget.php';
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-get-urls.php';
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-active-section.php';
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/class-navigation-widget.php';
 
 /**
  * Convenience class to wrap loading and init functions.

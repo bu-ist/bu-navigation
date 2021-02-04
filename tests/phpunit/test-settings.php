@@ -22,12 +22,12 @@ class Test_BU_Navigation_Settings extends BU_Navigation_UnitTestCase {
 	public function test_get_all() {
 
 		$expected_settings = array(
-			'display' => true,
+			'display'   => true,
 			'max_items' => BU_NAVIGATION_PRIMARY_MAX,
-			'dive' => true,
-			'depth' => BU_NAVIGATION_PRIMARY_DEPTH,
-			'allow_top' => true
-			);
+			'dive'      => true,
+			'depth'     => BU_NAVIGATION_PRIMARY_DEPTH,
+			'allow_top' => true,
+		);
 
 		$this->assertSame( $expected_settings, $this->plugin->settings->get_all() );
 
@@ -36,12 +36,12 @@ class Test_BU_Navigation_Settings extends BU_Navigation_UnitTestCase {
 	public function test_update() {
 
 		$updates = array(
-			'display' => false,
+			'display'   => false,
 			'max_items' => 3,
-			'dive' => false,
-			'depth' => 2,
-			'allow_top' => false
-			);
+			'dive'      => false,
+			'depth'     => 2,
+			'allow_top' => false,
+		);
 
 		$this->plugin->settings->update( $updates );
 		$this->plugin->settings->clear();

@@ -14,10 +14,25 @@ class Test_BU_Navigation_Extras extends BU_Navigation_UnitTestCase {
 	 */
 	public function test_navigation_exclude() {
 
-		$parent = $this->factory->post->create( array( 'post_type' => 'page' ) );
-		$child = $this->factory->post->create( array( 'post_type' => 'page', 'post_parent' => $parent ) );
-		$hidden_child = $this->factory->post->create( array( 'post_type' => 'page','post_parent' => $parent ) );
-		$hidden_link = $this->factory->post->create( array( 'post_type' => 'bu_link','post_parent' => $parent ) );
+		$parent       = $this->factory->post->create( array( 'post_type' => 'page' ) );
+		$child        = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_parent' => $parent,
+			)
+		);
+		$hidden_child = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_parent' => $parent,
+			)
+		);
+		$hidden_link  = $this->factory->post->create(
+			array(
+				'post_type'   => 'bu_link',
+				'post_parent' => $parent,
+			)
+		);
 
 		// 1. Test default value (do not exclude)
 		$posts = bu_navigation_get_posts();

@@ -19,7 +19,6 @@ if ( defined( 'BU_NAVIGATION_LIB_LOADED' ) && BU_NAVIGATION_LIB_LOADED ) {
 
 define( 'BU_NAVIGATION_LIB_LOADED', true );
 
-define( 'GROUP_CONCAT_MAX_LEN', 20480 );
 
 /**
  * Gets the supported post_types by the bu-navigation plugin.
@@ -94,22 +93,6 @@ function bu_navigation_gather_sections( $page_id, $args = '', $all_sections = nu
 }
 
 /**
- * Gets a section of children given a post ID and some arguments.
- *
- * This is a stub for the new namespaced function, but there's no reason to think
- * any other themes or components are calling this. Likely it should be removed.
- *
- * @param string  $parent_id ID of a parent post expressed as a string.
- * @param array   $sections All of the sections at the depth being gathered.
- * @param integer $max_depth Maximum depth to gather.
- * @param integer $current_depth Current depth from gather_sections() args.
- * @return array Array of page ids.
- */
-function bu_navigation_gather_childsections( $parent_id, $sections, $max_depth = 0, $current_depth = 1 ) {
-	return Navigation\gather_childsections( $parent_id, $sections, $max_depth, $current_depth );
-}
-
-/**
  * This is the only function that appears to allow for the the 3rd 'all_sections' arg from gather_sections.
  * It is entirely unusued at BU except for the bu-tech-workflow.php template in the bu-tech-2014 theme.
  * Ideally this function should be deprecated, and the 'all_sections' arg should be removed from gather_sections.
@@ -127,85 +110,6 @@ function bu_navigation_get_page_depth( $page_id, $all_sections = null ) {
 	$depth--;
 
 	return $depth;
-}
-
-/**
- * Add the post permalink as a property on the post object.
- *
- * Helpful when you need URLs for a large number of posts and don't want to
- * melt your server with 3000 calls to `get_permalink()`.
- *
- * This is most efficient when $pages contains the complete ancestry for each post. If any post
- * ancestors are missing when calculating hierarchical post names it will load them,
- * at the expensive of a few extra queries.
- *
- * This is a stub for the new namespaced function, but there's no reason to think
- * any other themes or components are calling this. Likely it should be removed.
- *
- * @param  array $pages An array of post objects keyed on post ID. Works with all post types.
- * @return array $pages The input array with $post->url set to the permalink for each post.
- */
-function bu_navigation_get_urls( $pages ) {
-	return Navigation\get_urls( $pages );
-}
-
-/**
- * Retrieve the page permalink.
- *
- * Intended as an efficient alternative to `get_page_link()` / `_get_page_link()`.
- * Allows you to provide an array of post ancestors for use calculating post name path.
- *
- * This is a stub for the new namespaced function, but there's no reason to think
- * any other themes or components are calling this. Likely it should be removed.
- *
- * @see `_get_page_link()`
- *
- * @param  object  $page       Post object to calculate permalink for.
- * @param  array   $ancestors  Optional. An array of post objects keyed on post ID. Should contain all ancestors of $page.
- * @param  boolean $sample     Optional. Is it a sample permalink.
- * @return string              Post permalink.
- */
-function bu_navigation_get_page_link( $page, $ancestors = array(), $sample = false ) {
-	return Navigation\get_nav_page_link( $page, $ancestors, $sample );
-}
-
-/**
- * Retrieve the permalink for a post with a custom post type.
- *
- * Intended as an efficient alternative to `get_post_permalink()`.
- * Allows you to provide an array of post ancestors for use calculating post name path.
- *
- * @see `get_post_permalink()`
- *
- * This is a stub for the new namespaced function, but there's no reason to think
- * any other themes or components are calling this. Likely it should be removed.
- *
- * @param  object  $post       Post object to calculate permalink for.
- * @param  array   $ancestors  Optional. An array of post objects keyed on post ID. Should contain all ancestors of $post.
- * @param  boolean $sample     Optional. Is it a sample permalink.
- * @return string              Post permalink.
- */
-function bu_navigation_get_post_link( $post, $ancestors = array(), $sample = false ) {
-	return Navigation\get_nav_post_link( $post, $ancestors, $sample );
-}
-
-/**
- * Calculate the post path for a post.
- *
- * Loops backwards from $page through $ancestors to determine full post path.
- * If any ancestor is not present in $ancestors it will attempt to load them on demand.
- * Utilizes static caching to minimize repeat queries across calls.
- *
- * This is a stub for the new namespaced function, but there's no reason to think
- * any other themes or components are calling this. Likely it should be removed.
- *
- * @param  object $page      Post object to query path for. Must contain ID, post_name and post_parent fields.
- * @param  array  $ancestors An array of post objects keyed on post ID.  Should contain ancestors of $page,
- *                           with ID, post_name and post_parent fields for each.
- * @return string            Page path.
- */
-function bu_navigation_get_page_uri( $page, $ancestors ) {
-	return Navigation\get_page_uri( $page, $ancestors );
 }
 
 /**
@@ -309,8 +213,8 @@ function bu_navigation_format_page( $page, $args = '' ) {
  *
  * @todo relocate to a default filters file
  *
- * @param $attributes array Associative array of anchor attributes
- * @param $page object Page object
+ * @param array  $classes Associative array of css classes.
+ * @param object $page Page object.
  * @return array Array of classes
  */
 function bu_navigation_filter_item_attrs( $classes, $page ) {

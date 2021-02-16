@@ -62,6 +62,7 @@ require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/s
 require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-widget.php';
 require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-get-urls.php';
 require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-active-section.php';
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/filters.php';
 require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/class-navigation-widget.php';
 
 /**

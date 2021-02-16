@@ -261,7 +261,6 @@ class Navigation_Widget extends \WP_Widget {
 
 		// Not sure this check is necessary as there should always be an instance style, but leaving it in to preserve original behavior.
 		if ( ! array_key_exists( 'navigation_style', $instance ) ) {
-			$GLOBALS['bu_navigation_plugin']->log( 'No nav label widget style set!' );
 			return $list_args;
 		}
 

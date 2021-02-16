@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2fb8fb950d103db7c7d942e4a4ca3d72",
+    "content-hash": "2d2dd5425da31405a790fb6c8d5ffae5",
     "packages": [
         {
             "name": "bu-ist/bu-navigation-core-widget",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bu-ist/bu-navigation-core-widget.git",
-                "reference": "810bb56b2993a23f40b19d001cc7eb23902bf522"
+                "reference": "438bab3926ea72bd0a79180819448a8d6d4b9ec4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bu-ist/bu-navigation-core-widget/zipball/810bb56b2993a23f40b19d001cc7eb23902bf522",
-                "reference": "810bb56b2993a23f40b19d001cc7eb23902bf522",
+                "url": "https://api.github.com/repos/bu-ist/bu-navigation-core-widget/zipball/438bab3926ea72bd0a79180819448a8d6d4b9ec4",
+                "reference": "438bab3926ea72bd0a79180819448a8d6d4b9ec4",
                 "shasum": ""
             },
             "require": {
@@ -29,7 +29,30 @@
                 "wp-coding-standards/wpcs": "^2.3"
             },
             "type": "wordpress-dropin",
+            "license": [
+                "GPL2+"
+            ],
             "authors": [
+                {
+                    "name": "Niall Kavanagh",
+                    "email": "ntk@bu.edu"
+                },
+                {
+                    "name": "Gregory Cornelius",
+                    "email": "gcorne@gmail.com"
+                },
+                {
+                    "name": "Mike Burns",
+                    "email": "mgburns@bu.edu"
+                },
+                {
+                    "name": "Tyler Wiest",
+                    "email": "jtwiest@gmail.com"
+                },
+                {
+                    "name": "Andrew Bauer",
+                    "email": "awbauer@bu.edu"
+                },
                 {
                     "name": "Jonathan Williams",
                     "email": "jaydub@bu.edu"
@@ -37,10 +60,10 @@
             ],
             "description": "Core data methods and widget logic for BU Navigation",
             "support": {
-                "source": "https://github.com/bu-ist/bu-navigation-core-widget/tree/1.0.0",
+                "source": "https://github.com/bu-ist/bu-navigation-core-widget/tree/1.0.1",
                 "issues": "https://github.com/bu-ist/bu-navigation-core-widget/issues"
             },
-            "time": "2021-02-01T21:11:06+00:00"
+            "time": "2021-02-16T16:32:24+00:00"
         },
         {
             "name": "composer/installers",
@@ -2069,7 +2092,7 @@
         },
         {
             "name": "symfony/polyfill-ctype",
-            "version": "v1.22.0",
+            "version": "v1.22.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
@@ -2128,7 +2151,7 @@
                 "portable"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-ctype/tree/v1.22.0"
+                "source": "https://github.com/symfony/polyfill-ctype/tree/v1.22.1"
             },
             "funding": [
                 {
@@ -2148,16 +2171,16 @@
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.22.0",
+            "version": "v1.22.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "f377a3dd1fde44d37b9831d68dc8dea3ffd28e13"
+                "reference": "5232de97ee3b75b0360528dae24e73db49566ab1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/f377a3dd1fde44d37b9831d68dc8dea3ffd28e13",
-                "reference": "f377a3dd1fde44d37b9831d68dc8dea3ffd28e13",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/5232de97ee3b75b0360528dae24e73db49566ab1",
+                "reference": "5232de97ee3b75b0360528dae24e73db49566ab1",
                 "shasum": ""
             },
             "require": {
@@ -2208,7 +2231,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.22.0"
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.22.1"
             },
             "funding": [
                 {
@@ -2224,11 +2247,11 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-01-07T16:49:33+00:00"
+            "time": "2021-01-22T09:19:47+00:00"
         },
         {
             "name": "symfony/polyfill-php73",
-            "version": "v1.22.0",
+            "version": "v1.22.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php73.git",
@@ -2287,7 +2310,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php73/tree/v1.22.0"
+                "source": "https://github.com/symfony/polyfill-php73/tree/v1.22.1"
             },
             "funding": [
                 {
@@ -2307,7 +2330,7 @@
         },
         {
             "name": "symfony/polyfill-php80",
-            "version": "v1.22.0",
+            "version": "v1.22.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php80.git",
@@ -2370,7 +2393,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php80/tree/v1.22.0"
+                "source": "https://github.com/symfony/polyfill-php80/tree/v1.22.1"
             },
             "funding": [
                 {

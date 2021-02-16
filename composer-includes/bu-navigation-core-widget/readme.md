@@ -19,7 +19,7 @@ Then add the package to the composer require section:
 
 ``` json
 "require": {
-    "bu-ist/bu-navigation-core-widget": "0.1.3"
+    "bu-ist/bu-navigation-core-widget": "1.0.*"
 }
 ```
 
@@ -59,6 +59,7 @@ if ( ! $bu_navigation_plugin ) {
     require __DIR__ . '/inc/bu-navigation-core-widget/src/data-model.php';
     require __DIR__ . '/inc/bu-navigation-core-widget/src/data-nav-labels.php';
     require __DIR__ . '/inc/bu-navigation-core-widget/src/data-widget.php';
+    require __DIR__ . '/inc/bu-navigation-core-widget/src/filters.php';
 
     define( 'BU_NAVIGATION_LINK_POST_TYPE', 'link' );
 

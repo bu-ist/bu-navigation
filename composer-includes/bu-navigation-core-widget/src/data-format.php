@@ -314,7 +314,10 @@ function format_page( $page, $args = '' ) {
 	}
 
 	$item_classes = apply_filters( 'bu_navigation_filter_item_attrs', $item_classes, $page );
-	$item_classes = apply_filters( 'page_css_class', $item_classes, $page );
+
+	// The page_css_class filter requires a 'depth' parameter in the third spot.
+	// It doesn't seem consequential so, supply the default '0' for depth.
+	$item_classes = apply_filters( 'page_css_class', $item_classes, $page, 0, array(), (int) $page->ID );
 
 	$title = apply_filters( 'bu_page_title', $title );
 	$label = apply_filters( 'bu_navigation_format_page_label', $title, $page );

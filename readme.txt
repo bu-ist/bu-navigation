@@ -3,7 +3,7 @@ Contributors: ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
 Tested up to: 5.5
-Stable tag: 1.2.24
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,12 @@ Please see this page for the details:
 5. The same drag and drop view is available to move pages while editing them
 
 == Changelog ==
+
+= 1.3.0 =
+
+* Moves core methods to a Composer package that is then imported back into the plugin.  This is to allow for other plugins to also import the core data and widget code.
+* Uses a new namespace for the core data methods.
+* Global stubs for the namespaced functions are still available for functions that are in use outside of the plugin. If a function doesn't appear to be in use outside of the plugin, the global function was removed.
 
 = 1.2.24 =
 

@@ -107,6 +107,12 @@ Please see this page for the details:
 
 ## Changelog
 
+### 1.3.0
+
+* Moves core methods to a [Composer package](https://github.com/bu-ist/bu-navigation-core-widget) that is then imported back into the plugin.  This is to allow for other plugins to also import the core data and widget code.
+* Uses a new namespace for the core data methods.
+* Global stubs for the namespaced functions are still available for functions that are in use outside of the plugin. If a function doesn't appear to be in use outside of the plugin, the global function was removed.
+
 ### 1.2.24
 
 * Refactor library query functions for code standards and maintainability.

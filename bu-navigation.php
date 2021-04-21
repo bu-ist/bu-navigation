@@ -5,7 +5,7 @@
  * Author: Boston University (IS&T)
  * Author URI: http://sites.bu.edu/web/
  * Description: Provides alternative navigation elements designed for blogs with large page counts
- * Version: 1.2.24
+ * Version: 1.3.0
  * Text Domain: bu-navigation
  * Domain Path: /languages
  * License: GPL2+
@@ -56,6 +56,15 @@ require_once BU_NAV_PLUGIN_DIR . '/includes/library.php';
 require_once BU_NAV_PLUGIN_DIR . '/includes/class-tree-view.php';
 require_once BU_NAV_PLUGIN_DIR . '/includes/class-reorder.php';
 
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-model.php';
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-format.php';
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-nav-labels.php';
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-widget.php';
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-get-urls.php';
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/data-active-section.php';
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/filters.php';
+require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/class-navigation-widget.php';
+
 /**
  * Convenience class to wrap loading and init functions.
  */
@@ -82,7 +91,7 @@ class BU_Navigation_Plugin {
 	 *
 	 * @var string
 	 */
-	const VERSION = '1.2.24';
+	const VERSION = '1.3.0';
 
 	/**
 	 * Plugin class constructor.

@@ -4,8 +4,9 @@
 define( 'BU_NAV_META_PAGE_EXCLUDE', '_bu_cms_navigation_exclude' );
 
 // Default post exclusion value for posts that don't have a post meta row yet
-if ( ! defined( 'BU_NAVIGATION_POST_EXCLUDE_DEFAULT' ) )
+if ( ! defined( 'BU_NAVIGATION_POST_EXCLUDE_DEFAULT' ) ) {
 	define( 'BU_NAVIGATION_POST_EXCLUDE_DEFAULT', false );
+}
 
 /**
  * Built-in filter for bu_navigation_get_pages
@@ -23,12 +24,14 @@ function bu_navigation_filter_pages_exclude( $pages ) {
 	if ( is_array( $pages ) && count( $pages ) > 0 ) {
 
 		// Fetch pages that have been explicitly excluded from navigation lists
-		$ids = array_keys( $pages );
-		$query = sprintf( "SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s)",
+		$ids   = array_keys( $pages );
+		$query = sprintf(
+			"SELECT post_id, meta_value FROM %s WHERE meta_key = '%s' AND post_id IN (%s)",
 			$wpdb->postmeta,
 			BU_NAV_META_PAGE_EXCLUDE,
 			implode( ',', $ids )
-			);
+		);
+
 		$exclude_meta = $wpdb->get_results( $query, OBJECT_K );
 
 		if ( false === $exclude_meta ) {
@@ -53,10 +56,10 @@ function bu_navigation_filter_pages_exclude( $pages ) {
 				}
 			}
 
-			if ( ! $excluded )
+			if ( ! $excluded ) {
 				$filtered[ $page->ID ] = $page;
+			}
 		}
-
 	}
 
 	return $filtered;

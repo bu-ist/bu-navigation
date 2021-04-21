@@ -37,6 +37,20 @@ To get started developing with BU Navigation, run `npm install` to initialize No
 
 Run `npm run wp-env` to [start a local Docker instance of WordPress for local development.](https://www.npmjs.com/package/@wordpress/env)
 
+For running local phpunit tests, there is a `docker-compose` setup.  Run
+
+```bash
+docker-compose up
+```
+
+to launch the php and mysql containers.  To download WordPress and setup the phpunit test, obtain a shell on the wp-phpunit-xdebug container and run the setup script from the container:
+
+```bash
+bash bin/install-wp-tests.sh wordpress_test root '' mysql latest
+```
+
+After setup, running inside the container `phpunit` will run the tests.
+
 ## Installation
 
 This plugin can be installed automatically through the WordPress admin interface, or by clicking the download link on this page and installing manually.
@@ -92,6 +106,12 @@ Please see this page for the details:
 ![The same drag and drop view is available to move pages while editing them](https://ps.w.org/bu-navigation/assets/screenshot-5.png)
 
 ## Changelog
+
+### 1.3.0
+
+* Moves core methods to a [Composer package](https://github.com/bu-ist/bu-navigation-core-widget) that is then imported back into the plugin.  This is to allow for other plugins to also import the core data and widget code.
+* Uses a new namespace for the core data methods.
+* Global stubs for the namespaced functions are still available for functions that are in use outside of the plugin. If a function doesn't appear to be in use outside of the plugin, the global function was removed.
 
 ### 1.2.24
 

@@ -1,0 +1,40 @@
+{
+    "name": "bu-ist/bu-navigation-core-widget",
+    "description": "Core data methods and widget logic for BU Navigation",
+    "type": "wordpress-dropin",
+    "license": "GPL2+",
+    "authors": [
+        {
+            "name": "Niall Kavanagh",
+            "email": "ntk@bu.edu"
+        },
+        {
+            "name": "Gregory Cornelius",
+            "email": "gcorne@gmail.com"
+        },
+        {
+            "name": "Mike Burns",
+            "email": "mgburns@bu.edu"
+        },
+        {
+            "name": "Tyler Wiest",
+            "email": "jtwiest@gmail.com"
+        },
+        {
+            "name": "Andrew Bauer",
+            "email": "awbauer@bu.edu"
+        },
+        {
+            "name": "Jonathan Williams",
+            "email": "jaydub@bu.edu"
+        }
+    ],
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
+        "squizlabs/php_codesniffer": "^3.5",
+        "wp-coding-standards/wpcs": "^2.3"
+    },
+    "require": {
+        "composer/installers": "^1.10"
+    }
+}

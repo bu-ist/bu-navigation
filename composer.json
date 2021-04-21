@@ -32,11 +32,24 @@
             "email": "jaydub@bu.edu"
         }
     ],
-    "require": {},
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/bu-ist/bu-navigation-core-widget.git"
+        }
+    ],
+    "require": {
+        "bu-ist/bu-navigation-core-widget": "1.0.2"
+    },
+    "extra": {
+        "installer-paths": {
+            "composer-includes/{$name}": ["bu-ist/bu-navigation-core-widget"]
+        }
+    },
     "require-dev": {
         "phpunit/phpunit": "4.3.*",
         "codeclimate/php-test-reporter": "dev-master",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
         "squizlabs/php_codesniffer": "3.*",
         "wp-coding-standards/wpcs": "^0.14.0"
     }

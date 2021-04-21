@@ -8,7 +8,7 @@
  */
 class Test_BU_Navigation_Plugin extends BU_Navigation_UnitTestCase {
 
-	public function setUp(){
+	public function setUp() {
 		parent::setUp();
 
 		$this->plugin->load_widget();
@@ -21,7 +21,7 @@ class Test_BU_Navigation_Plugin extends BU_Navigation_UnitTestCase {
 
 		$features = $this->plugin->features();
 
-		foreach( $features as $feature => $default ) {
+		foreach ( $features as $feature => $default ) {
 
 			$this->assertEquals( $default, $this->plugin->supports( $feature ) );
 
@@ -44,7 +44,7 @@ class Test_BU_Navigation_Plugin extends BU_Navigation_UnitTestCase {
 
 		$features = $this->plugin->features();
 
-		foreach( $features as $feature => $default ) {
+		foreach ( $features as $feature => $default ) {
 
 			$this->assertEquals( $default, $this->plugin->supports( $feature ) );
 
@@ -55,24 +55,52 @@ class Test_BU_Navigation_Plugin extends BU_Navigation_UnitTestCase {
 
 	}
 
-	public function test_widget_adaptive_with_section_title(){
-		global $wp_widget_factory,
-		       $post;
+	public function test_widget_adaptive_with_section_title() {
+		global $wp_widget_factory, $post;
 
 		/**
 		 * IA
 		 * - Page 1
-	 	 *     - Subpage 1.A
-	 	 *         - Subpage 1.A.1 (widget loaded here)
-	 	 *             - Subpage 1.A.1.A (excluded from nav)
-	 	 *         - Subpage 1.A.2
+		 *     - Subpage 1.A
+		 *         - Subpage 1.A.1 (widget loaded here)
+		 *             - Subpage 1.A.1.A (excluded from nav)
+		 *         - Subpage 1.A.2
 		 */
 
-		$page1 = $this->factory->post->create( array( 'post_type' => 'page', 'post_title' => 'Page 1', ) );
-		$page1_A = $this->factory->post->create( array( 'post_type' => 'page', 'post_title' => 'Subpage 1-A', 'post_parent' => $page1 ) );
-		$page1_A_1 = $this->factory->post->create( array( 'post_type' => 'page', 'post_title' => 'Subpage 1-A-1 (Has Child)', 'post_parent' => $page1_A ) );
-		$page1_A_1_A = $this->factory->post->create( array( 'post_type' => 'page', 'post_title' => 'Subpage 1-A-1-A', 'post_parent' => $page1_A_1 ) );
-		$page1_A_2 = $this->factory->post->create( array( 'post_type' => 'page', 'post_title' => 'Subpage 1-A-2 (No Child)', 'post_parent' => $page1_A ) );
+		$page1       = $this->factory->post->create(
+			array(
+				'post_type'  => 'page',
+				'post_title' => 'Page 1',
+			)
+		);
+		$page1_A     = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Subpage 1-A',
+				'post_parent' => $page1,
+			)
+		);
+		$page1_A_1   = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Subpage 1-A-1 (Has Child)',
+				'post_parent' => $page1_A,
+			)
+		);
+		$page1_A_1_A = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Subpage 1-A-1-A',
+				'post_parent' => $page1_A_1,
+			)
+		);
+		$page1_A_2   = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Subpage 1-A-2 (No Child)',
+				'post_parent' => $page1_A,
+			)
+		);
 
 		// make sure we've got everyone
 		$posts = bu_navigation_get_posts();
@@ -90,37 +118,37 @@ class Test_BU_Navigation_Plugin extends BU_Navigation_UnitTestCase {
 		setup_postdata( $post );
 
 		$instance = array(
-			'navigation_title' => 'section',
+			'navigation_title'      => 'section',
 			'navigation_title_text' => '',
-			'navigation_title_url' => '',
-			'navigation_style' => 'adaptive',
-			);
+			'navigation_title_url'  => '',
+			'navigation_style'      => 'adaptive',
+		);
 
 		ob_start();
 		the_widget( 'BU_Widget_Pages', $instance );
 		$widget = ob_get_contents();
 		ob_end_clean();
 
-		$this->assertRegExp('/<h2.+Page 1<\/a>/i', $widget);
-		$this->assertRegExp('/class="level_1".+Subpage 1-A<\/a>/is', $widget);
+		$this->assertRegExp( '/<h2.+Page 1<\/a>/i', $widget );
+		$this->assertRegExp( '/class="level_1".+Subpage 1-A<\/a>/is', $widget );
 
 		// load perspective of page page1_A
 		$post = get_post( $page1_A );
 		setup_postdata( $post );
 
 		$instance = array(
-			'navigation_title' => 'section',
+			'navigation_title'      => 'section',
 			'navigation_title_text' => '',
-			'navigation_title_url' => '',
-			'navigation_style' => 'adaptive',
-			);
+			'navigation_title_url'  => '',
+			'navigation_style'      => 'adaptive',
+		);
 
 		ob_start();
 		the_widget( 'BU_Widget_Pages', $instance );
 		$widget = ob_get_contents();
 		ob_end_clean();
 
-		$this->assertRegExp('/<h2.+Page 1<\/a>/i', $widget);
-		$this->assertRegExp('/class="level_1".+Subpage 1-A<\/a>/is', $widget);
+		$this->assertRegExp( '/<h2.+Page 1<\/a>/i', $widget );
+		$this->assertRegExp( '/class="level_1".+Subpage 1-A<\/a>/is', $widget );
 	}
 }

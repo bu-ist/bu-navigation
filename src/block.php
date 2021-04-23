@@ -11,7 +11,25 @@ namespace BU\Plugins\Navigation;
  * Dynamic render callback for the navigation block
  */
 function navigation_block_render_callback() {
-	return '<div>block content</div>';
+	global $post;
+
+	// Fake widget settings.
+	$instance                     = array();
+	$instance['navigation_style'] = 'adaptive';
+
+	$list_args = array(
+		'page_id'      => $post->ID,
+		'title_li'     => '',
+		'echo'         => 0,
+		'container_id' => 'lorem-ipsum',
+		'post_types'   => $post->post_type,
+		'style'        => 'section',
+		'widget'       => true,
+	);
+
+	$list = list_pages( $list_args );
+
+	return $list;
 }
 
 /**

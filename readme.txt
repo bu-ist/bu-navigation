@@ -78,6 +78,10 @@ Please see this page for the details:
 
 == Changelog ==
 
+= 1.3.1 =
+
+* Adds Github action, and removes redundant code.
+
 = 1.3.0 =
 
 * Moves core methods to a Composer package that is then imported back into the plugin.  This is to allow for other plugins to also import the core data and widget code.

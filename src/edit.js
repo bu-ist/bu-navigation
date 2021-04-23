@@ -26,15 +26,15 @@ import { TextControl } from '@wordpress/components';
 export default function Edit( { attributes, isSelected, setAttributes } ) {
 	return (
 		<div { ...useBlockProps() }>
-			{ attributes.message && ! isSelected ? (
-				<div>Message: { attributes.message }</div>
+			{ ! isSelected ? (
+				<div>Navigation Mode: { attributes.navMode }</div>
 			) : (
 				<div>
 					<TextControl
 						label={ __( 'Message', 'navigation-block' ) }
-						value={ attributes.message }
+						value={ attributes.navMode }
 						onChange={ ( val ) =>
-							setAttributes( { message: val } )
+							setAttributes( { navMode: val } )
 						}
 					/>
 				</div>

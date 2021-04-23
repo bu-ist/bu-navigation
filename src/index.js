@@ -21,9 +21,9 @@ registerBlockType( 'bu-navigation/navigation-block', {
 	icon: 'admin-site-alt3',
 	category: 'widgets',
 	attributes: {
-		message: {
+		navMode: {
 			type: 'string',
-			default: '',
+			default: 'section',
 		},
 	},
 	/**

@@ -2,7 +2,7 @@ import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 import { RadioControl } from '@wordpress/components';
 
-import { TextControl } from '@wordpress/components';
+import './editor.scss';
 
 /**
  * Displays the edit side of the block

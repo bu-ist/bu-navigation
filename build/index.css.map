@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack:///editor.scss"],"names":[],"mappings":"AAAA;EACE,0BAA0B;AAC5B,C","file":"index.css","sourcesContent":[".wp-block-bu-navigation-navigation-block {\n  border: 1px dotted #49a11f;\n}"],"sourceRoot":""}

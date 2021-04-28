@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { RadioControl } from '@wordpress/components';
+import { Placeholder, RadioControl } from '@wordpress/components';
 
 import './editor.scss';
 
@@ -14,17 +14,21 @@ import './editor.scss';
 export default function Edit( { attributes, setAttributes } ) {
 	return (
 		<div className="wp-block-bu-navigation-navigation-block">
-			<RadioControl
-				label={ __( 'Navigation Block Mode', 'bu-navigation' ) }
-				help={ __( 'Which type of navigation?', 'bu-navigation' ) }
-				selected={ attributes.navMode }
-				options={ [
-					{ label: 'Site', value: 'site' },
-					{ label: 'Section', value: 'section' },
-					{ label: 'Adaptive', value: 'adaptive' },
-				] }
-				onChange={ ( option ) => setAttributes( { navMode: option } ) }
-			/>
+			<Placeholder label={ __( 'Navigation Block', 'bu-navigation' ) }>
+				<RadioControl
+					label={ __( 'Mode', 'bu-navigation' ) }
+					help={ __( 'Which type of navigation?', 'bu-navigation' ) }
+					selected={ attributes.navMode }
+					options={ [
+						{ label: 'Site', value: 'site' },
+						{ label: 'Section', value: 'section' },
+						{ label: 'Adaptive', value: 'adaptive' },
+					] }
+					onChange={ ( option ) =>
+						setAttributes( { navMode: option } )
+					}
+				/>
+			</Placeholder>
 		</div>
 	);
 }

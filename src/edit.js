@@ -12,6 +12,9 @@ import './editor.scss';
  * @return {WPElement} Element to render.
  */
 export default function Edit( { attributes, setAttributes } ) {
+	// Loaded from wp_add_inline_scripts.
+	const parents = buNavigationBlockParents;
+
 	return (
 		<div className="wp-block-bu-navigation-navigation-block">
 			<Placeholder label={ __( 'Navigation Block', 'bu-navigation' ) }>

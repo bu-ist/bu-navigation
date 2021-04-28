@@ -10,10 +10,9 @@ namespace BU\Plugins\Navigation;
 /**
  * Query to pull just those posts that have children.
  *
- * @param WP_REST_Request $request The associated REST request.
  * @return array Array of post ids.
  */
-function get_only_parents( $request ) {
+function get_only_parents() {
 	global $bu_navigation_plugin;
 
 	$sections = load_sections(
@@ -82,6 +81,11 @@ function navigation_block_init() {
 		plugins_url( '/../build/index.js', __FILE__ ),
 		$asset_file['dependencies'],
 		$asset_file['version']
+	);
+
+	wp_add_inline_script(
+		'bu-navigation-block',
+		'var buNavigationBlockParents = ' . wp_json_encode( get_only_parents() ),
 	);
 
 	// Shared Frontend/Editor Styles.

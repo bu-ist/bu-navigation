@@ -47,6 +47,7 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
+    "@material-ui/core": "^4.11.4",
     "@wordpress/block-editor": "^5.3.2",
     "@wordpress/blocks": "^8.0.2",
     "@wordpress/components": "^13.0.2",

@@ -51,10 +51,11 @@ function navigation_block_render_callback( $attributes ) {
 	global $post;
 
 	// For some reason when saving the default value, the attribute is empty, so set it to the default if so.
-	$nav_mode = empty( $attributes ) ? 'section' : $attributes['navMode'];
+	$nav_mode     = empty( $attributes['navMode'] ) ? 'section' : $attributes['navMode'];
+	$root_post_id = empty( $attributes['rootPostID'] ) ? 0 : $attributes['rootPostID'];
 
 	$list_args = array(
-		'page_id'      => $post->ID,
+		'page_id'      => 0 === $root_post_id ? $post->ID : $root_post_id,
 		'title_li'     => '',
 		'echo'         => 0,
 		'container_id' => '',

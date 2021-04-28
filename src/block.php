@@ -8,6 +8,42 @@
 namespace BU\Plugins\Navigation;
 
 /**
+ * Query to pull just those posts that have children.
+ *
+ * @param WP_REST_Request $request The associated REST request.
+ * @return array Array of post ids.
+ */
+function get_only_parents( $request ) {
+	global $bu_navigation_plugin;
+
+	$sections = load_sections(
+		$bu_navigation_plugin->supported_post_types(),
+		true
+	);
+
+	$parent_ids = array_keys( $sections['sections'] );
+
+	return $parent_ids;
+}
+
+/**
+ * Add REST endpoint for parents query.
+ */
+add_action(
+	'rest_api_init', function() {
+		register_rest_route(
+			'bu-navigation/v1', '/parents/', array(
+				'methods'             => 'GET',
+				'callback'            => __NAMESPACE__ . '\get_only_parents',
+				'permission_callback' => function () {
+					return current_user_can( 'edit_others_posts' );
+				},
+			)
+		);
+	}
+);
+
+/**
  * Dynamic render callback for the navigation block
  *
  * @param array $attributes The block's attributes.

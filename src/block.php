@@ -93,12 +93,6 @@ function navigation_block_init() {
 		$asset_file['version']
 	);
 
-	wp_add_inline_script(
-		'bu-navigation-block',
-		'var buNavigationBlockParents = ' . wp_json_encode( get_only_parents() ),
-		'before'
-	);
-
 	// Shared Frontend/Editor Styles.
 	wp_register_style(
 		'bu-navigation-block-editor-style',

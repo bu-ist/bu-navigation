@@ -1,5 +1,8 @@
 import { __ } from '@wordpress/i18n';
 import { RadioControl } from '@wordpress/components';
+import apiFetch from '@wordpress/api-fetch';
+import { useState, useEffect } from '@wordpress/element';
+
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import { InputLabel } from '@material-ui/core';
@@ -15,8 +18,20 @@ import './editor.scss';
  * @return {WPElement} Element to render.
  */
 export default function Edit( { attributes, setAttributes } ) {
-	// Loaded from wp_add_inline_scripts.
-	const parents = buNavigationBlockParents;
+	const [ parents, setParents ] = useState( [
+		{ postid: 0, title: '', type: '' },
+	] );
+
+	useEffect( () => {
+		getParents();
+	}, [] );
+
+	const getParents = async () => {
+		const fetchedParents = await apiFetch( {
+			path: 'bu-navigation/v1/parents',
+		} );
+		setParents( fetchedParents );
+	};
 
 	return (
 		<div className="wp-block-bu-navigation-navigation-block">

@@ -22,7 +22,16 @@ function get_only_parents() {
 
 	$parent_ids = array_keys( $sections['sections'] );
 
-	return $parent_ids;
+	// Use get_nav_posts to load titles.
+	$parents = array_map( function( $id ) {
+		return array(
+			'postid' => $id,
+			'title'  => \get_the_title( $id ),
+			'type'   => \get_post_type( $id ),
+		);
+	}, $parent_ids );
+
+	return $parents;
 }
 
 /**
@@ -48,7 +57,7 @@ add_action(
  * @param array $attributes The block's attributes.
  */
 function navigation_block_render_callback( $attributes ) {
-	global $post;
+	global $post, $bu_navigation_plugin;
 
 	// For some reason when saving the default value, the attribute is empty, so set it to the default if so.
 	$nav_mode     = empty( $attributes['navMode'] ) ? 'section' : $attributes['navMode'];
@@ -59,7 +68,7 @@ function navigation_block_render_callback( $attributes ) {
 		'title_li'     => '',
 		'echo'         => 0,
 		'container_id' => '',
-		'post_types'   => $post->post_type,
+		'post_types'   => $bu_navigation_plugin->supported_post_types(),
 		'style'        => $nav_mode,
 		'widget'       => true,
 	);
@@ -87,6 +96,7 @@ function navigation_block_init() {
 	wp_add_inline_script(
 		'bu-navigation-block',
 		'var buNavigationBlockParents = ' . wp_json_encode( get_only_parents() ),
+		'before'
 	);
 
 	// Shared Frontend/Editor Styles.

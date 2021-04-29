@@ -29,13 +29,13 @@ export default function Edit( { attributes, setAttributes } ) {
 						setAttributes( { rootPostID: value.value } )
 					}
 				>
-					{ parents.map( ( parentID ) => (
+					{ parents.map( ( { postid, title, type } ) => (
 						<MenuItem
-							name={ parentID }
-							key={ parentID }
-							value={ parentID }
+							name={ postid }
+							key={ postid }
+							value={ postid }
 						>
-							{ parentID === 0 ? 'Current Parent' : `${parentID}` }
+							{ postid === 0 ? 'Current Parent' : title }
 						</MenuItem>
 					) ) }
 				</Select>

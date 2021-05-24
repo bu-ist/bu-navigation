@@ -75,7 +75,7 @@ function navigation_block_render_callback( $attributes ) {
 
 	$list = list_pages( $list_args );
 
-	return sprintf( '<div class="bu-nav-block">%s</div>', $list );
+	return sprintf( '<div class="widget widget_bu_pages bu-nav-block">%s</div>', $list );
 }
 
 /**

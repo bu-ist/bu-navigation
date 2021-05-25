@@ -25,6 +25,10 @@ registerBlockType( 'bu-navigation/navigation-block', {
 			type: 'string',
 			default: 'section',
 		},
+		rootPostID: {
+			type: 'integer',
+			default: 0,
+		},
 	},
 	/**
 	 * @see ./edit.js

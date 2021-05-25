@@ -47,9 +47,12 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
+    "@material-ui/core": "^4.11.4",
+    "@wordpress/api-fetch": "^3.23.1",
     "@wordpress/block-editor": "^5.3.2",
     "@wordpress/blocks": "^8.0.2",
     "@wordpress/components": "^13.0.2",
+    "@wordpress/element": "^2.20.3",
     "@wordpress/i18n": "^3.19.2"
   }
 }

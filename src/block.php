@@ -10,10 +10,9 @@ namespace BU\Plugins\Navigation;
 /**
  * Query to pull just those posts that have children.
  *
- * @param WP_REST_Request $request The associated REST request.
  * @return array Array of post ids.
  */
-function get_only_parents( $request ) {
+function get_only_parents() {
 	global $bu_navigation_plugin;
 
 	$sections = load_sections(
@@ -23,7 +22,16 @@ function get_only_parents( $request ) {
 
 	$parent_ids = array_keys( $sections['sections'] );
 
-	return $parent_ids;
+	// Use get_nav_posts to load titles.
+	$parents = array_map( function( $id ) {
+		return array(
+			'postid' => $id,
+			'title'  => \get_the_title( $id ),
+			'type'   => \get_post_type( $id ),
+		);
+	}, $parent_ids );
+
+	return $parents;
 }
 
 /**
@@ -49,24 +57,25 @@ add_action(
  * @param array $attributes The block's attributes.
  */
 function navigation_block_render_callback( $attributes ) {
-	global $post;
+	global $post, $bu_navigation_plugin;
 
 	// For some reason when saving the default value, the attribute is empty, so set it to the default if so.
-	$nav_mode = empty( $attributes ) ? 'section' : $attributes['navMode'];
+	$nav_mode     = empty( $attributes['navMode'] ) ? 'section' : $attributes['navMode'];
+	$root_post_id = empty( $attributes['rootPostID'] ) ? 0 : $attributes['rootPostID'];
 
 	$list_args = array(
-		'page_id'      => $post->ID,
+		'page_id'      => 0 === $root_post_id ? $post->ID : $root_post_id,
 		'title_li'     => '',
 		'echo'         => 0,
 		'container_id' => '',
-		'post_types'   => $post->post_type,
+		'post_types'   => $bu_navigation_plugin->supported_post_types(),
 		'style'        => $nav_mode,
 		'widget'       => true,
 	);
 
 	$list = list_pages( $list_args );
 
-	return sprintf( '<div class="bu-nav-block">%s</div>', $list );
+	return sprintf( '<div class="widget widget_bu_pages bu-nav-block">%s</div>', $list );
 }
 
 /**

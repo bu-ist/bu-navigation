@@ -137,7 +137,7 @@ class Navigation_Widget extends \WP_Widget {
 		}
 
 		// Fetch markup.
-		$nav_list_markup = list_pages( $list_args );
+		$nav_list_markup = list_pages( apply_filters( 'widget_bu_pages_args', $list_args ) );
 
 		// Only output anything at all if there is existing markup from list_pages.
 		if ( empty( $nav_list_markup ) ) {

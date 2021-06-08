@@ -78,6 +78,10 @@ Please see this page for the details:
 
 == Changelog ==
 
+= 1.3.2 =
+
+* Restores the widget_bu_pages_args filter.
+
 = 1.3.1 =
 
 * Adds Github action, and removes redundant code.

@@ -39,7 +39,7 @@
         }
     ],
     "require": {
-        "bu-ist/bu-navigation-core-widget": "1.0.2"
+        "bu-ist/bu-navigation-core-widget": "1.0.3"
     },
     "extra": {
         "installer-paths": {

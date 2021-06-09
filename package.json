@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "@material-ui/core": "^4.11.4",
+    "@material-ui/lab": "*",
     "@wordpress/api-fetch": "^3.23.1",
     "@wordpress/block-editor": "^5.3.2",
     "@wordpress/blocks": "^8.0.2",

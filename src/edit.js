@@ -3,9 +3,9 @@ import { RadioControl } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 import { useState, useEffect } from '@wordpress/element';
 
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
 import { InputLabel } from '@material-ui/core';
+import TextField from '@material-ui/core/TextField';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 import './editor.scss';
 
@@ -19,7 +19,7 @@ import './editor.scss';
  */
 export default function Edit( { attributes, setAttributes } ) {
 	const [ parents, setParents ] = useState( [
-		{ postid: 0, title: '', type: '' },
+		{ postid: 0, title: 'Current Parent', type: '' },
 	] );
 
 	useEffect( () => {
@@ -30,31 +30,40 @@ export default function Edit( { attributes, setAttributes } ) {
 		const fetchedParents = await apiFetch( {
 			path: 'bu-navigation/v1/parents',
 		} );
+		// set the zero item to 'Parent Post'
+		fetchedParents[ 0 ].title = 'Current Parent';
+
 		setParents( fetchedParents );
 	};
 
+	const [ currentValue ] = parents.filter(
+		( { postid } ) => postid === attributes.rootPostID
+	);
+		
+	
+	const currentInputValue =
+		! currentValue || attributes.rootPostID === 0
+			? 'Current Parent'
+			: currentValue.title;
+	
+	console.log(currentInputValue);
+ 
 	return (
 		<div className="wp-block-bu-navigation-navigation-block">
 			<p>Navigation Block</p>
-			<div className="bu-navigation-parent-picker ">
-				<InputLabel>Display from parent post:</InputLabel>
-				<Select
-					value={ attributes.rootPostID }
-					onChange={ ( { target: value } ) =>
-						setAttributes( { rootPostID: value.value } )
-					}
-				>
-					{ parents.map( ( { postid, title, type } ) => (
-						<MenuItem
-							name={ postid }
-							key={ postid }
-							value={ postid }
-						>
-							{ postid === 0 ? 'Current Parent' : title }
-						</MenuItem>
-					) ) }
-				</Select>
-			</div>
+			<InputLabel>Display from parent post:</InputLabel>
+			<Autocomplete
+				className="bu-navigation-parent-picker"
+				options={ parents }
+				getOptionLabel={ ( { title } ) => title }
+				renderInput={ ( params ) => (
+					<TextField { ...params } label="Parent Posts" />
+				) }
+				//inputValue={ currentInputValue }
+				onChange={ ( event, { postid } ) =>
+					setAttributes( { rootPostID: postid } )
+				}
+			/>
 			<hr />
 			<RadioControl
 				label={ __( 'Display Mode', 'bu-navigation' ) }

@@ -35,10 +35,35 @@ function get_only_parents() {
 }
 
 /**
+ * Returns block markup for editing preview
+ *
+ * Takes block attributes as parameters and returns the current markup output.
+ * Used for block preview.
+ *
+ * @param WP_REST_Request $data Parameters from the rest request.
+ * @return string Rendered block markup.
+ */
+function block_markup( $data ) {
+
+	if ( ! $data['id'] ) {
+		// Bail early if there's no valid id.
+		return rest_ensure_response( 'provide post id' );
+	}
+
+	$attributes = [
+		'rootPostID' => $data['id'],
+		'navMode'    => 'section', //need to also get this thru api param
+	];
+	return rest_ensure_response( navigation_block_render_callback( $attributes ) );
+
+}
+
+/**
  * Add REST endpoint for parents query.
  */
 add_action(
 	'rest_api_init', function() {
+		// Endpoint for parent posts.
 		register_rest_route(
 			'bu-navigation/v1', '/parents/', array(
 				'methods'             => 'GET',
@@ -47,6 +72,17 @@ add_action(
 					return current_user_can( 'edit_others_posts' );
 				},
 			)
+		);
+
+		// Endpoint for block preview.
+		register_rest_route(
+			'bu-navigation/v1', '/markup/(?P<id>[\d]+)', [
+				'methods'             => 'GET',
+				'callback'            => __NAMESPACE__ . '\block_markup',
+				'permission_callback' => function () {
+					return current_user_can( 'edit_others_posts' );
+				},
+			]
 		);
 	}
 );

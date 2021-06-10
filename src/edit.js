@@ -22,6 +22,9 @@ export default function Edit( { attributes, setAttributes } ) {
 		{ postid: 0, title: '', type: '' },
 	] );
 
+	const [ preview, setPreview ] = useState( '' );
+
+	// Load all parent posts for the block's rootPostID attribute.
 	useEffect( () => {
 		getParents();
 	}, [] );
@@ -31,6 +34,18 @@ export default function Edit( { attributes, setAttributes } ) {
 			path: 'bu-navigation/v1/parents',
 		} );
 		setParents( fetchedParents );
+	};
+
+	// Refresh the block preview markup whenever the attributes change.
+	useEffect( () => {
+		getPreview();
+	}, [ attributes ] );
+
+	const getPreview = async () => {
+		const fetchedPreview = await apiFetch( {
+			path: `bu-navigation/v1/markup/${ attributes.rootPostID }`,
+		} );
+		setPreview( fetchedPreview );
 	};
 
 	return (
@@ -67,6 +82,7 @@ export default function Edit( { attributes, setAttributes } ) {
 				] }
 				onChange={ ( option ) => setAttributes( { navMode: option } ) }
 			/>
+			<div dangerouslySetInnerHTML={ { __html: preview } } />
 		</div>
 	);
 }

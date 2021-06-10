@@ -43,7 +43,7 @@ export default function Edit( { attributes, setAttributes } ) {
 
 	const getPreview = async () => {
 		const fetchedPreview = await apiFetch( {
-			path: `bu-navigation/v1/markup/${ attributes.rootPostID }`,
+			path: `bu-navigation/v1/markup?id=${ attributes.rootPostID }&navMode=${ attributes.navMode }`,
 		} );
 		setPreview( fetchedPreview );
 	};

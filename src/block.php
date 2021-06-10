@@ -45,14 +45,14 @@ function get_only_parents() {
  */
 function block_markup( $data ) {
 
-	if ( ! $data['id'] ) {
-		// Bail early if there's no valid id.
-		return rest_ensure_response( 'provide post id' );
+	if ( ! $data['id'] || ! $data['navMode'] ) {
+		// Bail early if attributes are missing.
+		return rest_ensure_response( 'No valid navigation items' );
 	}
 
 	$attributes = [
 		'rootPostID' => $data['id'],
-		'navMode'    => 'section', //need to also get this thru api param
+		'navMode'    => $data['navMode'],
 	];
 	return rest_ensure_response( navigation_block_render_callback( $attributes ) );
 
@@ -76,7 +76,7 @@ add_action(
 
 		// Endpoint for block preview.
 		register_rest_route(
-			'bu-navigation/v1', '/markup/(?P<id>[\d]+)', [
+			'bu-navigation/v1', '/markup', [
 				'methods'             => 'GET',
 				'callback'            => __NAMESPACE__ . '\block_markup',
 				'permission_callback' => function () {

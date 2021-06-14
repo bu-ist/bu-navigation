@@ -16,7 +16,7 @@ import Edit from './edit';
  * @see https://developer.wordpress.org/block-editor/developers/block-api/#registering-a-block
  */
 registerBlockType( 'bu-navigation/navigation-block', {
-	title: 'Navigation Block',
+	title: 'BU Navigation Block',
 	icon: 'admin-site-alt3',
 	category: 'widgets',
 	attributes: {

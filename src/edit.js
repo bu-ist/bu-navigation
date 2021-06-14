@@ -1,11 +1,11 @@
 import { __ } from '@wordpress/i18n';
-import { RadioControl } from '@wordpress/components';
+import { PanelBody, ButtonGroup, Button } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 import { useState, useEffect } from '@wordpress/element';
+import { InspectorControls } from '@wordpress/block-editor';
 
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-import { InputLabel } from '@material-ui/core';
 
 import './editor.scss';
 
@@ -50,38 +50,68 @@ export default function Edit( { attributes, setAttributes } ) {
 
 	return (
 		<div className="wp-block-bu-navigation-navigation-block">
-			<p>Navigation Block</p>
-			<div className="bu-navigation-parent-picker ">
-				<InputLabel>Display from parent post:</InputLabel>
-				<Select
-					value={ attributes.rootPostID }
-					onChange={ ( { target: value } ) =>
-						setAttributes( { rootPostID: value.value } )
-					}
-				>
-					{ parents.map( ( { postid, title, type } ) => (
-						<MenuItem
-							name={ postid }
-							key={ postid }
-							value={ postid }
+			<InspectorControls>
+				<PanelBody title="Display Settings" initialOpen>
+					<fieldset style={ { marginBottom: '2em' } }>
+						<legend className="blocks-base-control__label">
+							{ __(
+								'Parent post for navigation tree',
+								'bu-navigation'
+							) }
+						</legend>
+						<Select
+							value={ attributes.rootPostID }
+							onChange={ ( { target: value } ) =>
+								setAttributes( { rootPostID: value.value } )
+							}
 						>
-							{ postid === 0 ? 'Current Parent' : title }
-						</MenuItem>
-					) ) }
-				</Select>
-			</div>
-			<hr />
-			<RadioControl
-				label={ __( 'Display Mode', 'bu-navigation' ) }
-				help={ __( 'Which type of navigation?', 'bu-navigation' ) }
-				selected={ attributes.navMode }
-				options={ [
-					{ label: 'Site', value: 'site' },
-					{ label: 'Section', value: 'section' },
-					{ label: 'Adaptive', value: 'adaptive' },
-				] }
-				onChange={ ( option ) => setAttributes( { navMode: option } ) }
-			/>
+							{ parents.map( ( { postid, title, type } ) => (
+								<MenuItem
+									name={ postid }
+									key={ postid }
+									value={ postid }
+								>
+									{ postid === 0 ? 'Current Parent' : title }
+								</MenuItem>
+							) ) }
+						</Select>
+					</fieldset>
+					<fieldset style={ { marginBottom: '2em' } }>
+						<legend className="blocks-base-control__label">
+							{ __( 'Display Mode', 'bu-navigation' ) }
+						</legend>
+						<ButtonGroup>
+							<Button
+								isSecondary={ attributes.navMode !== 'site' }
+								isPrimary={ attributes.navMode === 'site' }
+								onClick={ () =>
+									setAttributes( { navMode: 'site' } )
+								}
+							>
+								Site
+							</Button>
+							<Button
+								isSecondary={ attributes.navMode !== 'section' }
+								isPrimary={ attributes.navMode === 'section' }
+								onClick={ () =>
+									setAttributes( { navMode: 'section' } )
+								}
+							>
+								Section
+							</Button>
+							<Button
+								isSecondary={ attributes.navMode !== 'adaptive' }
+								isPrimary={ attributes.navMode === 'adaptive' }
+								onClick={ () =>
+									setAttributes( { navMode: 'adaptive' } )
+								}
+							>
+								Adaptive
+							</Button>
+						</ButtonGroup>
+					</fieldset>
+				</PanelBody>
+			</InspectorControls>
 			<div dangerouslySetInnerHTML={ { __html: preview } } />
 		</div>
 	);

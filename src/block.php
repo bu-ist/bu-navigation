@@ -35,10 +35,35 @@ function get_only_parents() {
 }
 
 /**
+ * Returns block markup for editing preview
+ *
+ * Takes block attributes as parameters and returns the current markup output.
+ * Used for block preview.
+ *
+ * @param WP_REST_Request $data Parameters from the rest request.
+ * @return string Rendered block markup.
+ */
+function block_markup( $data ) {
+
+	if ( ! $data['id'] || ! $data['navMode'] ) {
+		// Bail early if attributes are missing.
+		return rest_ensure_response( 'No valid navigation items' );
+	}
+
+	$attributes = [
+		'rootPostID' => $data['id'],
+		'navMode'    => $data['navMode'],
+	];
+	return rest_ensure_response( navigation_block_render_callback( $attributes ) );
+
+}
+
+/**
  * Add REST endpoint for parents query.
  */
 add_action(
 	'rest_api_init', function() {
+		// Endpoint for parent posts.
 		register_rest_route(
 			'bu-navigation/v1', '/parents/', array(
 				'methods'             => 'GET',
@@ -47,6 +72,17 @@ add_action(
 					return current_user_can( 'edit_others_posts' );
 				},
 			)
+		);
+
+		// Endpoint for block preview.
+		register_rest_route(
+			'bu-navigation/v1', '/markup', [
+				'methods'             => 'GET',
+				'callback'            => __NAMESPACE__ . '\block_markup',
+				'permission_callback' => function () {
+					return current_user_can( 'edit_others_posts' );
+				},
+			]
 		);
 	}
 );
@@ -103,7 +139,6 @@ function navigation_block_init() {
 
 	register_block_type(
 		'bu-navigation/navigation-block', array(
-			'api_version'     => 2,
 			'editor_script'   => 'bu-navigation-block',
 			'editor_style'    => 'bu-navigation-block-editor-style',
 			'render_callback' => __NAMESPACE__ . '\navigation_block_render_callback',

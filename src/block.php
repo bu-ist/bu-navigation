@@ -139,7 +139,6 @@ function navigation_block_init() {
 
 	register_block_type(
 		'bu-navigation/navigation-block', array(
-			'api_version'     => 2,
 			'editor_script'   => 'bu-navigation-block',
 			'editor_style'    => 'bu-navigation-block-editor-style',
 			'render_callback' => __NAMESPACE__ . '\navigation_block_render_callback',

@@ -146,3 +146,13 @@ function navigation_block_init() {
 	);
 }
 add_action( 'init', __NAMESPACE__ . '\navigation_block_init' );
+
+// Enqueue a small chunk of css for responsive theme compatibility.
+// Should ultimately go through a compile stage, but it's just a very small chunk of css right now.
+add_action( 'enqueue_block_assets', function() {
+	wp_enqueue_style(
+		'bu-navigation-block-frontend-style',
+		plugins_url( 'block-frontend.css', __FILE__ ),
+		array()
+	);
+} );

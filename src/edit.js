@@ -9,6 +9,12 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 import './editor.scss';
 
+const modes = [
+	[ 'Site', 'site' ],
+	[ 'Section', 'section' ],
+	[ 'Adaptive', 'adaptive' ],
+];
+
 /**
  * Displays the edit side of the block
  *
@@ -81,33 +87,18 @@ export default function Edit( { attributes, setAttributes } ) {
 							{ __( 'Display Mode', 'bu-navigation' ) }
 						</legend>
 						<ButtonGroup>
-							<Button
-								isSecondary={ attributes.navMode !== 'site' }
-								isPrimary={ attributes.navMode === 'site' }
-								onClick={ () =>
-									setAttributes( { navMode: 'site' } )
-								}
-							>
-								Site
-							</Button>
-							<Button
-								isSecondary={ attributes.navMode !== 'section' }
-								isPrimary={ attributes.navMode === 'section' }
-								onClick={ () =>
-									setAttributes( { navMode: 'section' } )
-								}
-							>
-								Section
-							</Button>
-							<Button
-								isSecondary={ attributes.navMode !== 'adaptive' }
-								isPrimary={ attributes.navMode === 'adaptive' }
-								onClick={ () =>
-									setAttributes( { navMode: 'adaptive' } )
-								}
-							>
-								Adaptive
-							</Button>
+							{ modes.map( ( [ label, value ] ) => (
+								<Button
+									key={ value }
+									isPrimary={ attributes.navMode === value }
+									isSecondary={ attributes.navMode !== value }
+									onClick={ () =>
+										setAttributes( { navMode: value } )
+									}
+								>
+									{ label }
+								</Button>
+							) ) }
 						</ButtonGroup>
 					</fieldset>
 				</PanelBody>

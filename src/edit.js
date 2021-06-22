@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 import { PanelBody, ButtonGroup, Button } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 import { useState, useEffect } from '@wordpress/element';
+import { select } from '@wordpress/data';
 import { InspectorControls } from '@wordpress/block-editor';
 
 import Select from '@material-ui/core/Select';
@@ -24,6 +25,10 @@ const modes = [
  * @return {WPElement} Element to render.
  */
 export default function Edit( { attributes, setAttributes } ) {
+	// Get current post id.
+	const { getCurrentPostId } = select( 'core/editor' );
+	const currentPostId = getCurrentPostId();
+
 	const [ parents, setParents ] = useState( [
 		{ postid: 0, title: '', type: '' },
 	] );

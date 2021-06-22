@@ -88,7 +88,7 @@ export default function Edit( { attributes, setAttributes } ) {
 									key={ postid }
 									value={ postid }
 								>
-									{ postid === 0 ? 'Current Parent' : title }
+									{ postid === 0 ? 'Current Post' : title }
 								</MenuItem>
 							) ) }
 						</Select>

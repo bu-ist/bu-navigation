@@ -53,8 +53,14 @@ export default function Edit( { attributes, setAttributes } ) {
 	}, [ attributes ] );
 
 	const getPreview = async () => {
+		const { rootPostID, navMode } = attributes;
+
+		// A rootPostID of 0 indicates the current post the block is used on.
+		// Unlike the frontend renderer which can get that from the global post, the editor needs to provide the current post ID.
+		const previewRoot = rootPostID === 0 ? currentPostId : rootPostID;
+
 		const fetchedPreview = await apiFetch( {
-			path: `bu-navigation/v1/markup?id=${ attributes.rootPostID }&navMode=${ attributes.navMode }`,
+			path: `bu-navigation/v1/markup?id=${ previewRoot }&navMode=${ navMode }`,
 		} );
 		setPreview( fetchedPreview );
 	};

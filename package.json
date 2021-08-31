@@ -1,6 +1,6 @@
 {
   "name": "bu-navigation",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Provides alternative navigation elements designed for blogs with large page counts",
   "main": "bu-navigation.php",
   "directories": {

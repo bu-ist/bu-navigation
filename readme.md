@@ -1,11 +1,11 @@
 # BU Navigation
-**Contributors:** ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99  
-**Tags:** navigation, hierarchical, post type, boston university, bu  
-**Requires at least:** 3.1  
-**Tested up to:** 5.5
-**Stable tag:** 1.2.24
-**License:** GPLv2 or later  
-**License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
+**Contributors:** ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99
+**Tags:** navigation, hierarchical, post type, boston university, bu
+**Requires at least:** 3.1
+**Tested up to:** 5.7
+**Stable tag:** 1.3.3
+**License:** GPLv2 or later
+**License URI:** http://www.gnu.org/licenses/gpl-2.0.html
 
 Robust tools for managing hierarchical page content in WordPress. Ideal for blogs with large page counts.
 
@@ -106,6 +106,10 @@ Please see this page for the details:
 ![The same drag and drop view is available to move pages while editing them](https://ps.w.org/bu-navigation/assets/screenshot-5.png)
 
 ## Changelog
+
+### 1.3.3
+
+* Removes deprecated jQuery browser check.
 
 ### 1.3.2
 

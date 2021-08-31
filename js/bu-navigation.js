@@ -100,18 +100,6 @@ bu.plugins.navigation = {};
 		'deselectOnDocumentClick': true
 	};
 
-	// DOM ready -- browser classes
-	$(document).ready(function () {
-		if($.browser && $.browser.msie){
-			if( $.browser.msie === true && parseInt($.browser.version, 10) === 7 )
-				$(document.body).addClass('ie7');
-			if( $.browser.msie === true && parseInt($.browser.version, 10) === 8 )
-				$(document.body).addClass('ie8');
-			if( $.browser.msie === true && parseInt($.browser.version, 10) === 9 )
-				$(document.body).addClass('ie9');
-		}
-	});
-
 	// Tree constructor
 	Nav.tree = function( type, config ) {
 		if (typeof type === 'undefined') {

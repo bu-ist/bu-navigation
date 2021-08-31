@@ -84,7 +84,7 @@ class BU_Navigation_Tree_View {
 
 		// Vendor scripts
 		wp_register_script( 'bu-jquery-cookie', $vendor_url . '/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '00168770', true );
-		wp_register_script( 'bu-jquery-tree', $vendor_url . '/jstree/jquery.jstree.js', array( 'jquery', 'bu-jquery-cookie' ), '1.0-rc3', true );
+		wp_register_script( 'bu-jquery-tree', $vendor_url . '/jstree/jquery.jstree' . $suffix . '.js', array( 'jquery', 'bu-jquery-cookie' ), '1.0-rc4', true );
 
 		// Main navigation scripts & styles
 		wp_register_script( 'bu-navigation', $scripts_url . '/bu-navigation' . $suffix . '.js', array( 'jquery', 'bu-jquery-tree', 'bu-jquery-cookie', 'json2' ), BU_Navigation_Plugin::VERSION, true );

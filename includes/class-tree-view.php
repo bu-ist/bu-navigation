@@ -12,7 +12,7 @@ class BU_Navigation_Tree_View {
 	private $plugin;
 
 	private $query;
-	
+
 	public $hierarchy;
 
 	/**
@@ -84,7 +84,7 @@ class BU_Navigation_Tree_View {
 
 		// Vendor scripts
 		wp_register_script( 'bu-jquery-cookie', $vendor_url . '/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '00168770', true );
-		wp_register_script( 'bu-jquery-tree', $vendor_url . '/jstree/jquery.jstree' . $suffix . '.js', array( 'jquery', 'bu-jquery-cookie' ), '1.0-rc3', true );
+		wp_register_script( 'bu-jquery-tree', $vendor_url . '/jstree/jquery.jstree' . $suffix . '.js', array( 'jquery', 'bu-jquery-cookie' ), '1.0-rc4', true );
 
 		// Main navigation scripts & styles
 		wp_register_script( 'bu-navigation', $scripts_url . '/bu-navigation' . $suffix . '.js', array( 'jquery', 'bu-jquery-tree', 'bu-jquery-cookie', 'json2' ), BU_Navigation_Plugin::VERSION, true );
@@ -320,7 +320,7 @@ class BU_Navigation_Tree_View {
 }
 
 /**
- * Collection of methods that allow the page hierarchy be represented as 
+ * Collection of methods that allow the page hierarchy be represented as
  * a hash value. By comparing two hash values, we can tell if there were
  * any changes in the hierarchy.
  */
@@ -341,7 +341,7 @@ class BU_Navigation_Tree_Hierarchy {
 	 * By taking the posts structure and leaving only hierarchy-related
 	 * preperties of it, we get the object that stays the same as long as
 	 * the post hierarchy stays the same.
-	 * 
+	 *
 	 * @return array Object that represents post tree hierarchy
 	 */
 	private function as_object() {
@@ -369,7 +369,7 @@ class BU_Navigation_Tree_Hierarchy {
 	/**
 	 * Gets hashed representation of the BU_Navigation_Tree_Query instance
 	 * passed into the constructor of this class.
-	 * 
+	 *
 	 * @return String hashed representation of the post hierarchy
 	 */
 	public function as_hash() {

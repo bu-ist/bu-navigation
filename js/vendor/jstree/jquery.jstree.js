@@ -2539,9 +2539,9 @@
 							}
 						}, this));
 			}
-			
+
 			$.vakata.dnd.drag_container = s.drag_container;
-			
+
 		},
 		defaults : {
 			copy_modifier	: "ctrl",
@@ -4912,12 +4912,6 @@
 					t = this,
 					tree = t.get_container(),
 					sections, remaining;
-
-				// Lazy loading causes huge performance issues in IE < 8
-				if ($.browser.msie === true && parseInt($.browser.version, 10) < 8) {
-					s.lazy_load = false;
-					return;
-				}
 
 				if (!tree.data('lazy-loaded')) {
 					tree.data('lazy-loading', true );

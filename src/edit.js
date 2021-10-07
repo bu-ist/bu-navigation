@@ -95,7 +95,11 @@ export default function Edit( { attributes, setAttributes } ) {
 									key={ postid }
 									value={ postid }
 								>
-									{ postid === 0 ? 'Current Post' : title }
+									{ postid === 0 ? (
+										<>&#10022; Current Post</>
+									) : (
+										title
+									) }
 								</MenuItem>
 							) ) }
 						</Select>

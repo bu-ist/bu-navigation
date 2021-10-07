@@ -62,7 +62,14 @@ export default function Edit( { attributes, setAttributes } ) {
 		const fetchedPreview = await apiFetch( {
 			path: `bu-navigation/v1/markup?id=${ previewRoot }&navMode=${ navMode }`,
 		} );
-		setPreview( fetchedPreview );
+
+		// On the front end an empty list should stay empty; the editor should show a status message.
+		// If the list is empty, the returned markup won't include any <li> tags.
+		const newPreview = fetchedPreview.includes( '<li' )
+			? fetchedPreview
+			: '<div>No navigation items found</div>';
+
+		setPreview( newPreview );
 	};
 
 	return (

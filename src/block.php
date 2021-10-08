@@ -120,11 +120,11 @@ function navigation_block_render_callback( $attributes ) {
 function navigation_block_init() {
 
 	// Load dependencies.
-	$asset_file = include plugin_dir_path( __FILE__ ) . '/../build/index.asset.php';
+	$asset_file = include plugin_dir_path( __FILE__ ) . '/../build/block.asset.php';
 
 	wp_register_script(
 		'bu-navigation-block',
-		plugins_url( '/../build/index.js', __FILE__ ),
+		plugins_url( '/../build/block.js', __FILE__ ),
 		$asset_file['dependencies'],
 		$asset_file['version']
 	);
@@ -132,7 +132,7 @@ function navigation_block_init() {
 	// Shared Frontend/Editor Styles.
 	wp_register_style(
 		'bu-navigation-block-editor-style',
-		plugins_url( '/../build/index.css', __FILE__ ),
+		plugins_url( '/../build/block.css', __FILE__ ),
 		array(),
 		$asset_file['version']
 	);

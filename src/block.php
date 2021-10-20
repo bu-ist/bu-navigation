@@ -59,7 +59,7 @@ function block_markup( $data ) {
 }
 
 /**
- * Add REST endpoint for parents query.
+ * Add REST endpoints for parents query and block preview.
  */
 add_action(
 	'rest_api_init', function() {

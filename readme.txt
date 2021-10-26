@@ -78,6 +78,11 @@ Please see this page for the details:
 
 == Changelog ==
 
+= 1.3.4 =
+
+* Adds a Navigation Block that can display the same output as the widget.  It can also display a navigation tree from any specified parent post.
+* Adds a wp-scripts build setup for building the block assets.
+
 = 1.3.3 =
 
 * Removes deprecated jQuery browser check.

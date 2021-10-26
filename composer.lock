@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6e4d6aa34f6d619f0d2eb1154be15591",
+    "content-hash": "5a6988fb6dd22a3f8169a14f6f37ea8e",
     "packages": [
         {
             "name": "bu-ist/bu-navigation-core-widget",
-            "version": "dev-block-alternate-root",
+            "version": "1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bu-ist/bu-navigation-core-widget.git",
-                "reference": "9ffb04eb8bd6bf94d535823ac7fe76e569e88785"
+                "reference": "a7fc9e0cf5309885fcb929fa5378b4e3ee3d623e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bu-ist/bu-navigation-core-widget/zipball/9ffb04eb8bd6bf94d535823ac7fe76e569e88785",
-                "reference": "9ffb04eb8bd6bf94d535823ac7fe76e569e88785",
+                "url": "https://api.github.com/repos/bu-ist/bu-navigation-core-widget/zipball/a7fc9e0cf5309885fcb929fa5378b4e3ee3d623e",
+                "reference": "a7fc9e0cf5309885fcb929fa5378b4e3ee3d623e",
                 "shasum": ""
             },
             "require": {
@@ -60,10 +60,10 @@
             ],
             "description": "Core data methods and widget logic for BU Navigation",
             "support": {
-                "source": "https://github.com/bu-ist/bu-navigation-core-widget/tree/block-alternate-root",
+                "source": "https://github.com/bu-ist/bu-navigation-core-widget/tree/1.0.4",
                 "issues": "https://github.com/bu-ist/bu-navigation-core-widget/issues"
             },
-            "time": "2021-06-29T18:35:02+00:00"
+            "time": "2021-10-26T16:05:00+00:00"
         },
         {
             "name": "composer/installers",
@@ -2731,7 +2731,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "bu-ist/bu-navigation-core-widget": 20,
         "codeclimate/php-test-reporter": 20
     },
     "prefer-stable": false,

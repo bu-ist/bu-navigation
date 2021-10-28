@@ -65,6 +65,9 @@ require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/s
 require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/filters.php';
 require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/src/class-navigation-widget.php';
 
+// Include Block root file.
+require_once BU_NAV_PLUGIN_DIR . '/src/block.php';
+
 /**
  * Convenience class to wrap loading and init functions.
  */

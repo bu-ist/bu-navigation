@@ -80,17 +80,22 @@ function adaptive_pages_args( $args ) {
  * centered around the current post
  *
  * @param array $pages_by_parent Array of parents and children in the form of a 'section'.
+ * @param int   $page_id ID of the root post of navigation tree.
  * @return array Transformed array for adaptive mode.
  */
-function adaptive_pages_filter( $pages_by_parent ) {
+function adaptive_pages_filter( $pages_by_parent, $page_id = null ) {
 	global $post;
 
+	// The block can specify a different root than the current post,
+	// so if the page_id parameter is different from the global post fetch the root post based on the passed $page_id parameter.
+	$root_post = ( $page_id && $post->ID !== $page_id ) ? get_post( $page_id ) : $post;
+
 	$filtered             = array();
-	$display_has_children = array_key_exists( $post->ID, $pages_by_parent ) && ( count( $pages_by_parent[ $post->ID ] ) > 0 );
+	$display_has_children = array_key_exists( $root_post->ID, $pages_by_parent ) && ( count( $pages_by_parent[ $root_post->ID ] ) > 0 );
 
 	foreach ( $pages_by_parent as $parent_id => $children ) {
 
-		$adaptive_children = adaptive_filter_children( $children, $display_has_children, $post );
+		$adaptive_children = adaptive_filter_children( $children, $display_has_children, $root_post );
 
 		if ( count( $adaptive_children ) > 0 ) {
 			$filtered[ $parent_id ] = $adaptive_children;

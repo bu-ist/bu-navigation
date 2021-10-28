@@ -1,0 +1,4 @@
+.bu-nav-block {
+    /* shim for responsive 2.0 to reuse widget styles */
+    float: unset !important;
+}

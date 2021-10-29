@@ -84,8 +84,50 @@ add_action(
 				},
 			]
 		);
+
+		// Endpoint to gather a flat list of posts in the navigations.
+		register_rest_route(
+			'bu-navigation/v1', '/all-urls', [
+				'methods'  => 'GET',
+				'callback' => __NAMESPACE__ . '\get_all_urls',
+			]
+		);
 	}
 );
+
+/**
+ * Get an ordered array of all links to posts that are in the navigation
+ *
+ * Walks through the 'sections' array, flattening the list
+ * and looking up the permalink for each post id.
+ *
+ * @return array Array of urls as strings
+ */
+function get_all_urls() {
+	global $bu_navigation_plugin;
+	$flat_post_ids = array();
+
+	$sections_result = load_sections(
+		$bu_navigation_plugin->supported_post_types(),
+		true
+	);
+
+	$sections = $sections_result['sections'];
+
+	foreach ( $sections as $parent => $children ) {
+		$flat_post_ids[] = $parent;
+		$flat_post_ids   = array_merge( $flat_post_ids, $children );
+	}
+
+	$url_list = array_map(
+		function( $post_id ) {
+			return \get_permalink( (int) $post_id );
+		},
+		$flat_post_ids
+	);
+
+	return $url_list;
+}
 
 /**
  * Dynamic render callback for the navigation block

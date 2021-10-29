@@ -1,4 +1,5 @@
 # BU Navigation
+
 **Contributors:** ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99
 **Tags:** navigation, hierarchical, post type, boston university, bu
 **Requires at least:** 3.1
@@ -17,7 +18,7 @@ BU Navigation provides key tools you need to manage large numbers of pages.
 * The “Edit Order” screen presents you with a holistic view of your site’s structure for bulk ordering operations
 * The Content Navigation widget presents a customizable sidebar navigation list fed from your natural page hierarchy
 * The Navigation Block provides a navigation menu based on
-a customizeable parent post
+  a customizeable parent post
 * Add external links to navigation lists with the “Add a Link” tool
 
 Additionally, themes that support the primary navigation feature gain the ability to display a primary navigation list fed from page order. With two lines of code any theme can benefit from this feature-rich custom menu alternative.
@@ -117,7 +118,7 @@ Please see this page for the details:
 ### 1.3.4
 
 * Adds a Navigation Block that can display the same output as the widget.
-It can also display a navigation tree from any specified parent post.
+  It can also display a navigation tree from any specified parent post.
 * Adds a wp-scripts build setup for building the block assets.
 
 ### 1.3.3

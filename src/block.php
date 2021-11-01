@@ -23,11 +23,11 @@ function get_only_parents() {
 	$parent_ids = array_keys( $sections['sections'] );
 
 	// Use get_nav_posts to load titles.
-	$parents = array_map( function( $id ) {
+	$parents = array_map( function( $parent_id ) {
 		return array(
-			'postid' => $id,
-			'title'  => html_entity_decode( \get_the_title( $id ), ENT_QUOTES, 'UTF-8' ),
-			'type'   => \get_post_type( $id ),
+			'postid' => $parent_id,
+			'title'  => html_entity_decode( \get_the_title( $parent_id ), ENT_QUOTES, 'UTF-8' ),
+			'type'   => \get_post_type( $parent_id ),
 		);
 	}, $parent_ids );
 

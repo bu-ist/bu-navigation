@@ -153,6 +153,7 @@ add_action( 'enqueue_block_assets', function() {
 	wp_enqueue_style(
 		'bu-navigation-block-frontend-style',
 		plugins_url( 'block-frontend.css', __FILE__ ),
-		array()
+		array(),
+		\BU_Navigation_Plugin::VERSION
 	);
 } );

@@ -8,7 +8,6 @@ exclude_patterns:
 - vendor/
 - node_modules/
 - build/
-- composer-includes/
 - "**.min.css"
 - "**.min.js"
 - "js/jquery-ui-classic.css"

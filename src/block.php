@@ -126,7 +126,8 @@ function navigation_block_init() {
 		'bu-navigation-block',
 		plugins_url( '/../build/block.js', __FILE__ ),
 		$asset_file['dependencies'],
-		$asset_file['version']
+		$asset_file['version'],
+		true
 	);
 
 	// Shared Frontend/Editor Styles.

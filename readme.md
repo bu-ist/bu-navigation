@@ -1,9 +1,10 @@
 # BU Navigation
+
 **Contributors:** ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99
 **Tags:** navigation, hierarchical, post type, boston university, bu
 **Requires at least:** 3.1
 **Tested up to:** 5.7
-**Stable tag:** 1.3.3
+**Stable tag:** 1.3.4
 **License:** GPLv2 or later
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,6 +17,8 @@ BU Navigation provides key tools you need to manage large numbers of pages.
 * Replaces the built-in “Page Parent” and “Menu Order” dropdowns with an intuitive drag and drop interface for managing your page hierarchy
 * The “Edit Order” screen presents you with a holistic view of your site’s structure for bulk ordering operations
 * The Content Navigation widget presents a customizable sidebar navigation list fed from your natural page hierarchy
+* The Navigation Block provides a navigation menu based on
+  a customizeable parent post
 * Add external links to navigation lists with the “Add a Link” tool
 
 Additionally, themes that support the primary navigation feature gain the ability to display a primary navigation list fed from page order. With two lines of code any theme can benefit from this feature-rich custom menu alternative.
@@ -90,22 +93,33 @@ Please see this page for the details:
 
 ## Screenshots
 
-###1. Manage your site’s page hierarchy with an easy to use drag and drop interface###
+### 1. Manage your site’s page hierarchy with an easy to use drag and drop interface
+
 ![Manage your site’s page hierarchy with an easy to use drag and drop interface](https://ps.w.org/bu-navigation/assets/screenshot-1.png)
 
-###2. The “Add a Link” tool allows you to add external links to your navigation lists###
+### 2. The “Add a Link” tool allows you to add external links to your navigation lists
+
 ![The “Add a Link” tool allows you to add external links to your navigation lists](https://ps.w.org/bu-navigation/assets/screenshot-2.png)
 
-###3. The “Content Navigation” widget presents a configurable sidebar navigation list###
+### 3. The “Content Navigation” widget presents a configurable sidebar navigation list
+
 ![The “Content Navigation” widget presents a configurable sidebar navigation list](https://ps.w.org/bu-navigation/assets/screenshot-3.png)
 
-###4. The “Navigation Attributes” metabox replaces the built-in “Page Parent” and “Menu Order” dropdowns###
+### 4. The “Navigation Attributes” metabox replaces the built-in “Page Parent” and “Menu Order” dropdowns
+
 ![The “Navigation Attributes” metabox replaces the built-in “Page Parent” and “Menu Order” dropdowns](https://ps.w.org/bu-navigation/assets/screenshot-4.png)
 
-###5. The same drag and drop view is available to move pages while editing them###
+### 5. The same drag and drop view is available to move pages while editing them
+
 ![The same drag and drop view is available to move pages while editing them](https://ps.w.org/bu-navigation/assets/screenshot-5.png)
 
 ## Changelog
+
+### 1.3.4
+
+* Adds a Navigation Block that can display the same output as the widget.
+  It can also display a navigation tree from any specified parent post.
+* Adds a wp-scripts build setup for building the block assets.
 
 ### 1.3.3
 

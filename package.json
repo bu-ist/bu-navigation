@@ -1,6 +1,6 @@
 {
   "name": "bu-navigation",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "Provides alternative navigation elements designed for blogs with large page counts",
   "main": "bu-navigation.php",
   "directories": {
@@ -8,7 +8,9 @@
   },
   "scripts": {
     "test": "phpunit",
-    "wp-env": "wp-env"
+    "wp-env": "wp-env",
+    "start": "wp-scripts start",
+    "build": "wp-scripts build"
   },
   "repository": {
     "type": "git",
@@ -30,12 +32,28 @@
   },
   "homepage": "https://github.com/bu-ist/bu-navigation",
   "devDependencies": {
-    "@wordpress/env": "^1.4.0",
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
+    "@babel/preset-env": "^7.13.15",
+    "@babel/preset-react": "^7.13.13",
+    "@wordpress/env": "^4.0.2",
+    "@wordpress/eslint-plugin": "^9.0.3",
+    "@wordpress/scripts": "^14.1.1",
     "grunt": "^1.3.0",
     "grunt-contrib-uglify": "^5.0.0",
     "grunt-contrib-watch": "^1.1.0",
     "grunt-po2mo": "^0.1.2",
     "grunt-pot": "^0.2.1",
-    "matchdep": "^2.0.0"
+    "matchdep": "^2.0.0",
+    "webpack-cli": "^3.3.12"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.11.4",
+    "@wordpress/api-fetch": "^3.23.1",
+    "@wordpress/block-editor": "^5.3.2",
+    "@wordpress/blocks": "^8.0.2",
+    "@wordpress/components": "^13.0.2",
+    "@wordpress/data": "^4.27.3",
+    "@wordpress/element": "^2.20.3",
+    "@wordpress/i18n": "^3.19.2"
   }
 }

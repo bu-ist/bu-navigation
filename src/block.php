@@ -23,11 +23,11 @@ function get_only_parents() {
 	$parent_ids = array_keys( $sections['sections'] );
 
 	// Use get_nav_posts to load titles.
-	$parents = array_map( function( $id ) {
+	$parents = array_map( function( $parent_id ) {
 		return array(
-			'postid' => $id,
-			'title'  => html_entity_decode( \get_the_title( $id ), ENT_QUOTES, 'UTF-8' ),
-			'type'   => \get_post_type( $id ),
+			'postid' => $parent_id,
+			'title'  => html_entity_decode( \get_the_title( $parent_id ), ENT_QUOTES, 'UTF-8' ),
+			'type'   => \get_post_type( $parent_id ),
 		);
 	}, $parent_ids );
 
@@ -126,7 +126,8 @@ function navigation_block_init() {
 		'bu-navigation-block',
 		plugins_url( '/../build/block.js', __FILE__ ),
 		$asset_file['dependencies'],
-		$asset_file['version']
+		$asset_file['version'],
+		true
 	);
 
 	// Shared Frontend/Editor Styles.
@@ -153,6 +154,7 @@ add_action( 'enqueue_block_assets', function() {
 	wp_enqueue_style(
 		'bu-navigation-block-frontend-style',
 		plugins_url( 'block-frontend.css', __FILE__ ),
-		array()
+		array(),
+		\BU_Navigation_Plugin::VERSION
 	);
 } );

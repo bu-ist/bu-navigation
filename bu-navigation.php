@@ -5,7 +5,7 @@
  * Author: Boston University (IS&T)
  * Author URI: http://sites.bu.edu/web/
  * Description: Provides alternative navigation elements designed for blogs with large page counts
- * Version: 1.3.3
+ * Version: 1.3.4
  * Text Domain: bu-navigation
  * Domain Path: /languages
  * License: GPL2+
@@ -94,7 +94,7 @@ class BU_Navigation_Plugin {
 	 *
 	 * @var string
 	 */
-	const VERSION = '1.3.3';
+	const VERSION = '1.3.4';
 
 	/**
 	 * Plugin class constructor.

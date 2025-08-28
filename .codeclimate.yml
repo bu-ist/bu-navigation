@@ -7,17 +7,11 @@ exclude_patterns:
 - tests/
 - vendor/
 - node_modules/
+- build/
 - "**.min.css"
 - "**.min.js"
 - "js/jquery-ui-classic.css"
 - "js/jquery-ui-fresh.css"
-
-prepare:
-  fetch:
-  - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.eslintrc"
-  - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.eslintignore"
-  - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/.mdlrc"
-  - "https://raw.githubusercontent.com/bu-ist/coding-standards/master/code-climate-rule-sets/markdown.rb"
 
 plugins:
   csslint:
@@ -34,6 +28,9 @@ plugins:
     enabled: true
   markdownlint:
     enabled: true
+    checks:
+      MD013:
+        enabled: false
   phpcodesniffer:
     enabled: true
     config:

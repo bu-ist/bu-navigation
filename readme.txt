@@ -3,7 +3,7 @@ Contributors: ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
 Tested up to: 5.7
-Stable tag: 1.3.3
+Stable tag: 1.3.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,6 +16,7 @@ BU Navigation provides key tools you need to manage large numbers of pages.
 * Replaces the built-in “Page Parent” and “Menu Order” dropdowns with an intuitive drag and drop interface for managing your page hierarchy
 * The “Edit Order” screen presents you with a holistic view of your site’s structure for bulk ordering operations
 * The Content Navigation widget presents a customizable sidebar navigation list fed from your natural page hierarchy
+* The Navigation Block provides a navigation menu based on a customizeable parent post
 * Add external links to navigation lists with the “Add a Link” tool
 
 Additionally, themes that support the primary navigation feature gain the ability to display a primary navigation list fed from page order. With two lines of code any theme can benefit from this feature-rich custom menu alternative.

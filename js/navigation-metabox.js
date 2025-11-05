@@ -105,11 +105,11 @@ if((typeof bu === 'undefined' ) ||
 		attachHandlers: function() {
 
 			// Modal creation on click
-			this.$el.delegate(this.ui.moveBtn, 'click', this.data.modalTree.open );
+			this.$el.on('click', this.ui.moveBtn, this.data.modalTree.open);
 
 			// Metabox actions
-			this.$el.delegate(this.inputs.label, 'blur', $.proxy(this.onLabelChange,this));
-			this.$el.delegate(this.inputs.visible, 'click', $.proxy(this.onToggleVisibility,this));
+			this.$el.on('blur', this.inputs.label, $.proxy(this.onLabelChange,this));
+			this.$el.on('click', this.inputs.visible, $.proxy(this.onToggleVisibility,this));
 
 		},
 

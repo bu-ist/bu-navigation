@@ -128,9 +128,9 @@ class BU_Navigation_Admin_Post {
 		// Remove built in page attributes meta box
 		remove_meta_box('pageparentdiv', $post_type, 'side');
 
-		$templates = get_page_templates();
+		$templates = get_page_templates( $post );
 
-		if ( 'page' === $post_type && is_array( $templates ) && ( count( $templates ) > 0 ) ) {
+		if ( is_array( $templates ) && ( count( $templates ) > 0 ) ) {
 			add_meta_box(
 				'bupagetemplatediv',
 				sprintf( __( "%s Template", 'bu-navigation'  ), $post_type_object->labels->singular_name ),
@@ -198,6 +198,8 @@ class BU_Navigation_Admin_Post {
 	 * Since we replace the standard "Page Attributes" meta box with our own,
 	 * we relocate the "Template" dropdown that usually appears there to its
 	 * own custom meta box
+	 *
+	 * @param WP_Post $post Current post object.
 	 */
 	public function display_custom_template( $post ) {
 

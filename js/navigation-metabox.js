@@ -58,7 +58,7 @@ if((typeof bu === 'undefined' ) ||
 			currentParent = parseInt($(this.inputs['parent']).val(),10);
 			currentOrder = parseInt($(this.inputs['order']).val(),10);
 			navLabel = $(this.inputs['label']).val() || '(no title)';
-			navDisplay = $(this.inputs['visible']).attr('checked') || false;
+			navDisplay = $(this.inputs['visible']).prop('checked') || false;
 
 			// Create current post object
 			this.settings.currentPost = {
@@ -128,7 +128,7 @@ if((typeof bu === 'undefined' ) ||
 		},
 
 		onToggleVisibility: function(e) {
-			var visible = $(e.target).attr('checked');
+			var visible = $(e.target).prop('checked');
 			var msg = nav_metabox_settings.topLevelDisabled + "\n\n" + nav_metabox_settings.topLevelNotice;
 
 			if (visible && !this.isAllowedInNavigationLists(this.settings.currentPost)) {

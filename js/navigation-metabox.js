@@ -58,7 +58,7 @@ if((typeof bu === 'undefined' ) ||
 			currentParent = parseInt($(this.inputs['parent']).val(),10);
 			currentOrder = parseInt($(this.inputs['order']).val(),10);
 			navLabel = $(this.inputs['label']).val() || '(no title)';
-			navDisplay = $(this.inputs['visible']).attr('checked') || false;
+			navDisplay = $(this.inputs['visible']).prop('checked') || false;
 
 			// Create current post object
 			this.settings.currentPost = {
@@ -105,11 +105,11 @@ if((typeof bu === 'undefined' ) ||
 		attachHandlers: function() {
 
 			// Modal creation on click
-			this.$el.delegate(this.ui.moveBtn, 'click', this.data.modalTree.open );
+			this.$el.on('click', this.ui.moveBtn, this.data.modalTree.open);
 
 			// Metabox actions
-			this.$el.delegate(this.inputs.label, 'blur', $.proxy(this.onLabelChange,this));
-			this.$el.delegate(this.inputs.visible, 'click', $.proxy(this.onToggleVisibility,this));
+			this.$el.on('blur', this.inputs.label, $.proxy(this.onLabelChange,this));
+			this.$el.on('click', this.inputs.visible, $.proxy(this.onToggleVisibility,this));
 
 		},
 
@@ -128,7 +128,7 @@ if((typeof bu === 'undefined' ) ||
 		},
 
 		onToggleVisibility: function(e) {
-			var visible = $(e.target).attr('checked');
+			var visible = $(e.target).prop('checked');
 			var msg = nav_metabox_settings.topLevelDisabled + "\n\n" + nav_metabox_settings.topLevelNotice;
 
 			if (visible && !this.isAllowedInNavigationLists(this.settings.currentPost)) {

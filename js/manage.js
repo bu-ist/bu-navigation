@@ -411,8 +411,8 @@ if ((typeof bu === 'undefined') ||
 			// Clear dialog
 			$(this.ui.urlField).attr("value", "");
 			$(this.ui.labelField).attr("value", "");
-			$(this.ui.targetSameField).attr("checked", "checked");
-			$(this.ui.targetNewField).removeAttr("checked");
+			$(this.ui.targetSameField).prop("checked", true);
+			$(this.ui.targetNewField).prop("checked", false);
 
 			this.data.currentLink = null;
 

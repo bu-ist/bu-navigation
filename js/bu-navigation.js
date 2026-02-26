@@ -461,7 +461,7 @@ bu.plugins.navigation = {};
 					// Refresh post status badges (recursively)
 					// @todo move to callback
 					if (c.showStatuses) {
-						$node.find('li').andSelf().each(function (){
+						$node.find('li').addBack().each(function (){ /* CHANGE: .andSelf() -> .addBack() */
 							setStatusBadges($(this));
 						});
 					}
@@ -1074,10 +1074,8 @@ bu.plugins.navigation = {};
 			};
 
 			// Prevent default right click behavior
-			$tree.bind('loaded.jstree', function(e,data) {
-
-				$tree.undelegate('a', 'contextmenu.jstree');
-
+			$tree.on('loaded.jstree', function(e, data) {
+				$tree.off('contextmenu.jstree', 'a');
 			});
 
 			// Append options menu to each node
@@ -1109,7 +1107,7 @@ bu.plugins.navigation = {};
 			// jstree contextmenu plugin
 			var currentMenuTarget = null;
 
-			$tree.delegate(".edit-options", "click", function (e) {
+			$tree.on('click', '.edit-options', function (e) {
 				e.preventDefault();
 				e.stopPropagation();
 

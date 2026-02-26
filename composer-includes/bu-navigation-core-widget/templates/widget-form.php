@@ -88,7 +88,7 @@ function bu_navigation_widget_<?php echo $this->number; ?>_validate(e)
 
 function bu_navigation_widget_<?php echo $this->number; ?>_title_changed()
 {
-	var is_static = jQuery('#<?php echo $this->get_field_id('navigation_title_static');?>').attr('checked');
+	var is_static = jQuery('#<?php echo $this->get_field_id('navigation_title_static');?>').prop('checked');
 
 	if (is_static) {
 		jQuery(this).siblings('input.only-if-static').attr('disabled', false);

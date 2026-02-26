@@ -204,10 +204,10 @@ if ((typeof bu === 'undefined') ||
 			});
 
 			// Push pending deletions, insertions, updates and moves to hidden inputs for POST'ing
-			$(this.ui.deletionsField).prop("value", JSON.stringify(deletions));
-			$(this.ui.insertsField).prop("value", JSON.stringify(insertions));
-			$(this.ui.updatesField).prop("value", JSON.stringify(updates));
-			$(this.ui.movesField).prop("value", JSON.stringify(moves));
+			$(this.ui.deletionsField).attr("value", JSON.stringify(deletions));
+			$(this.ui.insertsField).attr("value", JSON.stringify(insertions));
+			$(this.ui.updatesField).attr("value", JSON.stringify(updates));
+			$(this.ui.movesField).attr("value", JSON.stringify(moves));
 
 			// Notify user that save is in progress
 			var $msg = $('<span>' + bu_navman_settings.saveNotice + '</span>')
@@ -409,8 +409,8 @@ if ((typeof bu === 'undefined') ||
 		clear: function () {
 
 			// Clear dialog
-			$(this.ui.urlField).prop("value", "");
-			$(this.ui.labelField).prop("value", "");
+			$(this.ui.urlField).attr("value", "");
+			$(this.ui.labelField).attr("value", "");
 			$(this.ui.targetSameField).prop("checked", true);
 			$(this.ui.targetNewField).prop("checked", false);
 

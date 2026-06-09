@@ -5,7 +5,7 @@
  * Author: Boston University (IS&T)
  * Author URI: http://sites.bu.edu/web/
  * Description: Provides alternative navigation elements designed for blogs with large page counts
- * Version: 1.3.5
+ * Version: 1.3.6
  * Text Domain: bu-navigation
  * Domain Path: /languages
  * License: GPL2+
@@ -94,7 +94,7 @@ class BU_Navigation_Plugin {
 	 *
 	 * @var string
 	 */
-	const VERSION = '1.3.4';
+	const VERSION = '1.3.6';
 
 	/**
 	 * Plugin class constructor.
@@ -124,17 +124,29 @@ class BU_Navigation_Plugin {
 	}
 
 	/**
-	 * Calls wp_cache_add_non_persistent_groups()
+	 * Object cache group configuration for the navigation tree.
 	 *
-	 * Calling wp_cache_add_non_persistent_groups() doesn't appear to do anything
-	 * in modern WordPress?
+	 * The 'bu-navigation' group caches the section/membership structure built by
+	 * load_sections() (see composer-includes/bu-navigation-core-widget/src/data-model.php).
+	 * It is intentionally left PERSISTENT (Redis-backed in production) rather than
+	 * registered non-persistent.
+	 *
+	 * This is safe by construction: the cached payload is order- and status-independent
+	 * parent->children membership only, and its cache key is version-stamped on core's
+	 * 'posts' last_changed value (bumped by clean_post_cache() on every post
+	 * insert/update/delete), so a stale entry is orphaned rather than served. Publication
+	 * status, menu_order ordering, and nav meta are all applied downstream on the uncached
+	 * get_nav_posts() query, so they are never served from this cache.
+	 *
+	 * Previously this method registered the group non-persistent. On production (where an
+	 * object cache is active) that defeated cross-request caching, forcing the expensive
+	 * GROUP_CONCAT/GROUP BY wp_posts scan to run on nearly every front-end render under
+	 * crawler concurrency. Leaving the group persistent removes that scan from the common
+	 * case while preserving the existing per-request invalidation behavior.
 	 *
 	 * @return void
 	 */
 	public function add_cache_groups() {
-		if ( function_exists( 'wp_cache_add_non_persistent_groups' ) ) {
-			wp_cache_add_non_persistent_groups( array( 'bu-navigation' ) );
-		}
 	}
 
 	/**

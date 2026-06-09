@@ -87,7 +87,11 @@ function load_sections( $post_types = array( 'page' ), $include_links = true ) {
 		wp_cache_set( 'last_changed', $last_changed, 'posts' );
 	}
 
-	$cache_key = 'all_sections:' . md5( serialize( $post_types ) . ":$last_changed" );
+	// Scope the key to the current site. The 'bu-navigation' group is Redis-backed
+	// (persistent) in production, and although the object cache prefixes non-global
+	// group keys by blog, including the blog id here guarantees per-site isolation on
+	// multisite regardless of the drop-in's behavior.
+	$cache_key = 'all_sections:' . get_current_blog_id() . ':' . md5( serialize( $post_types ) . ":$last_changed" );
 	if ( $all_sections = wp_cache_get( $cache_key, 'bu-navigation' ) ) {
 		return $all_sections;
 	}
@@ -105,8 +109,10 @@ function load_sections( $post_types = array( 'page' ), $include_links = true ) {
 
 	$all_sections = transform_rows( $rows );
 
-	// Cache results.
-	wp_cache_set( $cache_key, $all_sections, 'bu-navigation' );
+	// Cache results. The version-stamped key (posts 'last_changed') is the primary
+	// invalidation; the explicit TTL is a self-healing backstop in case a membership
+	// change ever bypasses clean_post_cache() (e.g. a direct $wpdb write or import).
+	wp_cache_set( $cache_key, $all_sections, 'bu-navigation', DAY_IN_SECONDS );
 
 	return $all_sections;
 }

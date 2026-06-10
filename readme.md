@@ -4,7 +4,7 @@
 **Tags:** navigation, hierarchical, post type, boston university, bu
 **Requires at least:** 3.1
 **Tested up to:** 5.7
-**Stable tag:** 1.3.5
+**Stable tag:** 1.3.6
 **License:** GPLv2 or later
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -114,6 +114,15 @@ Please see this page for the details:
 ![The same drag and drop view is available to move pages while editing them](https://ps.w.org/bu-navigation/assets/screenshot-5.png)
 
 ## Changelog
+
+### 1.3.6
+
+* Makes the navigation tree section cache (`load_sections`) persistent instead of
+  non-persistent, so the page-hierarchy `GROUP_CONCAT` query is reused across requests
+  rather than re-run on nearly every front-end render. The cache key is site-scoped and
+  version-stamped on the core posts cache, with a one-day TTL backstop; publication status,
+  ordering, and navigation meta continue to be applied on the uncached posts query, so
+  navigation output is unchanged.
 
 ### 1.3.4
 

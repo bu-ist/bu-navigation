@@ -3,7 +3,7 @@ Contributors: ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
 Tested up to: 5.7
-Stable tag: 1.3.6
+Stable tag: 1.3.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,10 @@ Please see this page for the details:
 5. The same drag and drop view is available to move pages while editing them
 
 == Changelog ==
+
+= 1.3.7 =
+
+* Makes the per-post ancestor lookup (`get_page_uri_ancestors`) persistent, mirroring the 1.3.6 `load_sections` change. This call resolves a post's ancestor chain when building permalinks and ran an uncached posts query once per missing-ancestor chain on nearly every front-end render — the dominant source of `wp_posts` read amplification during crawls. Results are now cached in the site-scoped, version-stamped `bu-navigation` cache (invalidated on any post edit, with a short TTL backstop), so permalinks render identically while the underlying query is reused across requests.
 
 = 1.3.6 =
 

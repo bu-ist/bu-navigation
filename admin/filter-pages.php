@@ -8,6 +8,7 @@
 class BU_Navigation_Admin_Filter_Pages {
 
 	public $post_type;
+	public $post_parent;
 	private $plugin;
 
 	public function __construct( $post_type, $post_parent, $plugin ) {

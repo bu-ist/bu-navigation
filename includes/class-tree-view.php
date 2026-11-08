@@ -14,6 +14,7 @@ class BU_Navigation_Tree_View {
 	private $query;
 
 	public $hierarchy;
+	public $no_title_text;
 
 	/**
 	 * Setup an object capable of creating the navigation management interface

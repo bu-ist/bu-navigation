@@ -3,7 +3,7 @@ Contributors: ntk, mgburns, gcorne, jtwiest, awbauer, inderpreet99
 Tags: navigation, hierarchical, post type, boston university, bu
 Requires at least: 3.1
 Tested up to: 5.7
-Stable tag: 1.3.7
+Stable tag: 1.3.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,12 @@ Please see this page for the details:
 5. The same drag and drop view is available to move pages while editing them
 
 == Changelog ==
+
+= 1.3.8 =
+
+* Fixes PHP 8 fatal errors when the navigation query finds no pages: `count()` on `false` in `pages_by_parent()` (Content Navigation widget, primary navigation) and in `BU_Navigation_Tree_Query` (Edit Order screen, Navigation Attributes metabox, navigation tree AJAX). Output on PHP 7 is unchanged, without its `count()` and `foreach()` warnings.
+* The Content Navigation widget returns early when there is no current post instead of reading `post_type` from `null`.
+* Declares `BU_Navigation_Admin_Manager::$post_type` and `::$pages` and `BU_Navigation_Tree_View::$no_title_text`, which PHP 8.2+ reports as deprecated dynamic properties.
 
 = 1.3.7 =
 

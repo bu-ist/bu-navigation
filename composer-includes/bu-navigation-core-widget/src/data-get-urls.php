@@ -218,6 +218,35 @@ function get_page_uri( $page, $ancestors ) {
  */
 function get_page_uri_ancestors( $post ) {
 
+	// Try the cache first, mirroring load_sections(). This call resolves a post's
+	// ancestor chain via load_sections() + the uncached get_nav_posts() query, and
+	// runs once per missing-ancestor chain on every front-end render. Without a
+	// persistent cache it re-runs the raw posts query on each request, which is the
+	// dominant source of wp_posts read amplification during crawls.
+	//
+	// The key is version-stamped on the core posts 'last_changed' value (bumped by
+	// clean_post_cache() on any post edit) and site-scoped. The 'bu-navigation' group
+	// is Redis-backed (persistent) in production. Freshness is fully handled by the
+	// last_changed stamp; the TTL is only a self-healing backstop for the rare case an
+	// edit bypasses clean_post_cache() (e.g. a direct $wpdb write or import). Unlike
+	// load_sections() (keyed on post types, so a few keys per site), this cache is keyed
+	// per post, so a short TTL is used to keep orphaned key generations -- one per
+	// last_changed bump -- from accumulating in Redis.
+	$last_changed = wp_cache_get( 'last_changed', 'posts' );
+	if ( ! $last_changed ) {
+		$last_changed = microtime();
+		wp_cache_set( 'last_changed', $last_changed, 'posts' );
+	}
+
+	$cache_key = 'page_uri_ancestors:' . get_current_blog_id() . ':' . md5( $post->ID . ':' . $post->post_type . ":$last_changed" );
+	$cached    = wp_cache_get( $cache_key, 'bu-navigation' );
+
+	// Use a strict check against false so that an empty-ancestors result (a top-level
+	// post with no ancestors) is still served from cache rather than recomputed.
+	if ( false !== $cached ) {
+		return $cached;
+	}
+
 	$ancestors    = array();
 	$all_sections = load_sections( $post->post_type );
 
@@ -245,6 +274,8 @@ function get_page_uri_ancestors( $post ) {
 			$ancestors = array();
 		}
 	}
+
+	wp_cache_set( $cache_key, $ancestors, 'bu-navigation', HOUR_IN_SECONDS );
 
 	return $ancestors;
 }

@@ -14,6 +14,7 @@ class BU_Navigation_Tree_View {
 	private $query;
 
 	public $hierarchy;
+	public $no_title_text;
 
 	/**
 	 * Setup an object capable of creating the navigation management interface
@@ -449,7 +450,7 @@ class BU_Navigation_Tree_Query {
 			)
 		);
 
-		$this->post_count = count($this->posts);
+		$this->post_count = ( $this->posts ) ? count( $this->posts ) : 0;
 
 		// Restore filters
 		remove_filter('bu_navigation_filter_pages', array( $this, 'filter_posts' ) );

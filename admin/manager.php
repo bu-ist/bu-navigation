@@ -19,6 +19,8 @@ class BU_Navigation_Admin_Manager {
 
 	public $page;
 	public $reorder_tracker;
+	public $post_type;
+	public $pages;
 
 	const OPTION_LOCK_TIME = '_bu_navman_lock_time';
 	const OPTION_LOCK_USER = '_bu_navman_lock_user';

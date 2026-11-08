@@ -122,7 +122,7 @@ class Navigation_Widget extends \WP_Widget {
 		global $post;
 
 		// Only display navigation widget for supported post types.
-		if ( ! in_array( $post->post_type, bu_navigation_supported_post_types(), true ) ) {
+		if ( ! $post || ! in_array( $post->post_type, bu_navigation_supported_post_types(), true ) ) {
 			return;
 		}
 

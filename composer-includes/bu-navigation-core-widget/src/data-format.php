@@ -168,7 +168,7 @@ function gather_ancestor_sections( $page_id, $pages, $sections ) {
  */
 function pages_by_parent( $pages ) {
 
-	if ( ! is_array( $pages ) && ! count( $pages ) > 0 ) {
+	if ( ! is_array( $pages ) || 0 === count( $pages ) ) {
 		return array();
 	}
 

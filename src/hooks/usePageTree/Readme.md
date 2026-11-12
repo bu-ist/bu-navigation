@@ -36,6 +36,7 @@ const MyComponent = ( { postType } ) => {
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `postType` | `string` | The post type of the tree. |
+| `postId` | `number` | Optional. The post being placed. Its unpublished ancestors are added to the levels they belong to. |
 
 ## Returns
 
@@ -53,7 +54,7 @@ Each page in `levels[ parentId ].pages` comes from the REST route, in navigation
 | `id` | `number` | The post ID. |
 | `label` | `string` | The navigation label, or the title when no label is set. |
 | `type` | `string` | The post type. Links added in "Edit Order" use the link post type. |
-| `status` | `string` | `publish` or `private`. |
+| `status` | `string` | `publish` or `private`, or the status of an unpublished ancestor of `postId` (`draft`, `pending` or `future`). |
 | `parent` | `number` | The parent post ID. |
 | `menuOrder` | `number` | The position among its siblings. |
 | `excluded` | `boolean` | Whether the page is hidden from navigation lists. |

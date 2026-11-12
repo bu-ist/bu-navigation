@@ -9,9 +9,10 @@ import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
  * A level that failed to load is requested again the next time it is loaded.
  *
  * @param {string} postType The post type of the tree.
+ * @param {number} postId   The post being placed. Its unpublished ancestors are added to the levels they belong to.
  * @return {Object} An object containing `levels`, keyed by parent ID, and `loadLevel( parentId )`.
  */
-const usePageTree = ( postType ) => {
+const usePageTree = ( postType, postId = 0 ) => {
 	// Each level is an object with `pages`, `isLoading` and `error`.
 	const [ levels, setLevels ] = useState( {} );
 
@@ -48,7 +49,7 @@ const usePageTree = ( postType ) => {
 			apiFetch( {
 				path: `/bu-navigation/v1/tree?post_type=${ encodeURIComponent(
 					postType
-				) }&child_of=${ parentId }`,
+				) }&child_of=${ parentId }&post_id=${ postId }`,
 			} )
 				.then( ( pages ) => {
 					setLevel( parentId, {
@@ -66,7 +67,7 @@ const usePageTree = ( postType ) => {
 					} );
 				} );
 		},
-		[ postType, setLevel ]
+		[ postType, postId, setLevel ]
 	);
 
 	return { levels, loadLevel };

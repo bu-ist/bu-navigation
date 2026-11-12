@@ -119,6 +119,9 @@ function register_meta_fields() {
 				'auth_callback'     => __NAMESPACE__ . '\\can_edit_navigation_meta',
 			)
 		);
+
+		// After set_new_post_visibility(), which runs at the default priority.
+		add_action( "rest_after_insert_{$post_type}", __NAMESPACE__ . '\\delete_empty_visibility', 20 );
 	}
 }
 
@@ -177,6 +180,13 @@ function register_rest_routes() {
 					'minimum'           => 0,
 					'sanitize_callback' => 'absint',
 				),
+				// The post being placed. Its unpublished ancestors are added to the levels they belong to.
+				'post_id'   => array(
+					'type'              => 'integer',
+					'default'           => 0,
+					'minimum'           => 0,
+					'sanitize_callback' => 'absint',
+				),
 			),
 		)
 	);
@@ -208,7 +218,8 @@ function can_view_tree( $request ) {
  * Return the children of one page (or the top level pages) for the Move dialog.
  *
  * The tree is built by BU_Navigation_Tree_View with the same instance name as the Classic
- * Editor metabox ('nav_metabox'), so filters on that instance apply to both.
+ * Editor metabox ('nav_metabox'), so filters on that instance apply to both. It loads one level
+ * below `child_of`, and the sections under that level, which tell which pages have children.
  *
  * BU Section Editing marks the pages a section editor cannot edit through those filters, but
  * it adds them on admin requests only. When they are missing, as on this REST request, the
@@ -226,10 +237,12 @@ function get_tree_level( $request ) {
 			'postTypes'    => array( $request['post_type'] ),
 			'postStatuses' => array( 'publish', 'private' ),
 			'suppressUrls' => true,
+			'depth'        => 1,
 		)
 	);
 
 	$pages = array_map( __NAMESPACE__ . '\\format_tree_node', $tree_view->render() );
+	$pages = add_unpublished_ancestors( $pages, $request['child_of'], $request['post_id'], $request['post_type'] );
 
 	// BU Section Editing defines this function where it adds the filters.
 	if ( is_section_editor() && ! function_exists( 'buse_bu_navigation_format_post' ) ) {
@@ -244,6 +257,65 @@ function get_tree_level( $request ) {
 	}
 
 	return rest_ensure_response( $pages );
+}
+
+/**
+ * Add the post's unpublished ancestors that belong to one level of the tree.
+ *
+ * The tree lists published and private posts only. A post under a draft, pending or scheduled
+ * post still needs that ancestor in the Move dialog to reach its own location, so it is added
+ * in menu order, as the Classic Editor metabox adds it to its tree (js/bu-navigation.js).
+ *
+ * @param array  $pages     The level, from format_tree_node().
+ * @param int    $child_of  The parent ID of the level.
+ * @param int    $post_id   The post being placed, or 0.
+ * @param string $post_type The post type of the tree.
+ * @return array The level with the ancestor added, if one belongs to it.
+ */
+function add_unpublished_ancestors( $pages, $child_of, $post_id, $post_type ) {
+	if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+		return $pages;
+	}
+
+	$listed = wp_list_pluck( $pages, 'id' );
+
+	foreach ( get_post_ancestors( $post_id ) as $ancestor_id ) {
+		$ancestor = get_post( $ancestor_id );
+
+		if (
+			! $ancestor
+			|| $post_type !== $ancestor->post_type
+			|| (int) $ancestor->post_parent !== (int) $child_of
+			|| in_array( $ancestor->post_status, array( 'trash', 'auto-draft' ), true )
+			|| in_array( (int) $ancestor->ID, $listed, true )
+			|| ! current_user_can( 'read_post', $ancestor->ID )
+		) {
+			continue;
+		}
+
+		$node = array(
+			'id'          => (int) $ancestor->ID,
+			'label'       => html_entity_decode( bu_navigation_get_label( $ancestor ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
+			'type'        => $ancestor->post_type,
+			'status'      => $ancestor->post_status,
+			'parent'      => (int) $ancestor->post_parent,
+			'menuOrder'   => (int) $ancestor->menu_order,
+			'excluded'    => bu_navigation_post_excluded( $ancestor ),
+			'hasChildren' => true,
+			'canEdit'     => true,
+		);
+
+		$position = count( $pages );
+		foreach ( $pages as $index => $page ) {
+			if ( $page['menuOrder'] > $node['menuOrder'] ) {
+				$position = $index;
+				break;
+			}
+		}
+		array_splice( $pages, $position, 0, array( $node ) );
+	}
+
+	return $pages;
 }
 
 /**
@@ -353,6 +425,23 @@ function set_new_post_visibility( $post ) {
 
 	$hide_top_level = 0 === (int) $post->post_parent && ! $bu_navigation_plugin->settings->get( 'allow_top' );
 	update_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE, $hide_top_level ? '1' : '0' );
+}
+
+/**
+ * Delete an empty navigation visibility value after a save through the REST API.
+ *
+ * The Block Editor sends every registered meta field when any one of them changes, so saving
+ * only the label of a post with no visibility value stores an empty one. The navigation list
+ * filters read a stored empty value as "show", while a missing value uses
+ * BU_NAVIGATION_POST_EXCLUDE_DEFAULT, as the panel does.
+ *
+ * @param \WP_Post $post The inserted or updated post.
+ * @return void
+ */
+function delete_empty_visibility( $post ) {
+	if ( metadata_exists( 'post', $post->ID, BU_NAV_META_PAGE_EXCLUDE ) && '' === (string) get_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE, true ) ) {
+		delete_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE );
+	}
 }
 
 /**

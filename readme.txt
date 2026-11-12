@@ -87,7 +87,7 @@ Please see this page for the details:
     * Visibility: a "Hide from navigation" checkbox. A new post shows in navigation lists unless the box is checked, or it is a top-level post while top-level posts are not allowed.
     * BU Section Editing's rules and the "Allow Top-Level Pages" setting apply as in the metabox.
 * Registers the navigation label and visibility post meta for the REST API, and adds `custom-fields` and `page-attributes` support to supported post types that lack it.
-* Adds the `bu-navigation/v1/tree` REST route for the Move dialog.
+* Adds the `bu-navigation/v1/tree` REST route for the Move dialog. It loads one level of the tree through the new optional `depth` setting of `BU_Navigation_Tree_View`; without it, the tree views load every level below `childOf`, as before.
 * Reorders sibling posts after a move saved in the block editor, as after a Classic Editor save.
 * The script that removes the core Page Attributes panel uses the `core/editor` store where it has `removeEditorPanel()` (WordPress 6.5 and later).
 

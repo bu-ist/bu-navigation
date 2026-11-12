@@ -71,6 +71,7 @@ const NavigationPlacementPanelContent = ( {
 		menuOrder,
 		title,
 		savedParent,
+		savedMenuOrder,
 		savedStatus,
 		savedExclude,
 	} = useSelect( ( select ) => {
@@ -84,6 +85,7 @@ const NavigationPlacementPanelContent = ( {
 			menuOrder: getEditedPostAttribute( 'menu_order' ) || 0,
 			title: getEditedPostAttribute( 'title' ),
 			savedParent: getCurrentPostAttribute( 'parent' ) || 0,
+			savedMenuOrder: getCurrentPostAttribute( 'menu_order' ) || 0,
 			savedStatus: getCurrentPostAttribute( 'status' ),
 			savedExclude: savedMeta ? savedMeta[ metaKeys.exclude ] : null,
 		};
@@ -98,8 +100,14 @@ const NavigationPlacementPanelContent = ( {
 		postId
 	);
 
-	// The ancestors shown in the breadcrumbs: from PHP when the editor loads, then from the Move dialog.
-	const [ ancestors, setAncestors ] = useState( settings.ancestors || [] );
+	// The ancestors of each parent the post has had in this editor, for the breadcrumbs: the saved
+	// parent's from PHP, and each parent chosen in the Move dialog. Undo and Redo only return to these
+	// parents, so the breadcrumbs follow the edited parent. The core Page Attributes panel, the other
+	// way to set a parent, is removed.
+	const [ ancestorsByParent, setAncestorsByParent ] = useState( () => ( {
+		[ savedParent ]: settings.ancestors || [],
+	} ) );
+	const ancestors = ( 0 !== parent && ancestorsByParent[ parent ] ) || [];
 	const [ isMoveModalOpen, setIsMoveModalOpen ] = useState( false );
 
 	const isNewPost = 'auto-draft' === savedStatus;
@@ -161,7 +169,10 @@ const NavigationPlacementPanelContent = ( {
 	 */
 	const onConfirmMove = ( location ) => {
 		editPost( { parent: location.parent, menu_order: location.menuOrder } );
-		setAncestors( location.ancestors );
+		setAncestorsByParent( ( previous ) => ( {
+			...previous,
+			[ location.parent ]: location.ancestors,
+		} ) );
 		setIsMoveModalOpen( false );
 	};
 
@@ -215,6 +226,9 @@ const NavigationPlacementPanelContent = ( {
 					labels={ postTypeLabels }
 					currentParent={ parent }
 					currentMenuOrder={ menuOrder }
+					isPositionSaved={
+						parent === savedParent && menuOrder === savedMenuOrder
+					}
 					ancestors={ ancestors }
 					isHidden={ isHidden }
 					canStayAtTopLevel={ canStayAtTopLevel }

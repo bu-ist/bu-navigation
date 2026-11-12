@@ -36,6 +36,15 @@ const PageTree = ( props ) => {
 
 	const level = levels[ parentId ];
 
+	// Badges for the statuses the tree lists besides published: private pages, and the
+	// unpublished ancestors of the post being moved.
+	const statusBadges = {
+		private: __( 'private', 'bu-navigation' ),
+		draft: __( 'draft', 'bu-navigation' ),
+		pending: __( 'pending', 'bu-navigation' ),
+		future: __( 'scheduled', 'bu-navigation' ),
+	};
+
 	if ( ! level || level.isLoading ) {
 		return <Spinner />;
 	}
@@ -115,9 +124,9 @@ const PageTree = ( props ) => {
 										{ __( 'not in nav', 'bu-navigation' ) }
 									</span>
 								) }
-								{ 'private' === page.status && (
+								{ statusBadges[ page.status ] && (
 									<span className="bu-navigation-placement-badge">
-										{ __( 'private', 'bu-navigation' ) }
+										{ statusBadges[ page.status ] }
 									</span>
 								) }
 								{ disabledReason && (

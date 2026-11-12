@@ -30,6 +30,7 @@ import PageTree from '../page-tree';
  * @param {Object}   props.labels               Post type names: `singularName` as registered, and `singular` and `plural` in lower case.
  * @param {number}   props.currentParent        The post's parent ID (0 for the top level).
  * @param {number}   props.currentMenuOrder     The post's position among its siblings.
+ * @param {boolean}  props.isPositionSaved      Whether the post's parent and position are the saved ones.
  * @param {Array}    props.ancestors            The post's ancestors from the top level down, as `{ id, label }` objects.
  * @param {boolean}  props.isHidden             Whether the post is hidden from navigation lists.
  * @param {boolean}  props.canStayAtTopLevel    Whether the post was saved at the top level and showing in navigation lists.
@@ -47,6 +48,7 @@ const MovePageModal = ( {
 	labels,
 	currentParent,
 	currentMenuOrder,
+	isPositionSaved,
 	ancestors,
 	isHidden,
 	canStayAtTopLevel,
@@ -57,7 +59,7 @@ const MovePageModal = ( {
 	onConfirm,
 	onClose,
 } ) => {
-	const { levels, loadLevel } = usePageTree( postType );
+	const { levels, loadLevel } = usePageTree( postType, postId );
 
 	const [ selectedParent, setSelectedParent ] = useState( currentParent );
 
@@ -69,11 +71,12 @@ const MovePageModal = ( {
 		ancestors.map( ( ancestor ) => ancestor.id )
 	);
 
-	// Load the top level and each level down to the post.
+	// Load the top level, each level down to the post, and the post's own level for its positions.
 	useEffect( () => {
 		loadLevel( 0 );
 		ancestors.forEach( ( ancestor ) => loadLevel( ancestor.id ) );
-	}, [ ancestors, loadLevel ] );
+		loadLevel( currentParent );
+	}, [ ancestors, currentParent, loadLevel ] );
 
 	// Section editing restrictions only affect published content.
 	const sectionRulesApply = isSectionEditor && isPublished;
@@ -150,11 +153,12 @@ const MovePageModal = ( {
 		: [];
 
 	// The default position: where the post is now when it stays in its section, otherwise the end.
+	// The tree has saved positions, so a position that is not saved yet comes from currentMenuOrder.
 	let defaultPosition = siblings.length + 1;
 	if ( selectedParent === currentParent && siblingsLevel ) {
-		const currentIndex = siblingsLevel.pages.findIndex(
-			( page ) => page.id === postId
-		);
+		const currentIndex = isPositionSaved
+			? siblingsLevel.pages.findIndex( ( page ) => page.id === postId )
+			: -1;
 		defaultPosition =
 			currentIndex > -1
 				? currentIndex + 1

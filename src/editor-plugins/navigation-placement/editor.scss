@@ -1,0 +1,141 @@
+// Navigation Placement panel and Move dialog.
+
+$bu-navigation-placement-gray: #757575;
+
+// Panel.
+.bu-navigation-placement-location {
+	margin-bottom: 16px;
+}
+
+// Section labels use BaseControl.VisualLabel, so they take each WordPress
+// version's label type. Newer versions display it as a block with an 8px
+// margin; 5.8 leaves it inline.
+.bu-navigation-placement-section-label {
+	display: block;
+	margin-bottom: 8px;
+}
+
+.bu-navigation-placement-label {
+	margin-bottom: 16px;
+}
+
+.bu-navigation-placement-breadcrumbs {
+	margin: 0 0 12px;
+	padding: 0;
+	list-style: none;
+
+	li {
+		display: inline;
+		margin: 0;
+
+		// A chevron between items, drawn with borders so that
+		// screen readers do not announce it.
+		&:not(:last-child)::after {
+			content: "";
+			display: inline-block;
+			width: 5px;
+			height: 5px;
+			margin: 0 7px 1px 4px;
+			border-top: 1px solid $bu-navigation-placement-gray;
+			border-right: 1px solid $bu-navigation-placement-gray;
+			transform: rotate(45deg);
+		}
+	}
+
+	.is-current {
+		font-weight: 600;
+	}
+}
+
+// Move dialog.
+.bu-navigation-placement-modal {
+	width: 100%;
+	max-width: 600px;
+}
+
+.bu-navigation-placement-modal-hint {
+	margin-top: 0;
+}
+
+.bu-navigation-placement-tree {
+	max-height: 50vh;
+	margin: 0 0 16px;
+	padding: 0;
+	overflow-y: auto;
+	border: 0;
+
+	legend {
+		margin-bottom: 8px;
+		padding: 0;
+	}
+}
+
+.bu-navigation-placement-tree-level {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		margin: 0;
+	}
+
+	.bu-navigation-placement-tree-level {
+		margin-left: 24px;
+	}
+}
+
+.bu-navigation-placement-tree-item {
+	display: flex;
+	align-items: center;
+	min-height: 32px;
+
+	input[type="radio"] {
+		margin: 0 8px 0 4px;
+	}
+
+	label {
+		cursor: pointer;
+	}
+
+	input[type="radio"]:disabled + label {
+		cursor: default;
+	}
+}
+
+.bu-navigation-placement-tree .bu-navigation-placement-tree-toggle.components-button {
+	flex: none;
+	width: 24px;
+	min-width: 24px;
+	height: 24px;
+	padding: 0;
+}
+
+.bu-navigation-placement-tree-toggle-spacer {
+	flex: none;
+	width: 24px;
+}
+
+.bu-navigation-placement-badge {
+	margin-left: 6px;
+	padding: 0 6px;
+	border-radius: 2px;
+	background: #f0f0f0;
+	color: #50575e;
+	font-size: 12px;
+}
+
+.bu-navigation-placement-tree-reason {
+	margin: 0 0 4px 60px;
+	color: $bu-navigation-placement-gray;
+	font-size: 12px;
+}
+
+.bu-navigation-placement-modal-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 16px;
+
+	.components-button + .components-button {
+		margin-left: 8px;
+	}
+}

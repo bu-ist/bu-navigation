@@ -88,10 +88,14 @@ function register_meta_fields() {
 	foreach ( get_supported_post_types() as $post_type ) {
 		// The REST API only reads and saves post meta for post types that support custom fields,
 		// and the post order (`menu_order`) for post types that support page attributes.
-		foreach ( array( 'custom-fields', 'page-attributes' ) as $feature ) {
-			if ( ! post_type_supports( $post_type, $feature ) ) {
-				add_post_type_support( $post_type, $feature );
-			}
+		// Core's metaboxes for them stay off the edit screen: Custom Fields is removed here, and
+		// Page Attributes by BU_Navigation_Admin_Post::add_meta_boxes().
+		if ( ! post_type_supports( $post_type, 'custom-fields' ) ) {
+			add_post_type_support( $post_type, 'custom-fields' );
+			add_action( "add_meta_boxes_{$post_type}", __NAMESPACE__ . '\\remove_custom_fields_meta_box' );
+		}
+		if ( ! post_type_supports( $post_type, 'page-attributes' ) ) {
+			add_post_type_support( $post_type, 'page-attributes' );
 		}
 
 		// Navigation label. Sanitized the same way as the Classic Editor metabox save.
@@ -123,6 +127,16 @@ function register_meta_fields() {
 		// After set_new_post_visibility(), which runs at the default priority.
 		add_action( "rest_after_insert_{$post_type}", __NAMESPACE__ . '\\delete_empty_visibility', 20 );
 	}
+}
+
+/**
+ * Remove core's Custom Fields metabox from a post type that supports custom fields for the REST API only.
+ *
+ * @param \WP_Post $post The post being edited.
+ * @return void
+ */
+function remove_custom_fields_meta_box( $post ) {
+	remove_meta_box( 'postcustom', $post->post_type, 'normal' );
 }
 
 /**
@@ -230,12 +244,16 @@ function can_view_tree( $request ) {
  * @return \WP_REST_Response
  */
 function get_tree_level( $request ) {
+	// Private posts are listed for users who can read them.
+	$post_type_object = get_post_type_object( $request['post_type'] );
+	$post_statuses    = current_user_can( $post_type_object->cap->read_private_posts ) ? array( 'publish', 'private' ) : array( 'publish' );
+
 	$tree_view = new \BU_Navigation_Tree_View(
 		'nav_metabox',
 		array(
 			'childOf'      => $request['child_of'],
 			'postTypes'    => array( $request['post_type'] ),
-			'postStatuses' => array( 'publish', 'private' ),
+			'postStatuses' => $post_statuses,
 			'suppressUrls' => true,
 			'depth'        => 1,
 		)
@@ -452,24 +470,20 @@ function delete_empty_visibility( $post ) {
  */
 function get_ancestor_labels( $post ) {
 	$ancestors = array();
-	$parent_id = (int) $post->post_parent;
 
-	while ( $parent_id ) {
-		$ancestor = get_post( $parent_id );
+	foreach ( array_reverse( get_post_ancestors( $post ) ) as $ancestor_id ) {
+		$ancestor = get_post( $ancestor_id );
 
-		// Stop at a missing parent, or at a loop in the hierarchy.
-		if ( ! $ancestor || (int) $ancestor->ID === (int) $post->ID || isset( $ancestors[ $ancestor->ID ] ) ) {
-			break;
+		// get_post_ancestors() lists the ID of a parent that no longer exists.
+		if ( $ancestor ) {
+			$ancestors[] = array(
+				'id'    => (int) $ancestor->ID,
+				'label' => html_entity_decode( bu_navigation_get_label( $ancestor ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
+			);
 		}
-
-		$ancestors[ $ancestor->ID ] = array(
-			'id'    => (int) $ancestor->ID,
-			'label' => html_entity_decode( bu_navigation_get_label( $ancestor ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
-		);
-		$parent_id                  = (int) $ancestor->post_parent;
 	}
 
-	return array_reverse( array_values( $ancestors ) );
+	return $ancestors;
 }
 
 /**

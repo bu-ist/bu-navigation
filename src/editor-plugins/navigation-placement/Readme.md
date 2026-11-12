@@ -72,8 +72,8 @@ New posts show in navigation lists: on a new post's first save, `navigation-plac
 ## PHP
 
 `navigation-placement.php`:
-- Registers the two meta keys for the REST API, and adds `custom-fields` and `page-attributes` support to the supported post types that lack it (the REST API needs them for post meta and `menu_order`).
-- Registers `GET /bu-navigation/v1/tree?post_type=page&child_of=0&post_id=123`, which returns one level of the page tree. It requires the post type's `edit_posts` capability. The tree lists published and private pages; with `post_id`, the unpublished ancestors of that post are added to their levels, so a post in a draft section can stay where it is.
+- Registers the two meta keys for the REST API, and adds `custom-fields` and `page-attributes` support to the supported post types that lack it (the REST API needs them for post meta and `menu_order`). Core's Custom Fields metabox is removed from the edit screen of the post types it adds `custom-fields` to.
+- Registers `GET /bu-navigation/v1/tree?post_type=page&child_of=0&post_id=123`, which returns one level of the page tree. It requires the post type's `edit_posts` capability. The tree lists published pages, and private pages for users who can read them; with `post_id`, the unpublished ancestors of that post are added to their levels, so a post in a draft section can stay where it is.
 - Deletes an empty navigation visibility value after a REST API save. The block editor sends every registered meta key, and an empty value stored for a post that had none would read as "show" in the navigation lists instead of falling back to `BU_NAVIGATION_POST_EXCLUDE_DEFAULT`.
 - Renumbers the siblings after a post moves in a REST API save, as `BU_Navigation_Admin_Post::save()` does for the Classic Editor.
 - Enqueues the built script and passes `buNavigationPlacementSettings` to it.

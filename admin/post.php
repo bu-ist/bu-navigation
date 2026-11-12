@@ -75,6 +75,11 @@ class BU_Navigation_Admin_Post {
 	 */
 	public function add_scripts( $page ) {
 
+		// The Block Editor uses the Navigation Placement editor plugin, which does not need these scripts.
+		if ( $this->is_block_editor() ) {
+			return;
+		}
+
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		$scripts_url = plugins_url( 'js', BU_NAV_PLUGIN );
 		$styles_url = plugins_url( 'css', BU_NAV_PLUGIN );
@@ -141,6 +146,11 @@ class BU_Navigation_Admin_Post {
 				);
 		}
 
+		// The Block Editor shows the Navigation Placement editor plugin (src/editor-plugins/navigation-placement) instead.
+		if ( $this->is_block_editor() ) {
+			return;
+		}
+
 		add_meta_box(
 			'bunavattrsdiv',
 			__( 'Placement in Navigation', 'bu-navigation' ),
@@ -150,6 +160,17 @@ class BU_Navigation_Admin_Post {
 			'core'
 			);
 
+	}
+
+	/**
+	 * Whether the current screen is the Block Editor.
+	 *
+	 * @return bool
+	 */
+	private function is_block_editor() {
+		$screen = get_current_screen();
+
+		return $screen && method_exists( $screen, 'is_block_editor' ) && $screen->is_block_editor();
 	}
 
 	/**

@@ -4,7 +4,7 @@
 **Tags:** navigation, hierarchical, post type, boston university, bu
 **Requires at least:** 3.1
 **Tested up to:** 5.7
-**Stable tag:** 1.3.8
+**Stable tag:** 1.4.0
 **License:** GPLv2 or later
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -114,6 +114,27 @@ Please see this page for the details:
 ![The same drag and drop view is available to move pages while editing them](https://ps.w.org/bu-navigation/assets/screenshot-5.png)
 
 ## Changelog
+
+### 1.4.0
+
+* Adds a "Placement in Navigation" panel to the block editor's document sidebar for the post
+  types BU Navigation supports. It replaces the Navigation Attributes metabox in the block
+  editor; the Classic Editor keeps the metabox.
+  * Location: the post's ancestors as breadcrumbs, and a Move dialog that loads the page tree
+    one level at a time and sets the parent and the position among its siblings.
+  * Label: the navigation label. An empty label uses the title.
+  * Visibility: a "Hide from navigation" checkbox. A new post shows in navigation lists unless
+    the box is checked, or it is a top-level post while top-level posts are not allowed.
+  * BU Section Editing's rules and the "Allow Top-Level Pages" setting apply as in the metabox.
+* Registers the navigation label and visibility post meta for the REST API, and adds
+  `custom-fields` and `page-attributes` support to supported post types that lack it. Core's
+  Custom Fields metabox stays off the edit screen of those post types.
+* Adds the `bu-navigation/v1/tree` REST route for the Move dialog. It loads one level of the tree
+  through the new optional `depth` setting of `BU_Navigation_Tree_View`; without it, the tree
+  views load every level below `childOf`, as before.
+* Reorders sibling posts after a move saved in the block editor, as after a Classic Editor save.
+* The script that removes the core Page Attributes panel uses the `core/editor` store where it
+  has `removeEditorPanel()` (WordPress 6.5 and later).
 
 ### 1.3.8
 

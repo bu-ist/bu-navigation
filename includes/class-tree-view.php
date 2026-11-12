@@ -62,6 +62,12 @@ class BU_Navigation_Tree_View {
 			'include_links' => $this->settings['includeLinks'],
 			'suppress_urls' => $this->settings['suppressUrls']
 		);
+
+		// Optional: the levels to load below childOf. Without it, a query below the top level loads every level.
+		if ( isset( $this->settings['depth'] ) ) {
+			$query_args['depth'] = absint( $this->settings['depth'] );
+		}
+
 		$this->query = new BU_Navigation_Tree_Query( $query_args );
 		$this->hierarchy = new BU_Navigation_Tree_Hierarchy( $this->query );
 
@@ -185,6 +191,11 @@ class BU_Navigation_Tree_View {
 			$load_children = false;
 		} else {
 			$load_children = true;
+		}
+
+		// A query limited in depth has not loaded the deeper levels to nest.
+		if ( $this->query->args['depth'] > 0 ) {
+			$load_children = false;
 		}
 
 		// Convert to jstree formatted posts

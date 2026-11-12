@@ -5,7 +5,7 @@
  * Author: Boston University (IS&T)
  * Author URI: http://sites.bu.edu/web/
  * Description: Provides alternative navigation elements designed for blogs with large page counts
- * Version: 1.3.8
+ * Version: 1.4.0
  * Text Domain: bu-navigation
  * Domain Path: /languages
  * License: GPL2+
@@ -68,6 +68,9 @@ require_once BU_NAV_PLUGIN_DIR . '/composer-includes/bu-navigation-core-widget/s
 // Include Block root file.
 require_once BU_NAV_PLUGIN_DIR . '/src/block.php';
 
+// Include the Navigation Placement Block Editor plugin.
+require_once BU_NAV_PLUGIN_DIR . '/src/editor-plugins/navigation-placement/navigation-placement.php';
+
 /**
  * Convenience class to wrap loading and init functions.
  */
@@ -94,7 +97,7 @@ class BU_Navigation_Plugin {
 	 *
 	 * @var string
 	 */
-	const VERSION = '1.3.8';
+	const VERSION = '1.4.0';
 
 	/**
 	 * Plugin class constructor.

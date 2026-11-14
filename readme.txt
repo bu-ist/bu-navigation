@@ -89,6 +89,7 @@ Please see this page for the details:
 * Registers the navigation label and visibility post meta for the REST API, and adds `custom-fields` and `page-attributes` support to supported post types that lack it. Core's Custom Fields metabox stays off the edit screen of those post types.
 * Adds the `bu-navigation/v1/tree` REST route for the Move dialog. It loads one level of the tree through the new optional `depth` setting of `BU_Navigation_Tree_View`; without it, the tree views load every level below `childOf`, as before.
 * Reorders sibling posts after a move saved in the block editor, as after a Classic Editor save.
+* A post created in either editor stores its navigation visibility on its first save, autosaves included: shown, or hidden for a top-level post while top-level posts are not allowed. On a new post, the Classic Editor's "Display in navigation lists" checkbox starts checked under the same rule. Posts with no stored value, such as existing posts and posts created by imports or WP-CLI, still use `BU_NAVIGATION_POST_EXCLUDE_DEFAULT`.
 * The script that removes the core Page Attributes panel uses the `core/editor` store where it has `removeEditorPanel()` (WordPress 6.5 and later).
 
 = 1.3.8 =

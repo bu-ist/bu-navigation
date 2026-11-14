@@ -42,6 +42,7 @@ const settings = window.buNavigationPlacementSettings || {};
 const allowTop = Boolean( settings.allowTop );
 const excludeDefault = Boolean( settings.excludeDefault );
 const isSectionEditor = Boolean( settings.isSectionEditor );
+const loadedAsNewPost = Boolean( settings.isNewPost );
 const linkPostType = settings.linkPostType;
 const metaKeys = settings.metaKeys || {};
 
@@ -116,12 +117,23 @@ const NavigationPlacementPanelContent = ( {
 	 * Whether a navigation visibility value hides the post. An empty value uses the site default,
 	 * except for a new post, which shows in navigation lists unless it is hidden.
 	 *
+	 * The first save of a new post stores its value (see bu_navigation_set_new_post_visibility()).
+	 * An autosave does not reload the post meta, so after an autosave of a post that was new when
+	 * the editor loaded, the value here stays empty: the stored value is '1' for a post saved at the
+	 * top level while top level posts are not allowed, and '0' otherwise.
+	 *
 	 * @param {string|null} value The navigation visibility meta value.
 	 * @return {boolean} Whether the value hides the post.
 	 */
 	const isExcluded = ( value ) => {
 		if ( null === value || undefined === value || '' === value ) {
-			return isNewPost ? false : excludeDefault;
+			if ( isNewPost ) {
+				return false;
+			}
+			if ( loadedAsNewPost ) {
+				return 0 === savedParent && ! allowTop;
+			}
+			return excludeDefault;
 		}
 		return '0' !== String( value );
 	};

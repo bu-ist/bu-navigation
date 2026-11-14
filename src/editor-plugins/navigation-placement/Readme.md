@@ -67,14 +67,14 @@ The "Hide from navigation" checkbox. Checked stores `'1'` and unchecked stores `
 
 Both keys are registered with `show_in_rest` and no `default`, so posts without a value keep falling back to the title and to `BU_NAVIGATION_POST_EXCLUDE_DEFAULT`. Only users who can edit the post can change them.
 
-New posts show in navigation lists: on a new post's first save, `navigation-placement.php` stores `'0'` when no value was chosen, or `'1'` for a top level post when top level posts are not allowed in navigation lists.
+New posts show in navigation lists. On the first save of a post created in either editor (a draft save, a publish or an autosave), `bu_navigation_set_new_post_visibility()` in `extras/bu-navigation-exclude.php` stores `'0'`, or `'1'` for a top level post when top level posts are not allowed in navigation lists. The value chosen in the editor is saved after it.
 
 ## PHP
 
 `navigation-placement.php`:
 - Registers the two meta keys for the REST API, and adds `custom-fields` and `page-attributes` support to the supported post types that lack it (the REST API needs them for post meta and `menu_order`). Core's Custom Fields metabox is removed from the edit screen of the post types it adds `custom-fields` to.
 - Registers `GET /bu-navigation/v1/tree?post_type=page&child_of=0&post_id=123`, which returns one level of the page tree. It requires the post type's `edit_posts` capability. The tree lists published pages, and private pages for users who can read them; with `post_id`, the unpublished ancestors of that post are added to their levels, so a post in a draft section can stay where it is.
-- Deletes an empty navigation visibility value after a REST API save. The block editor sends every registered meta key, and an empty value stored for a post that had none would read as "show" in the navigation lists instead of falling back to `BU_NAVIGATION_POST_EXCLUDE_DEFAULT`.
+- Does not store an empty navigation visibility value sent in a REST API request (`update_post_metadata` filter). The block editor sends every registered meta key with the values it loaded, so a post with no value, or a new post after an autosave, sends `''`. Stored, it would read as "show" in the navigation lists, or replace the value stored on the first save.
 - Renumbers the siblings after a post moves in a REST API save, as `BU_Navigation_Admin_Post::save()` does for the Classic Editor.
 - Enqueues the built script and passes `buNavigationPlacementSettings` to it.
 
@@ -88,6 +88,7 @@ New posts show in navigation lists: on a new post's first save, `navigation-plac
 | `excludeDefault` | The value of `BU_NAVIGATION_POST_EXCLUDE_DEFAULT`. |
 | `linkPostType` | The post type of navigation links. |
 | `isSectionEditor` | Whether BU Section Editing treats the user as a section editor. |
+| `isNewPost` | Whether the post was new (an auto-draft) when the editor loaded it. |
 | `ancestors` | The post's ancestors from the top level down, as `{ id, label }` objects. |
 | `metaKeys` | The `label` and `exclude` meta keys. |
 

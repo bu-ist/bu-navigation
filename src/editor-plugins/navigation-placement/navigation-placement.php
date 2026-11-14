@@ -123,10 +123,9 @@ function register_meta_fields() {
 				'auth_callback'     => __NAMESPACE__ . '\\can_edit_navigation_meta',
 			)
 		);
-
-		// After set_new_post_visibility(), which runs at the default priority.
-		add_action( "rest_after_insert_{$post_type}", __NAMESPACE__ . '\\delete_empty_visibility', 20 );
 	}
+
+	add_filter( 'update_post_metadata', __NAMESPACE__ . '\\keep_stored_visibility', 10, 4 );
 }
 
 /**
@@ -381,9 +380,6 @@ function format_tree_node( $node ) {
  * This does the same reordering for those saves: it renumbers the siblings in the old and new sections
  * when the post moves to another parent, or in its section when only its position changes.
  *
- * On the first save of a new post, it also sets up `set_new_post_visibility()` to run after the
- * REST API has saved the post meta sent with the request.
- *
  * @param int      $post_id     The post ID.
  * @param \WP_Post $post_after  The post after the update.
  * @param \WP_Post $post_before The post before the update.
@@ -396,10 +392,6 @@ function update_navigation_after_rest_save( $post_id, $post_after, $post_before 
 
 	if ( ! in_array( $post_after->post_type, get_supported_post_types(), true ) || 'auto-draft' === $post_after->post_status ) {
 		return;
-	}
-
-	if ( 'auto-draft' === $post_before->post_status ) {
-		add_action( "rest_after_insert_{$post_after->post_type}", __NAMESPACE__ . '\\set_new_post_visibility' );
 	}
 
 	$reorder = new \BU_Navigation_Reorder_Tracker( $post_after->post_type );
@@ -419,47 +411,28 @@ function update_navigation_after_rest_save( $post_id, $post_after, $post_before 
 }
 
 /**
- * Store the navigation visibility of a new post after its first save through the REST API.
+ * Keep the stored navigation visibility when a REST API save sends an empty value.
  *
- * New posts show in navigation lists: an empty or missing value is stored as '0'. A top level post is
- * stored as hidden ('1') when top level posts are not allowed in navigation lists. A value chosen in the
- * editor ('0' or '1') is kept.
+ * The Block Editor sends every registered meta field when any one of them changes, with the values
+ * it loaded. An empty visibility value comes from a post that had none when the editor loaded it:
+ * a post without a stored value, or a new post whose first save, an autosave, stored one
+ * (bu_navigation_set_new_post_visibility()) without reloading the editor's post meta. An empty value
+ * is not stored, so the stored value stays, and a post without one keeps using
+ * BU_NAVIGATION_POST_EXCLUDE_DEFAULT. The navigation list filters would read a stored empty value as
+ * "show".
  *
- * This runs after the REST API saves the request's post meta, because the Block Editor sends every
- * registered meta field when any one of them changes, including an empty navigation visibility value.
- *
- * @param \WP_Post $post The inserted post.
- * @return void
+ * @param null|bool $check      Null to save the value, or the result of a filter that saved it.
+ * @param int       $object_id  The post ID.
+ * @param string    $meta_key   The meta key.
+ * @param mixed     $meta_value The sanitized value.
+ * @return null|bool True to skip saving an empty navigation visibility value, otherwise `$check`.
  */
-function set_new_post_visibility( $post ) {
-	global $bu_navigation_plugin;
-
-	// Only the post whose first save added this callback.
-	remove_action( current_action(), __NAMESPACE__ . '\\set_new_post_visibility' );
-
-	if ( '' !== (string) get_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE, true ) ) {
-		return;
+function keep_stored_visibility( $check, $object_id, $meta_key, $meta_value ) {
+	if ( BU_NAV_META_PAGE_EXCLUDE === $meta_key && '' === $meta_value && defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		return true;
 	}
 
-	$hide_top_level = 0 === (int) $post->post_parent && ! $bu_navigation_plugin->settings->get( 'allow_top' );
-	update_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE, $hide_top_level ? '1' : '0' );
-}
-
-/**
- * Delete an empty navigation visibility value after a save through the REST API.
- *
- * The Block Editor sends every registered meta field when any one of them changes, so saving
- * only the label of a post with no visibility value stores an empty one. The navigation list
- * filters read a stored empty value as "show", while a missing value uses
- * BU_NAVIGATION_POST_EXCLUDE_DEFAULT, as the panel does.
- *
- * @param \WP_Post $post The inserted or updated post.
- * @return void
- */
-function delete_empty_visibility( $post ) {
-	if ( metadata_exists( 'post', $post->ID, BU_NAV_META_PAGE_EXCLUDE ) && '' === (string) get_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE, true ) ) {
-		delete_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE );
-	}
+	return $check;
 }
 
 /**
@@ -542,6 +515,8 @@ function enqueue_block_editor_scripts() {
 			'excludeDefault'  => (bool) BU_NAVIGATION_POST_EXCLUDE_DEFAULT,
 			'linkPostType'    => BU_NAVIGATION_LINK_POST_TYPE,
 			'isSectionEditor' => ! empty( $tree_context['isSectionEditor'] ),
+			// The post was new when the editor loaded it. See keep_stored_visibility().
+			'isNewPost'       => $post && 'auto-draft' === $post->post_status,
 			'ancestors'       => $post ? get_ancestor_labels( $post ) : array(),
 			'metaKeys'        => array(
 				'label'   => BU_NAV_META_PAGE_LABEL,

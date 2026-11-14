@@ -121,7 +121,8 @@ Please see this page for the details:
   types BU Navigation supports. It replaces the Navigation Attributes metabox in the block
   editor; the Classic Editor keeps the metabox.
   * Location: the post's ancestors as breadcrumbs, and a Move dialog that loads the page tree
-    one level at a time and sets the parent and the position among its siblings.
+    one level at a time and sets the parent and the position among its siblings. The post can be
+    dragged to its new place in the tree, or placed with the radio buttons and the Position list.
   * Label: the navigation label. An empty label uses the title.
   * Visibility: a "Hide from navigation" checkbox. A new post shows in navigation lists unless
     the box is checked, or it is a top-level post while top-level posts are not allowed.

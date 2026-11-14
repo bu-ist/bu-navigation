@@ -1,6 +1,8 @@
 // Navigation Placement panel and Move dialog.
 
 $bu-navigation-placement-gray: #757575;
+$bu-navigation-placement-theme: var(--wp-admin-theme-color, #007cba);
+$bu-navigation-placement-blocked: #cc1818;
 
 // Panel.
 .bu-navigation-placement-location {
@@ -85,9 +87,11 @@ $bu-navigation-placement-gray: #757575;
 }
 
 .bu-navigation-placement-tree-item {
+	position: relative;
 	display: flex;
 	align-items: center;
 	min-height: 32px;
+	border-radius: 2px;
 
 	input[type="radio"] {
 		margin: 0 8px 0 4px;
@@ -100,6 +104,57 @@ $bu-navigation-placement-gray: #757575;
 	input[type="radio"]:disabled + label {
 		cursor: default;
 	}
+
+	// The post being moved can be dragged.
+	&.is-current-post,
+	&.is-current-post input[type="radio"]:disabled + label {
+		cursor: grab;
+	}
+
+	&.is-dragging {
+		opacity: 0.5;
+	}
+
+	// Drop indicators: a line before or after the page, or an outline when
+	// the post goes inside it.
+	&.is-drop-reorder-before::before,
+	&.is-drop-reorder-after::after {
+		content: "";
+		position: absolute;
+		right: 0;
+		left: 24px;
+		height: 2px;
+		background: $bu-navigation-placement-theme;
+	}
+
+	&.is-drop-reorder-before::before {
+		top: -1px;
+	}
+
+	&.is-drop-reorder-after::after {
+		bottom: -1px;
+	}
+
+	&.is-drop-combine {
+		box-shadow: inset 0 0 0 2px $bu-navigation-placement-theme;
+	}
+
+	&.is-drop-blocked::before,
+	&.is-drop-blocked::after {
+		background: $bu-navigation-placement-blocked;
+	}
+
+	&.is-drop-blocked.is-drop-combine {
+		box-shadow: inset 0 0 0 2px $bu-navigation-placement-blocked;
+	}
+}
+
+.bu-navigation-placement-tree-drag-handle {
+	flex: none;
+	width: 24px;
+	color: $bu-navigation-placement-gray;
+	font-size: 18px;
+	line-height: 20px;
 }
 
 .bu-navigation-placement-tree .bu-navigation-placement-tree-toggle.components-button {

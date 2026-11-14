@@ -147,6 +147,8 @@ const NavigationPlacementPanelContent = ( {
 	const isLocked = 0 === parent && ! allowTop && ! canStayAtTopLevel;
 	const isHidden = isLocked || isExcluded( exclude );
 
+	const postLabel = label || title || __( '(no title)', 'bu-navigation' );
+
 	const singularName = postTypeObject.labels.singular_name;
 	const postTypeLabels = {
 		singularName,
@@ -211,9 +213,7 @@ const NavigationPlacementPanelContent = ( {
 				</BaseControl.VisualLabel>
 				<LocationBreadcrumbs
 					ancestors={ ancestors }
-					label={
-						label || title || __( '(no title)', 'bu-navigation' )
-					}
+					label={ postLabel }
 					singularName={ singularName }
 					labelledBy="bu-navigation-placement-location-label"
 				/>
@@ -251,6 +251,8 @@ const NavigationPlacementPanelContent = ( {
 				<MovePageModal
 					postId={ postId }
 					postType={ postType }
+					postLabel={ postLabel }
+					postStatus={ savedStatus }
 					labels={ postTypeLabels }
 					currentParent={ parent }
 					currentMenuOrder={ menuOrder }

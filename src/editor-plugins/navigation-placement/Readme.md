@@ -6,7 +6,7 @@ A WordPress Block Editor plugin that adds a "Placement in Navigation" panel to t
 
 The panel is rendered with `PluginDocumentSettingPanel`, which places it directly below the Status & Visibility (Summary) panel. It provides:
 - The post's location in the page hierarchy, as breadcrumbs.
-- A **Move** dialog to choose the post's parent page and its position among that page's child pages.
+- A **Move** dialog to choose the post's parent page and its position among that page's child pages, by dragging the post in the page tree or with radio buttons and a select.
 - A **Label** field for the navigation label.
 - A **Hide from navigation** checkbox. New pages show in navigation lists unless this is checked.
 
@@ -22,7 +22,7 @@ navigation-placement/
 ├── editor-partials/
 │   ├── location-breadcrumbs/   # LocationBreadcrumbs component
 │   ├── move-page-modal/        # MovePageModal component
-│   ├── page-tree/              # PageTree component, used by MovePageModal
+│   ├── page-tree/              # PageTree and PageTreeItem components, used by MovePageModal
 │   └── visibility-control/     # VisibilityControl component
 └── Readme.md                   # This file
 ```
@@ -44,6 +44,8 @@ The post's ancestors from the top level down, followed by the post. A top level 
 **Location:** `editor-partials/move-page-modal/index.js`
 
 A dialog with the page tree as a set of radio buttons, then a **Position** select ("First" or "After …"). The tree opens at the post's location, and each level loads from the REST API when it is shown (see the `usePageTree` hook), so large sites do not load every page at once. Pages that are not published carry a badge with their status ("private", "draft", "pending" or "scheduled").
+
+The tree lists the post at the location chosen in the dialog, and the post can be dragged there with [Pragmatic drag and drop](https://atlassian.design/components/pragmatic-drag-and-drop/). Dropping it on the top or bottom of a page's row places it before or after that page; dropping it on the middle of a row places it last inside that page. The bottom of an open page's row also places it inside. Holding the post over a closed page opens it, and the tree scrolls when the post is held near its top or bottom edge. A drop where the rules below do not allow the post shows a red indicator and changes nothing. Each drop selects the radio button and position it stands for and is announced to screen readers; the radio buttons and the select are the keyboard path.
 
 It follows the rules of the Classic Editor metabox:
 - The post cannot be placed in itself or in a link, and its own child pages are not listed.
@@ -115,10 +117,16 @@ entry: {
 - `@wordpress/data` - The `core/editor` store
 - `@wordpress/core-data` - `useEntityProp`
 - `@wordpress/api-fetch` - Requests to the tree route
+- `@wordpress/a11y` - `speak()` for drops in the Move dialog
 - `@wordpress/url` - `addQueryArgs` for the tree route
 - `@wordpress/element` - React and hooks
 - `@wordpress/i18n` - Internationalization
 - `@wordpress/dom-ready` - DOM ready utility
+
+### External Dependencies
+- `@atlaskit/pragmatic-drag-and-drop` - Dragging the post in the Move dialog's page tree
+- `@atlaskit/pragmatic-drag-and-drop-hitbox` - Where a drop on a page's row places the post (`list-item`)
+- `@atlaskit/pragmatic-drag-and-drop-auto-scroll` - Scrolling the tree during a drag
 
 ### Internal Dependencies
 - `usePost` - Gets current post data

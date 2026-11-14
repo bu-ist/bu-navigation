@@ -1,4 +1,8 @@
+// External dependencies
+import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-scroll/element';
+
 // WordPress dependencies
+import { speak } from '@wordpress/a11y';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import {
 	BaseControl,
@@ -6,7 +10,7 @@ import {
 	Modal,
 	SelectControl,
 } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 
 // Internal Dependencies
 import usePageTree from '../../../../hooks/usePageTree';
@@ -16,7 +20,8 @@ import PageTree from '../page-tree';
  * Move Page Modal Component
  *
  * A dialog for choosing a new location for the post: the page to place it in (or the top level),
- * then its position among that page's child pages. Levels of the page tree load as they are shown.
+ * then its position among that page's child pages. The post can also be dragged to its new place
+ * in the tree. Levels of the page tree load as they are shown.
  *
  * Follows the rules of the Classic Editor metabox:
  * - A post cannot be placed in itself or in a link.
@@ -27,6 +32,8 @@ import PageTree from '../page-tree';
  * @param {Object}   props
  * @param {number}   props.postId               The ID of the post being moved.
  * @param {string}   props.postType             The post type of the post.
+ * @param {string}   props.postLabel            The navigation label or title of the post.
+ * @param {string}   props.postStatus           The saved status of the post.
  * @param {Object}   props.labels               Post type names: `singularName` as registered, and `singular` and `plural` in lower case.
  * @param {number}   props.currentParent        The post's parent ID (0 for the top level).
  * @param {number}   props.currentMenuOrder     The post's position among its siblings.
@@ -45,6 +52,8 @@ import PageTree from '../page-tree';
 const MovePageModal = ( {
 	postId,
 	postType,
+	postLabel,
+	postStatus,
 	labels,
 	currentParent,
 	currentMenuOrder,
@@ -71,12 +80,20 @@ const MovePageModal = ( {
 		ancestors.map( ( ancestor ) => ancestor.id )
 	);
 
+	const treeRef = useRef();
+
 	// Load the top level, each level down to the post, and the post's own level for its positions.
 	useEffect( () => {
 		loadLevel( 0 );
 		ancestors.forEach( ( ancestor ) => loadLevel( ancestor.id ) );
 		loadLevel( currentParent );
 	}, [ ancestors, currentParent, loadLevel ] );
+
+	// Scroll the tree while the post is dragged near its top or bottom edge.
+	useEffect(
+		() => autoScrollForElements( { element: treeRef.current } ),
+		[]
+	);
 
 	// Section editing restrictions only affect published content.
 	const sectionRulesApply = isSectionEditor && isPublished;
@@ -141,12 +158,18 @@ const MovePageModal = ( {
 		return '';
 	};
 
+	const onExpand = ( pageId ) => {
+		setExpanded( ( ids ) =>
+			ids.includes( pageId ) ? ids : [ ...ids, pageId ]
+		);
+		loadLevel( pageId );
+	};
+
 	const onToggle = ( pageId ) => {
 		if ( expanded.includes( pageId ) ) {
 			setExpanded( expanded.filter( ( id ) => id !== pageId ) );
 		} else {
-			setExpanded( [ ...expanded, pageId ] );
-			loadLevel( pageId );
+			onExpand( pageId );
 		}
 	};
 
@@ -191,6 +214,111 @@ const MovePageModal = ( {
 		} ) ),
 	];
 
+	const pagesById = {};
+	Object.values( levels ).forEach( ( level ) => {
+		level.pages.forEach( ( page ) => {
+			pagesById[ page.id ] = page;
+		} );
+	} );
+
+	// The tree lists the post at the chosen location, so a drop shows where the post will go.
+	const postPage = {
+		id: postId,
+		label: postLabel,
+		type: postType,
+		status: postStatus,
+		parent: selectedParent,
+		excluded: isHidden,
+		hasChildren: false,
+	};
+	const treeLevels = {};
+	Object.keys( levels ).forEach( ( parentId ) => {
+		const pages = levels[ parentId ].pages
+			.filter( ( page ) => page.id !== postId )
+			// The selected parent can be opened to show the post.
+			.map( ( page ) =>
+				page.id === selectedParent
+					? { ...page, hasChildren: true }
+					: page
+			);
+		if ( Number( parentId ) === selectedParent ) {
+			pages.splice( position - 1, 0, postPage );
+		}
+		treeLevels[ parentId ] = { ...levels[ parentId ], pages };
+	} );
+
+	/**
+	 * Where the post can be dropped on a page: before or after it among its siblings, or inside it.
+	 *
+	 * @param {Object}  page       A page in the tree.
+	 * @param {boolean} isExpanded Whether the page's child pages are shown.
+	 * @return {Object} The operations for the list-item hitbox: 'available', 'blocked' or 'not-available'.
+	 */
+	const getDropOperations = ( page, isExpanded ) => {
+		const canBeSibling =
+			0 === page.parent
+				? ! topLevelDisabledReason
+				: !! pagesById[ page.parent ] &&
+				  ! getDisabledReason( pagesById[ page.parent ] );
+		const sibling = canBeSibling ? 'available' : 'blocked';
+
+		return {
+			'reorder-before': sibling,
+			// The child pages of an expanded page are listed below it, so the bottom of its row places the post inside it.
+			'reorder-after': isExpanded ? 'not-available' : sibling,
+			combine: getDisabledReason( page ) ? 'blocked' : 'available',
+		};
+	};
+
+	/**
+	 * Place the post where it was dropped.
+	 *
+	 * @param {Object} page      The page the post was dropped on.
+	 * @param {string} operation 'reorder-before', 'reorder-after' or 'combine'.
+	 */
+	const onDropPost = ( page, operation ) => {
+		const parent = 'combine' === operation ? page.id : page.parent;
+		const parentLevel = levels[ parent ];
+		const pages =
+			parentLevel && ! parentLevel.isLoading
+				? parentLevel.pages.filter( ( item ) => item.id !== postId )
+				: null;
+
+		// Inside a page, the post goes last. The default position is the last one once the level loads.
+		let newPosition = pages ? pages.length + 1 : null;
+		if ( 'combine' !== operation ) {
+			newPosition =
+				pages.findIndex( ( item ) => item.id === page.id ) +
+				( 'reorder-before' === operation ? 1 : 2 );
+		}
+
+		setSelectedParent( parent );
+		setSelectedPosition( newPosition );
+		if ( 'combine' === operation ) {
+			onExpand( parent );
+		}
+
+		let announcement = sprintf(
+			/* translators: %s: page label. */
+			__( 'Placed in %s.', 'bu-navigation' ),
+			page.label
+		);
+		if ( 'reorder-before' === operation ) {
+			announcement = sprintf(
+				/* translators: %s: page label. */
+				__( 'Placed before %s.', 'bu-navigation' ),
+				page.label
+			);
+		} else if ( 'reorder-after' === operation ) {
+			announcement = sprintf(
+				/* translators: %s: page label. */
+				__( 'Placed after %s.', 'bu-navigation' ),
+				page.label
+			);
+		}
+		speak( announcement );
+	};
+
 	/**
 	 * The ancestors of the selected parent for the breadcrumbs, from the top level down, ending with the parent.
 	 *
@@ -200,13 +328,6 @@ const MovePageModal = ( {
 		if ( selectedParent === currentParent ) {
 			return ancestors;
 		}
-
-		const pagesById = {};
-		Object.values( levels ).forEach( ( level ) => {
-			level.pages.forEach( ( page ) => {
-				pagesById[ page.id ] = page;
-			} );
-		} );
 
 		const path = [];
 		let pageId = selectedParent;
@@ -252,14 +373,14 @@ const MovePageModal = ( {
 				{ sprintf(
 					/* translators: %s: post type singular name, e.g. "page". */
 					__(
-						'Choose where to place this %s, then its position.',
+						'Drag this %s to its new place, or choose where to place it, then its position.',
 						'bu-navigation'
 					),
 					labels.singular
 				) }
 			</p>
 
-			<fieldset className="bu-navigation-placement-tree">
+			<fieldset className="bu-navigation-placement-tree" ref={ treeRef }>
 				<legend>
 					<BaseControl.VisualLabel className="bu-navigation-placement-section-label">
 						{ __( 'Place in', 'bu-navigation' ) }
@@ -297,7 +418,7 @@ const MovePageModal = ( {
 						) }
 						<PageTree
 							parentId={ 0 }
-							levels={ levels }
+							levels={ treeLevels }
 							expanded={ expanded }
 							onToggle={ onToggle }
 							selected={ selectedParent }
@@ -305,6 +426,9 @@ const MovePageModal = ( {
 							getDisabledReason={ getDisabledReason }
 							currentPostId={ postId }
 							onRetry={ loadLevel }
+							getDropOperations={ getDropOperations }
+							onDropPost={ onDropPost }
+							onDragExpand={ onExpand }
 						/>
 					</li>
 				</ul>

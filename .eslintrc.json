@@ -3,6 +3,7 @@
     "ignorePatterns": ["webpack.config.js", "build/**/*.js", "**/vendor/**"],
     "settings": {
         "import/core-modules": [
+            "@wordpress/a11y",
             "@wordpress/core-data",
             "@wordpress/dom-ready",
             "@wordpress/edit-post",

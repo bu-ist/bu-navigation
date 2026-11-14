@@ -136,7 +136,8 @@ Please see this page for the details:
 * A post created in either editor stores its navigation visibility on its first save, autosaves
   included: shown, or hidden for a top-level post while top-level posts are not allowed. On a new
   post, the Classic Editor's "Display in navigation lists" checkbox starts checked under the same
-  rule. Posts with no stored value, such as existing posts and posts created by imports or
+  rule. A new post hidden only because it is at the top level shows once it moves into a section,
+  unless its visibility was changed in the editor. Posts with no stored value, such as existing posts and posts created by imports or
   WP-CLI, still use `BU_NAVIGATION_POST_EXCLUDE_DEFAULT`.
 * The script that removes the core Page Attributes panel uses the `core/editor` store where it
   has `removeEditorPanel()` (WordPress 6.5 and later).

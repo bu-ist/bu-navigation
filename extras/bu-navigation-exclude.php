@@ -111,16 +111,11 @@ function bu_navigation_new_post_exclude_value( $post ) {
 }
 
 /**
- * Store the navigation visibility of a post created in an editor, on its first save.
+ * Store a navigation visibility value when a post created in an editor is first saved.
  *
- * Both editors create a new post as an auto-draft, and its first save leaves that status, whether
- * the save is a draft save, a publish or an autosave. The value is stored then, so a post shows in
- * navigation lists by default whichever editor creates it or edits it later. A value already stored
- * is kept. The editors save the value chosen in them after this runs: the Classic Editor metabox
- * from its checkbox, the Block Editor panel through the REST API.
- *
- * Posts created by code without an auto-draft (imports, WP-CLI) get no value here and use
- * BU_NAVIGATION_POST_EXCLUDE_DEFAULT.
+ * Both editors create posts as auto-drafts, so this runs on the first draft save, publish or
+ * autosave, before the editor saves its own value. A stored value is kept. Posts created without
+ * an auto-draft (imports, WP-CLI) get no value.
  *
  * @param string  $new_status The new post status.
  * @param string  $old_status The previous post status.

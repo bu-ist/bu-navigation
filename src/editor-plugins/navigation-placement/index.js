@@ -36,15 +36,19 @@ import VisibilityControl from './editor-partials/visibility-control';
 
 import './editor.scss';
 
-// Settings from navigation-placement.php. wp_localize_script() passes top level values
-// as strings, so booleans arrive as '1' or ''.
-const settings = window.buNavigationPlacementSettings || {};
-const allowTop = Boolean( settings.allowTop );
-const excludeDefault = Boolean( settings.excludeDefault );
-const isSectionEditor = Boolean( settings.isSectionEditor );
-const loadedAsNewPost = Boolean( settings.isNewPost );
-const linkPostType = settings.linkPostType;
-const metaKeys = settings.metaKeys || {};
+// Settings from navigation-placement.php.
+const {
+	allowTop,
+	excludeDefault,
+	isSectionEditor,
+	isNewPost: loadedAsNewPost,
+	newPostExclude,
+	linkPostType,
+	ancestors: savedAncestors = [],
+	metaKeys = {},
+} = window.buNavigationPlacementSettings || {};
+
+const NO_ANCESTORS = [];
 
 // WordPress 6.6 moved PluginDocumentSettingPanel from wp.editPost to wp.editor.
 const PluginDocumentSettingPanel =
@@ -55,16 +59,20 @@ const PluginDocumentSettingPanel =
  *
  * The panel for a post whose data has loaded.
  *
- * @param {Object} props
- * @param {number} props.postId         The ID of the post being edited.
- * @param {string} props.postType       The post type of the post.
- * @param {Object} props.postTypeObject The post type object.
+ * @param {Object}   props
+ * @param {number}   props.postId             The ID of the post being edited.
+ * @param {string}   props.postType           The post type of the post.
+ * @param {Object}   props.postTypeObject     The post type object.
+ * @param {boolean}  props.isVisibilityChosen Whether the visibility was changed in this editor.
+ * @param {Function} props.onChooseVisibility Called when the visibility is changed.
  * @return {JSX.Element} The panel content.
  */
 const NavigationPlacementPanelContent = ( {
 	postId,
 	postType,
 	postTypeObject,
+	isVisibilityChosen,
+	onChooseVisibility,
 } ) => {
 	// The edited parent and position, and the post's last saved values.
 	const {
@@ -101,26 +109,19 @@ const NavigationPlacementPanelContent = ( {
 		postId
 	);
 
-	// The ancestors of each parent the post has had in this editor, for the breadcrumbs: the saved
-	// parent's from PHP, and each parent chosen in the Move dialog. Undo and Redo only return to these
-	// parents, so the breadcrumbs follow the edited parent. The core Page Attributes panel, the other
-	// way to set a parent, is removed.
+	// Breadcrumbs for each parent the post has had in this editor, so they follow Undo and Redo.
 	const [ ancestorsByParent, setAncestorsByParent ] = useState( () => ( {
-		[ savedParent ]: settings.ancestors || [],
+		[ savedParent ]: savedAncestors,
 	} ) );
-	const ancestors = ( 0 !== parent && ancestorsByParent[ parent ] ) || [];
+	const ancestors =
+		( 0 !== parent && ancestorsByParent[ parent ] ) || NO_ANCESTORS;
 	const [ isMoveModalOpen, setIsMoveModalOpen ] = useState( false );
 
 	const isNewPost = 'auto-draft' === savedStatus;
 
 	/**
 	 * Whether a navigation visibility value hides the post. An empty value uses the site default,
-	 * except for a new post, which shows in navigation lists unless it is hidden.
-	 *
-	 * The first save of a new post stores its value (see bu_navigation_set_new_post_visibility()).
-	 * An autosave does not reload the post meta, so after an autosave of a post that was new when
-	 * the editor loaded, the value here stays empty: the stored value is '1' for a post saved at the
-	 * top level while top level posts are not allowed, and '0' otherwise.
+	 * except on a new post.
 	 *
 	 * @param {string|null} value The navigation visibility meta value.
 	 * @return {boolean} Whether the value hides the post.
@@ -130,8 +131,9 @@ const NavigationPlacementPanelContent = ( {
 			if ( isNewPost ) {
 				return false;
 			}
+			// An autosave stored the new post's value without reloading the meta here.
 			if ( loadedAsNewPost ) {
-				return 0 === savedParent && ! allowTop;
+				return newPostExclude;
 			}
 			return excludeDefault;
 		}
@@ -181,6 +183,17 @@ const NavigationPlacementPanelContent = ( {
 	 */
 	const onConfirmMove = ( location ) => {
 		editPost( { parent: location.parent, menu_order: location.menuOrder } );
+
+		// A new post hidden only because it is at the top level shows once it moves into a section.
+		if (
+			isLocked &&
+			0 !== location.parent &&
+			( isNewPost || loadedAsNewPost ) &&
+			! isVisibilityChosen
+		) {
+			setExclude( '0' );
+		}
+
 		setAncestorsByParent( ( previous ) => ( {
 			...previous,
 			[ location.parent ]: location.ancestors,
@@ -228,7 +241,10 @@ const NavigationPlacementPanelContent = ( {
 				isHidden={ isHidden }
 				isLocked={ isLocked }
 				lockedHelp={ lockedHelp }
-				onChange={ ( checked ) => setExclude( checked ? '1' : '0' ) }
+				onChange={ ( checked ) => {
+					onChooseVisibility();
+					setExclude( checked ? '1' : '0' );
+				} }
 			/>
 
 			{ isMoveModalOpen && (
@@ -268,6 +284,9 @@ const NavigationPlacementPanel = () => {
 	// Get current post data using custom usePost hook.
 	const { postId, postType, postTypeObject, isLoading } = usePost();
 
+	// Kept here so that it lasts while the panel is collapsed.
+	const [ isVisibilityChosen, setIsVisibilityChosen ] = useState( false );
+
 	if ( isLoading ) {
 		return null;
 	}
@@ -283,6 +302,8 @@ const NavigationPlacementPanel = () => {
 				postId={ postId }
 				postType={ postType }
 				postTypeObject={ postTypeObject }
+				isVisibilityChosen={ isVisibilityChosen }
+				onChooseVisibility={ () => setIsVisibilityChosen( true ) }
 			/>
 		</PluginDocumentSettingPanel>
 	);

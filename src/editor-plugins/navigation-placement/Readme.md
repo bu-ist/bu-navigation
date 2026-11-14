@@ -67,7 +67,7 @@ The "Hide from navigation" checkbox. Checked stores `'1'` and unchecked stores `
 
 Both keys are registered with `show_in_rest` and no `default`, so posts without a value keep falling back to the title and to `BU_NAVIGATION_POST_EXCLUDE_DEFAULT`. Only users who can edit the post can change them.
 
-New posts show in navigation lists. On the first save of a post created in either editor (a draft save, a publish or an autosave), `bu_navigation_set_new_post_visibility()` in `extras/bu-navigation-exclude.php` stores `'0'`, or `'1'` for a top level post when top level posts are not allowed in navigation lists. The value chosen in the editor is saved after it.
+New posts show in navigation lists. On the first save of a post created in either editor (a draft save, a publish or an autosave), `bu_navigation_set_new_post_visibility()` in `extras/bu-navigation-exclude.php` stores `'0'`, or `'1'` for a top level post when top level posts are not allowed in navigation lists. The value chosen in the editor is saved after it. When a new post hidden only by that rule moves into a section, the panel sets `'0'`, unless the visibility was changed in the editor.
 
 ## PHP
 
@@ -80,7 +80,7 @@ New posts show in navigation lists. On the first save of a post created in eithe
 
 ## Settings
 
-`window.buNavigationPlacementSettings`, from `wp_localize_script()`:
+`window.buNavigationPlacementSettings`, printed before the script with `wp_add_inline_script()`:
 
 | Key | Description |
 |-----|-------------|
@@ -89,10 +89,9 @@ New posts show in navigation lists. On the first save of a post created in eithe
 | `linkPostType` | The post type of navigation links. |
 | `isSectionEditor` | Whether BU Section Editing treats the user as a section editor. |
 | `isNewPost` | Whether the post was new (an auto-draft) when the editor loaded it. |
+| `newPostExclude` | Whether the first save of the new post hides it (see `bu_navigation_new_post_exclude_value()`). |
 | `ancestors` | The post's ancestors from the top level down, as `{ id, label }` objects. |
 | `metaKeys` | The `label` and `exclude` meta keys. |
-
-`wp_localize_script()` passes top level values as strings, so booleans arrive as `'1'` or `''`.
 
 ## Build
 
@@ -116,6 +115,7 @@ entry: {
 - `@wordpress/data` - The `core/editor` store
 - `@wordpress/core-data` - `useEntityProp`
 - `@wordpress/api-fetch` - Requests to the tree route
+- `@wordpress/url` - `addQueryArgs` for the tree route
 - `@wordpress/element` - React and hooks
 - `@wordpress/i18n` - Internationalization
 - `@wordpress/dom-ready` - DOM ready utility

@@ -1,6 +1,7 @@
 // WordPress Dependencies
 import apiFetch from '@wordpress/api-fetch';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * A custom hook to load the page tree of a post type one level at a time.
@@ -47,9 +48,11 @@ const usePageTree = ( postType, postId = 0 ) => {
 			setLevel( parentId, { pages: [], isLoading: true, error: null } );
 
 			apiFetch( {
-				path: `/bu-navigation/v1/tree?post_type=${ encodeURIComponent(
-					postType
-				) }&child_of=${ parentId }&post_id=${ postId }`,
+				path: addQueryArgs( '/bu-navigation/v1/tree', {
+					post_type: postType,
+					child_of: parentId,
+					post_id: postId,
+				} ),
 			} )
 				.then( ( pages ) => {
 					setLevel( parentId, {

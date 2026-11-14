@@ -170,7 +170,7 @@ class BU_Navigation_Admin_Post {
 	private function is_block_editor() {
 		$screen = get_current_screen();
 
-		return $screen && method_exists( $screen, 'is_block_editor' ) && $screen->is_block_editor();
+		return $screen && $screen->is_block_editor();
 	}
 
 	/**

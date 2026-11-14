@@ -258,7 +258,10 @@ function get_tree_level( $request ) {
 		)
 	);
 
-	$pages = array_map( __NAMESPACE__ . '\\format_tree_node', $tree_view->render() );
+	$pages = array();
+	foreach ( $tree_view->render() as $node ) {
+		$pages[] = format_tree_node( $node, $tree_view->strip_node_prefix( $node['attr']['id'] ) );
+	}
 	$pages = add_unpublished_ancestors( $pages, $request['child_of'], $request['post_id'], $request['post_type'] );
 
 	// BU Section Editing defines this function where it adds the filters.
@@ -352,15 +355,16 @@ function is_section_editor() {
  * Only one level is returned: a page with children has `hasChildren` set, and its children
  * are requested when the page is expanded.
  *
- * @param array $node A tree node from BU_Navigation_Tree_View::render().
+ * @param array $node    A tree node from BU_Navigation_Tree_View::render().
+ * @param int   $post_id The post ID of the node.
  * @return array
  */
-function format_tree_node( $node ) {
+function format_tree_node( $node, $post_id ) {
 	$post      = $node['metadata']['post'];
 	$post_meta = $post['post_meta'];
 
 	return array(
-		'id'          => (int) preg_replace( '/\D/', '', $node['attr']['id'] ),
+		'id'          => $post_id,
 		'label'       => html_entity_decode( $node['data'], ENT_QUOTES, get_bloginfo( 'charset' ) ),
 		'type'        => $post['post_type'],
 		'status'      => $post['post_status'],
@@ -411,15 +415,11 @@ function update_navigation_after_rest_save( $post_id, $post_after, $post_before 
 }
 
 /**
- * Keep the stored navigation visibility when a REST API save sends an empty value.
+ * Don't store an empty navigation visibility value from a REST API save.
  *
- * The Block Editor sends every registered meta field when any one of them changes, with the values
- * it loaded. An empty visibility value comes from a post that had none when the editor loaded it:
- * a post without a stored value, or a new post whose first save, an autosave, stored one
- * (bu_navigation_set_new_post_visibility()) without reloading the editor's post meta. An empty value
- * is not stored, so the stored value stays, and a post without one keeps using
- * BU_NAVIGATION_POST_EXCLUDE_DEFAULT. The navigation list filters would read a stored empty value as
- * "show".
+ * The Block Editor sends back the meta values it loaded, so '' means the post had no value then.
+ * Stored, it would read as "show" in navigation lists, or replace the value set on the first save
+ * (bu_navigation_set_new_post_visibility()).
  *
  * @param null|bool $check      Null to save the value, or the result of a filter that saved it.
  * @param int       $object_id  The post ID.
@@ -477,13 +477,7 @@ function enqueue_block_editor_scripts() {
 		return;
 	}
 
-	$asset_path = plugin_dir_path( BU_NAV_PLUGIN ) . 'build/editor-plugins/navigation-placement.asset.php';
-	$asset      = file_exists( $asset_path )
-		? require $asset_path
-		: array(
-			'dependencies' => array(),
-			'version'      => \BU_Navigation_Plugin::VERSION,
-		);
+	$asset = require plugin_dir_path( BU_NAV_PLUGIN ) . 'build/editor-plugins/navigation-placement.asset.php';
 
 	wp_enqueue_script(
 		'bu-navigation-placement-editor-plugin',
@@ -505,24 +499,28 @@ function enqueue_block_editor_scripts() {
 	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- The plugin's existing public hook.
 	$tree_context = apply_filters( 'bu_nav_tree_script_context', array( 'isSectionEditor' => false ), 'nav_metabox' );
 
-	$post = get_post();
+	$post        = get_post();
+	$is_new_post = $post && 'auto-draft' === $post->post_status;
 
-	wp_localize_script(
+	$settings = array(
+		'allowTop'        => (bool) $bu_navigation_plugin->settings->get( 'allow_top' ),
+		'excludeDefault'  => (bool) BU_NAVIGATION_POST_EXCLUDE_DEFAULT,
+		'linkPostType'    => BU_NAVIGATION_LINK_POST_TYPE,
+		'isSectionEditor' => ! empty( $tree_context['isSectionEditor'] ),
+		'isNewPost'       => $is_new_post,
+		// Whether the first save of the new post hides it.
+		'newPostExclude'  => $is_new_post && '1' === bu_navigation_new_post_exclude_value( $post ),
+		'ancestors'       => $post ? get_ancestor_labels( $post ) : array(),
+		'metaKeys'        => array(
+			'label'   => BU_NAV_META_PAGE_LABEL,
+			'exclude' => BU_NAV_META_PAGE_EXCLUDE,
+		),
+	);
+
+	wp_add_inline_script(
 		'bu-navigation-placement-editor-plugin',
-		'buNavigationPlacementSettings',
-		array(
-			'allowTop'        => (bool) $bu_navigation_plugin->settings->get( 'allow_top' ),
-			'excludeDefault'  => (bool) BU_NAVIGATION_POST_EXCLUDE_DEFAULT,
-			'linkPostType'    => BU_NAVIGATION_LINK_POST_TYPE,
-			'isSectionEditor' => ! empty( $tree_context['isSectionEditor'] ),
-			// The post was new when the editor loaded it. See keep_stored_visibility().
-			'isNewPost'       => $post && 'auto-draft' === $post->post_status,
-			'ancestors'       => $post ? get_ancestor_labels( $post ) : array(),
-			'metaKeys'        => array(
-				'label'   => BU_NAV_META_PAGE_LABEL,
-				'exclude' => BU_NAV_META_PAGE_EXCLUDE,
-			),
-		)
+		'window.buNavigationPlacementSettings = ' . wp_json_encode( $settings ) . ';',
+		'before'
 	);
 }
 

@@ -42,7 +42,8 @@ if((typeof bu === 'undefined' ) ||
 		data: {
 			modalTree: undefined,
 			breadcrumbs: '',
-			label: ''
+			label: '',
+			visibilityChanged: false
 		},
 
 		initialize: function() {
@@ -138,6 +139,7 @@ if((typeof bu === 'undefined' ) ||
 
 			} else {
 
+				this.data.visibilityChanged = true;
 				this.settings.currentPost.post_meta['excluded'] = ! visible;
 
 				// Nav visibility updates should be reflected in tree view
@@ -149,6 +151,15 @@ if((typeof bu === 'undefined' ) ||
 		},
 
 		onLocationUpdated: function( post ) {
+
+			// A new post hidden only because top-level posts are not allowed shows once it moves into a section.
+			var leftTopLevel = this.settings.currentPost.post_parent === 0 && post.post_parent !== 0;
+			if ( leftTopLevel && this.settings.isNewPost && ! this.settings.allowTop && ! this.data.visibilityChanged ) {
+				$(this.inputs.visible).prop('checked', true);
+				post.post_meta['excluded'] = false;
+				Navtree.updatePost( post );
+				Navtree.save();
+			}
 
 			// Set form field values
 			$(this.inputs.parent).val(post.post_parent);

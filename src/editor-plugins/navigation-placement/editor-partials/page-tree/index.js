@@ -1,5 +1,5 @@
 // WordPress dependencies
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 import { Button, Notice, Spinner } from '@wordpress/components';
 
 /**
@@ -39,10 +39,22 @@ const PageTree = ( props ) => {
 	// Badges for the statuses the tree lists besides published: private pages, and the
 	// unpublished ancestors of the post being moved.
 	const statusBadges = {
-		private: __( 'private', 'bu-navigation' ),
-		draft: __( 'draft', 'bu-navigation' ),
-		pending: __( 'pending', 'bu-navigation' ),
-		future: __( 'scheduled', 'bu-navigation' ),
+		private: _x(
+			'private',
+			'page tree badge: post status',
+			'bu-navigation'
+		),
+		draft: _x( 'draft', 'page tree badge: post status', 'bu-navigation' ),
+		pending: _x(
+			'pending',
+			'page tree badge: post status',
+			'bu-navigation'
+		),
+		future: _x(
+			'scheduled',
+			'page tree badge: post status',
+			'bu-navigation'
+		),
 	};
 
 	if ( ! level || level.isLoading ) {
@@ -121,7 +133,11 @@ const PageTree = ( props ) => {
 								{ page.label }
 								{ page.excluded && (
 									<span className="bu-navigation-placement-badge">
-										{ __( 'not in nav', 'bu-navigation' ) }
+										{ _x(
+											'not in nav',
+											'page tree badge: hidden from navigation lists',
+											'bu-navigation'
+										) }
 									</span>
 								) }
 								{ statusBadges[ page.status ] && (

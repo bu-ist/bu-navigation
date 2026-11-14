@@ -282,7 +282,8 @@ class BU_Navigation_Tree_View {
 				'protected' => ( isset( $post->post_password ) && ! empty( $post->post_password ) ) ? true : false,
 				'excluded' => isset( $post->excluded ) ? $post->excluded : false,
 				),
-			'url' => $post->url,
+			// No URL when the suppressUrls setting is on.
+			'url' => isset( $post->url ) ? $post->url : '',
 			'originalParent' => $post->post_parent,
 			'originalOrder' => $post->menu_order,
 			'originalExclude' => isset( $post->excluded ) ? $post->excluded : false

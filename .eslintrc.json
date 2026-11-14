@@ -7,7 +7,8 @@
             "@wordpress/dom-ready",
             "@wordpress/edit-post",
             "@wordpress/editor",
-            "@wordpress/plugins"
+            "@wordpress/plugins",
+            "@wordpress/url"
         ]
     }
 }

@@ -1,5 +1,5 @@
 // WordPress dependencies
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 import {
 	BaseControl,
 	Button,
@@ -113,10 +113,18 @@ const MovePageModal = ( {
 	 */
 	const getDisabledReason = ( page ) => {
 		if ( page.id === postId ) {
-			return __( 'this page', 'bu-navigation' );
+			return _x(
+				'this page',
+				'page tree badge: the page being moved',
+				'bu-navigation'
+			);
 		}
 		if ( page.type === linkPostType ) {
-			return __( 'link', 'bu-navigation' );
+			return _x(
+				'link',
+				'page tree badge: a navigation link',
+				'bu-navigation'
+			);
 		}
 		// Staying in the current section is always allowed.
 		if (
@@ -124,7 +132,11 @@ const MovePageModal = ( {
 			! page.canEdit &&
 			page.id !== currentParent
 		) {
-			return __( 'denied', 'bu-navigation' );
+			return _x(
+				'denied',
+				'page tree badge: the user cannot edit this section',
+				'bu-navigation'
+			);
 		}
 		return '';
 	};

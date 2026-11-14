@@ -10,7 +10,7 @@ import {
 
 // WordPress dependencies
 import { __, _x, sprintf } from '@wordpress/i18n';
-import { Button, Notice, Spinner } from '@wordpress/components';
+import { Button, Notice, Spinner, VisuallyHidden } from '@wordpress/components';
 import { useEffect, useRef, useState } from '@wordpress/element';
 
 // Identifies drags of the post being moved, so that the tree ignores other drags.
@@ -163,7 +163,8 @@ const PageTreeItem = ( {
 	const rowClassName = [
 		'bu-navigation-placement-tree-item',
 		isCurrentPost && 'is-current-post',
-		isDragging && 'is-dragging',
+		// Not is-dragging, which the WordPress 5.8 block editor hides with display: none.
+		isDragging && 'is-dragged',
 		dropInstruction && `is-drop-${ dropInstruction.operation }`,
 		dropInstruction && dropInstruction.blocked && 'is-drop-blocked',
 	]
@@ -219,24 +220,37 @@ const PageTreeItem = ( {
 				/>
 				<label htmlFor={ inputId }>
 					{ page.label }
-					{ page.excluded && (
-						<span className="bu-navigation-placement-badge">
-							{ _x(
-								'not in nav',
-								'page tree badge: hidden from navigation lists',
-								'bu-navigation'
-							) }
-						</span>
-					) }
-					{ statusBadge && (
-						<span className="bu-navigation-placement-badge">
-							{ statusBadge }
-						</span>
-					) }
-					{ disabledReason && (
-						<span className="bu-navigation-placement-badge is-disabled-reason">
+					<span className="bu-navigation-placement-badges">
+						{ page.excluded && (
+							<span className="bu-navigation-placement-badge is-excluded">
+								{ _x(
+									'not in nav',
+									'page tree badge: hidden from navigation lists',
+									'bu-navigation'
+								) }
+							</span>
+						) }
+						{ statusBadge && (
+							<span
+								className={ `bu-navigation-placement-badge is-status-${ page.status }` }
+							>
+								{ statusBadge }
+							</span>
+						) }
+						{ disabledReason && ! isCurrentPost && (
+							<span className="bu-navigation-placement-badge is-disabled-reason">
+								{ disabledReason }
+							</span>
+						) }
+					</span>
+					{ /* The post's row is marked by its color; its reason is for screen readers. */ }
+					{ disabledReason && isCurrentPost && (
+						<VisuallyHidden
+							as="span"
+							className="is-disabled-reason"
+						>
 							{ disabledReason }
-						</span>
+						</VisuallyHidden>
 					) }
 				</label>
 			</div>

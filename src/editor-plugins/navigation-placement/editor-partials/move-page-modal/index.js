@@ -95,6 +95,23 @@ const MovePageModal = ( {
 		[]
 	);
 
+	// Once the tree has loaded down to the post, scroll its row, the one that is dragged, to the middle
+	// of the tree, away from the edges where a drag scrolls the tree.
+	const hasShownPost = useRef( false );
+	useEffect( () => {
+		const tree = treeRef.current;
+		const row = tree.querySelector( '.is-current-post' );
+		if ( row && ! hasShownPost.current ) {
+			hasShownPost.current = true;
+			const treeBox = tree.getBoundingClientRect();
+			const rowBox = row.getBoundingClientRect();
+			tree.scrollTop +=
+				rowBox.top +
+				rowBox.height / 2 -
+				( treeBox.top + treeBox.height / 2 );
+		}
+	}, [ levels ] );
+
 	// Section editing restrictions only affect published content.
 	const sectionRulesApply = isSectionEditor && isPublished;
 

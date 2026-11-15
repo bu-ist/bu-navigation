@@ -1,7 +1,6 @@
 // Navigation Placement panel and Move dialog.
 
 $bu-navigation-placement-gray: #757575;
-$bu-navigation-placement-theme: var(--wp-admin-theme-color, #007cba);
 $bu-navigation-placement-theme-dark: var(--wp-admin-theme-color-darker-20, #005a87);
 $bu-navigation-placement-allowed: #00a32a;
 $bu-navigation-placement-blocked: #d63638;
@@ -142,10 +141,14 @@ $bu-navigation-placement-blocked: #d63638;
 		margin: 0 8px 0 4px;
 	}
 
+	// On narrow screens the badges wrap below the page's label.
 	label {
 		display: flex;
 		flex: 1;
+		flex-wrap: wrap;
 		align-items: center;
+		min-width: 0;
+		overflow-wrap: anywhere;
 		cursor: pointer;
 	}
 
@@ -154,11 +157,16 @@ $bu-navigation-placement-blocked: #d63638;
 	}
 
 	// The post being moved is filled with the admin theme color, and dragged.
+	// The darker shade keeps its white text readable in other color schemes.
 	&.is-current-post {
 		border-color: $bu-navigation-placement-theme-dark;
-		background: $bu-navigation-placement-theme;
+		background: $bu-navigation-placement-theme-dark;
 		color: #fff;
 		cursor: grab;
+
+		// A long press on iOS would select the text instead of dragging.
+		-webkit-touch-callout: none;
+		user-select: none;
 
 		// Its radio button cannot be chosen; the row's color marks it instead.
 		input[type="radio"] {
@@ -181,6 +189,7 @@ $bu-navigation-placement-blocked: #d63638;
 
 	// Drop indicators, green where the post can go and red where it cannot:
 	// a line before or after the page, or an outline when the post goes inside it.
+	// Red ones are dashed, so that they do not depend on color.
 	&.is-drop-reorder-before::before,
 	&.is-drop-reorder-after::after {
 		content: "";
@@ -208,14 +217,16 @@ $bu-navigation-placement-blocked: #d63638;
 
 	&.is-drop-blocked::before,
 	&.is-drop-blocked::after {
-		background: $bu-navigation-placement-blocked;
-		box-shadow: 0 0 4px $bu-navigation-placement-blocked;
+		background: repeating-linear-gradient(90deg, $bu-navigation-placement-blocked 0 8px, transparent 8px 12px);
+		box-shadow: none;
 	}
 
 	&.is-drop-blocked.is-drop-combine {
-		border-color: $bu-navigation-placement-blocked;
+		border-color: transparent;
 		background: #fcf0f1;
-		box-shadow: inset 0 0 0 1px $bu-navigation-placement-blocked;
+		box-shadow: none;
+		outline: 2px dashed $bu-navigation-placement-blocked;
+		outline-offset: -1px;
 	}
 }
 

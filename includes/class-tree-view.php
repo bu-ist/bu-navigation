@@ -62,6 +62,12 @@ class BU_Navigation_Tree_View {
 			'include_links' => $this->settings['includeLinks'],
 			'suppress_urls' => $this->settings['suppressUrls']
 		);
+
+		// Optional: the levels to load below childOf. Without it, a query below the top level loads every level.
+		if ( isset( $this->settings['depth'] ) ) {
+			$query_args['depth'] = absint( $this->settings['depth'] );
+		}
+
 		$this->query = new BU_Navigation_Tree_Query( $query_args );
 		$this->hierarchy = new BU_Navigation_Tree_Hierarchy( $this->query );
 
@@ -187,6 +193,11 @@ class BU_Navigation_Tree_View {
 			$load_children = true;
 		}
 
+		// A query limited in depth has not loaded the deeper levels to nest.
+		if ( $this->query->args['depth'] > 0 ) {
+			$load_children = false;
+		}
+
 		// Convert to jstree formatted posts
 		$formatted_posts = $this->get_formatted_posts( $child_of, $posts, $load_children );
 
@@ -271,7 +282,8 @@ class BU_Navigation_Tree_View {
 				'protected' => ( isset( $post->post_password ) && ! empty( $post->post_password ) ) ? true : false,
 				'excluded' => isset( $post->excluded ) ? $post->excluded : false,
 				),
-			'url' => $post->url,
+			// No URL when the suppressUrls setting is on.
+			'url' => isset( $post->url ) ? $post->url : '',
 			'originalParent' => $post->post_parent,
 			'originalOrder' => $post->menu_order,
 			'originalExclude' => isset( $post->excluded ) ? $post->excluded : false
@@ -440,8 +452,9 @@ class BU_Navigation_Tree_Query {
 		$section_args = array( 'direction' => 'down', 'depth' => $this->args['depth'], 'post_types' => $this->args['post_types'] );
 		$sections = bu_navigation_gather_sections( $this->args['child_of'], $section_args );
 
-		// Load pages in sections
-		$this->posts = bu_navigation_get_posts( array(
+		// Load pages in sections. No sections means nothing below child_of, and bu_navigation_get_posts()
+		// would load every page without them.
+		$this->posts = empty( $sections ) ? array() : bu_navigation_get_posts( array(
 			'sections' => $sections,
 			'post_types' => $this->args['post_types'],
 			'post_status' => $this->args['post_status'],

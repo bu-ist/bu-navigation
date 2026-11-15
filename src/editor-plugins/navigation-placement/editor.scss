@@ -1,0 +1,267 @@
+// Navigation Placement panel and Move dialog.
+
+$bu-navigation-placement-gray: #757575;
+$bu-navigation-placement-theme-dark: var(--wp-admin-theme-color-darker-20, #005a87);
+$bu-navigation-placement-allowed: #00a32a;
+$bu-navigation-placement-blocked: #d63638;
+
+// Panel.
+.bu-navigation-placement-location {
+	margin-bottom: 16px;
+}
+
+// Section labels use BaseControl.VisualLabel, so they take each WordPress
+// version's label type. Newer versions display it as a block with an 8px
+// margin; 5.8 leaves it inline.
+.bu-navigation-placement-section-label {
+	display: block;
+	margin-bottom: 8px;
+}
+
+.bu-navigation-placement-label {
+	margin-bottom: 16px;
+}
+
+.bu-navigation-placement-breadcrumbs {
+	margin: 0 0 12px;
+	padding: 0;
+	list-style: none;
+
+	li {
+		display: inline;
+		margin: 0;
+
+		// A chevron between items, drawn with borders so that
+		// screen readers do not announce it.
+		&:not(:last-child)::after {
+			content: "";
+			display: inline-block;
+			width: 5px;
+			height: 5px;
+			margin: 0 7px 1px 4px;
+			border-top: 1px solid $bu-navigation-placement-gray;
+			border-right: 1px solid $bu-navigation-placement-gray;
+			transform: rotate(45deg);
+		}
+	}
+
+	.is-current {
+		font-weight: 600;
+	}
+}
+
+// Move dialog.
+.bu-navigation-placement-modal {
+	width: 100%;
+	max-width: 600px;
+}
+
+.bu-navigation-placement-modal-hint {
+	margin-top: 0;
+}
+
+.bu-navigation-placement-tree {
+	max-height: 50vh;
+	margin: 0 0 16px;
+	padding: 0;
+	overflow-y: auto;
+	border: 0;
+
+	legend {
+		margin-bottom: 8px;
+		padding: 0;
+	}
+}
+
+.bu-navigation-placement-tree-level {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		margin: 0 0 2px;
+	}
+
+	.bu-navigation-placement-tree-level {
+		margin: 2px 0 0 24px;
+	}
+}
+
+// Badges sit at the end of the row: orange for pages hidden from navigation
+// lists and yellow for unpublished pages, as in the Classic Editor's tree.
+.bu-navigation-placement-badges {
+	display: flex;
+	flex: none;
+	margin-left: auto;
+	padding-left: 8px;
+}
+
+.bu-navigation-placement-badge {
+	margin-left: 4px;
+	padding: 1px 6px;
+	border-radius: 2px;
+	background: #dcdcde;
+	color: #1e1e1e;
+	font-size: 12px;
+
+	&.is-excluded {
+		background: #f5c4a1;
+	}
+
+	&.is-status-draft,
+	&.is-status-pending,
+	&.is-status-future {
+		background: #f7dc8c;
+	}
+
+	&.is-disabled-reason {
+		border: 1px solid #dcdcde;
+		background: #fff;
+		color: #50575e;
+	}
+}
+
+// Each page is a row of its own, as in the Classic Editor's tree.
+.bu-navigation-placement-tree-item {
+	position: relative;
+	display: flex;
+	align-items: center;
+	min-height: 36px;
+	padding-right: 8px;
+	border: 1px solid #dcdcde;
+	border-radius: 3px;
+	background: #f6f7f7;
+
+	&:hover {
+		border-color: #a7aaad;
+		background: #fff;
+	}
+
+	input[type="radio"] {
+		margin: 0 8px 0 4px;
+	}
+
+	// On narrow screens the badges wrap below the page's label.
+	label {
+		display: flex;
+		flex: 1;
+		flex-wrap: wrap;
+		align-items: center;
+		min-width: 0;
+		overflow-wrap: anywhere;
+		cursor: pointer;
+	}
+
+	input[type="radio"]:disabled + label {
+		cursor: default;
+	}
+
+	// The post being moved is filled with the admin theme color, and dragged.
+	// The darker shade keeps its white text readable in other color schemes.
+	&.is-current-post {
+		border-color: $bu-navigation-placement-theme-dark;
+		background: $bu-navigation-placement-theme-dark;
+		color: #fff;
+		cursor: grab;
+
+		// A long press on iOS would select the text instead of dragging.
+		-webkit-touch-callout: none;
+		user-select: none;
+
+		// Its radio button cannot be chosen; the row's color marks it instead.
+		input[type="radio"] {
+			opacity: 0;
+		}
+
+		input[type="radio"]:disabled + label {
+			cursor: grab;
+		}
+
+		.bu-navigation-placement-badge {
+			background: rgba(0, 0, 0, 0.25);
+			color: #fff;
+		}
+	}
+
+	&.is-dragged {
+		opacity: 0.5;
+	}
+
+	// Drop indicators, green where the post can go and red where it cannot:
+	// a line before or after the page, or an outline when the post goes inside it.
+	// Red ones are dashed, so that they do not depend on color.
+	&.is-drop-reorder-before::before,
+	&.is-drop-reorder-after::after {
+		content: "";
+		position: absolute;
+		right: 0;
+		left: 0;
+		height: 3px;
+		background: $bu-navigation-placement-allowed;
+		box-shadow: 0 0 4px $bu-navigation-placement-allowed;
+	}
+
+	&.is-drop-reorder-before::before {
+		top: -3px;
+	}
+
+	&.is-drop-reorder-after::after {
+		bottom: -3px;
+	}
+
+	&.is-drop-combine {
+		border-color: $bu-navigation-placement-allowed;
+		background: #edfaef;
+		box-shadow: inset 0 0 0 1px $bu-navigation-placement-allowed;
+	}
+
+	&.is-drop-blocked::before,
+	&.is-drop-blocked::after {
+		background: repeating-linear-gradient(90deg, $bu-navigation-placement-blocked 0 8px, transparent 8px 12px);
+		box-shadow: none;
+	}
+
+	&.is-drop-blocked.is-drop-combine {
+		border-color: transparent;
+		background: #fcf0f1;
+		box-shadow: none;
+		outline: 2px dashed $bu-navigation-placement-blocked;
+		outline-offset: -1px;
+	}
+}
+
+.bu-navigation-placement-tree-drag-handle {
+	flex: none;
+	width: 24px;
+	font-size: 18px;
+	line-height: 20px;
+}
+
+.bu-navigation-placement-tree .bu-navigation-placement-tree-toggle.components-button {
+	flex: none;
+	width: 24px;
+	min-width: 24px;
+	height: 24px;
+	padding: 0;
+}
+
+.bu-navigation-placement-tree-toggle-spacer {
+	flex: none;
+	width: 24px;
+}
+
+.bu-navigation-placement-tree-reason {
+	margin: 0 0 4px 60px;
+	color: $bu-navigation-placement-gray;
+	font-size: 12px;
+}
+
+.bu-navigation-placement-modal-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 16px;
+
+	.components-button + .components-button {
+		margin-left: 8px;
+	}
+}

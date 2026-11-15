@@ -13,8 +13,8 @@ if ( ! defined( 'BU_NAVIGATION_POST_EXCLUDE_DEFAULT' ) ) {
  *
  * Removes any posts that have "Display in navigation lists" unchecked
  *
- * Note that new posts are excluded by default.  In the case where no meta value exists yet,
- * the post will be excluded from navigation lists.
+ * A post with no meta value uses BU_NAVIGATION_POST_EXCLUDE_DEFAULT. Posts created in either
+ * editor get a value on their first save (see bu_navigation_set_new_post_visibility()).
  */
 function bu_navigation_filter_pages_exclude( $pages ) {
 	global $wpdb;
@@ -94,3 +94,50 @@ function bu_navigation_post_excluded( $post ) {
 	return (bool) $excluded;
 
 }
+
+/**
+ * Navigation visibility value for a new post: '0' (shown), or '1' (hidden) for a top level post
+ * while top level posts are not allowed in navigation lists.
+ *
+ * @param WP_Post $post The new post.
+ * @return string '0' or '1'.
+ */
+function bu_navigation_new_post_exclude_value( $post ) {
+	global $bu_navigation_plugin;
+
+	$hide_top_level = 0 === (int) $post->post_parent && ! $bu_navigation_plugin->settings->get( 'allow_top' );
+
+	return $hide_top_level ? '1' : '0';
+}
+
+/**
+ * Store a navigation visibility value when a post created in an editor is first saved.
+ *
+ * Both editors create posts as auto-drafts, so this runs on the first draft save, publish or
+ * autosave, before the editor saves its own value. A stored value is kept. Posts created without
+ * an auto-draft (imports, WP-CLI) get no value.
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The previous post status.
+ * @param WP_Post $post       The post.
+ * @return void
+ */
+function bu_navigation_set_new_post_visibility( $new_status, $old_status, $post ) {
+	global $bu_navigation_plugin;
+
+	if ( 'auto-draft' !== $old_status || in_array( $new_status, array( 'auto-draft', 'inherit', 'trash' ), true ) ) {
+		return;
+	}
+
+	if ( empty( $bu_navigation_plugin ) || ! in_array( $post->post_type, bu_navigation_supported_post_types(), true ) ) {
+		return;
+	}
+
+	if ( '' !== (string) get_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE, true ) ) {
+		return;
+	}
+
+	update_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE, bu_navigation_new_post_exclude_value( $post ) );
+}
+
+add_action( 'transition_post_status', 'bu_navigation_set_new_post_visibility', 10, 3 );

@@ -75,6 +75,11 @@ class BU_Navigation_Admin_Post {
 	 */
 	public function add_scripts( $page ) {
 
+		// The Block Editor uses the Navigation Placement editor plugin, which does not need these scripts.
+		if ( $this->is_block_editor() ) {
+			return;
+		}
+
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		$scripts_url = plugins_url( 'js', BU_NAV_PLUGIN );
 		$styles_url = plugins_url( 'css', BU_NAV_PLUGIN );
@@ -141,6 +146,11 @@ class BU_Navigation_Admin_Post {
 				);
 		}
 
+		// The Block Editor shows the Navigation Placement editor plugin (src/editor-plugins/navigation-placement) instead.
+		if ( $this->is_block_editor() ) {
+			return;
+		}
+
 		add_meta_box(
 			'bunavattrsdiv',
 			__( 'Placement in Navigation', 'bu-navigation' ),
@@ -150,6 +160,17 @@ class BU_Navigation_Admin_Post {
 			'core'
 			);
 
+	}
+
+	/**
+	 * Whether the current screen is the Block Editor.
+	 *
+	 * @return bool
+	 */
+	private function is_block_editor() {
+		$screen = get_current_screen();
+
+		return $screen && $screen->is_block_editor();
 	}
 
 	/**
@@ -182,7 +203,13 @@ class BU_Navigation_Admin_Post {
 		$nav_label = bu_navigation_get_label( $raw_post, '' );
 		$breadcrumbs = $this->get_post_breadcrumbs_label( $raw_post );
 
-		$nav_display = ! bu_navigation_post_excluded( $post );
+		if ( 'auto-draft' === $post->post_status && '' === (string) get_post_meta( $post->ID, BU_NAV_META_PAGE_EXCLUDE, true ) ) {
+			// A new post shows in navigation lists, as in the block editor, unless it is a top level
+			// post while top level posts are not allowed.
+			$nav_display = '0' === bu_navigation_new_post_exclude_value( $post );
+		} else {
+			$nav_display = ! bu_navigation_post_excluded( $post );
+		}
 		$images_url = plugins_url( 'images', BU_NAV_PLUGIN );
 		$pub_cap = $post_type->cap->publish_posts;
 		$user_cannot_publish = ( $post->post_status != 'publish' && ! current_user_can( $pub_cap ) );

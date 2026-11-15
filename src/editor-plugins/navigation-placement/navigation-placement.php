@@ -52,7 +52,7 @@ function is_enabled() {
 }
 
 /**
- * Post types that get the editor plugin: the supported navigation post types that use the Block Editor.
+ * Navigation post types that can use the Block Editor (`show_in_rest`).
  *
  * @return array Post type names.
  */
@@ -230,14 +230,10 @@ function can_view_tree( $request ) {
 /**
  * Return the children of one page (or the top level pages) for the Move dialog.
  *
- * The tree is built by BU_Navigation_Tree_View with the same instance name as the Classic
- * Editor metabox ('nav_metabox'), so filters on that instance apply to both. It loads one level
- * below `child_of`, and the sections under that level, which tell which pages have children.
- *
- * BU Section Editing marks the pages a section editor cannot edit through those filters, but
- * it adds them on admin requests only. When they are missing, as on this REST request, the
- * pages are marked with its permission check, BU_Group_Permissions::can_edit_section(),
- * which reads the same section group data.
+ * BU_Navigation_Tree_View builds the level under the Classic Editor metabox's instance name,
+ * 'nav_metabox', so filters on that instance apply to both. BU Section Editing adds its filters
+ * on admin requests only; on this REST request, section editors' pages are marked with its
+ * permission check instead.
  *
  * @param \WP_REST_Request $request The REST request.
  * @return \WP_REST_Response
@@ -315,7 +311,7 @@ function add_unpublished_ancestors( $pages, $child_of, $post_id, $post_type ) {
 
 		$node = array(
 			'id'          => (int) $ancestor->ID,
-			'label'       => html_entity_decode( bu_navigation_get_label( $ancestor ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
+			'label'       => decode_label( bu_navigation_get_label( $ancestor ) ),
 			'type'        => $ancestor->post_type,
 			'status'      => $ancestor->post_status,
 			'parent'      => (int) $ancestor->post_parent,
@@ -365,7 +361,7 @@ function format_tree_node( $node, $post_id ) {
 
 	return array(
 		'id'          => $post_id,
-		'label'       => html_entity_decode( $node['data'], ENT_QUOTES, get_bloginfo( 'charset' ) ),
+		'label'       => decode_label( $node['data'] ),
 		'type'        => $post['post_type'],
 		'status'      => $post['post_status'],
 		'parent'      => (int) $post['post_parent'],
@@ -418,8 +414,8 @@ function update_navigation_after_rest_save( $post_id, $post_after, $post_before 
  * Don't store an empty navigation visibility value from a REST API save.
  *
  * The Block Editor sends back the meta values it loaded, so '' means the post had no value then.
- * Stored, it would read as "show" in navigation lists, or replace the value set on the first save
- * (bu_navigation_set_new_post_visibility()).
+ * A stored '' reads as "show" in navigation lists, and would replace the value stored on the
+ * first save (bu_navigation_set_new_post_visibility()).
  *
  * @param null|bool $check      Null to save the value, or the result of a filter that saved it.
  * @param int       $object_id  The post ID.
@@ -451,12 +447,22 @@ function get_ancestor_labels( $post ) {
 		if ( $ancestor ) {
 			$ancestors[] = array(
 				'id'    => (int) $ancestor->ID,
-				'label' => html_entity_decode( bu_navigation_get_label( $ancestor ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
+				'label' => decode_label( bu_navigation_get_label( $ancestor ) ),
 			);
 		}
 	}
 
 	return $ancestors;
+}
+
+/**
+ * Decode the HTML entities in a navigation label. The editor renders labels as plain text.
+ *
+ * @param string $label The label.
+ * @return string
+ */
+function decode_label( $label ) {
+	return html_entity_decode( $label, ENT_QUOTES, get_bloginfo( 'charset' ) );
 }
 
 /**

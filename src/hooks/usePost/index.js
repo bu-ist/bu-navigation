@@ -1,4 +1,4 @@
-// WordPress Dependencies
+// WordPress dependencies
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -15,9 +15,9 @@ const usePost = () => {
 		);
 		const { getPostType } = select( 'core' );
 
-		const postId = getCurrentPostId(); // e.g. 123
-		const postType = getCurrentPostType(); // e.g. 'page'
-		const postTypeObject = postType ? getPostType( postType ) : undefined; // Labels, supports, etc.
+		const postId = getCurrentPostId();
+		const postType = getCurrentPostType();
+		const postTypeObject = postType ? getPostType( postType ) : undefined;
 
 		return {
 			postId,

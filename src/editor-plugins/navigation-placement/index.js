@@ -6,11 +6,10 @@
  * on Block Editor screens. The Classic Editor keeps using the metabox.
  *
  * Features:
- * - Uses a custom hook to get current post data.
  * - Shows the post's location in the page hierarchy as breadcrumbs.
  * - Provides a Move dialog that sets the post's parent and position (menu order).
- * - Uses a custom hook to get and set the navigation label post meta.
- * - Provides a "Hide from navigation" checkbox for the navigation visibility post meta.
+ * - Provides a field for the navigation label.
+ * - Provides a "Hide from navigation" checkbox.
  *
  * The core Page Attributes panel (parent and order) is removed by js/remove_attributes_panel.js.
  *
@@ -27,7 +26,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 
-// Internal Dependencies
+// Internal dependencies
 import usePost from '../../hooks/usePost';
 import usePostMeta from '../../hooks/usePostMeta';
 import LocationBreadcrumbs from './editor-partials/location-breadcrumbs';
@@ -101,7 +100,6 @@ const NavigationPlacementPanelContent = ( {
 	}, [] );
 	const { editPost } = useDispatch( 'core/editor' );
 
-	// Get and set the navigation meta for the current post.
 	const [ label, setLabel ] = usePostMeta( metaKeys.label, postType, postId );
 	const [ exclude, setExclude ] = usePostMeta(
 		metaKeys.exclude,
@@ -121,7 +119,7 @@ const NavigationPlacementPanelContent = ( {
 
 	/**
 	 * Whether a navigation visibility value hides the post. An empty value uses the site default,
-	 * except on a new post.
+	 * except on a new post, which shows.
 	 *
 	 * @param {string|null} value The navigation visibility meta value.
 	 * @return {boolean} Whether the value hides the post.
@@ -283,7 +281,6 @@ const NavigationPlacementPanelContent = ( {
  * @return {JSX.Element|null} The panel, or null while the post data loads.
  */
 const NavigationPlacementPanel = () => {
-	// Get current post data using custom usePost hook.
 	const { postId, postType, postTypeObject, isLoading } = usePost();
 
 	// Kept here so that it lasts while the panel is collapsed.

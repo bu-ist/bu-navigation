@@ -12,7 +12,7 @@ import {
 } from '@wordpress/components';
 import { useEffect, useRef, useState } from '@wordpress/element';
 
-// Internal Dependencies
+// Internal dependencies
 import usePageTree from '../../../../hooks/usePageTree';
 import PageTree from '../page-tree';
 
@@ -95,8 +95,7 @@ const MovePageModal = ( {
 		[]
 	);
 
-	// Once the tree has loaded down to the post, scroll its row, the one that is dragged, to the middle
-	// of the tree, away from the edges where a drag scrolls the tree.
+	// Once the post's row loads, scroll it to the middle of the tree, away from the edges where a drag scrolls.
 	const hasShownPost = useRef( false );
 	useEffect( () => {
 		const tree = treeRef.current;
@@ -204,8 +203,8 @@ const MovePageModal = ( {
 		? siblingsLevel.pages.filter( ( page ) => page.id !== postId )
 		: [];
 
-	// The default position: where the post is now when it stays in its section, otherwise the end.
-	// The tree has saved positions, so a position that is not saved yet comes from currentMenuOrder.
+	// The default position is where the post is now when it stays in its section, otherwise the end.
+	// The tree has saved positions only, so an unsaved position comes from currentMenuOrder.
 	let defaultPosition = siblings.length + 1;
 	if ( selectedParent === currentParent && siblingsLevel ) {
 		const currentIndex = isPositionSaved

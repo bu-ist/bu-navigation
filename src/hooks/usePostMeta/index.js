@@ -1,4 +1,4 @@
-// WordPress Dependencies
+// WordPress dependencies
 import { useEntityProp } from '@wordpress/core-data';
 import { useCallback } from '@wordpress/element';
 
@@ -13,7 +13,6 @@ import { useCallback } from '@wordpress/element';
  * @return {Array} The meta value, or null when it is not available, and a function to set it.
  */
 const usePostMeta = ( metaKey, postType, postId ) => {
-	// Get and set the meta object of the post.
 	const [ meta, setMeta ] = useEntityProp(
 		'postType',
 		postType,

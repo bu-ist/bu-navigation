@@ -1,4 +1,4 @@
-// WordPress Dependencies
+// WordPress dependencies
 import apiFetch from '@wordpress/api-fetch';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';

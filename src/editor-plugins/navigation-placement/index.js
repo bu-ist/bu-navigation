@@ -43,7 +43,7 @@ const {
 	isNewPost: loadedAsNewPost,
 	newPostExclude,
 	linkPostType,
-	ancestors: savedAncestors = [],
+	ancestors: loadedAncestors = [],
 	metaKeys = {},
 } = window.buNavigationPlacementSettings || {};
 
@@ -64,6 +64,8 @@ const PluginDocumentSettingPanel =
  * @param {Object}   props.postTypeObject     The post type object.
  * @param {boolean}  props.isVisibilityChosen Whether the visibility was changed in this editor.
  * @param {Function} props.onChooseVisibility Called when the visibility is changed.
+ * @param {Object}   props.ancestorsByParent  Ancestors for the breadcrumbs, keyed by parent ID.
+ * @param {Function} props.onAddAncestors     Called with a parent ID and its ancestors after a move.
  * @return {JSX.Element} The panel content.
  */
 const NavigationPlacementPanelContent = ( {
@@ -72,6 +74,8 @@ const NavigationPlacementPanelContent = ( {
 	postTypeObject,
 	isVisibilityChosen,
 	onChooseVisibility,
+	ancestorsByParent,
+	onAddAncestors,
 } ) => {
 	// The edited parent and position, and the post's last saved values.
 	const {
@@ -107,10 +111,6 @@ const NavigationPlacementPanelContent = ( {
 		postId
 	);
 
-	// Breadcrumbs for each parent the post has had in this editor, so they follow Undo and Redo.
-	const [ ancestorsByParent, setAncestorsByParent ] = useState( () => ( {
-		[ savedParent ]: savedAncestors,
-	} ) );
 	const ancestors =
 		( 0 !== parent && ancestorsByParent[ parent ] ) || NO_ANCESTORS;
 	const [ isMoveModalOpen, setIsMoveModalOpen ] = useState( false );
@@ -194,10 +194,7 @@ const NavigationPlacementPanelContent = ( {
 			setExclude( '0' );
 		}
 
-		setAncestorsByParent( ( previous ) => ( {
-			...previous,
-			[ location.parent ]: location.ancestors,
-		} ) );
+		onAddAncestors( location.parent, location.ancestors );
 		setIsMoveModalOpen( false );
 	};
 
@@ -283,8 +280,21 @@ const NavigationPlacementPanelContent = ( {
 const NavigationPlacementPanel = () => {
 	const { postId, postType, postTypeObject, isLoading } = usePost();
 
-	// Kept here so that it lasts while the panel is collapsed.
+	// Kept here, not in the panel content, so that they last while the panel is collapsed.
 	const [ isVisibilityChosen, setIsVisibilityChosen ] = useState( false );
+	// Breadcrumbs for each parent the post has had in this editor, so they follow Undo and Redo.
+	// The ancestors from PHP end with the parent the post had when the editor loaded.
+	const [ ancestorsByParent, setAncestorsByParent ] = useState( () => ( {
+		[ loadedAncestors.length
+			? loadedAncestors[ loadedAncestors.length - 1 ].id
+			: 0 ]: loadedAncestors,
+	} ) );
+
+	const onAddAncestors = ( parentId, ancestors ) =>
+		setAncestorsByParent( ( previous ) => ( {
+			...previous,
+			[ parentId ]: ancestors,
+		} ) );
 
 	if ( isLoading ) {
 		return null;
@@ -303,6 +313,8 @@ const NavigationPlacementPanel = () => {
 				postTypeObject={ postTypeObject }
 				isVisibilityChosen={ isVisibilityChosen }
 				onChooseVisibility={ () => setIsVisibilityChosen( true ) }
+				ancestorsByParent={ ancestorsByParent }
+				onAddAncestors={ onAddAncestors }
 			/>
 		</PluginDocumentSettingPanel>
 	);

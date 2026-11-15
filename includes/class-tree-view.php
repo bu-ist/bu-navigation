@@ -452,8 +452,9 @@ class BU_Navigation_Tree_Query {
 		$section_args = array( 'direction' => 'down', 'depth' => $this->args['depth'], 'post_types' => $this->args['post_types'] );
 		$sections = bu_navigation_gather_sections( $this->args['child_of'], $section_args );
 
-		// Load pages in sections
-		$this->posts = bu_navigation_get_posts( array(
+		// Load pages in sections. No sections means nothing below child_of, and bu_navigation_get_posts()
+		// would load every page without them.
+		$this->posts = empty( $sections ) ? array() : bu_navigation_get_posts( array(
 			'sections' => $sections,
 			'post_types' => $this->args['post_types'],
 			'post_status' => $this->args['post_status'],

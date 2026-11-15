@@ -260,6 +260,15 @@ function get_tree_level( $request ) {
 	}
 	$pages = add_unpublished_ancestors( $pages, $request['child_of'], $request['post_id'], $request['post_type'] );
 
+	$positions = get_sibling_positions( $request['child_of'], $request['post_id'], $request['post_type'] );
+	$pages     = array_map(
+		function ( $page ) use ( $positions ) {
+			$page['position'] = isset( $positions[ $page['id'] ] ) ? $positions[ $page['id'] ] : 0;
+			return $page;
+		},
+		$pages
+	);
+
 	// BU Section Editing defines this function where it adds the filters.
 	if ( is_section_editor() && ! function_exists( 'buse_bu_navigation_format_post' ) ) {
 		$user  = wp_get_current_user();
@@ -335,6 +344,38 @@ function add_unpublished_ancestors( $pages, $child_of, $post_id, $post_type ) {
 }
 
 /**
+ * Number the published and private pages of one level as BU_Navigation_Reorder_Tracker::run() does,
+ * without the post being placed. The tree leaves out the private pages a user cannot read and adds
+ * the post's unpublished ancestors, so a place in the tree is not a menu order; these numbers are.
+ *
+ * @param int    $child_of  The parent ID of the level.
+ * @param int    $post_id   The post being placed, or 0.
+ * @param string $post_type The post type of the tree.
+ * @return array Positions from 1, keyed by post ID.
+ */
+function get_sibling_positions( $child_of, $post_id, $post_type ) {
+	// The tracker adds navigation links to pages.
+	$reorder = new \BU_Navigation_Reorder_Tracker( $post_type );
+	$posts   = bu_navigation_get_pages(
+		array(
+			'sections'              => array( $child_of ),
+			'suppress_filter_pages' => true,
+			'post_status'           => array( 'publish', 'private' ),
+			'post_types'            => $reorder->post_types,
+		)
+	);
+
+	$positions = array();
+	foreach ( $posts ? $posts : array() as $post ) {
+		if ( (int) $post->ID !== (int) $post_id ) {
+			$positions[ (int) $post->ID ] = count( $positions ) + 1;
+		}
+	}
+
+	return $positions;
+}
+
+/**
  * Whether the current user is a section editor in BU Section Editing.
  *
  * @return bool
@@ -349,7 +390,7 @@ function is_section_editor() {
  * Reduce a node in the format BU_Navigation_Tree_View returns to the fields the Move dialog uses.
  *
  * Only one level is returned: a page with children has `hasChildren` set, and its children
- * are requested when the page is expanded.
+ * are requested when the page is expanded. get_tree_level() adds `position`.
  *
  * @param array $node    A tree node from BU_Navigation_Tree_View::render().
  * @param int   $post_id The post ID of the node.

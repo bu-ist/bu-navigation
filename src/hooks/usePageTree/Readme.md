@@ -56,7 +56,8 @@ Each page in `levels[ parentId ].pages` comes from the REST route, in navigation
 | `type` | `string` | The post type. Links added in "Edit Order" use the link post type. |
 | `status` | `string` | `publish` or `private`, or the status of an unpublished ancestor of `postId` (`draft`, `pending` or `future`). |
 | `parent` | `number` | The parent post ID. |
-| `menuOrder` | `number` | The position among its siblings. |
+| `menuOrder` | `number` | The stored menu order. |
+| `position` | `number` | The page's number among all of the level's published and private pages, without the post being placed, as `BU_Navigation_Reorder_Tracker` renumbers them; `0` for an unpublished ancestor. |
 | `excluded` | `boolean` | Whether the page is hidden from navigation lists. |
 | `hasChildren` | `boolean` | Whether the page has child pages to load. |
 | `canEdit` | `boolean` | `false` for pages a section editor cannot edit in BU Section Editing. |

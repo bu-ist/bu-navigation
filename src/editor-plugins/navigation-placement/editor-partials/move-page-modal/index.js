@@ -36,7 +36,7 @@ import PageTree from '../page-tree';
  * @param {string}   props.postStatus           The saved status of the post.
  * @param {Object}   props.labels               Post type names: `singularName` as registered, and `singular` and `plural` in lower case.
  * @param {number}   props.currentParent        The post's parent ID (0 for the top level).
- * @param {number}   props.currentMenuOrder     The post's position among its siblings.
+ * @param {number}   props.currentMenuOrder     The post's menu order.
  * @param {boolean}  props.isPositionSaved      Whether the post's parent and position are the saved ones.
  * @param {Array}    props.ancestors            The post's ancestors from the top level down, as `{ id, label }` objects.
  * @param {boolean}  props.isHidden             Whether the post is hidden from navigation lists.
@@ -72,7 +72,7 @@ const MovePageModal = ( {
 
 	const [ selectedParent, setSelectedParent ] = useState( currentParent );
 
-	// The chosen position (1 is first); null until one is chosen, which uses the default position.
+	// The chosen place in the Position list (1 is first); null until one is chosen, which uses the default.
 	const [ selectedPosition, setSelectedPosition ] = useState( null );
 
 	// Open the tree at the post's location.
@@ -203,6 +203,40 @@ const MovePageModal = ( {
 		? siblingsLevel.pages.filter( ( page ) => page.id !== postId )
 		: [];
 
+	// The list leaves out the private pages the user cannot read and adds the post's unpublished
+	// ancestors, so a place in it is not a menu order. Each page's `position` is its number among all
+	// of the level's published and private pages, as BU_Navigation_Reorder_Tracker renumbers them.
+
+	/**
+	 * The menu order for a place in the list: after the nearest page above it that has a position.
+	 *
+	 * @param {number} listPosition A place in the list (1 is first).
+	 * @return {number} The menu order.
+	 */
+	const toMenuOrder = ( listPosition ) => {
+		for ( let index = listPosition - 2; index >= 0; index-- ) {
+			if ( siblings[ index ].position ) {
+				return siblings[ index ].position + 1;
+			}
+		}
+		return 1;
+	};
+
+	/**
+	 * The place in the list for a menu order: after the last page whose position comes before it.
+	 *
+	 * @param {number} menuOrder A menu order.
+	 * @return {number} The place in the list (1 is first).
+	 */
+	const toListPosition = ( menuOrder ) =>
+		siblings.reduce(
+			( listPosition, sibling, index ) =>
+				sibling.position && sibling.position < menuOrder
+					? index + 2
+					: listPosition,
+			1
+		);
+
 	// The default position is where the post is now when it stays in its section, otherwise the end.
 	// The tree has saved positions only, so an unsaved position comes from currentMenuOrder.
 	let defaultPosition = siblings.length + 1;
@@ -213,10 +247,7 @@ const MovePageModal = ( {
 		defaultPosition =
 			currentIndex > -1
 				? currentIndex + 1
-				: Math.min(
-						Math.max( currentMenuOrder, 1 ),
-						siblings.length + 1
-				  );
+				: toListPosition( currentMenuOrder );
 	}
 	const position =
 		null !== selectedPosition ? selectedPosition : defaultPosition;
@@ -370,7 +401,7 @@ const MovePageModal = ( {
 
 		onConfirm( {
 			parent: selectedParent,
-			menuOrder: position,
+			menuOrder: toMenuOrder( position ),
 			ancestors: getSelectedAncestors(),
 		} );
 	};

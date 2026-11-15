@@ -52,7 +52,7 @@ It follows the rules of the Classic Editor metabox:
 - When top level posts are not allowed in navigation lists (the "Allow Top-Level Pages" setting is off), a post that shows in navigation lists can only be placed at the top level if it already showed there.
 - When BU Section Editing is active, a section editor moving a published post cannot place it at the top level or in a page they cannot edit ("denied"). Drafts can be placed anywhere.
 
-The position is the 1-based `menu_order` that `BU_Navigation_Reorder_Tracker` expects.
+The tree leaves out the private pages the user cannot read and adds the post's unpublished ancestors, so the saved `menu_order` comes from each page's `position` among all of the level's published and private pages, which `BU_Navigation_Reorder_Tracker` renumbers after the save: the position of the nearest page above the chosen place, plus one.
 
 ### VisibilityControl
 

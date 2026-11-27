@@ -370,6 +370,9 @@ class BU_Navigation_Admin_Manager {
 
 		if ( array_key_exists( 'bu_navman_save', $_POST ) ) {
 
+			// Reject saves that were not submitted from the Edit Order form.
+			check_admin_referer( 'bu_navman_save', 'bu_navman_nonce' );
+
 			$saved = false;
 
 			// Process post removals

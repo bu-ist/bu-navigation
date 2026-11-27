@@ -526,6 +526,15 @@ function bu_navigation_ajax_get_navtree() {
 
 		$child_of = isset($_POST['child_of']) ? $_POST['child_of'] : 0;
 		$post_types = isset($_POST['post_types']) ? $_POST['post_types'] : 'page';
+
+		// The tree is only used on editing screens: require the edit capability for every requested post type.
+		$requested_types = is_array( $post_types ) ? $post_types : explode( ',', $post_types );
+		foreach ( $requested_types as $requested_type ) {
+			$pto = get_post_type_object( trim( $requested_type ) );
+			if ( ! $pto || ! current_user_can( $pto->cap->edit_posts ) ) {
+				wp_send_json_error( null, 403 );
+			}
+		}
 		$post_statuses = isset($_POST['post_statuses']) ? $_POST['post_statuses'] : 'publish';
 		$instance = isset($_POST['instance']) ? $_POST['instance'] : 'default';
 		$prefix = isset($_POST['prefix']) ? $_POST['prefix'] : 'p';
@@ -565,8 +574,13 @@ add_action( 'wp_ajax_bu-get-navtree', 'bu_navigation_ajax_get_navtree' );
 function bu_navigation_ajax_get_post() {
 	if( defined('DOING_AJAX') && DOING_AJAX ) {
 
-		$post_id = isset($_GET['post_id']) ? $_GET['post_id'] : 0;
+		$post_id = isset($_GET['post_id']) ? (int) $_GET['post_id'] : 0;
 		$post = get_post($post_id);
+
+		// The whole post object is returned, so only answer for posts the user may edit.
+		if ( ! $post || ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( null, 403 );
+		}
 
 		// Add extra fields to response for links
 		if( BU_NAVIGATION_LINK_POST_TYPE == $post->post_type ){

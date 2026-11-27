@@ -24,6 +24,17 @@ function bu_navigation_breadcrumbs( $args = '' ) {
 		);
 	$r = wp_parse_args( $args, $defaults );
 
+	// These values are printed as markup below and can come from shortcode attributes.
+	$allowed_tags = array( 'div', 'nav', 'p', 'span', 'ul', 'ol', 'li', 'section', 'header', 'footer', 'aside' );
+	$r['container_tag'] = in_array( strtolower( $r['container_tag'] ), $allowed_tags, true ) ? strtolower( $r['container_tag'] ) : 'div';
+	$r['crumb_tag'] = in_array( strtolower( $r['crumb_tag'] ), $allowed_tags, true ) ? strtolower( $r['crumb_tag'] ) : '';
+	$r['container_id'] = esc_attr( $r['container_id'] );
+	$r['container_class'] = esc_attr( $r['container_class'] );
+	$r['anchor_class'] = esc_attr( $r['anchor_class'] );
+	$r['glue'] = wp_kses_post( $r['glue'] );
+	$r['prefix'] = wp_kses_post( $r['prefix'] );
+	$r['suffix'] = wp_kses_post( $r['suffix'] );
+
 	if ( $r['post'] ) {
 		$p = null;
 
@@ -110,7 +121,7 @@ function bu_navigation_breadcrumbs( $args = '' ) {
 				if ( ( $current->ID == $p->ID ) && ( ! $r['anchor_current'] ) ) {
 					$anchor_open = sprintf( '<a class="%s">', $classname );
 				} else {
-					$anchor_open = sprintf( '<a href="%s" class="%s">', $href, $classname );
+					$anchor_open = sprintf( '<a href="%s" class="%s">', esc_url( $href ), $classname );
 				}
 				$anchor_close = '</a>';
 			}

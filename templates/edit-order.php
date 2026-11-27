@@ -5,6 +5,7 @@
 
 	<div id="navman-container">
 		<form method="post" id="navman_form" action="">
+			<?php wp_nonce_field( 'bu_navman_save', 'bu_navman_nonce' ); ?>
 			<input type="hidden" id="navman-hash" name="navman-hash" value="<?php echo esc_attr( $tree->hierarchy->as_hash() ); ?>" />
 			<input type="hidden" id="navman-moves" name="navman-moves" value="" />
 			<input type="hidden" id="navman-inserts" name="navman-inserts" value="" />
